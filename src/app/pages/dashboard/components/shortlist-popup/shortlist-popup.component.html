@@ -1,0 +1,64 @@
+<!-- shortlist-popup.component.html -->
+<div class="modal-overlay" *ngIf="dataService.openShortList" (click)="close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Shortlisted Candidates</h3>
+      <button (click)="close()" class="close-button">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <table class="shortlist-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Years of Experience</th>
+            <th>Highest Degree</th>
+            <th>Institution</th>
+            <th>Availability</th>
+            <th>Shortlist</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let candidate of dataService.shortlistedCandidates">
+            <td>{{ candidate.form_data?.full_name || candidate.resume_data.personal_details.full_name }}</td>
+            <td>{{ candidate.form_data?.years_of_experience}}</td>
+            <td>{{ candidate.form_data?.highest_degree || (candidate.resume_data && candidate.resume_data.education &&
+              candidate.resume_data.education[0]?.degree) }}</td>
+            <td>{{ candidate.form_data?.institution_name || (candidate.resume_data && candidate.resume_data.education &&
+              candidate.resume_data.education[0].institution) || '' }}</td>
+            <td>{{ candidate.form_data?.availability }}</td>
+            <td>
+
+              <label class="flex items-center space-x-2 ml-auto cursor-pointer">
+                <input type="checkbox"
+                  class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring focus:ring-blue-300 focus:outline-none"
+                  [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
+                <span class="text-sm text-gray-700">Shortlist</span>
+              </label>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="modal-footer">
+      <!-- <button (click)="close()" class="close-modal-button">
+          Close
+        </button> -->
+
+      <button class="ml-5" (click)="saveShortListing()" class="close-modal-button" [disabled]="isLoading">
+        <span *ngIf="!isLoading">Save Shortlist</span>
+        <span *ngIf="isLoading">Saving...</span>
+      </button>
+    </div>
+
+    <!-- Popup for Success/Error Messages -->
+    <div *ngIf="showPopup" [ngClass]="{
+    'bg-green-100 border-green-400 text-green-700': popupType === 'success',
+    'bg-red-100 border-red-400 text-red-700': popupType === 'error'
+  }" class="border-l-4 p-4 m-5 mb-6 rounded">
+  {{popupMessage}}
+      
+    </div>
+  </div>
+</div>

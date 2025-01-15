@@ -1,0 +1,33 @@
+<div class="filters">
+    <!-- Basic Filters -->
+    <div class="filter-group">
+        <label for="search-term">Enter any Search term</label>
+        <!-- Search by Name -->
+        <input type="text" id="search-term" placeholder="Search by name" [(ngModel)]="filters.search" (input)="onFilterChange()"
+            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+    </div>
+
+    <div class="filter-group">
+        <label for="skills">Search by Skills</label>
+        <!-- Search by Skills -->
+        <input type="text" id="skills" placeholder="Search by skills" [(ngModel)]="filters.skills" (input)="onFilterChange()"
+            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+    </div>
+
+    <div class="filter-group">
+        <label for="education">Education</label>
+
+        <!-- Filter by Education (Degree) -->
+        <input id="education" type="text" placeholder="Filter by Education (Degree)"
+            [(ngModel)]="filters.educationDegree" (input)="onFilterChange()"
+            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+    </div>
+
+    <div class="filter-group">
+        <label for="projects">Projects</label>
+        <!-- Filter by Projects -->
+        <input id="projects" type="text" placeholder="Filter by Projects" [(ngModel)]="filters.projects"
+            (input)="onFilterChange()"
+            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+    </div>
+</div>

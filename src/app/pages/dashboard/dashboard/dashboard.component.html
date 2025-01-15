@@ -1,0 +1,88 @@
+<div class="dashboard" style="overflow: hidden;">
+    <header>
+      <h1><i class="fas fa-briefcase"></i>Dashboard</h1>
+      <div class="search-bar">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Global Search" />
+      </div>
+      <div class="user-profile">
+        <i class="fas fa-user-circle"></i>
+        <span>SafetyCampaignGH</span>
+      </div>
+    </header>
+    <div class="content">
+      <aside>
+        <nav>
+          <a
+          [class.active]="activeSection === 'candidates'"
+          (click)="setActiveSection('candidates')"
+          class="flex items-center p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+        >
+          <i class="fas fa-users mr-2 text-lg"></i>
+          <span class="font-medium">Candidates</span>
+        </a>
+        
+        <!-- Sub-navigation for Shortlisting and Ranking -->
+        <div class="ml-8 mt-2 space-y-2" [ngClass]="{'hidden': activeSection !== 'candidates' && activeSection !== 'shortlisting' && activeSection !== 'ranking' }">
+          <a
+            [class.active]="activeSection === 'shortlisting'"
+            (click)="setActiveSection('shortlisting')"
+            class="flex items-center p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-list-ul mr-2 text-sm"></i>
+            <span class="text-sm">Shortlisting</span>
+          </a>
+          <a
+            [class.active]="activeSection === 'ranking'"
+            (click)="setActiveSection('ranking')"
+            class="flex items-center p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+          >
+            <i class="fas fa-chart-line mr-2 text-sm"></i>
+            <span class="text-sm">Ranking</span>
+          </a>
+        </div>
+          <a
+            [class.active]="activeSection === 'job-postings'"
+            (click)="setActiveSection('job-postings')"
+          >
+            <i class="fas fa-file-alt"></i>
+            <span>Job Postings</span>
+          </a>
+          <a
+            [class.active]="activeSection === 'analytics'"
+            (click)="setActiveSection('analytics')"
+          >
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+          </a>
+          <a
+            [class.active]="activeSection === 'settings'"
+            (click)="setActiveSection('settings')"
+          >
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </nav>
+      </aside>
+      <main class="main">
+        <div [ngClass]="{'hidden': activeSection !== 'candidates'}">
+          <app-candidate-list></app-candidate-list>
+        </div>
+        <div [ngClass]="{'hidden': activeSection !== 'shortlisting'}">
+         <app-shortlisted></app-shortlisted>
+        </div>
+        <div [ngClass]="{'hidden': activeSection !== 'ranking'}">
+          <app-candidate-ranking></app-candidate-ranking>
+        </div>
+        <div [ngClass]="{'hidden': activeSection !== 'job-postings'}">
+          <p>Job Postings Content Goes Here</p>
+        </div>
+        <div [ngClass]="{'hidden': activeSection !== 'analytics'}">
+          <p>Analytics Content Goes Here</p>
+        </div>
+        <div [ngClass]="{'hidden': activeSection !== 'settings'}">
+          <p>Settings Content Goes Here</p>
+        </div>
+      </main>
+    </div>
+  </div>

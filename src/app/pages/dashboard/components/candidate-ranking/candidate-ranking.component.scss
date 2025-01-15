@@ -1,0 +1,248 @@
+.options-panel {
+    overflow-y: scroll !important;
+    height: 350px;
+}
+
+
+.range-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 5px;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.range-slider:hover {
+    opacity: 1;
+}
+
+.range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.range-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: #3b82f6;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 18px;
+    color: var(--primary);
+    padding: 20px;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+}
+
+.loading-indicator i {
+    font-size: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* candidate-list.component.css */
+.no-data-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    max-width: 400px;
+    margin: 20px auto;
+
+    position: absolute;
+    top: 30%;
+    left: 45%;
+}
+
+.no-data-card i {
+    font-size: 48px;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+.no-data-card h3 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--text-color);
+}
+
+.no-data-card p {
+    margin: 8px 0 0;
+    font-size: 16px;
+    color: var(--text-color);
+}
+
+
+/* candidate-list.component.css */
+.candidate-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    padding-left: 0;
+    max-height: 500px;
+    overflow-y: scroll !important;
+    /* Hide scrollbar for Webkit browsers */
+    scrollbar-width: none;
+    /* For Firefox */
+    -ms-overflow-style: none;
+    /* For IE and Edge */
+}
+
+.candidate-grid::-webkit-scrollbar {
+    display: none;
+    /* For Chrome, Safari, and Opera */
+}
+
+.candidate-card {
+    background-color: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    padding: 16px;
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.card-header .subtitle {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: var(--gray);
+}
+
+.card-body {
+    padding: 16px;
+}
+
+.card-body p {
+    margin: 8px 0;
+    font-size: 14px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card-body i {
+    color: var(--primary);
+    width: 16px;
+    text-align: center;
+}
+
+.card-footer {
+    padding: 16px;
+    border-top: 1px solid var(--gray);
+    text-align: center;
+}
+
+
+.shortlist-button {
+    background-color: var(--primary);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 16px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.shortlist-button:hover {
+    background-color: var(--secondary);
+}
+
+
+
+/* candidate-details-popover.component.css */
+.popover-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent overlay */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+
+.popover {
+    background-color: #ffffff;
+    /* Pure white background */
+    border-radius: 12px;
+    /* Rounded corners */
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    font-family: 'Arial', sans-serif;
+    /* Clean font */
+
+    /* Hide scrollbar for Webkit browsers */
+    scrollbar-width: none;
+    /* For Firefox */
+    -ms-overflow-style: none;
+    /* For IE and Edge */
+}
+
+.popover::-webkit-scrollbar {
+    display: none;
+    /* For Chrome, Safari, and Opera */
+}

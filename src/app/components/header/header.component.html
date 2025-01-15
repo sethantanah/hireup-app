@@ -1,0 +1,12 @@
+<header class="bg-white shadow-sm">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-[var(--gray-900)]">
+        <img [src]="logoUrl" alt="Company Logo" class="h-10">
+      </div>
+      <nav class="space-x-6">
+        <a *ngFor="let link of navLinks" [href]="link.url" class="text-[var(--gray-700)] hover:text-[var(--electric-violet)]">
+          {{ link.text }}
+        </a>
+      </nav>
+    </div>
+  </header>

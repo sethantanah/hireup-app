@@ -1,0 +1,70 @@
+<div class="filters">
+  <!-- Advanced Filters Toggle -->
+  <button (click)="toggleAdvancedFilters()" class="toggle-button">
+    <i class="fas fa-gear"></i> <!-- Gear icon -->
+  </button>
+
+  <!-- Advanced Filters Popover -->
+  <div *ngIf="dataService.showFilters" class="advanced-filters-popover">
+    <button (click)="toggleAdvancedFilters()" class="close-button">
+      <i class="fas fa-times"></i> <!-- Close icon -->
+    </button>
+    <div class="popover-content">
+      <!-- Basic Filters -->
+      <div class="filter-group">
+        <label for="search">Search by Name</label>
+        <input id="search" type="text" placeholder="Enter name" [(ngModel)]="filters.search"
+          (input)="onFilterChange()" />
+      </div>
+
+      <div class="filter-group">
+        <label for="availability">Availability</label>
+        <select id="availability" [(ngModel)]="filters.availability" (change)="onFilterChange()">
+          <option value="">All</option>
+          <option value="Yes">Available</option>
+          <option value="No">Not Available</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="yearsOfExperience">Years of Experience</label>
+        <input id="yearsOfExperience" type="number" min="0" max="50" placeholder="Enter years"
+          [(ngModel)]="filters.yearsOfExperience" (input)="onFilterChange()" />
+      </div>
+
+      <div class="filter-group">
+        <label for="education">Education</label>
+        <select id="education" [(ngModel)]="filters.education" (change)="onFilterChange()">
+          <option value="">All</option>
+          <option value="Degree">Degree</option>
+          <option value="Diploma">Diploma</option>
+          <option value="HND">HND</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="highestDegree">Highest Degree</label>
+        <input id="highestDegree" type="text" placeholder="Enter degree" [(ngModel)]="filters.highestDegree"
+          (input)="onFilterChange()" />
+      </div>
+
+      <div class="filter-group">
+        <label for="fieldOfStudy">Field of Study</label>
+        <input id="fieldOfStudy" type="text" placeholder="Enter field" [(ngModel)]="filters.fieldOfStudy"
+          (input)="onFilterChange()" />
+      </div>
+
+      <div class="filter-group">
+        <label for="institutionName">Institution Name</label>
+        <input id="institutionName" type="text" placeholder="Enter institution" [(ngModel)]="filters.institutionName"
+          (input)="onFilterChange()" />
+      </div>
+
+      <div class="filter-group">
+        <label for="yearOfGraduation">Year of Graduation</label>
+        <input id="yearOfGraduation" type="number" placeholder="Enter year" [(ngModel)]="filters.yearOfGraduation"
+          (input)="onFilterChange()" />
+      </div>
+    </div>
+  </div>
+</div>

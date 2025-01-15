@@ -1,0 +1,288 @@
+<div *ngIf="showSubmissionMessage" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50000000000">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+      <!-- Title -->
+      <h2 class="text-2xl font-bold mb-4" [ngStyle]="{ color: colorScheme?.primary || '#282157' }">
+        {{ submissionMessage.title }}
+      </h2>
+      <!-- Message -->
+      <p class="text-[var(--gray-600)] mb-6">
+        {{ submissionMessage.message }}
+      </p>
+      <!-- Close Button -->
+      <button
+        (click)="closeSubmissionMessage()"
+        class="px-6 py-2 rounded-lg font-semibold text-white transition-colors"
+        [ngStyle]="{ backgroundColor: colorScheme?.primary || '#282157' }"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+
+
+
+  <div *ngIf="isLoading" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-5000000">
+    <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+      <!-- Title -->
+      <p class="text-2xl font-bold mb-4" [ngStyle]="{ color: colorScheme?.primary || '#282157' }">
+        Uploading in Progress...
+      </p>
+      <p class="text-md mb-4" [ngStyle]="{ color: colorScheme?.primary || '#282157' }">
+        Your document is being uploaded. Please hold on for a moment—it won’t take long!
+      </p>
+      <!-- Message -->
+      <div class="text-[var(--gray-600)] mb-6 mt-6 flex items-center justify-center">
+        <div  class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+     
+    </div>
+  </div>
+
+<div class="max-w-4xl mx-auto" *ngIf="formData">
+    <!-- Title and Description -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold mb-2" [ngStyle]="{ color: colorScheme?.primary || '#282157' }">
+        {{ formData.title }}
+      </h1>
+      <p class="text-[var(--gray-600)]">
+        {{ formData.description }}
+      </p>
+    </div>
+  
+    <!-- Tabs for Sections -->
+    <div class="mb-6 pl-4">
+      <nav class="flex space-x-2">
+        <button
+          *ngFor="let section of sections"
+          (click)="activeSection = section"
+          [ngClass]="{
+            'text-white': activeSection === section,
+            'text-[var(--gray-500)] hover:bg-[var(--gray-100)]': activeSection !== section
+          }"
+          class="px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 focus:outline-none"
+          [ngStyle]="{
+            backgroundColor: activeSection === section ? (colorScheme?.primary || '#282157') : 'transparent',
+            border: activeSection === section ? 'none' : '1px solid ' + (colorScheme?.primary || '#282157')
+          }"
+        >
+          {{ section.toLocaleUpperCase() }}
+        </button>
+      </nav>
+    </div>
+  
+    <p class="p-3 pl-4">Fill all fields marked *</p>
+  
+    <!-- Form -->
+    <form (ngSubmit)="onSubmit()" class="space-y-6">
+      <!-- Loop through fields and display only those in the active section -->
+      <div class="grid grid-cols-1 md:grid-cols-2">
+        <div *ngFor="let field of formData.fields" class="mt-0 mr-4 ml-4">
+          <div *ngIf="field.section === activeSection" class="space-y-2 mb-5">
+            <label class="block text-[var(--gray-700)] font-medium">
+              {{ field.label }} {{ field.required ? '*' : '' }}
+            </label>
+  
+            <!-- Display Info if Exists -->
+            <div *ngIf="field.info" class="bg-[var(--gray-50)] p-3 rounded-lg text-sm text-[var(--gray-600)]">
+              <p *ngFor="let line of field.info">{{ line }}</p>
+            </div>
+  
+            <!-- Text, Email, Tel, Date Fields -->
+            <div *ngIf="field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'date'">
+              <input
+                [type]="field.type"
+                [(ngModel)]="formValues[field.key]"
+                [name]="field.key"
+                class="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:outline-none transition-all"
+                [ngStyle]="{ 'focus:ring': colorScheme?.primary || '#282157' }"
+                [required]="field.required!"
+                (blur)="validateField(field)"
+              />
+              <p *ngIf="errors[field.key]" class="text-sm text-red-500 mt-1">
+                {{ errors[field.key] }}
+              </p>
+            </div>
+  
+            <!-- Text Area Field -->
+            <div *ngIf="field.type === 'text-area'">
+              <textarea
+                [(ngModel)]="formValues[field.key]"
+                [name]="field.key"
+                class="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:outline-none transition-all"
+                [ngStyle]="{ 'focus:ring': colorScheme?.primary || '#282157' }"
+                [required]="field.required!"
+                (blur)="validateField(field)"
+              ></textarea>
+              <p *ngIf="errors[field.key]" class="text-sm text-red-500 mt-1">
+                {{ errors[field.key] }}
+              </p>
+            </div>
+  
+            <!-- Select Field -->
+            <div *ngIf="field.type === 'select'">
+              <select
+                [(ngModel)]="formValues[field.key]"
+                [name]="field.key"
+                (blur)="validateField(field)"
+                class="w-full px-4 py-2 border border-[var(--gray-300)] rounded-lg focus:outline-none transition-all"
+                [ngStyle]="{ 'focus:ring': colorScheme?.primary || '#282157' }"
+                [required]="field.required!"
+              >
+                <option *ngFor="let option of field.options" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+              <p *ngIf="errors[field.key]" class="text-sm text-red-500 mt-1">
+                {{ errors[field.key] }}
+              </p>
+            </div>
+  
+            <!-- File Upload Field -->
+            <div *ngIf="field.type === 'file'">
+              <div
+                class="relative border border-[var(--gray-300)] rounded-lg p-4 hover:border-[var(--bright-blue)] transition-all"
+              >
+                <input
+                  type="file"
+                  (change)="onFileChange($event, field.key)"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  [required]="field.required"
+                />
+                <div class="text-center">
+                  <span class="text-[var(--bright-blue)] font-medium">Click to upload</span>
+                  <p class="text-sm text-[var(--gray-500)]">or drag and drop</p>
+                  <p class="text-xs text-[var(--gray-400)]">Max file size: 5MB</p>
+                </div>
+              </div>
+              <p *ngIf="uploadedFiles[field.key]" class="text-sm text-[var(--gray-600)] mt-2">
+                Uploaded: {{ uploadedFiles[field.key].name }}
+              </p>
+              <p *ngIf="errors[field.key]" class="text-sm text-red-500 mt-1">
+                {{ errors[field.key] }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between mt-8 p-4">
+        <!-- Previous Button -->
+        <button
+          *ngIf="activeSection !== sections[0]"
+          (click)="goToPreviousSection()"
+          type="button"
+          class="px-6 py-2 rounded-lg transition-colors focus:outline-none"
+          [ngStyle]="{
+            backgroundColor: colorScheme?.secondary || '#FF4E04',
+            color: 'white'
+          }"
+        >
+          <i class="fas fa-arrow-left mr-2"></i> Previous
+        </button>
+  
+        <!-- Next Button -->
+        <button
+          *ngIf="activeSection !== sections[sections.length - 1]"
+          (click)="goToNextSection()"
+          type="button"
+          class="ml-auto px-6 py-2 rounded-lg transition-colors focus:outline-none"
+          [ngStyle]="{
+            backgroundColor: colorScheme?.primary || '#282157',
+            color: 'white'
+          }"
+        >
+          Next <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </div>
+  
+      <!-- Declaration (Only for Upload Section) -->
+      <div *ngIf="activeSection === 'upload'" class="bg-[var(--gray-100)] p-4 rounded-lg">
+        <p class="text-[var(--gray-600)] text-sm">
+          {{ formData.declaration }}
+        </p>
+      </div>
+  
+      <!-- Checkbox for Agreement (Only for Upload Section) -->
+      <div *ngIf="activeSection === 'upload'" class="flex items-center">
+        <input
+          type="checkbox"
+          [(ngModel)]="formValues['agreeToDeclaration']"
+          [name]="'agreeToDeclaration'"
+          id="agreeToDeclaration"
+          class="w-5 h-5 border border-[var(--gray-300)] rounded focus:ring-2 focus:ring-[var(--bright-blue)]"
+          required
+        />
+        <label for="agreeToDeclaration" class="ml-2 text-[var(--gray-700)]">
+          I agree to the above declaration.
+        </label>
+      </div>
+  
+      <!-- Submit Button (Only for Upload Section) -->
+      <div *ngIf="activeSection === 'upload'">
+        <button
+          type="submit"
+          class="w-full px-6 py-3 rounded-lg transition-colors focus:outline-none"
+          [ngStyle]="{
+            backgroundColor: colorScheme?.primary || '#282157',
+            color: 'white'
+          }"
+          [disabled]="isLoading"
+        >
+          <span>{{ formData.submitButtonText }}</span>
+        </button>
+      </div>
+  
+      <!-- Popup for Success/Error Messages -->
+      <div
+        *ngIf="showPopup"
+        [ngClass]="{
+          'bg-green-100 border-green-400 text-green-700': popupType === 'success',
+          'bg-red-100 border-red-400 text-red-700': popupType === 'error'
+        }"
+        class="border-l-4 p-4 mb-6 rounded"
+      >
+        {{ popupMessage }}
+      </div>
+    </form>
+  
+ <!-- Contact Information -->
+<div class="mt-8 text-center">
+    <!-- Heading -->
+    <h3 class="text-xl font-semibold mb-4" [ngStyle]="{ color: colorScheme?.primary || '#282157' }">
+      Contact Us
+    </h3>
+  
+    <!-- Email and Phone -->
+    <div class="space-y-2 mb-4">
+      <p class="text-[var(--gray-600)]">
+        For any inquiries, please contact:
+      </p>
+      <p class="text-[var(--gray-700)] font-medium">
+        {{ formData.contactInfo.email }} | {{ formData.contactInfo.phone }}
+      </p>
+    </div>
+  
+    <!-- Website Link -->
+    <div class="mb-4">
+      <a
+        [href]="formData.contactInfo.website"
+        [ngStyle]="{ color: colorScheme?.primary || '#282157' }"
+        class="hover:underline transition-colors duration-200"
+      >
+        {{ formData.contactInfo.website }}
+      </a>
+    </div>
+  
+    <!-- LinkedIn Link -->
+    <div>
+      <a
+        [href]="formData.contactInfo.linkedin"
+        [ngStyle]="{ color: colorScheme?.primary || '#282157' }"
+        class="hover:underline transition-colors duration-200"
+      >
+        LinkedIn
+      </a>
+    </div>
+  </div>
+  </div>

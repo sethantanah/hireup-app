@@ -1,0 +1,158 @@
+/* app.component.css */
+:root {
+    --primary-color: #4a90e2;
+    --secondary-color: #34495e;
+    --background-color: #f5f6fa;
+    --text-color: #2c3e50;
+    --white: #ffffff;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+.dashboard {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    /* Hide scrollbar for Webkit browsers */
+    scrollbar-width: none;
+    /* For Firefox */
+    -ms-overflow-style: none;
+    /* For IE and Edge */
+}
+
+.dashboard::-webkit-scrollbar {
+    display: none;
+    /* For Chrome, Safari, and Opera */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--white);
+    // box-shadow: var(--shadow);
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: var(--primary-color);
+}
+
+header h1 i {
+    margin-right: 10px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background-color: var(--background-color);
+    padding: 8px 12px;
+    border-radius: 20px;
+}
+
+.search-bar i {
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.search-bar input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 14px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.user-profile i {
+    font-size: 24px;
+    color: var(--primary-color);
+    margin-right: 8px;
+}
+
+.user-profile span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.content {
+    display: flex;
+    flex: 1;
+}
+
+aside {
+    width: 250px;
+    background-color: var(--white);
+    // box-shadow: var(--shadow);
+    padding: 20px;
+}
+
+aside nav {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+aside nav a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text-color);
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+aside nav a:hover {
+    background-color: var(--background-color);
+}
+
+aside nav a.active {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+aside nav a i {
+    margin-right: 10px;
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: var(--background-color);
+}
+
+
+/* app.component.css */
+aside nav a.active {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+}
+
+aside nav a.active i {
+    color: var(--primary-color);
+}
+
+/* app.component.css */
+aside nav a:hover {
+    background-color: var(--background-color);
+    color: var(--primary-color);
+}
+
+aside nav a:hover i {
+    color: var(--primary-color);
+}

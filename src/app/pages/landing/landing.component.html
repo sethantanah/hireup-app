@@ -1,0 +1,61 @@
+<main class="min-h-screen shadow-lg bg-gray-50 font-sans" *ngIf="landingPageData">
+  <!-- Header -->
+  <header class="bg-white shadow-sm w-full">
+    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+      <!-- Company Logo -->
+      <div class="text-2xl font-bold" [ngStyle]="{ color: landingPageData.colorsScheme.primary }">
+        <img [src]="landingPageData.company.logoUrl" alt="Company Logo" class="h-10">
+      </div>
+
+      <!-- Hamburger Menu (Mobile) -->
+      <button
+        class="md:hidden p-2 focus:outline-none"
+        (click)="toggleNav()"
+        aria-label="Toggle navigation"
+      >
+        <i class="fas fa-bars text-xl" [ngStyle]="{ color: landingPageData.colorsScheme.primary }"></i>
+      </button>
+
+      <!-- Navigation Links -->
+      <nav
+        class="hidden md:flex space-x-6"
+        [ngClass]="{ 'hidden': !isNavOpen, 'flex flex-col absolute top-16 right-0 bg-white shadow-lg p-4 space-y-4': isNavOpen && isMobile }"
+      >
+        <a
+          *ngFor="let link of landingPageData.company.navLinks"
+          [href]="link.url"
+          class="text-[var(--gray-700)] hover:text-[var(--electric-violet)] transition-colors"
+          [ngStyle]="{ color: landingPageData.colorsScheme.primary }"
+        >
+          {{ link.text }}
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <div class="flex flex-col md:flex-row items-center justify-center bg-[var(--gray-50)] py-12 md:py-20">
+    <!-- Upload Resume Component -->
+    <div class="flex-1 flex items-center justify-center px-6">
+      <app-upload-resume [submissionMessage]="landingPageData.submissionMessage" [colorScheme]="landingPageData.colorsScheme" [formData]="landingPageData.formData"></app-upload-resume>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-[var(--gray-900)] text-white py-8">
+    <div class="container mx-auto px-6 text-center">
+      <p class="text-[var(--gray-400)]">
+        &copy; 2023 {{ landingPageData.company.name }}. All rights reserved.
+      </p>
+      <div class="mt-4 space-x-6">
+        <a
+          *ngFor="let link of landingPageData.footer.links"
+          [href]="link.url"
+          class="text-[var(--gray-400)] hover:text-[var(--bright-blue)] transition-colors"
+        >
+          {{ link.text }}
+        </a>
+      </div>
+    </div>
+  </footer>
+</main>

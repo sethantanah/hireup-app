@@ -1,0 +1,181 @@
+<div class="candidate-ranking-page p-1 min-h-screen">
+
+    <!-- Loading Indicator -->
+    <div *ngIf="isLoading" class="loading-indicator">
+        <i class="fas fa-spinner fa-spin"></i> Loading...
+    </div>
+
+
+    <!-- Gear Icon to Toggle Options -->
+    <div class="flex justify-start mb-6">
+        <button (click)="viewShortlist()" class="shortlist-button" *ngIf="!isLoading && candidates.length > 0">
+            <i class="fas fa-list"></i> View Shortlist ({{ dataService.shortlistedCandidates.length }})
+        </button>
+        <button (click)="toggleOptions()"
+            class="ml-auto p-1 h-10 w-10 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors duration-200">
+            <i class="fas fa-cog text-md text-gray-600"></i>
+        </button>
+    </div>
+
+    <!-- Options Panel (Hidden by Default) -->
+    <div *ngIf="showOptions"
+        class="options-panel popover-overlay bg-white rounded-lg shadow-md border border-gray-200 mb-8 z-0" (click)="toggleOptions()">
+        <div class="popover p-6" (click)="$event.stopPropagation()">
+            <div class="flex flex-row">
+
+                <!-- Upload Button -->
+                <div class="mb-1">
+                    <input type="file" class="hidden" id="file-upload" (change)="onFileUpload($event)" />
+                    <label for="file-upload"
+                        class="cursor-pointer inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-upload mr-2"></i>
+                        Upload Job Description (PDF/DOC)
+                    </label>
+                </div>
+
+
+                <!-- Submit Button -->
+                <div class="ml-auto mb-1">
+                    <button (click)="onSubmit()"
+                        class="cursor-pointer inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm text-sm font-medium text-gray-700">
+                        Save & Generate Rankings
+                    </button>
+                </div>
+            </div>
+
+            <span class="text-sm font-medium text-gray-700" *ngIf="file">{{file.name}}</span>
+            <div class="pb-4"></div>
+            <!-- Large Text Area for Job Description -->
+            <div class="mb-8">
+                <textarea rows="10" [(ngModel)]="jobDescription" placeholder="Enter the job description here..."
+                    class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+            </div>
+
+            <!-- Elegant Sliders for Ranking Weights -->
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold text-gray-700 mb-6">Adjust Ranking Weights</h2>
+                <div class="space-y-6 flex flex-row gap-5 items-center justify-center">
+                    <!-- Skills Slider -->
+                    <div class="mt-5">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" min="0" max="100" [(ngModel)]="weights.skills"
+                                class="w-full range-slider" />
+                            <span class="text-sm text-gray-600 w-12 text-right">{{ weights.skills }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- Projects Slider -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Projects</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" min="0" max="100" [(ngModel)]="weights.projects"
+                                class="w-full range-slider" />
+                            <span class="text-sm text-gray-600 w-12 text-right">{{ weights.projects }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- Work Experience Slider -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Work Experience</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" min="0" max="100" [(ngModel)]="weights.work_experience"
+                                class="w-full range-slider" />
+                            <span class="text-sm text-gray-600 w-12 text-right">{{ weights.work_experience }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- Education Slider -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Education</label>
+                        <div class="flex items-center space-x-4">
+                            <input type="range" min="0" max="100" [(ngModel)]="weights.education"
+                                class="w-full range-slider" />
+                            <span class="text-sm text-gray-600 w-12 text-right">{{ weights.education }}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <app-shortlist-popup (filterChange)="onFilterByIds($event)"></app-shortlist-popup>
+    <app-candidate-details></app-candidate-details>
+
+    <div class="candidate-grid">
+        <div *ngFor="let candidate of candidates">
+            <div class="candidate-card bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+                <!-- Card Header -->
+                <div class="card-header">
+                    <h3>{{ candidate.form_data.full_name }}</h3>
+                    <p class="subtitle">{{ candidate.form_data.years_of_experience }} years of experience</p>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body p-6">
+                    <!-- <div class="card-body">
+                        <p><i class="fas fa-graduation-cap"></i> {{ candidate.form_data.highest_degree }}</p>
+                        <p><i class="fas fa-university"></i> {{ candidate.form_data.institution_name }}</p>
+                        <p><i class="fas fa-check-circle"></i> {{ candidate.form_data.availability == "Yes"?
+                            "Available": "Not
+                            Available" }}</p>
+                    </div> -->
+
+                    <!-- Scores Section -->
+                    <div class="mt-6">
+                        <h4 class="text-lg font-semibold text-gray-800 mb-3">Scores</h4>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="text-sm text-gray-700">
+                                <span class="font-medium">Skills:</span> {{
+                                (candidate.resume_data.skills_score! * 100).toFixed(2) || 'N/A'
+                                }}%
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                <span class="font-medium">Projects:</span> {{
+                                (candidate.resume_data.projects_score! * 100).toFixed(2) ||
+                                'N/A'
+                                }}%
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                <span class="font-medium">Education:</span> {{ (candidate.resume_data.skills_score! *
+                                100).toFixed(2) || 'N/A' }}%
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                <span class="font-medium">Work Experience:</span> {{
+                                (candidate.resume_data.work_experience_score! * 100 ).toFixed(2) || 'N/A' }}%
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-700">
+                            <span class="font-medium">Overall Score:</span> {{
+                            (candidate.resume_data.overall_score)?.toFixed(2) ||
+                            'N/A'
+                            }}%
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="card-footer p-6 border-t border-gray-200 flex items-center justify-between">
+                    <!-- View Details Button -->
+                    <button (click)="viewDetails(candidate)"
+                        class="view-details-button px-4 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <i class="fas fa-eye mr-2"></i> View Details
+                    </button>
+
+                    <!-- Shortlist Checkbox -->
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox"
+                            class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
+                        <span class="text-sm text-gray-700">Shortlist</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-12 bg-transparent"></div>
+        <div class="pt-12 bg-transparent"></div>
+        <div class="pt-12 bg-transparent"></div>
+     
+    </div>
+</div>

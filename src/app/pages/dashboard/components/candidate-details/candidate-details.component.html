@@ -1,0 +1,157 @@
+<!-- dataService.candidate-details-popover.component.html -->
+<div class="popover-overlay" *ngIf="this.dataService.openCandidateDetails" (click)="close()">
+    <div class="popover" (click)="$event.stopPropagation()">
+      <div class="popover-header">
+        <h3>Candidate Details</h3>
+        <button (click)="close()" class="close-button">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="popover-body">
+          <!-- Form Data Section -->
+          <div class="section">
+            <h4>Form Data</h4>
+            <div class="details-grid">
+              <!-- Dynamically render form_data -->
+              <div class="detail" *ngFor="let key of getFormDataKeys()">
+                <label>{{ formatKey(key) }}:</label>
+                <span>{{ getFormDataValue(key) }}</span>
+              </div>
+            </div>
+          </div>
+  
+        <!-- Resume Data Section -->
+        <div class="section">
+          <h4>CV Information</h4>
+          <div class="details-grid">
+            <div class="detail">
+              <label>Full Name:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.full_name || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <label>Email:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.email || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <label>Phone Number:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.phone_number || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <label>LinkedIn:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.linkedin || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <label>GitHub:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.github || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <label>Portfolio:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.portfolio || 'N/A' }}</span>
+            </div>
+            <div class="detail">
+              <label>Address:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.address || 'N/A' }}</span>
+            </div>
+            <!-- <div class="detail">
+              <label>Years of Experience:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.years_of_experience || 'N/A' }}</span>
+            </div> -->
+            <!-- <div class="detail">
+              <label>Availability:</label>
+              <span>{{ dataService.candidate?.resume_data?.personal_details?.availability || 'N/A' }}</span>
+            </div> -->
+          </div>
+  
+          <!-- Education -->
+          <div class="subsection">
+            <h5>Education</h5>
+            <div *ngFor="let edu of dataService.candidate?.resume_data?.education" class="details-grid">
+              <div class="detail">
+                <label>Institution:</label>
+                <span>{{ edu?.institution || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Degree:</label>
+                <span>{{ edu?.degree || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Field of Study:</label>
+                <span>{{ edu?.field_of_study || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Start Date:</label>
+                <span>{{ edu?.start_date || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>End Date:</label>
+                <span>{{ edu?.end_date || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Location:</label>
+                <span>{{ edu?.location || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Description:</label>
+                <span>{{ edu?.description || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Work Experience -->
+          <div class="subsection">
+            <h5>Work Experience</h5>
+            <div *ngFor="let exp of dataService.candidate?.resume_data?.work_experience" class="details-grid">
+              <div class="detail">
+                <label>Company:</label>
+                <span>{{ exp?.company || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Job Title:</label>
+                <span>{{ exp?.job_title || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Start Date:</label>
+                <span>{{ exp?.start_date || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>End Date:</label>
+                <span>{{ exp?.end_date || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Location:</label>
+                <span>{{ exp?.location || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Description:</label>
+                <span>{{ exp?.description || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Skills -->
+          <div class="subsection">
+            <h5>Skills</h5>
+            <div class="details-grid">
+              <div class="detail">
+                <label>Technical Skills:</label>
+                <span>{{ dataService.candidate?.resume_data?.skills?.technical_skills?.join(', ') || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Soft Skills:</label>
+                <span>{{ dataService.candidate?.resume_data?.skills?.soft_skills?.join(', ') || 'N/A' }}</span>
+              </div>
+              <div class="detail">
+                <label>Languages:</label>
+                <span>{{ dataService.candidate?.resume_data?.skills?.languages?.join(', ') || 'N/A' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="popover-footer">
+        <button (click)="close()" class="close-popover-button">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
