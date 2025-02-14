@@ -11,7 +11,7 @@ import { AdvanceFilterComponent } from '../advance-filter/advance-filter.compone
 
 @Component({
   selector: 'app-shortlisted',
-  imports: [CommonModule, FiltersComponent, ShortlistPopupComponent, CandidateDetailsComponent, AdvanceFilterComponent],
+  imports: [CommonModule, FiltersComponent, CandidateDetailsComponent, AdvanceFilterComponent],
   templateUrl: './shortlisted.component.html',
   styleUrl: './shortlisted.component.scss'
 })
