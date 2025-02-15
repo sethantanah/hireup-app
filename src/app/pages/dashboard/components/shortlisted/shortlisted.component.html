@@ -62,7 +62,7 @@
       <div class="card-body">
         <p><i class="fas fa-graduation-cap"></i> {{ candidate.form_data.highest_degree }}</p>
         <p><i class="fas fa-university"></i> {{ candidate.form_data.institution_name }}</p>
-        <p><i class="fas fa-check-circle"></i> {{ candidate.form_data.availability == "Yes"? "Available": "Not
+        <p><i class="fas fa-check-circle"></i> {{ candidate.form_data.availability.value == "Yes"? "Available": "Not
           Available" }}</p>
       </div>
       <div class="card-footer  flex flex-row">

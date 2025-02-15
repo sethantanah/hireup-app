@@ -1,19 +1,6 @@
 export interface Candidate {
   id: string;
-  form_data: {
-    full_name: string;
-    date_of_birth: string;
-    email: string;
-    phone_number: string;
-    residential_address: string;
-    highest_degree: string;
-    field_of_study: string;
-    institution_name: string;
-    year_of_graduation: string;
-    years_of_experience: string;
-    availability: string;
-    agree_to_declaration: boolean;
-  };
+  form_data: FormData;
   uploaded_files: {
     cv: string;
     reference_letter: string;
@@ -91,4 +78,26 @@ export interface Candidate {
     work_experience_score?: number,
     overall_score?: number
   };
+}
+
+
+export interface FormData {
+  full_name: FormDataItem;
+    date_of_birth: FormDataItem;
+    email: FormDataItem;
+    phone_number: FormDataItem;
+    residential_address: FormDataItem;
+    highest_degree: FormDataItem;
+    field_of_study: FormDataItem;
+    institution_name: FormDataItem;
+    year_of_graduation: FormDataItem;
+    years_of_experience: FormDataItem;
+    availability: FormDataItem;
+    agree_to_declaration: FormDataItem;
+}
+
+
+export interface FormDataItem {
+  lable: string;
+  value: string | boolean | number;
 }

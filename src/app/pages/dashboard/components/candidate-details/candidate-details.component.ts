@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { DataService } from '../../../../services/data.service';
 import { CommonModule } from '@angular/common';
+import { FormDataItem } from '../../models/candidate.model';
 
 @Component({
   selector: 'app-candidate-details',
@@ -22,7 +23,7 @@ export class CandidateDetailsComponent {
     return [];
   }
 
-  getFormDataValue(key: string): string | boolean | 'N/A' {
+  getFormDataValue(key: string): string | boolean | FormDataItem | 'N/A' {
     const formData = this.dataService.candidate?.form_data;
     if (formData && key in formData) {
       return formData[key as keyof typeof formData];

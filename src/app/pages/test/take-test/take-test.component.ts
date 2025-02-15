@@ -302,7 +302,7 @@ export class TakeTestComponent implements CanComponentDeactivate {
   submitTest(): void {
     const score = this.calculateScore();
     this.testScore = score;
-    this.testPercentage = score / this.testData!.formData.fields.length;
+    this.testPercentage = (score / this.testData!.formData.fields.length)*100;
 
     // Check if the user passed
     const passmark = this.testData!.sections[0].scoring.passmark; // Assuming passmark is the same for all sections
@@ -326,6 +326,7 @@ export class TakeTestComponent implements CanComponentDeactivate {
           localStorage.removeItem('applicateCredentials');
         },
         error: (error) => {
+          localStorage.removeItem('applicateCredentials');
           console.error(error);
         },
       });

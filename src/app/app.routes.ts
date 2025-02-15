@@ -9,6 +9,7 @@ import { canRefreshGuard } from './can-refresh.guard';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
+  { path: 'apply', component: LandingComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'jobposts', component: ManagerComponent },
   { path: 'jobposts/tests/:jobId', component: ListTestComponent },

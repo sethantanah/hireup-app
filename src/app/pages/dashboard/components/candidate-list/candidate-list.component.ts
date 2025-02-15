@@ -80,14 +80,14 @@ export class CandidateListComponent implements OnInit {
 
       if (
         this.filters.search &&
-        !data.full_name.toLowerCase().includes(this.filters.search.toLowerCase())
+        !data.full_name.valueOf().toString().toLowerCase().includes(this.filters.search.toLowerCase())
       ) {
         return false;
       }
 
       if (
         this.filters.availability &&
-        form_data.availability !== this.filters.availability
+        form_data.availability.value !== this.filters.availability
       ) {
         return false;
       }
@@ -134,35 +134,35 @@ export class CandidateListComponent implements OnInit {
       // Advanced Filters
       if (
         this.filters.dateOfBirth &&
-        form_data.date_of_birth !== this.filters.dateOfBirth
+        form_data.date_of_birth.value !== this.filters.dateOfBirth
       ) {
         return false;
       }
 
       if (
         this.filters.highestDegree &&
-        form_data.highest_degree !== this.filters.highestDegree
+        form_data.highest_degree.value !== this.filters.highestDegree
       ) {
         return false;
       }
 
       if (
         this.filters.fieldOfStudy &&
-        form_data.field_of_study !== this.filters.fieldOfStudy
+        form_data.field_of_study.value !== this.filters.fieldOfStudy
       ) {
         return false;
       }
 
       if (
         this.filters.institutionName &&
-        form_data.institution_name !== this.filters.institutionName
+        form_data.institution_name.value !== this.filters.institutionName
       ) {
         return false;
       }
 
       if (
         this.filters.yearOfGraduation &&
-        form_data.year_of_graduation !== this.filters.yearOfGraduation
+        form_data.year_of_graduation.value !== this.filters.yearOfGraduation
       ) {
         return false;
       }
