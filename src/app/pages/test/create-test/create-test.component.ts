@@ -63,7 +63,6 @@ export class CreateTestComponent implements OnInit {
       this.test = this.testService.getTest();
     }
 
-    console.log(this.test?.formData.fields[this.test?.formData.fields.length-1])
   }
   ngOnInit(): void {
     this.test = this.testService.getTest();

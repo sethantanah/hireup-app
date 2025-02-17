@@ -58,6 +58,9 @@ export class ListTestComponent {
     window.open(url, '_blank');
   }
 
+
+
+
   // Method to delete a test
   deleteTest(test: JobTest) {
     console.log('Delete Test:', test.id);
@@ -101,7 +104,13 @@ export class ListTestComponent {
 
   // Method to view submissions for a test
   viewSubmissions(test: JobTest) {
-    console.log('View Submissions for Test:', test.id);
-    // Add logic to navigate to a submissions page
+    const projectId = this.route.snapshot.paramMap.get('jobId');
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree([
+        '/jobposts/tests/submissions',
+        test.id,
+      ])
+    );
+    window.open(url, '_blank');
   }
 }

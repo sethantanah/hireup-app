@@ -87,13 +87,13 @@
       class="p-4 border-t border-gray-200 space-y-3"
       *ngIf="this.test.sections.length === 1"
     >
-      <button
+      <!-- <button
         class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
         (click)="openQuestionPopup('multiple-choice')"
       >
         <i class="fas fa-plus"></i>
         <span>Add New Question</span>
-      </button>
+      </button> -->
     </div>
   </div>
 
@@ -336,7 +336,7 @@
 
       <div class="flex flex-row gap-5  mt-5">
         <button
-        *ngIf="test.sections.length > 1"
+        
         class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
         (click)="
           setQuestionSection(section.sectionId);

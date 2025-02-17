@@ -6,6 +6,8 @@ import { ListTestComponent } from './pages/test/list-test/list-test.component';
 import { CreateTestComponent } from './pages/test/create-test/create-test.component';
 import { TakeTestComponent } from './pages/test/take-test/take-test.component';
 import { canRefreshGuard } from './can-refresh.guard';
+import { PageNotFoundComponent } from './pages/special/page-not-found/page-not-found.component';
+import { SubmissionsComponent } from './pages/test/submissions/submissions.component';
 
 export const routes: Routes = [
   { path: '', component: LandingComponent },
@@ -23,7 +25,16 @@ export const routes: Routes = [
   },
   {
     path: 'jobposts/tests/take-test/:testId',
-    component: TakeTestComponent,
+    component: PageNotFoundComponent,
     canDeactivate: [canRefreshGuard]
   },
+  {
+    path: 'jobposts/tests/submissions/:testId',
+    component: SubmissionsComponent
+  }
+  // {
+  //   path: 'jobposts/tests/take-test/:testId',
+  //   component: TakeTestComponent,
+  //   canDeactivate: [canRefreshGuard]
+  // },
 ];

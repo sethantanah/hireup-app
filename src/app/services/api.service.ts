@@ -139,7 +139,7 @@ export class ApiService {
   }
 
   shortListCandidates(resumes_ids: string[]): Observable<any> {
-    const apiUrl = environment.apiUrl + `/shortlisting/shortlist`;
+    const apiUrl = environment.apiUrl + `/shortlisting/shortlist/project_id=${this.project_id}`;
     const headers = new HttpHeaders({
       'accept': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`

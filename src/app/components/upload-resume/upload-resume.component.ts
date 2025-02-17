@@ -201,7 +201,7 @@ export class UploadResumeComponent implements OnInit {
 
     // Append form values to FormData
 
-    formData.append('form_data', JSON.stringify(this.formValues));
+    formData.append('form_data', JSON.stringify(this.transformObject(this.formValues)));
 
     // Append uploaded files to FormData
     Object.keys(this.uploadedFiles).forEach(key => {
@@ -280,5 +280,55 @@ export class UploadResumeComponent implements OnInit {
   // Close the success message
   closeSubmissionMessage() {
     this.showSubmissionMessage = false;
+  }
+
+
+  
+  transformObject(input: any) {
+    // Define a mapping of field names to their corresponding labels
+    const labelMapping = {
+      full_name: "Full Name",
+      date_of_birth: "Date of Birth",
+      email: "Email",
+      phone_number: "Phone Number",
+      residential_address: "Residential Address",
+      highest_degree: "Highest Degree",
+      field_of_study: "Field of Study",
+      institution_name: "Institution Name",
+      year_of_graduation: "Year of Graduation",
+      occupation: "Occupation",
+      organization: "Organization",
+      years_of_experience: "Years of Experience",
+      personal_motivation: "Personal Motivation",
+      "community-involvement": "Community Involvement",
+      professional_improvement: "Professional Improvement",
+      mentor: "Mentor",
+      time_management: "Time Management",
+      participation_availability: "Participation Availability",
+      availability: "Availability",
+      availability_hours: "Availability Hours",
+      cv: "CV",
+      reference_letter: "Reference Letter",
+      agree_to_declaration: "Agree to Declaration",
+    };
+  
+    // Transform the input object
+    const transformedObject:any = {};
+    for (const key in input) {
+      if (labelMapping.hasOwnProperty(key)) {
+        transformedObject[key] = {
+          label: labelMapping[key as keyof typeof labelMapping],
+          value: input[key],
+        };
+      } else {
+        // If the key is not in the mapping, use the key itself as the label
+        transformedObject[key] = {
+          label: key,
+          value: input[key],
+        };
+      }
+    }
+  
+    return transformedObject;
   }
 }

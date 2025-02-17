@@ -78,7 +78,7 @@ export class TakeTestComponent implements CanComponentDeactivate {
         next: (data) => {
           this.testData = data[0].test_data;
           if (this.testData) {
-            this.timer = this.testData.sections[0].duration * 60;
+            this.timer = 0.3 * 60 // this.testData.sections[0].duration * 60;
 
             this.testResponses = this.testData.formData.fields.map((field) => ({
               question: field.question,
@@ -108,35 +108,40 @@ export class TakeTestComponent implements CanComponentDeactivate {
     this.isLoading = true;
     this.errorMessage = null;
 
-    // Simulate an API call
+
+    this.isLoading = false;
+    this.errorMessage = null;
+    this.showPopup = false;
+    this.currentView = 'form';
+    this.startTimer();
 
     // Simulate an API call
-    this.testService
-      .checkApplicantCredentials(
-        this.userForm.get('email')!.value,
-        this.userForm.get('name')!.value
-      )
-      .subscribe({
-        next: (data) => {
-          this.isLoading = false;
-          this.errorMessage = null;
-          this.showPopup = false;
-          this.currentView = 'form';
-          this.startTimer();
+    // this.testService
+    //   .checkApplicantCredentials(
+    //     this.userForm.get('email')!.value,
+    //     this.userForm.get('name')!.value
+    //   )
+    //   .subscribe({
+    //     next: (data) => {
+    //       this.isLoading = false;
+    //       this.errorMessage = null;
+    //       this.showPopup = false;
+    //       this.currentView = 'form';
+    //       this.startTimer();
 
-          localStorage.setItem(
-            'applicateCredentials',
-            JSON.stringify({
-              ...data,
-            })
-          );
-        },
-        error: (error) => {
-          this.isLoading = false;
-          this.errorMessage = error.error.detail;
-          console.error(error);
-        },
-      });
+    //       localStorage.setItem(
+    //         'applicateCredentials',
+    //         JSON.stringify({
+    //           ...data,
+    //         })
+    //       );
+    //     },
+    //     error: (error) => {
+    //       this.isLoading = false;
+    //       this.errorMessage = error.error.detail;
+    //       console.error(error);
+    //     },
+    //   });
   }
 
   // Start the timer
@@ -203,7 +208,7 @@ export class TakeTestComponent implements CanComponentDeactivate {
   navigateSection() {
     if (this.testData!.sections.length - 1 > this.currentSection) {
       this.currentSection = this.currentSection + 1;
-      this.timer = this.testData!.sections[this.currentSection].duration * 60;
+      this.timer = this.timer = 0.3 * 60 // this.testData!.sections[this.currentSection].duration * 60;
 
       // Simulate an API call
       this.isLoading = false;
@@ -300,37 +305,37 @@ export class TakeTestComponent implements CanComponentDeactivate {
 
   // Submit the test
   submitTest(): void {
-    const score = this.calculateScore();
-    this.testScore = score;
-    this.testPercentage = (score / this.testData!.formData.fields.length)*100;
+    // const score = this.calculateScore();
+    // this.testScore = score;
+    // this.testPercentage = (score / this.testData!.formData.fields.length)*100;
 
-    // Check if the user passed
-    const passmark = this.testData!.sections[0].scoring.passmark; // Assuming passmark is the same for all sections
+    // // Check if the user passed
+    // const passmark = this.testData!.sections[0].scoring.passmark; // Assuming passmark is the same for all sections
 
-    const resData = localStorage.getItem('applicateCredentials');
-    if (resData) {
-      const testId = this.route.snapshot.paramMap.get('testId');
-      const res = JSON.parse(resData);
+    // const resData = localStorage.getItem('applicateCredentials');
+    // if (resData) {
+    //   const testId = this.route.snapshot.paramMap.get('testId');
+    //   const res = JSON.parse(resData);
 
-      const reqData = {
-        applicant_name: res.name,
-        applicant_email: res.email,
-        applicant_id: res.applicant_id,
-        test_response: this.formatResponses(),
-        test_score: score,
-        test_id: testId,
-      };
+    //   const reqData = {
+    //     applicant_name: res.name,
+    //     applicant_email: res.email,
+    //     applicant_id: res.applicant_id,
+    //     test_response: this.formatResponses(),
+    //     test_score: score,
+    //     test_id: testId,
+    //   };
 
-      this.testService.saveTestResponse(reqData).subscribe({
-        next: () => {
-          localStorage.removeItem('applicateCredentials');
-        },
-        error: (error) => {
-          localStorage.removeItem('applicateCredentials');
-          console.error(error);
-        },
-      });
-    }
+    //   this.testService.saveTestResponse(reqData).subscribe({
+    //     next: () => {
+    //       localStorage.removeItem('applicateCredentials');
+    //     },
+    //     error: (error) => {
+    //       localStorage.removeItem('applicateCredentials');
+    //       console.error(error);
+    //     },
+    //   });
+    // }
 
     this.currentView = 'thankyou';
   }

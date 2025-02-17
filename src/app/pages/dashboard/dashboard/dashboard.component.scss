@@ -35,7 +35,7 @@ body {
 header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: start;
     padding: 15px 30px;
     background-color: var(--white);
     // box-shadow: var(--shadow);
@@ -98,6 +98,16 @@ aside {
     background-color: var(--white);
     // box-shadow: var(--shadow);
     padding: 20px;
+
+    transition: width 0.3s ease;
+    
+    &.collapsed {
+      width: 70px;
+      padding: 12px;
+      nav a span {
+        display: none;
+      }
+    }
 }
 
 aside nav {
@@ -156,3 +166,7 @@ aside nav a:hover {
 aside nav a:hover i {
     color: var(--primary-color);
 }
+
+
+
+

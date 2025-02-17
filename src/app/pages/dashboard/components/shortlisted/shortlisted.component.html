@@ -56,12 +56,12 @@
     <!-- Card for form_data -->
     <div *ngIf="candidate.form_data && candidate.form_data | keyvalue" class="candidate-card">
       <div class="card-header">
-        <h3>{{ candidate.form_data.full_name }}</h3>
-        <p class="subtitle">{{ candidate.form_data.years_of_experience }} years of experience</p>
+        <h3>{{ candidate.form_data.full_name.value }}</h3>
+        <p class="subtitle">{{ candidate.form_data.years_of_experience.value }} years of experience</p>
       </div>
       <div class="card-body">
-        <p><i class="fas fa-graduation-cap"></i> {{ candidate.form_data.highest_degree }}</p>
-        <p><i class="fas fa-university"></i> {{ candidate.form_data.institution_name }}</p>
+        <p><i class="fas fa-graduation-cap"></i> {{ candidate.form_data.highest_degree.value }}</p>
+        <p><i class="fas fa-university"></i> {{ candidate.form_data.institution_name.value }}</p>
         <p><i class="fas fa-check-circle"></i> {{ candidate.form_data.availability.value == "Yes"? "Available": "Not
           Available" }}</p>
       </div>

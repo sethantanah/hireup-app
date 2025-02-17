@@ -1,0 +1,418 @@
+<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+      <div class="mt-4 text-lg font-medium text-gray-700">Loading ...</div>
+    </div>
+  </div>
+
+<div class="min-h-screen bg-gray-50 p-6">
+  <!-- Header Section -->
+  <header class="sticky top-0 z-40 bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Always Visible Section -->
+      <div class="py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <h1 class="text-2xl font-bold text-gray-800">
+            <i class="fas fa-users mr-2"></i> Submissions
+          </h1>
+          <!-- Quick Stats - Visible when collapsed -->
+          <div class="flex items-center space-x-2" [class.hidden]="!isCollapsed">
+            <span class="text-sm text-gray-600">
+              {{passedCount}}/{{applicants.length}} Passed
+            </span>
+            <span class="inline-flex h-2 w-2 rounded-full" 
+                  [ngClass]="{'bg-green-500': passedCount > 0, 'bg-red-500': passedCount === 0}">
+            </span>
+          </div>
+        </div>
+        
+        <button 
+          (click)="isCollapsed = !isCollapsed"
+          class="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          [attr.aria-expanded]="!isCollapsed">
+          <i class="fas" [class]="isCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+        </button>
+      </div>
+  
+      <!-- Collapsible Section -->
+      <div class="overflow-hidden transition-all duration-300" 
+           [class.h-0]="isCollapsed" 
+           [class.opacity-0]="isCollapsed"
+           [class.h-auto]="!isCollapsed"
+           [class.opacity-100]="!isCollapsed">
+        <div class="py-4 border-t">
+          <!-- Original Content -->
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <!-- Stats Section -->
+            <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <div class="flex flex-wrap gap-2">
+                <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                  Total: {{applicants.length}}
+                </span>
+                <span class="bg-green-100 text-green-800 text-sm font-medium px-3 py-1 rounded-full">
+                  Passed: {{passedCount}}
+                </span>
+                <span class="bg-red-100 text-red-800 text-sm font-medium px-3 py-1 rounded-full">
+                  Failed: {{this.applicants.length - passedCount}}
+                </span>
+              </div>
+              <button (click)="openPassMarkModal()" class="flex items-center space-x-2 px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors">
+                <i class="fas fa-percentage"></i>
+                <span>Pass Mark: {{passMark}}%</span>
+              </button>
+            </div>
+  
+            <!-- Search and Filters -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <div class="relative">
+                <input type="search" placeholder="Search applicants..." class="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" [(ngModel)]="searchTerm"/>
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+              </div>
+              <div class="flex bg-gray-100 rounded-lg p-1 overflow-x-auto">
+                <button *ngFor="let filterOption of filterOptions" (click)="filter = filterOption.value" class="whitespace-nowrap px-4 py-2 rounded-md transition-all duration-200" [ngClass]="{'bg-white shadow-sm text-blue-600': filter === filterOption.value, 'text-gray-600 hover:bg-gray-200': filter !== filterOption.value}">
+                  <i [class]="filterOption.icon"></i> {{filterOption.label}}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  
+
+  <!-- Main Content -->
+  <div class="grid gap-4 md:grid-cols-3 lg:grid-cols-4 mt-5">
+    <div
+      *ngFor="let applicant of filteredApplicants"
+      class="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+    >
+      <div class="flex items-start justify-between">
+        <div class="flex items-center space-x-3">
+          <div
+            class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center"
+          >
+            <span class="text-xl font-semibold text-gray-600">
+              {{ applicant.applicant_name.charAt(0) }}
+            </span>
+          </div>
+          <div>
+            <h2 class="text-lg font-semibold text-gray-800">
+              {{ applicant.applicant_name }}
+            </h2>
+            <div class="flex items-center text-gray-600">
+              <i class="fas fa-envelope text-sm mr-2"></i>
+              <a
+              href="mailto:{{ applicant.applicant_email }}"
+              class="text-sm hover:text-blue-600 truncate max-w-[100px] overflow-hidden"
+            >
+              {{ applicant.applicant_email }}
+            </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-end space-y-2">
+          <span
+            [ngClass]="{
+              'bg-green-100 text-green-800': applicant.test_score >= passMark,
+              'bg-red-100 text-red-800': applicant.test_score < passMark
+            }"
+            class="px-3 py-1 rounded-full text-sm font-medium"
+          >
+            <i
+              [class]="
+                applicant.test_score >= passMark
+                  ? 'fas fa-check-circle'
+                  : 'fas fa-times-circle'
+              "
+            ></i>
+            {{ applicant.test_score }}%
+          </span>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t flex justify-between items-center">
+        <div class="flex space-x-2">
+          <button
+            (click)="openResponsesModal(applicant)"
+            class="flex items-center px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+          >
+            <i class="fas fa-clipboard-list mr-2"></i>
+            View Responses
+          </button>
+        </div>
+        <div class="flex items-center">
+          <button
+            (click)="toggleShortlist(applicant)"
+            [ngClass]="{ 'text-purple-600': isShortlisted(applicant) }"
+            class="text-gray-400 hover:text-purple-600 transition-colors"
+          >
+            <i class="fas fa-star text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Action Button -->
+  <button
+    (click)="openShortlistPopup()"
+    class="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200"
+  >
+    <i class="fas fa-users-cog mr-2"></i>
+    Shortlist
+  </button>
+
+  <!-- Responses Modal -->
+  <div
+    *ngIf="showResponsesModal"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div
+      class="bg-white rounded-xl shadow-xl w-11/12 max-w-3xl max-h-[90vh] overflow-hidden"
+    >
+      <div class="p-6 border-b">
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold text-gray-800">
+            <i class="fas fa-clipboard-list mr-2"></i>
+            Test Responses
+          </h2>
+          <button
+            (click)="closeResponsesModal()"
+            class="text-gray-400 hover:text-gray-600"
+          >
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+        <div
+          *ngFor="
+            let response of selectedApplicant?.test_response;
+            let i = index
+          "
+          class="bg-gray-50 rounded-lg p-4 mb-4"
+        >
+          <div class="flex items-center mb-2">
+            <span
+              class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full"
+            >
+              Question {{ i + 1 }}
+            </span>
+          </div>
+          <p class="font-medium text-gray-800 mb-3">{{ response.question }}</p>
+          <div class="space-y-2">
+            <div class="flex items-center text-green-600">
+              <i class="fas fa-check-circle mr-2"></i>
+              <span>Correct: {{ response.correct_answer }}</span>
+            </div>
+            <div
+              class="flex items-center"
+              [ngClass]="{
+                'text-green-600': response.response === response.correct_answer,
+                'text-red-600': response.response !== response.correct_answer
+              }"
+            >
+              <i
+                class="fas"
+                [ngClass]="{
+                  'fa-check-circle':
+                    response.response === response.correct_answer,
+                  'fa-times-circle':
+                    response.response !== response.correct_answer
+                }"
+              >
+              </i>
+              <span class="ml-2">Response: {{ response.response }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showShortlistPopup" class="fixed inset-0 z-50">
+    <!-- Backdrop with blur effect -->
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+
+    <!-- Modal Content -->
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+      <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all"
+      >
+        <!-- Header -->
+        <div class="p-6 border-b">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-gray-800">
+              <i class="fas fa-users-cog mr-2"></i>
+              Shortlist Applicants
+            </h2>
+            <button
+              (click)="closeShortlistPopup()"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-6">
+          <!-- Stats Cards -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-purple-50 p-4 rounded-lg">
+              <div class="text-sm text-purple-600 font-medium">
+                Total Passed
+              </div>
+              <div class="text-2xl font-bold text-purple-700">
+                {{ passedCount }}
+              </div>
+            </div>
+            <div class="bg-green-50 p-4 rounded-lg">
+              <div class="text-sm text-green-600 font-medium">Selected</div>
+              <div class="text-2xl font-bold text-green-700">
+                {{ shortlistedApplicants.size }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Input Section -->
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700"
+              >Number to Shortlist</label
+            >
+            <div class="relative">
+              <input
+                [(ngModel)]="shortlistCount"
+                type="number"
+                min="1"
+                [max]="passedCount"
+                class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                placeholder="Enter number"
+              />
+              <span class="absolute right-4 top-3 text-gray-400">
+                <i class="fas fa-users"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t bg-gray-50 rounded-b-xl">
+          <div class="flex justify-end space-x-3">
+            <button
+              (click)="closeShortlistPopup()"
+              class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <i class="fas fa-times mr-2"></i>
+              Cancel
+            </button>
+            <button
+              (click)="confirmShortlist()"
+              class="px-5 py-2.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors"
+            >
+              <i class="fas fa-check mr-2"></i>
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pass Mark Modal -->
+  <div *ngIf="showPassMarkModal" class="fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-gray-900/50 backdrop-blur-sm"></div>
+
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+      <div
+        class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all"
+      >
+        <!-- Header -->
+        <div class="p-6 border-b">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-gray-800">
+              <i class="fas fa-percentage mr-2"></i>
+              Set Pass Mark
+            </h2>
+            <button
+              (click)="closePassMarkModal()"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-6">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-gray-700"
+              >Pass Mark Percentage</label
+            >
+            <div class="relative">
+              <input
+                [(ngModel)]="newPassMark"
+                type="number"
+                min="0"
+                max="100"
+                class="w-full pl-4 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                placeholder="Enter pass mark"
+              />
+              <span class="absolute right-4 top-3 text-gray-400">%</span>
+            </div>
+          </div>
+
+          <!-- Preview Impact -->
+          <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+            <h3 class="font-medium text-gray-700">Impact Preview</h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="text-green-600">
+                <div class="text-sm">Will Pass</div>
+                <div class="font-bold">
+                  {{ getPassCountForMark(newPassMark) }}
+                </div>
+              </div>
+              <div class="text-red-600">
+                <div class="text-sm">Will Fail</div>
+                <div class="font-bold">
+                  {{ applicants.length - getPassCountForMark(newPassMark) }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-6 border-t bg-gray-50 rounded-b-xl">
+          <div class="flex justify-end space-x-3">
+            <button
+              (click)="closePassMarkModal()"
+              class="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="updatePassMark()"
+              class="px-5 py-2.5 rounded-lg bg-yellow-600 text-white hover:bg-yellow-700 transition-colors"
+            >
+              Update Pass Mark
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <app-sendmail
+      [showModal]="showEmailSender"
+      [shortlistedEmails]="getShortlistedEmails()"
+      [notShortlistedEmails]="getNotShortlistedEmails()"
+      (closeModal)="showEmailSender = false"
+    ></app-sendmail>
+</div>

@@ -74,6 +74,18 @@ export class JobtestApiService {
     return this.http.post(apiUrl, data, { headers });
   }
 
+  testResponses(testId: string): Observable<any> {
+    const apiUrl =
+      environment.apiUrl +
+      `/jobtests/test-responses?test_id=0db9639f-e520-4979-b600-e2120bc10923`;
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.get(apiUrl, { headers });
+  }
+
   getTest(): TestData | null {
     return this.test;
   }

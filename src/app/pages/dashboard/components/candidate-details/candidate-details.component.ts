@@ -23,10 +23,10 @@ export class CandidateDetailsComponent {
     return [];
   }
 
-  getFormDataValue(key: string): string | boolean | FormDataItem | 'N/A' {
+  getFormDataValue(key: string): string | boolean | number | 'N/A' {
     const formData = this.dataService.candidate?.form_data;
     if (formData && key in formData) {
-      return formData[key as keyof typeof formData];
+      return formData[key as keyof typeof formData].value;
     }
     return 'N/A';
   }

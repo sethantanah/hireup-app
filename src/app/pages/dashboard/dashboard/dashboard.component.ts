@@ -6,14 +6,28 @@ import { ShortlistedComponent } from '../components/shortlisted/shortlisted.comp
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, CandidateListComponent, CandidateRankingComponent, ShortlistedComponent],
+  imports: [
+    CommonModule,
+    CandidateListComponent,
+    CandidateRankingComponent,
+    ShortlistedComponent,
+  ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent {
   activeSection: string = 'candidates'; // Default active section
-
+  sidebarOpen: boolean = true;
+  sidebarCollapse: boolean = false;
   setActiveSection(section: string) {
     this.activeSection = section;
+  }
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  toggleSidebarCollapse(){
+    this.sidebarCollapse = !this.sidebarCollapse;
   }
 }

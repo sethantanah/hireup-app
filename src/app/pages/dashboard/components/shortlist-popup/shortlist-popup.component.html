@@ -21,13 +21,13 @@
         </thead>
         <tbody>
           <tr *ngFor="let candidate of dataService.shortlistedCandidates">
-            <td>{{ candidate.form_data?.full_name || candidate.resume_data.personal_details.full_name }}</td>
-            <td>{{ candidate.form_data?.years_of_experience}}</td>
-            <td>{{ candidate.form_data?.highest_degree || (candidate.resume_data && candidate.resume_data.education &&
-              candidate.resume_data.education[0]?.degree) }}</td>
-            <td>{{ candidate.form_data?.institution_name || (candidate.resume_data && candidate.resume_data.education &&
+            <td>{{ candidate.form_data.full_name.value || candidate.resume_data.personal_details.full_name }}</td>
+            <td>{{ candidate.form_data.years_of_experience.value}}</td>
+            <td>{{ candidate.form_data.highest_degree.value || (candidate.resume_data && candidate.resume_data.education &&
+              candidate.resume_data.education[0].degree) }}</td>
+            <td>{{ candidate.form_data.institution_name.value || (candidate.resume_data && candidate.resume_data.education &&
               candidate.resume_data.education[0].institution) || '' }}</td>
-            <td>{{ candidate.form_data?.availability }}</td>
+            <td>{{ candidate.form_data.availability.value }}</td>
             <td>
 
               <label class="flex items-center space-x-2 ml-auto cursor-pointer">
