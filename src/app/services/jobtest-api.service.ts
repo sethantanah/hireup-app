@@ -7,7 +7,7 @@ import {
   FormSection,
   FormSubSection,
   TestData,
-} from '../models/test-models';
+} from '../models/test.model';
 
 @Injectable({
   providedIn: 'root',
@@ -19,8 +19,8 @@ export class JobtestApiService {
     this.loadFromLocalStorage();
   }
 
-  jobTests(project_id: string): Observable<any> {
-    const apiUrl = environment.apiUrl + `/jobtests/?project_id=${project_id}`;
+  jobTests(jobpost_id: string): Observable<any> {
+    const apiUrl = environment.apiUrl + `/jobtests/?jobpost_id=${jobpost_id}`;
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -39,9 +39,9 @@ export class JobtestApiService {
     return this.http.get(apiUrl, { headers });
   }
 
-  createUpdateJobTests(project_id: string, test_data: any): Observable<any> {
+  createUpdateJobTests(jobpost_id: string, test_data: any): Observable<any> {
     const apiUrl =
-      environment.apiUrl + `/jobtests/create-update/?project_id=${project_id}`;
+      environment.apiUrl + `/jobtests/create-update/?jobpost_id=${jobpost_id}`;
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -77,7 +77,7 @@ export class JobtestApiService {
   testResponses(testId: string): Observable<any> {
     const apiUrl =
       environment.apiUrl +
-      `/jobtests/test-responses?test_id=0db9639f-e520-4979-b600-e2120bc10923`;
+      `/jobtests/test-responses?test_id=${testId}`;
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,

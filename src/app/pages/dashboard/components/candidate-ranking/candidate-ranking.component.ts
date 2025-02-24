@@ -49,7 +49,7 @@ export class CandidateRankingComponent {
     const formData = new FormData();
     formData.append('weights', JSON.stringify(this.weights));
     formData.append('job_description', this.jobDescription);
-    formData.append('project_id', this.apiService.project_id);
+    formData.append('jobpost_id', this.apiService.jobpost_id);
 
     this.apiService.rankCandidates(formData).subscribe({
       next: (data) => {

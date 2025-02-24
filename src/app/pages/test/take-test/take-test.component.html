@@ -1,3 +1,10 @@
+<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+  <div class="text-center">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
+    <div class="mt-4 text-lg font-medium text-gray-700">Loading ...</div>
+  </div>
+</div>
+
 <!-- Instructions View -->
 <div
   appPreventScreenShot

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { JobtestApiService } from '../../../services/jobtest-api.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { JobTest } from '../../../models/test-models';
+import { JobTest } from '../../../models/test.model';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class ListTestComponent {
   jobTests: JobTest[] = [];
-  isLoading: boolean = false;
+  loading: boolean = false;
   constructor(
     private apiService: JobtestApiService,
     private router: Router,
@@ -25,11 +25,14 @@ export class ListTestComponent {
   }
 
   loadJobTest(project_id: string) {
+    this.loading = true;
     this.apiService.jobTests(project_id).subscribe({
       next: (data) => {
         this.jobTests = data as JobTest[];
+        this.loading = false;
       },
       error: (error) => {
+        this.loading = false;
         console.error(error);
       },
     });

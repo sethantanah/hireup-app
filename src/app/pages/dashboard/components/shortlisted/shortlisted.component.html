@@ -30,17 +30,28 @@
 
 
 <!-- No Data Card -->
-<div *ngIf="!isLoading && candidates.length === 0" class="no-data-card">
-  <i class="fas fa-folder-open" style="font-size: 25px"></i>
-  <p>No Candidates Found</p>
-  <p>There are no candidates to display at the moment.</p>
-
-
-  <button (click)="refreshData()" class="refresh-button">
-    <div class="mt-auto mb-auto">
-      <i class="fas fa-refresh"></i>
+<div class="w-full h-full flex items-center justify-center" *ngIf="!isLoading && candidates.length === 0">
+  <div class="md:w-[400px] flex items-center justify-center p-4 mt-[100px]">
+    <div class="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm max-w-md w-full mx-auto">
+      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+        <i class="fas fa-folder-open text-3xl text-gray-500"></i>
+      </div>
+  
+      <h3 class="text-xl text-center font-semibold text-gray-800 mb-2">No Candidates Found</h3>
+      
+      <p class="text-gray-600 text-center mb-6">
+        There are no candidates to display at the moment.
+      </p>
+  
+      <button 
+        (click)="refreshData()" 
+        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 group"
+      >
+        <i class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"></i>
+        Refresh Data
+      </button>
     </div>
-  </button>
+  </div>
 </div>
 
 <!-- <div *ngIf="!isLoading && filteredCandidates.length === 0 && candidates.length > 0" class="no-data-card">
@@ -56,14 +67,14 @@
     <!-- Card for form_data -->
     <div *ngIf="candidate.form_data && candidate.form_data | keyvalue" class="candidate-card">
       <div class="card-header">
-        <h3>{{ candidate.form_data.full_name.value }}</h3>
+        <!-- <h3>{{ candidate.form_data.full_name.value }}</h3>
         <p class="subtitle">{{ candidate.form_data.years_of_experience.value }} years of experience</p>
       </div>
       <div class="card-body">
         <p><i class="fas fa-graduation-cap"></i> {{ candidate.form_data.highest_degree.value }}</p>
         <p><i class="fas fa-university"></i> {{ candidate.form_data.institution_name.value }}</p>
         <p><i class="fas fa-check-circle"></i> {{ candidate.form_data.availability.value == "Yes"? "Available": "Not
-          Available" }}</p>
+          Available" }}</p> -->
       </div>
       <div class="card-footer  flex flex-row">
         <button (click)="viewDetails(candidate)" class="view-details-button">
@@ -133,11 +144,11 @@
       <ng-container *ngFor="let candidate of filteredCandidates">
         <!-- Row for form_data -->
         <tr *ngIf="candidate.form_data && candidate.form_data | keyvalue">
-          <td>{{ candidate.form_data.full_name }}</td>
+          <!-- <td>{{ candidate.form_data.full_name }}</td>
           <td>{{ candidate.form_data.years_of_experience }}</td>
           <td>{{ candidate.form_data.highest_degree }}</td>
           <td>{{ candidate.form_data.institution_name }}</td>
-          <td>{{ candidate.form_data.availability }}</td>
+          <td>{{ candidate.form_data.availability }}</td> -->
           <td class="flex flex-row">
             <button (click)="viewDetails(candidate)" class="view-details-button">
               <i class="fas fa-eye"></i> View Details

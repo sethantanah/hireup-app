@@ -18,4 +18,27 @@ export class JobpostingsApiService {
 
     return this.http.get(apiUrl, { headers });
   }
+
+
+  createUpdateJobPost(user_id: string, data: any): Observable<any> {
+    const apiUrl =
+      environment.apiUrl + `/jobposts/jobpost/create-update/?user_id=${user_id}`;
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.post(apiUrl, data, { headers });
+  }
+
+
+  deleteJobPosting(jobpost_id: string): Observable<any> {
+    const apiUrl = environment.apiUrl + `/jobposts/jobpost/delete?jobpost_id=${jobpost_id}`;
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.delete(apiUrl, { headers });
+  }
 }

@@ -1,10 +1,15 @@
-<div class="dashboard" style="overflow: hidden;">
+<app-loader *ngIf="loading" [loadingText]="'Loading ...'"></app-loader>
+
+<div class="dashboard" style="overflow: hidden">
   <header>
     <button class="menu-button md:hidden" (click)="toggleSidebar()">
       <i class="fas fa-bars"></i>
     </button>
 
-    <button class="menu-button hidden md:flex" (click)="toggleSidebarCollapse()">
+    <button
+      class="menu-button hidden md:flex"
+      (click)="toggleSidebarCollapse()"
+    >
       <i class="fa fa-chevron-right" *ngIf="!sidebarCollapse"></i>
       <i class="fa fa-chevron-left" *ngIf="sidebarCollapse"></i>
     </button>
@@ -19,55 +24,85 @@
     </div>
   </header>
   <div class="content">
-    <aside [class.collapsed]="!sidebarCollapse" [ngClass]="{'hidden': !sidebarOpen}">
+    <aside
+      [class.collapsed]="!sidebarCollapse"
+      [ngClass]="{ hidden: !sidebarOpen }"
+    >
       <nav>
-        <a [class.active]="activeSection === 'candidates'" (click)="setActiveSection('candidates')">
-          <i class="fas fa-user-friends"></i> <!-- Better for candidates -->
+        <a
+          [class.active]="activeSection === 'candidates'"
+          (click)="setActiveSection('candidates')"
+        >
+          <i class="fas fa-user-friends"></i>
+          <!-- Better for candidates -->
           <span>Candidates</span>
         </a>
-  
-          <a [class.active]="activeSection === 'shortlisting'" (click)="setActiveSection('shortlisting')">
-            <i class="fas fa-check-square"></i> <!-- Represents selection better -->
-            <span>Shortlisting</span>
-          </a>
-          <a [class.active]="activeSection === 'ranking'" (click)="setActiveSection('ranking')">
-            <i class="fas fa-sort-amount-down"></i> <!-- More relevant for ranking -->
-            <span>Ranking</span>
-          </a>
-        
-        <a [class.active]="activeSection === 'job-postings'" (click)="setActiveSection('job-postings')">
-          <i class="fas fa-briefcase"></i> <!-- More recognizable for jobs -->
+
+        <a
+          [class.active]="activeSection === 'shortlisting'"
+          (click)="setActiveSection('shortlisting')"
+        >
+          <i class="fas fa-check-square"></i>
+          <!-- Represents selection better -->
+          <span>Shortlisting</span>
+        </a>
+        <a
+          [class.active]="activeSection === 'ranking'"
+          (click)="setActiveSection('ranking')"
+        >
+          <i class="fas fa-sort-amount-down"></i>
+          <!-- More relevant for ranking -->
+          <span>Ranking</span>
+        </a>
+
+        <a
+          [class.active]="activeSection === 'job-postings'"
+          (click)="setActiveSection('job-postings')"
+        >
+          <i class="fas fa-briefcase"></i>
+          <!-- More recognizable for jobs -->
           <span>Job Postings</span>
         </a>
-        <a [class.active]="activeSection === 'analytics'" (click)="setActiveSection('analytics')">
-          <i class="fas fa-chart-pie"></i> <!-- More distinct from ranking -->
+        <a
+          [class.active]="activeSection === 'analytics'"
+          (click)="setActiveSection('analytics')"
+        >
+          <i class="fas fa-chart-pie"></i>
+          <!-- More distinct from ranking -->
           <span>Analytics</span>
         </a>
-        <a [class.active]="activeSection === 'settings'" (click)="setActiveSection('settings')">
-          <i class="fas fa-sliders-h"></i> <!-- Modern settings icon -->
+        <a
+          [class.active]="activeSection === 'settings'"
+          (click)="setActiveSection('settings')"
+        >
+          <i class="fas fa-sliders-h"></i>
+          <!-- Modern settings icon -->
           <span>Settings</span>
         </a>
       </nav>
     </aside>
-    
-    <main class="main">
-      <div [ngClass]="{'hidden': activeSection !== 'candidates'}">
-        <app-candidate-list></app-candidate-list>
+
+    <main class="main" *ngIf="applicationData">
+      <div [ngClass]="{ hidden: activeSection !== 'candidates' }">
+        <app-candidate-list [applicationData]="applicationData"></app-candidate-list>
       </div>
-      <div [ngClass]="{'hidden': activeSection !== 'shortlisting'}">
+      <div [ngClass]="{ hidden: activeSection !== 'shortlisting' }">
         <app-shortlisted></app-shortlisted>
       </div>
-      <div [ngClass]="{'hidden': activeSection !== 'ranking'}">
+      <div [ngClass]="{ hidden: activeSection !== 'ranking' }">
         <app-candidate-ranking></app-candidate-ranking>
       </div>
-      <div [ngClass]="{'hidden': activeSection !== 'job-postings'}">
+      <div [ngClass]="{ hidden: activeSection !== 'job-postings' }">
         <p>Job Postings Content Goes Here</p>
       </div>
-      <div [ngClass]="{'hidden': activeSection !== 'analytics'}">
+      <div [ngClass]="{ hidden: activeSection !== 'analytics' }">
         <p>Analytics Content Goes Here</p>
       </div>
-      <div [ngClass]="{'hidden': activeSection !== 'settings'}">
-        <p>Settings Content Goes Here</p>
+      <div [ngClass]="{ hidden: activeSection !== 'settings' }">
+        <app-settings
+          [applicationData]="applicationData"
+          (updateApplicationData)="updateApplicationData($event)"
+        ></app-settings>
       </div>
     </main>
   </div>

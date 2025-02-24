@@ -90,13 +90,13 @@
     >
       <div class="flex items-start justify-between">
         <div class="flex items-center space-x-3">
-          <div
+          <!-- <div
             class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center"
           >
             <span class="text-xl font-semibold text-gray-600">
               {{ applicant.applicant_name.charAt(0) }}
             </span>
-          </div>
+          </div> -->
           <div>
             <h2 class="text-lg font-semibold text-gray-800">
               {{ applicant.applicant_name }}
@@ -413,6 +413,6 @@
       [showModal]="showEmailSender"
       [shortlistedEmails]="getShortlistedEmails()"
       [notShortlistedEmails]="getNotShortlistedEmails()"
-      (closeModal)="showEmailSender = false"
+      (closeModal)="showEmailSender = !showEmailSender"
     ></app-sendmail>
 </div>

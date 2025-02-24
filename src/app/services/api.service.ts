@@ -11,7 +11,7 @@ export class ApiService {
   private candidates: Candidate[] = [
   ];
 
-  project_id: string = "943ee467-f686-4703-acd1-ce50ecb676ac"
+  jobpost_id: string = "943ee467-f686-4703-acd1-ce50ecb676ac"
 
 
   constructor(private http: HttpClient) { }
@@ -117,8 +117,8 @@ export class ApiService {
   }
 
 
-  getDocuments(project_id: string) {
-    const apiUrl = environment.apiUrl + `/documents?project_id=${project_id}`;
+  getDocuments(jobpost_id: string) {
+    const apiUrl = environment.apiUrl + `/documents?jobpost_id=${jobpost_id}`;
     const headers = new HttpHeaders({
       'accept': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -139,7 +139,7 @@ export class ApiService {
   }
 
   shortListCandidates(resumes_ids: string[]): Observable<any> {
-    const apiUrl = environment.apiUrl + `/shortlisting/shortlist/project_id=${this.project_id}`;
+    const apiUrl = environment.apiUrl + `/shortlisting/shortlist/jobpost_id=${this.jobpost_id}`;
     const headers = new HttpHeaders({
       'accept': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -158,8 +158,8 @@ export class ApiService {
     return this.http.post(apiUrl, resumes_ids, { headers });
   }
 
-  getShortListedCandidates(project_id: string): Observable<any> {
-    const apiUrl = environment.apiUrl + `/shortlisting/shortlisted?project_id=${project_id}`;
+  getShortListedCandidates(jobpost_id: string): Observable<any> {
+    const apiUrl = environment.apiUrl + `/shortlisting/shortlisted?jobpost_id=${jobpost_id}`;
     const headers = new HttpHeaders({
       'accept': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`

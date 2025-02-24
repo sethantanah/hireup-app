@@ -5,7 +5,7 @@ import {
   FormSection,
   FormSubSection,
   TestData,
-} from '../../../models/test-models';
+} from '../../../models/test.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';

@@ -1,0 +1,91 @@
+<!-- Loading Indicator -->
+<div *ngIf="loading" class="loading-indicator">
+  <i class="fas fa-spinner fa-spin"></i> {{loadingText}}
+</div>
+
+
+
+
+<div class="bg-gray-50 rounded-lg shadow-md h-screen">
+  <div class="mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
+      <p class="mt-2 text-gray-600">
+        Manage your application preferences and configurations
+      </p>
+    </div>
+
+    <!-- Settings Layout -->
+    <div class="grid grid-cols-12 gap-6" *ngIf="applicationData">
+      <!-- Sidebar -->
+      <div class="col-span-12 md:col-span-3">
+        <div class="bg-white rounded-xl shadow-sm p-4">
+          <nav class="space-y-1">
+            <button
+              *ngFor="let item of settingsMenu"
+              (click)="selectSetting(item.id)"
+              [class.bg-blue-50]="currentSetting === item.id"
+              [class.text-blue-600]="currentSetting === item.id"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <i [class]="item.icon"></i>
+              <span>{{ item.label }}</span>
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="col-span-12 md:col-span-9" *ngIf="applicationData">
+        <div [ngSwitch]="currentSetting">
+          
+          <app-card-display-settings
+            *ngSwitchCase="'card-display'"
+            [applicationData]="applicationData"
+            (saveChanges)="saveChanges($event)"
+          ></app-card-display-settings>
+
+          <app-search-filter-settings
+          *ngSwitchCase="'search-filter'"
+          [applicationData]="applicationData"
+          (saveChanges)="saveChanges($event)"
+        ></app-search-filter-settings>
+
+          <div
+            *ngSwitchCase="'notifications'"
+            class="bg-white rounded-xl shadow-sm p-6"
+          >
+            <h2 class="text-xl font-semibold">Notification Settings</h2>
+            <p class="text-gray-600 mt-2">
+              Configure your notification preferences
+            </p>
+            <!-- Notification settings content will go here -->
+          </div>
+
+          <div
+            *ngSwitchCase="'preferences'"
+            class="bg-white rounded-xl shadow-sm p-6"
+          >
+            <h2 class="text-xl font-semibold">User Preferences</h2>
+            <p class="text-gray-600 mt-2">
+              Customize your application experience
+            </p>
+            <!-- Preferences content will go here -->
+          </div>
+
+          <div
+            *ngSwitchCase="'integrations'"
+            class="bg-white rounded-xl shadow-sm p-6"
+          >
+            <h2 class="text-xl font-semibold">Integration Settings</h2>
+            <p class="text-gray-600 mt-2">
+              Manage your third-party integrations
+            </p>
+            <!-- Integrations content will go here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

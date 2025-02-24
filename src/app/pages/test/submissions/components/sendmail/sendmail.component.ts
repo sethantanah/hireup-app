@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -12,6 +12,9 @@ export class SendmailComponent {
   @Input() showModal = false;
   @Input() shortlistedEmails: string[] = [];
   @Input() notShortlistedEmails: string[] = [];
+  @Output() closeModal = new EventEmitter<void>();
+
+
 
   listType: 'shortlisted' | 'notShortlisted' = 'shortlisted';
   fieldType: 'cc' | 'bcc' = 'cc';
@@ -47,7 +50,7 @@ export class SendmailComponent {
     window.open(mailtoUrl, '_blank');
   }
 
-  closeModal(){
-    this.showModal = false;
+  onClose() {
+    this.closeModal.emit();
   }
 }

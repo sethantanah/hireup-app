@@ -37,91 +37,91 @@ interface FilterOption {
 })
 export class SubmissionsComponent {
   applicants: Applicant[] = [
-    {
-      id: 17,
-      created_at: '2025-02-14T15:44:42.264732+00:00',
-      applicant_name: 'Vanessa Paintsil',
-      applicant_email: '1vanessapaintsil11@gmail.com',
-      applicant_id: '99b6c6ac-1c99-3348d2-8204-20bb2d284f0d',
-      test_response: [
-        {
-          question: 'What is the motto/slogan of Safety Campaign Ghana',
-          response:
-            'b) Mentorship! Bridging the gap between experience and knowledge',
-          correct_answer: 'a) The safety of one, is the safety of all',
-        },
-      ],
-      test_id: '0db9639f-e520-4979-b600-e2120bc10923',
-      test_score: 58,
-    },
-    {
-      id: 137,
-      created_at: '2025-02-14T15:44:42.264732+00:00',
-      applicant_name: 'Vanessa Paintsil',
-      applicant_email: '2vanessapaintsil11@gmail.com',
-      applicant_id: '99b6c6ac-331c99-48d2-8204-20bb2d284f0d',
-      test_response: [
-        {
-          question: 'What is the motto/slogan of Safety Campaign Ghana',
-          response:
-            'b) Mentorship! Bridging the gap between experience and knowledge',
-          correct_answer: 'a) The safety of one, is the safety of all',
-        },
-      ],
-      test_id: '0db9639f-e520-43y3979-b600-e212tr0bc10923',
-      test_score: 58,
-    },
-    {
-      id: 1537,
-      created_at: '2025-02-14T15:44:42.264732+00:00',
-      applicant_name: 'Vanessa Paintsil',
-      applicant_email: '3vanessapaintsil11@gmail.com',
-      applicant_id: '99b6c6ac-1c93389-48d2-8204-20bb2d284f0d',
-      test_response: [
-        {
-          question: 'What is the motto/slogan of Safety Campaign Ghana',
-          response:
-            'b) Mentorship! Bridging the gap between experience and knowledge',
-          correct_answer: 'a) The safety of one, is the safety of all',
-        },
-      ],
-      test_id: '0db9639f-e520-4335979-b600-e2120bc10923',
-      test_score: 58,
-    },
-    {
-      id: 1327,
-      created_at: '2025-02-14T15:44:42.264732+00:00',
-      applicant_name: 'Vanessa Paintsil',
-      applicant_email: '4vanessapaintsil11@gmail.com',
-      applicant_id: '99b6c6ac-133345c99-48d2-8204-20bb2d284f0d',
-      test_response: [
-        {
-          question: 'What is the motto/slogan of Safety Campaign Ghana',
-          response:
-            'b) Mentorship! Bridging the gap between experience and knowledge',
-          correct_answer: 'a) The safety of one, is the safety of all',
-        },
-      ],
-      test_id: '0db9639f-e520-4979-b600-e2120bc10923',
-      test_score: 58,
-    },
-    {
-      id: 1357,
-      created_at: '2025-02-14T15:44:42.264732+00:00',
-      applicant_name: 'Vanessa Paintsil',
-      applicant_email: '5vanessapaintsil11@gmail.com',
-      applicant_id: '99b6c6ac-1c99-48drt2-8204-20bb2d284f0d',
-      test_response: [
-        {
-          question: 'What is the motto/slogan of Safety Campaign Ghana',
-          response:
-            'b) Mentorship! Bridging the gap between experience and knowledge',
-          correct_answer: 'a) The safety of one, is the safety of all',
-        },
-      ],
-      test_id: '0db9639f-e520-4979-b600-e2120bc10923',
-      test_score: 58,
-    },
+    // {
+    //   id: 17,
+    //   created_at: '2025-02-14T15:44:42.264732+00:00',
+    //   applicant_name: 'Vanessa Paintsil',
+    //   applicant_email: '1vanessapaintsil11@gmail.com',
+    //   applicant_id: '99b6c6ac-1c99-3348d2-8204-20bb2d284f0d',
+    //   test_response: [
+    //     {
+    //       question: 'What is the motto/slogan of Safety Campaign Ghana',
+    //       response:
+    //         'b) Mentorship! Bridging the gap between experience and knowledge',
+    //       correct_answer: 'a) The safety of one, is the safety of all',
+    //     },
+    //   ],
+    //   test_id: '0db9639f-e520-4979-b600-e2120bc10923',
+    //   test_score: 58,
+    // },
+    // {
+    //   id: 137,
+    //   created_at: '2025-02-14T15:44:42.264732+00:00',
+    //   applicant_name: 'Vanessa Paintsil',
+    //   applicant_email: '2vanessapaintsil11@gmail.com',
+    //   applicant_id: '99b6c6ac-331c99-48d2-8204-20bb2d284f0d',
+    //   test_response: [
+    //     {
+    //       question: 'What is the motto/slogan of Safety Campaign Ghana',
+    //       response:
+    //         'b) Mentorship! Bridging the gap between experience and knowledge',
+    //       correct_answer: 'a) The safety of one, is the safety of all',
+    //     },
+    //   ],
+    //   test_id: '0db9639f-e520-43y3979-b600-e212tr0bc10923',
+    //   test_score: 58,
+    // },
+    // {
+    //   id: 1537,
+    //   created_at: '2025-02-14T15:44:42.264732+00:00',
+    //   applicant_name: 'Vanessa Paintsil',
+    //   applicant_email: '3vanessapaintsil11@gmail.com',
+    //   applicant_id: '99b6c6ac-1c93389-48d2-8204-20bb2d284f0d',
+    //   test_response: [
+    //     {
+    //       question: 'What is the motto/slogan of Safety Campaign Ghana',
+    //       response:
+    //         'b) Mentorship! Bridging the gap between experience and knowledge',
+    //       correct_answer: 'a) The safety of one, is the safety of all',
+    //     },
+    //   ],
+    //   test_id: '0db9639f-e520-4335979-b600-e2120bc10923',
+    //   test_score: 58,
+    // },
+    // {
+    //   id: 1327,
+    //   created_at: '2025-02-14T15:44:42.264732+00:00',
+    //   applicant_name: 'Vanessa Paintsil',
+    //   applicant_email: '4vanessapaintsil11@gmail.com',
+    //   applicant_id: '99b6c6ac-133345c99-48d2-8204-20bb2d284f0d',
+    //   test_response: [
+    //     {
+    //       question: 'What is the motto/slogan of Safety Campaign Ghana',
+    //       response:
+    //         'b) Mentorship! Bridging the gap between experience and knowledge',
+    //       correct_answer: 'a) The safety of one, is the safety of all',
+    //     },
+    //   ],
+    //   test_id: '0db9639f-e520-4979-b600-e2120bc10923',
+    //   test_score: 58,
+    // },
+    // {
+    //   id: 1357,
+    //   created_at: '2025-02-14T15:44:42.264732+00:00',
+    //   applicant_name: 'Vanessa Paintsil',
+    //   applicant_email: '5vanessapaintsil11@gmail.com',
+    //   applicant_id: '99b6c6ac-1c99-48drt2-8204-20bb2d284f0d',
+    //   test_response: [
+    //     {
+    //       question: 'What is the motto/slogan of Safety Campaign Ghana',
+    //       response:
+    //         'b) Mentorship! Bridging the gap between experience and knowledge',
+    //       correct_answer: 'a) The safety of one, is the safety of all',
+    //     },
+    //   ],
+    //   test_id: '0db9639f-e520-4979-b600-e2120bc10923',
+    //   test_score: 58,
+    // },
   ];
 
   shortListedApplicantsData: Applicant[] = [];
@@ -158,6 +158,8 @@ export class SubmissionsComponent {
     // setTimeout(() => {
     //   this.loading = false;
     // }, 1000);
+
+    
     this.testService.testResponses(testId ?? '').subscribe({
       next: (data) => {
         this.applicants = data;

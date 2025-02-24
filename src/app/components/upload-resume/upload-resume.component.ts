@@ -208,7 +208,7 @@ export class UploadResumeComponent implements OnInit {
       formData.append(key, this.uploadedFiles[key]);
     });
 
-    formData.append("projectId", this.apiService.project_id)
+    formData.append("projectId", this.apiService.jobpost_id)
 
 
     // Validate all fields before submission

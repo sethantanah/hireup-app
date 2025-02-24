@@ -82,18 +82,7 @@ export interface Candidate {
 
 
 export interface FormData {
-  full_name: FormDataItem;
-    date_of_birth: FormDataItem;
-    email: FormDataItem;
-    phone_number: FormDataItem;
-    residential_address: FormDataItem;
-    highest_degree: FormDataItem;
-    field_of_study: FormDataItem;
-    institution_name: FormDataItem;
-    year_of_graduation: FormDataItem;
-    years_of_experience: FormDataItem;
-    availability: FormDataItem;
-    agree_to_declaration: FormDataItem;
+  [key: string]: FormDataItem; // Allows any key as long as the value is of type FormDataItem
 }
 
 

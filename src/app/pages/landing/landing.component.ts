@@ -29,7 +29,7 @@ export class LandingComponent implements OnInit{
   }
 
   constructor(private apiService: ApiService) {
-    this.landingPageData = apiService.getData(this.apiService.project_id);
+    this.landingPageData = apiService.getData(this.apiService.jobpost_id);
   }
 
 
