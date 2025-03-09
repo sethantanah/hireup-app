@@ -63,14 +63,14 @@
           <!-- More recognizable for jobs -->
           <span>Job Postings</span>
         </a>
-        <a
+        <!-- <a
           [class.active]="activeSection === 'analytics'"
           (click)="setActiveSection('analytics')"
         >
           <i class="fas fa-chart-pie"></i>
-          <!-- More distinct from ranking -->
+          More distinct from ranking
           <span>Analytics</span>
-        </a>
+        </a> -->
         <a
           [class.active]="activeSection === 'settings'"
           (click)="setActiveSection('settings')"
@@ -84,13 +84,17 @@
 
     <main class="main" *ngIf="applicationData">
       <div [ngClass]="{ hidden: activeSection !== 'candidates' }">
-        <app-candidate-list [applicationData]="applicationData"></app-candidate-list>
+        <app-candidate-list
+          [applicationData]="applicationData"
+        ></app-candidate-list>
       </div>
       <div [ngClass]="{ hidden: activeSection !== 'shortlisting' }">
-        <app-shortlisted></app-shortlisted>
+        <app-shortlisted [applicationData]="applicationData"></app-shortlisted>
       </div>
       <div [ngClass]="{ hidden: activeSection !== 'ranking' }">
-        <app-candidate-ranking></app-candidate-ranking>
+        <app-candidate-ranking
+          [applicationData]="applicationData"
+        ></app-candidate-ranking>
       </div>
       <div [ngClass]="{ hidden: activeSection !== 'job-postings' }">
         <p>Job Postings Content Goes Here</p>

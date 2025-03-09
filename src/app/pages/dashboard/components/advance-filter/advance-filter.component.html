@@ -1,33 +1,113 @@
-<div class="filters">
-    <!-- Basic Filters -->
-    <div class="filter-group">
-        <label for="search-term">Enter any Search term</label>
-        <!-- Search by Name -->
-        <input type="text" id="search-term" placeholder="Search by name" [(ngModel)]="filters.search" (input)="onFilterChange()"
-            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+<div class="">
+    <!-- Action Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 items-start">
+      <!-- Toggle Filters (Mobile Only) -->
+      <!-- <button 
+        (click)="isFiltersOpen = !isFiltersOpen"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors md:hidden"
+      >
+        <i class="fas" [class.fa-filter]="!isFiltersOpen" [class.fa-times]="isFiltersOpen"></i>
+        {{ isFiltersOpen ? 'Close Filters' : 'Open Filters' }}
+      </button> -->
+  
+      <!-- Open Form Filters -->
+      <!-- <button 
+        (click)="openFormFilters()"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+      >
+        <i class="fas fa-plus"></i>
+        Open Form Filters
+      </button> -->
+  
+      <!-- Clear Filters -->
+      <!-- <button 
+        (click)="clearFilters()"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+      >
+        <i class="fas fa-times"></i>
+        Clear Filters
+      </button> -->
     </div>
-
-    <div class="filter-group">
-        <label for="skills">Search by Skills</label>
-        <!-- Search by Skills -->
-        <input type="text" id="skills" placeholder="Search by skills" [(ngModel)]="filters.skills" (input)="onFilterChange()"
-            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+  
+    <!-- Filters Section -->
+    <div 
+      class="bg-white p-4 rounded-lg shadow-sm transition-all duration-300"
+      [class.hidden]="!isFiltersOpen"
+      [class.block]="isFiltersOpen"
+      [class.md:block]="true"
+    >
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- General Search -->
+        <div class="flex flex-col space-y-2">
+          <label for="search-term" class="text-sm font-medium text-gray-700">
+            General Search
+          </label>
+          <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="text" 
+              id="search-term" 
+              placeholder="Enter any search term" 
+              [(ngModel)]="filters.search" 
+              (input)="onFilterChange()"
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+        </div>
+  
+        <!-- Skills Search -->
+        <div class="flex flex-col space-y-2">
+          <label for="skills" class="text-sm font-medium text-gray-700">
+            Search by Skills
+          </label>
+          <div class="relative">
+            <i class="fas fa-code absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="text" 
+              id="skills" 
+              placeholder="Enter skills" 
+              [(ngModel)]="filters.skills" 
+              (input)="onFilterChange()"
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+        </div>
+  
+        <!-- Education Filter -->
+        <div class="flex flex-col space-y-2">
+          <label for="education" class="text-sm font-medium text-gray-700">
+            Education
+          </label>
+          <div class="relative">
+            <i class="fas fa-graduation-cap absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="text" 
+              id="education" 
+              placeholder="Filter by degree" 
+              [(ngModel)]="filters.educationDegree" 
+              (input)="onFilterChange()"
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+        </div>
+  
+        <!-- Projects Filter -->
+        <div class="flex flex-col space-y-2">
+          <label for="projects" class="text-sm font-medium text-gray-700">
+            Projects
+          </label>
+          <div class="relative">
+            <i class="fas fa-project-diagram absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <input 
+              type="text" 
+              id="projects" 
+              placeholder="Search projects" 
+              [(ngModel)]="filters.projects" 
+              (input)="onFilterChange()"
+              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+            />
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="filter-group">
-        <label for="education">Education</label>
-
-        <!-- Filter by Education (Degree) -->
-        <input id="education" type="text" placeholder="Filter by Education (Degree)"
-            [(ngModel)]="filters.educationDegree" (input)="onFilterChange()"
-            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-    </div>
-
-    <div class="filter-group">
-        <label for="projects">Projects</label>
-        <!-- Filter by Projects -->
-        <input id="projects" type="text" placeholder="Filter by Projects" [(ngModel)]="filters.projects"
-            (input)="onFilterChange()"
-            class="flex-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
-    </div>
-</div>
+  </div>

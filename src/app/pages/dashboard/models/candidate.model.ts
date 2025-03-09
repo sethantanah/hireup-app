@@ -1,10 +1,7 @@
 export interface Candidate {
   id: string;
   form_data: FormData;
-  uploaded_files: {
-    cv: string;
-    reference_letter: string;
-  };
+  uploaded_files: any;
   resume_text?: string,
   resume_data: {
     personal_details: {
@@ -71,13 +68,10 @@ export interface Candidate {
       relationship: string;
       contact_info: string;
     }[];
-
-    skills_score?: number,
-    projects_score?: number,
-    education_score?: number,
-    work_experience_score?: number,
-    overall_score?: number
   };
+
+  document_ranking: any;
+  ranking_score: any;
 }
 
 

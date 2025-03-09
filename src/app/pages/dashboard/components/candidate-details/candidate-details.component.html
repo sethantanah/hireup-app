@@ -1,157 +1,233 @@
-<!-- dataService.candidate-details-popover.component.html -->
-<div class="popover-overlay" *ngIf="this.dataService.openCandidateDetails" (click)="close()">
-    <div class="popover" (click)="$event.stopPropagation()">
-      <div class="popover-header">
-        <h3>Candidate Details</h3>
-        <button (click)="close()" class="close-button">
-          <i class="fas fa-times"></i>
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center" *ngIf="this.dataService.openCandidateDetails" (click)="close()">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+    <!-- Enhanced Header with Quick Actions -->
+    <div class="px-6 py-4 border-b flex items-center justify-between bg-gray-50">
+      <div class="flex items-center gap-4">
+        <h2 class="text-2xl font-semibold text-gray-800">Candidate Details</h2>
+        <!-- <div class="flex items-center gap-2 text-sm text-gray-500">
+          <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full">Active</span>
+          <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full">Software Engineer</span>
+        </div> -->
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- <button class="btn-action">
+          <i class="fas fa-envelope"></i>
+          <span>Contact</span>
+        </button>
+        <button class="btn-action">
+          <i class="fas fa-calendar"></i>
+          <span>Schedule Interview</span>
+        </button> -->
+
+        <div class="pl-3 flex items-center gap-2">
+          <!-- Resume (Always static key but checked first) -->
+          <ng-container *ngIf="dataService.candidate?.uploaded_files?.resume">
+            <a
+              [href]="dataService.candidate?.uploaded_files?.resume.metadata.url"
+              target="_blank"
+              class="btn-document inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              <i class="fas fa-file-pdf"></i>
+              <span>{{ dataService.candidate?.uploaded_files?.resume.lable | titlecase }}</span>
+            </a>
+          </ng-container>
+        
+          <!-- Other Files (Dynamic keys) -->
+          <ng-container *ngIf="dataService.candidate?.uploaded_files?.other_files">
+            <ng-container *ngFor="let key of objectKeys(dataService.candidate?.uploaded_files?.other_files)">
+              <a
+                [href]="dataService.candidate?.uploaded_files?.other_files[key]?.metadata?.url"
+                target="_blank"
+                class="btn-document inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                <i class="fas fa-file-alt"></i>
+                <span>{{ key }}</span>
+              </a>
+            </ng-container>
+          </ng-container>
+        </div>
+        
+        <!-- <div class="pl-3 flex items-center gap-2">
+          <a [href]="dataService.candidate?.uploaded_files?.cv.url" target="_blank" class="btn-document inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors;">
+            <i class="fas fa-file-pdf"></i>
+            <span>CV</span>
+          </a>
+          <a [href]="dataService.candidate?.uploaded_files?.reference_letter.url" target="_blank" class="btn-document inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors;">
+            <i class="fas fa-file-alt"></i>
+            <span>Reference</span>
+          </a>
+        </div> -->
+        <button (click)="close()" class="p-2 text-gray-400 hover:text-gray-600">
+          <i class="fas fa-times text-xl"></i>
         </button>
       </div>
-      <div class="popover-body">
-          <!-- Form Data Section -->
-          <div class="section">
-            <h4>Form Data</h4>
-            <div class="details-grid">
-              <!-- Dynamically render form_data -->
-              <div class="detail" *ngFor="let key of getFormDataKeys()">
-                <label>{{ formatKey(key) }}:</label>
-                <span>{{ getFormDataValue(key) }}</span>
-              </div>
+    </div>
+
+    <!-- Two-Column Layout -->
+    <div class="flex-1 flex overflow-hidden">
+      <!-- Left Column: Key Information -->
+      <div class="w-1/3 border-r overflow-y-auto p-6 bg-gray-50">
+        <!-- Quick Overview -->
+        <!-- <div class="mb-6 p-4 bg-white rounded-lg shadow-sm">
+          <h3 class="text-lg font-semibold mb-4">Quick Overview</h3>
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <i class="fas fa-briefcase text-gray-400"></i>
+              <span>5+ years experience</span>
+            </div>
+      
+            <div class="flex items-center gap-2">
+              <i class="fas fa-clock text-gray-400"></i>
+              <span>Available in 2 weeks</span>
             </div>
           </div>
-  
-        <!-- Resume Data Section -->
-        <div class="section">
-          <h4>CV Information</h4>
-          <div class="details-grid">
-            <div class="detail">
-              <label>Full Name:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.full_name || 'N/A' }}</span>
-            </div>
-            <div class="detail">
-              <label>Email:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.email || 'N/A' }}</span>
-            </div>
-            <div class="detail">
-              <label>Phone Number:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.phone_number || 'N/A' }}</span>
-            </div>
-            <div class="detail">
-              <label>LinkedIn:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.linkedin || 'N/A' }}</span>
-            </div>
-            <div class="detail">
-              <label>GitHub:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.github || 'N/A' }}</span>
-            </div>
-            <div class="detail">
-              <label>Portfolio:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.portfolio || 'N/A' }}</span>
-            </div>
-            <div class="detail">
-              <label>Address:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.address || 'N/A' }}</span>
-            </div>
-            <!-- <div class="detail">
-              <label>Years of Experience:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.years_of_experience || 'N/A' }}</span>
-            </div> -->
-            <!-- <div class="detail">
-              <label>Availability:</label>
-              <span>{{ dataService.candidate?.resume_data?.personal_details?.availability || 'N/A' }}</span>
-            </div> -->
-          </div>
-  
-          <!-- Education -->
-          <div class="subsection">
-            <h5>Education</h5>
-            <div *ngFor="let edu of dataService.candidate?.resume_data?.education" class="details-grid">
-              <div class="detail">
-                <label>Institution:</label>
-                <span>{{ edu?.institution || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Degree:</label>
-                <span>{{ edu?.degree || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Field of Study:</label>
-                <span>{{ edu?.field_of_study || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Start Date:</label>
-                <span>{{ edu?.start_date || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>End Date:</label>
-                <span>{{ edu?.end_date || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Location:</label>
-                <span>{{ edu?.location || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Description:</label>
-                <span>{{ edu?.description || 'N/A' }}</span>
-              </div>
-            </div>
-          </div>
-  
-          <!-- Work Experience -->
-          <div class="subsection">
-            <h5>Work Experience</h5>
-            <div *ngFor="let exp of dataService.candidate?.resume_data?.work_experience" class="details-grid">
-              <div class="detail">
-                <label>Company:</label>
-                <span>{{ exp?.company || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Job Title:</label>
-                <span>{{ exp?.job_title || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Start Date:</label>
-                <span>{{ exp?.start_date || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>End Date:</label>
-                <span>{{ exp?.end_date || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Location:</label>
-                <span>{{ exp?.location || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Description:</label>
-                <span>{{ exp?.description || 'N/A' }}</span>
-              </div>
-            </div>
-          </div>
-  
-          <!-- Skills -->
-          <div class="subsection">
-            <h5>Skills</h5>
-            <div class="details-grid">
-              <div class="detail">
-                <label>Technical Skills:</label>
-                <span>{{ dataService.candidate?.resume_data?.skills?.technical_skills?.join(', ') || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Soft Skills:</label>
-                <span>{{ dataService.candidate?.resume_data?.skills?.soft_skills?.join(', ') || 'N/A' }}</span>
-              </div>
-              <div class="detail">
-                <label>Languages:</label>
-                <span>{{ dataService.candidate?.resume_data?.skills?.languages?.join(', ') || 'N/A' }}</span>
-              </div>
+        </div> -->
+
+        <!-- Form Data -->
+        <div class="space-y-4">
+          <h3 class="text-lg font-semibold">Application Details</h3>
+          <div class="bg-white rounded-lg p-4 shadow-sm">
+            <div *ngFor="let key of getFormDataKeys()" class="py-2 border-b last:border-0">
+              <label class="text-sm text-gray-500">{{formatKey(key)}}</label>
+              <p class="text-gray-800 mt-1">{{getFormDataValue(key)}}</p>
             </div>
           </div>
         </div>
       </div>
-      <div class="popover-footer">
-        <button (click)="close()" class="close-popover-button">
-          Close
-        </button>
+
+      <!-- Right Column: Detailed Information -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <!-- Skills Summary -->
+        <section class="mb-8">
+          <h3 class="text-lg font-semibold mb-4">Key Skills</h3>
+          <div class="flex flex-wrap gap-2">
+            <span *ngFor="let skill of dataService.candidate?.resume_data?.skills?.technical_skills" 
+                  class="px-3 py-1 bg-blue-50 text-blue-600 rounded-full text-sm">
+              {{skill}}
+            </span>
+          </div>
+        </section>
+
+        <!-- Work Experience -->
+        <section class="mb-8">
+          <h3 class="text-lg font-semibold mb-4">Work Experience</h3>
+          <div class="space-y-4">
+            <div *ngFor="let exp of dataService.candidate?.resume_data?.work_experience" 
+                 class="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h4 class="font-medium text-gray-800">{{exp?.job_title}}</h4>
+                  <p class="text-gray-600">{{exp?.company}}</p>
+                </div>
+                <span class="text-sm text-gray-500">{{exp?.start_date}} - {{exp?.end_date}}</span>
+              </div>
+              <p class="text-gray-600 text-sm">{{exp?.description}}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Education -->
+        <section  class="mb-8">
+          <h3 class="text-lg font-semibold mb-4">Education</h3>
+          <div class="space-y-4">
+            <div *ngFor="let edu of dataService.candidate?.resume_data?.education" 
+                 class="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+              <div class="flex justify-between items-start mb-2">
+                <div>
+                  <h4 class="font-medium text-gray-800">{{edu?.institution}}</h4>
+                  <p class="text-gray-600">{{edu?.degree}} in {{edu?.field_of_study}}</p>
+                </div>
+                <span class="text-sm text-gray-500">{{edu?.start_date}} - {{edu?.end_date}}</span>
+              </div>
+              <p class="text-gray-600 text-sm">{{edu?.description}}</p>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- Personal Details -->
+<section class="mb-8">
+  <h3 class="text-lg font-semibold mb-4">Personal Details</h3>
+  <div class="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+    <div class="grid grid-cols-2 gap-4">
+      <div class="space-y-2">
+        <div>
+          <label class="text-sm text-gray-500">Full Name</label>
+          <p class="text-gray-800">{{dataService.candidate?.resume_data?.personal_details?.full_name}}</p>
+        </div>
+        <div>
+          <label class="text-sm text-gray-500">Email</label>
+          <a [href]="'mailto:' + dataService.candidate?.resume_data?.personal_details?.email" 
+             class="text-blue-600 hover:underline">
+            {{dataService.candidate?.resume_data?.personal_details?.email}}
+          </a>
+        </div>
+        <div>
+          <label class="text-sm text-gray-500">Phone</label>
+          <a [href]="'tel:' + dataService.candidate?.resume_data?.personal_details?.phone_number" 
+             class="text-blue-600 hover:underline">
+            {{dataService.candidate?.resume_data?.personal_details?.phone_number}}
+          </a>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <div *ngIf="dataService.candidate?.resume_data?.personal_details?.linkedin">
+          <label class="text-sm text-gray-500">LinkedIn</label>
+          <a [href]="dataService.candidate?.resume_data?.personal_details?.linkedin" 
+             target="_blank" 
+             class="text-blue-600 hover:underline block">
+            <i class="fab fa-linkedin mr-1"></i> Profile
+          </a>
+        </div>
+        <div *ngIf="dataService.candidate?.resume_data?.personal_details?.github">
+          <label class="text-sm text-gray-500">GitHub</label>
+          <a [href]="dataService.candidate?.resume_data?.personal_details?.github" 
+             target="_blank" 
+             class="text-blue-600 hover:underline block">
+            <i class="fab fa-github mr-1"></i> Profile
+          </a>
+        </div>
+        <div>
+          <label class="text-sm text-gray-500">Address</label>
+          <p class="text-gray-800">{{dataService.candidate?.resume_data?.personal_details?.address}}</p>
+        </div>
       </div>
     </div>
   </div>
+</section>
+
+<!-- References -->
+<section class="mb-8">
+  <h3 class="text-lg font-semibold mb-4">References</h3>
+  <div class="grid grid-cols-1 gap-4">
+    <div *ngFor="let reference of dataService.candidate?.resume_data?.references" 
+         class="p-4 bg-white rounded-lg shadow-sm border border-gray-100">
+      <div class="space-y-2">
+        <h4 class="font-medium text-gray-800">{{reference.name}}</h4>
+        <p class="text-gray-600">{{reference.relationship}}</p>
+        <div class="flex gap-2">
+          <ng-container *ngFor="let contact of reference.contact_info.split(',')">
+            <ng-container *ngIf="contact.includes('@')">
+              <a [href]="'mailto:' + contact.trim()" 
+                 class="text-blue-600 hover:underline inline-flex items-center">
+                <i class="fas fa-envelope mr-1"></i>
+                {{contact.trim()}}
+              </a>
+            </ng-container>
+            <ng-container *ngIf="contact.includes('+')">
+              <a [href]="'tel:' + contact.trim()" 
+                 class="text-blue-600 hover:underline inline-flex items-center">
+                <i class="fas fa-phone mr-1"></i>
+                {{contact.trim()}}
+              </a>
+            </ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+      </div>
+    </div>
+  </div>
+</div>

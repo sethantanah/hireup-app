@@ -1,64 +1,80 @@
-<!-- shortlist-popup.component.html -->
-<div class="modal-overlay" *ngIf="dataService.openShortList" (click)="close()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Shortlisted Candidates</h3>
-      <button (click)="close()" class="close-button">
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-    <div class="modal-body">
-      <table class="shortlist-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Years of Experience</th>
-            <th>Highest Degree</th>
-            <th>Institution</th>
-            <th>Availability</th>
-            <th>Shortlist</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- <tr *ngFor="let candidate of dataService.shortlistedCandidates">
-            <td>{{ candidate.form_data.full_name.value || candidate.resume_data.personal_details.full_name }}</td>
-            <td>{{ candidate.form_data.years_of_experience.value}}</td>
-            <td>{{ candidate.form_data.highest_degree.value || (candidate.resume_data && candidate.resume_data.education &&
-              candidate.resume_data.education[0].degree) }}</td>
-            <td>{{ candidate.form_data.institution_name.value || (candidate.resume_data && candidate.resume_data.education &&
-              candidate.resume_data.education[0].institution) || '' }}</td>
-            <td>{{ candidate.form_data.availability.value }}</td>
-            <td>
-
-              <label class="flex items-center space-x-2 ml-auto cursor-pointer">
-                <input type="checkbox"
-                  class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring focus:ring-blue-300 focus:outline-none"
-                  [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
-                <span class="text-sm text-gray-700">Shortlist</span>
-              </label>
-            </td>
-          </tr> -->
-        </tbody>
-      </table>
-    </div>
-    <div class="modal-footer">
-      <!-- <button (click)="close()" class="close-modal-button">
-          Close
-        </button> -->
-
-      <button class="ml-5" (click)="saveShortListing()" class="close-modal-button" [disabled]="isLoading">
-        <span *ngIf="!isLoading">Save Shortlist</span>
-        <span *ngIf="isLoading">Saving...</span>
+<div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center" *ngIf="dataService.openShortList" (click)="close()">
+  <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b border-gray-100">
+      <h4 class="text-xl font-bold text-gray-800">Shortlisted Candidates</h4>
+      <button (click)="close()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <i class="fas fa-times text-gray-500"></i>
       </button>
     </div>
 
-    <!-- Popup for Success/Error Messages -->
-    <div *ngIf="showPopup" [ngClass]="{
-    'bg-green-100 border-green-400 text-green-700': popupType === 'success',
-    'bg-red-100 border-red-400 text-red-700': popupType === 'error'
-  }" class="border-l-4 p-4 m-5 mb-6 rounded">
-  {{popupMessage}}
-      
+    <!-- Table Content -->
+    <div class="p-6 max-h-[60vh] overflow-auto">
+      <div class="relative rounded-xl border border-gray-200 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th *ngFor="let field of dataService.selectedCardFields" 
+                  class="px-6 py-4 text-left font-semibold text-gray-700">
+                {{ formatFieldName(field) }}
+              </th>
+              <th class="px-6 py-4 text-right font-semibold text-gray-700">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr *ngFor="let candidate of dataService.shortlistedCandidates" 
+                class="hover:bg-gray-50 transition-colors">
+              <td *ngFor="let field of getRelevantFields(candidate.form_data)" 
+                  class="px-6 py-4 text-gray-600">
+                {{ field.value?.value || "N/A" }}
+              </td>
+              <td class="px-6 py-4 text-right">
+                <button 
+                  (click)="toggleShortlist(candidate)"
+                  class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <i class="fas fa-trash"></i>
+                  Remove
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="p-6 border-t border-gray-100 flex items-center justify-end gap-4">
+      <button 
+        (click)="saveShortListing()"
+        class="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="isLoading"
+      >
+        <i class="fas" [ngClass]="isLoading ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+        {{ isLoading ? 'Saving...' : 'Save Shortlist' }}
+      </button>
+    </div>
+
+    <!-- Notification -->
+    <div *ngIf="showPopup" 
+         class="absolute bottom-4 right-4 max-w-md animate-fade-in"
+         [ngClass]="{
+           'bg-green-50 border-green-500': popupType === 'success',
+           'bg-red-50 border-red-500': popupType === 'error'
+         }"
+    >
+      <div class="flex p-4 rounded-lg border-l-4">
+        <i class="fas mr-3" [ngClass]="{
+          'fa-check-circle text-green-500': popupType === 'success',
+          'fa-exclamation-circle text-red-500': popupType === 'error'
+        }"></i>
+        <p class="text-sm" [ngClass]="{
+          'text-green-700': popupType === 'success',
+          'text-red-700': popupType === 'error'
+        }">{{ popupMessage }}</p>
+      </div>
     </div>
   </div>
 </div>

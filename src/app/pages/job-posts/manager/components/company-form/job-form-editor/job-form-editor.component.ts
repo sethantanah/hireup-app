@@ -70,13 +70,16 @@ export class JobFormEditorComponent implements OnInit {
               uploadedData.id === localData.id
             ) {
               if (uploadedData.lastUpdated > localData.lastUpdated) {
-                this.applicationData = data[0].template_data;
+                this.applicationData = uploadedData;
                 this.jobPostService.upDateApplicationData(
                   this.applicationData!
                 );
               } else {
                 this.applicationData = this.jobPostService.getApplicationData();
               }
+            } else {
+              this.applicationData = uploadedData;
+              this.jobPostService.upDateApplicationData(this.applicationData!);
             }
           } else {
             this.applicationData = this.jobPostService.getApplicationData();

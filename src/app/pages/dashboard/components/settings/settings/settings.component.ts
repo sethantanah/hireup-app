@@ -7,15 +7,22 @@ import { FormattingService } from '../../../../../services/formatting.service';
 import { JobPostData } from '../../../../../models/jobpost.model';
 import { LoaderComponent } from '../../../../components/loader/loader.component';
 import { SearchFilterSettingsComponent } from '../search-filter-settings/search-filter-settings.component';
+import { CandidateRankingSettingsComponent } from '../candidate-ranking-settings/candidate-ranking-settings.component';
 export type SettingType =
   | 'card-display'
   | 'search-filter'
+  | 'candidate-ranking'
   | 'notifications'
   | 'preferences'
   | 'integrations';
 @Component({
   selector: 'app-settings',
-  imports: [CommonModule, CardDisplaySettingsComponent, SearchFilterSettingsComponent],
+  imports: [
+    CommonModule,
+    CardDisplaySettingsComponent,
+    SearchFilterSettingsComponent,
+    CandidateRankingSettingsComponent,
+  ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })
@@ -26,6 +33,11 @@ export class SettingsComponent implements OnInit {
   settingsMenu: Array<{ id: SettingType; label: string; icon: string }> = [
     { id: 'card-display', label: 'Card Display', icon: 'fas fa-id-card' },
     { id: 'search-filter', label: 'Search and Filter', icon: 'fas fa-search' },
+    {
+      id: 'candidate-ranking',
+      label: 'Candidate Ranking',
+      icon: 'fas fa-sort-amount-down',
+    },
     { id: 'notifications', label: 'Notifications', icon: 'fas fa-bell' },
     { id: 'preferences', label: 'Preferences', icon: 'fas fa-cog' },
     { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug' },

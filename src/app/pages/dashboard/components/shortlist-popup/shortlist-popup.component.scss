@@ -57,16 +57,22 @@
     width: 100%;
     border-collapse: collapse;
   }
+
+  .shortlist-table thead tr {
+    border-radius: 20px;
+    background-color: var(--primary);
+  }
   
   .shortlist-table th,
   .shortlist-table td {
     padding: 12px 16px;
     text-align: left;
     border-bottom: 1px solid var(--gray);
+   
   }
   
   .shortlist-table th {
-    background-color: var(--primary);
+  
     color: var(--white);
     font-weight: 600;
   }

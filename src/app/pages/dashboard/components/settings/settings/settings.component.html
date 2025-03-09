@@ -1,20 +1,17 @@
 <!-- Loading Indicator -->
 <div *ngIf="loading" class="loading-indicator">
-  <i class="fas fa-spinner fa-spin"></i> {{loadingText}}
+  <i class="fas fa-spinner fa-spin"></i> {{ loadingText }}
 </div>
 
-
-
-
-<div class="bg-gray-50 rounded-lg shadow-md h-screen">
+<div class=" h-screen">
   <div class="mx-auto px-4 py-6">
     <!-- Header -->
-    <div class="mb-8">
+    <!-- <div class="mb-8">
       <h1 class="text-3xl font-bold text-gray-900">Settings</h1>
       <p class="mt-2 text-gray-600">
         Manage your application preferences and configurations
       </p>
-    </div>
+    </div> -->
 
     <!-- Settings Layout -->
     <div class="grid grid-cols-12 gap-6" *ngIf="applicationData">
@@ -39,7 +36,6 @@
       <!-- Content Area -->
       <div class="col-span-12 md:col-span-9" *ngIf="applicationData">
         <div [ngSwitch]="currentSetting">
-          
           <app-card-display-settings
             *ngSwitchCase="'card-display'"
             [applicationData]="applicationData"
@@ -47,10 +43,20 @@
           ></app-card-display-settings>
 
           <app-search-filter-settings
-          *ngSwitchCase="'search-filter'"
-          [applicationData]="applicationData"
-          (saveChanges)="saveChanges($event)"
-        ></app-search-filter-settings>
+            *ngSwitchCase="'search-filter'"
+            [applicationData]="applicationData"
+            (saveChanges)="saveChanges($event)"
+          ></app-search-filter-settings>
+
+          <div
+            *ngSwitchCase="'candidate-ranking'"
+            class="bg-white rounded-xl shadow-sm p-6"
+          >
+            <app-candidate-ranking-settings
+              (saveChanges)="saveChanges($event)"
+              [applicationData]="applicationData"
+            ></app-candidate-ranking-settings>
+          </div>
 
           <div
             *ngSwitchCase="'notifications'"
@@ -60,7 +66,7 @@
             <p class="text-gray-600 mt-2">
               Configure your notification preferences
             </p>
-            <!-- Notification settings content will go here -->
+ 
           </div>
 
           <div

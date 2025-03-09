@@ -17,6 +17,8 @@ export class AdvanceFilterComponent {
     skills: ''
   };
 
+  isFiltersOpen = true;
+
 
   newSkill: string = ''; // Input for new skill
   selectedSkills: string[] = []; // List of selected skills
@@ -37,5 +39,21 @@ export class AdvanceFilterComponent {
 
   onFilterChange() {
     this.advanceFilterChange.emit(this.filters);
+  }
+
+
+
+  openFormFilters() {
+    // Add your form filters opening logic here
+  }
+
+  clearFilters() {
+    this.filters = {
+      search: '',
+      skills: '',
+      educationDegree: '',
+      projects: ''
+    };
+    this.onFilterChange();
   }
 }

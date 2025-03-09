@@ -89,4 +89,21 @@ export interface JobPostData {
   cardSettings?: string[];
   searchFilterSettings?: string[];
   cardDisplaySettings?: string[];
+  rankingSettings?: DocumentEvaluationSchema;
+  emailTemplates?: any[];
+}
+
+interface EvaluationMetric {
+  score: string;
+  weight: number;
+}
+
+interface DocumentCriteria {
+  document_type: string;
+  criteria: string;
+  evaluation_metrics: EvaluationMetric[];
+}
+
+interface DocumentEvaluationSchema {
+  [key: string]: DocumentCriteria;
 }

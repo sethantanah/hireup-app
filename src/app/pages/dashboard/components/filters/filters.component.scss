@@ -1,126 +1,30 @@
-/* filters.component.css */
-.filters {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-bottom: 20px;
-  position: relative;
-  // overflow-y: scroll; /* Required for popover positioning */
-}
-
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.filter-group label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-.filters input,
-.filters select {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-}
-
-.filters input:focus,
-.filters select:focus {
-  border-color: var(--primary);
-}
-
-.filters input[type="number"] {
-  width: 120px; /* Adjust width as needed */
-}
-
-.toggle-button {
-  // background-color: var(--primary);
-  // color: var(--white);
-  border: none;
-  padding: 8px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 2%;
-}
-
-.toggle-button:hover {
-  background-color: white;
-}
-
-.toggle-button i {
-  font-size: 16px;
-}
-
-.advanced-filters-popover {
-  position: absolute;
-  top: 10%; /* Position below the toggle button */
-  right: 0;
-  left: 10%;
-  background-color: var(--white);
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: var(--shadow);
-  z-index: 10; /* Ensure it appears above other elements */
-  padding: 15px;
-  width: 250px;
-  height: 400px; 
-  overflow-y: scroll;/* Adjust width as needed */
-    /* Hide scrollbar for Webkit browsers */
-    scrollbar-width: none;
-    /* For Firefox */
-    -ms-overflow-style: none;
-    /* For IE and Edge */
-}
-
-.advanced-filters-popover::-webkit-scrollbar {
-    display: none;
-    /* For Chrome, Safari, and Opera */
-}
-
-
-.close-button {
-  position: absolute;
-  top: 0px;
-  right: 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-color);
-  font-size: 16px;
-  transition: color 0.3s ease;
-}
-
-.close-button:hover {
-  color: var(--primary);
-}
-
-.popover-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.popover-content input {
-  width: 100% !important;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  outline: none;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.popover-content input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
-}
+ 
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .filter-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+  }
+  
+  .filters input,
+  .filters select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+  }
+  
+  .filters input:focus,
+  .filters select:focus {
+    border-color: var(--primary);
+  }
+  
+  .filters input[type="number"] {
+    width: 120px; /* Adjust width as needed */
+  }

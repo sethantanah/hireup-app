@@ -1,6 +1,6 @@
 import { Component, createNgModule, Input, OnInit } from '@angular/core';
 import { ApiService } from '../../../../services/api.service';
-import { Candidate } from '../../models/candidate.model';
+import { Candidate, FormData } from '../../models/candidate.model';
 import { CommonModule } from '@angular/common';
 import { FiltersComponent } from '../filters/filters.component';
 import { DataService } from '../../../../services/data.service';
@@ -9,28 +9,21 @@ import { CandidateDetailsComponent } from '../candidate-details/candidate-detail
 import { AdvanceFilterComponent } from '../advance-filter/advance-filter.component';
 import { ActivatedRoute } from '@angular/router';
 import { JobPostData } from '../../../../models/jobpost.model';
+import { CandidateFiltersComponent } from '../candidate-filters/candidate-filters.component';
 
 export const COMMON_FORM_FIELDS = [
   'full_name',
   'first_name',
   'last_name',
-  'age',
-  'years_of_experience',
-  'email',
-  'phone',
-  'position',
-  'education',
-  'skills',
 ];
 
 @Component({
   selector: 'app-candidate-list',
   imports: [
     CommonModule,
-    FiltersComponent,
     ShortlistPopupComponent,
     CandidateDetailsComponent,
-    AdvanceFilterComponent,
+    CandidateFiltersComponent
   ],
   templateUrl: './candidate-list.component.html',
   styleUrl: './candidate-list.component.scss',
@@ -64,6 +57,7 @@ export class CandidateListComponent implements OnInit {
   };
 
   private relevantFields = COMMON_FORM_FIELDS;
+  filteredFields = COMMON_FORM_FIELDS
 
   constructor(
     private candidateService: ApiService,
@@ -73,6 +67,8 @@ export class CandidateListComponent implements OnInit {
 
   ngOnInit(): void {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
+    this.dataService.saveJobId(jobpostId || '')
+
     if (jobpostId) {
       this.isLoading = true; // Show loading indicator
       this.candidateService.getDocuments(jobpostId).subscribe({
@@ -87,9 +83,10 @@ export class CandidateListComponent implements OnInit {
       });
     }
 
-    if (this.applicationData) {
-      this.relevantFields =
-        this.applicationData?.cardSettings || COMMON_FORM_FIELDS;
+    if(this.applicationData){
+      this.relevantFields = this. applicationData?.cardSettings || COMMON_FORM_FIELDS;
+      this.filteredFields = this.applicationData?.searchFilterSettings || COMMON_FORM_FIELDS; 
+      this.dataService.selectedCardFields = this.relevantFields;
     }
   }
 
@@ -148,97 +145,72 @@ export class CandidateListComponent implements OnInit {
   }
 
   onFilterChange(filters: any) {
-    // this.filters = filters;
-    // this.filteredCandidates = this.candidates.filter((candidate) => {
-    //   const { form_data, resume_data } = candidate;
-    //   const data =
-    //     Object.keys(form_data).length > 0
-    //       ? form_data
-    //       : resume_data.personal_details;
-    //   if (
-    //     this.filters.search &&
-    //     !data.full_name
-    //       .valueOf()
-    //       .toString()
-    //       .toLowerCase()
-    //       .includes(this.filters.search.toLowerCase())
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.availability &&
-    //     form_data.availability.value !== this.filters.availability
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.yearsOfExperience &&
-    //     +form_data.years_of_experience < this.filters.yearsOfExperience
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.skills.length > 0 &&
-    //     !this.filters.skills.every((skill) =>
-    //       resume_data.skills.technical_skills.includes(skill)
-    //     )
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.education &&
-    //     !resume_data.education.some(
-    //       (edu) =>
-    //         edu.degree === this.filters.education ||
-    //         edu.institution === this.filters.education
-    //     )
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.education &&
-    //     !resume_data.education.some(
-    //       (edu) =>
-    //         edu.degree === this.filters.education ||
-    //         edu.institution === this.filters.education
-    //     )
-    //   ) {
-    //     return false;
-    //   }
-    //   // Advanced Filters
-    //   if (
-    //     this.filters.dateOfBirth &&
-    //     form_data.date_of_birth.value !== this.filters.dateOfBirth
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.highestDegree &&
-    //     form_data.highest_degree.value !== this.filters.highestDegree
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.fieldOfStudy &&
-    //     form_data.field_of_study.value !== this.filters.fieldOfStudy
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.institutionName &&
-    //     form_data.institution_name.value !== this.filters.institutionName
-    //   ) {
-    //     return false;
-    //   }
-    //   if (
-    //     this.filters.yearOfGraduation &&
-    //     form_data.year_of_graduation.value !== this.filters.yearOfGraduation
-    //   ) {
-    //     return false;
-    //   }
-    //   return true;
-    // });
+    this.filteredCandidates = this.candidates.filter((candidate) => {
+      const { form_data, resume_data } = candidate;
+  
+      // Use form_data if available, else fall back to resume_data.personal_details
+      const data = form_data && Object.keys(form_data).length > 0
+        ? form_data
+        : (resume_data?.personal_details || {});
+  
+      // Loop through all filter keys dynamically
+      for (const key in filters) {
+        const filterValue = filters[key];
+  
+        // Skip empty filter values
+        if (!filterValue || filterValue.toString().trim() === "") {
+          continue;
+        }
+  
+        // Check if the field exists in form_data first
+        let fieldValue = (data as FormData)[key]?.value || (data as FormData)[key];
+  
+        // If not found in form_data, look in resume_data
+        if (!fieldValue && resume_data) {
+          // Flatten resume_data and check for the key
+          const resumeValue = this.findInResumeData(resume_data, key);
+          fieldValue = resumeValue !== undefined ? resumeValue : null;
+        }
+  
+        // Perform a case-insensitive comparison for strings
+        if (
+          typeof fieldValue === "string" &&
+          !fieldValue.toLowerCase().includes(filterValue.toLowerCase())
+        ) {
+          return false;
+        }
+  
+        // Perform a direct comparison for other data types (numbers, etc.)
+        if (
+          typeof fieldValue !== "string" &&
+          fieldValue !== null &&
+          fieldValue !== filterValue
+        ) {
+          return false;
+        }
+      }
+  
+      return true;
+    });
   }
+  
+  // Helper function to search deeply in resume_data
+  findInResumeData(resumeData: any, key: string): any {
+    for (const section in resumeData) {
+      const sectionData = resumeData[section];
+      if (Array.isArray(sectionData)) {
+        for (const item of sectionData) {
+          if (item[key] !== undefined) {
+            return item[key];
+          }
+        }
+      } else if (sectionData && sectionData[key] !== undefined) {
+        return sectionData[key];
+      }
+    }
+    return undefined;
+  }
+  
 
   onAdvanceFilterChange(filters: any) {
     this.advanceFilters = filters;
@@ -311,6 +283,7 @@ export class CandidateListComponent implements OnInit {
     } else {
       this.dataService.shortlistedCandidates.push(candidate);
     }
+    this.dataService.saveShortlistedCandidates(this.dataService.shortlistedCandidates);
   }
 
   // Open the shortlist popup

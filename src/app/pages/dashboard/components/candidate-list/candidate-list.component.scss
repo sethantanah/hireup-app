@@ -106,8 +106,8 @@
 
 /* candidate-list.component.css */
 .candidate-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  // display: grid;
+  // grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 20px;
   padding: 20px;
   padding-left: 0;
@@ -116,13 +116,31 @@
   scrollbar-width: none;
   /* For Firefox */
   -ms-overflow-style: none;
-  max-height: 500px;
+  max-height: 900px;
   /* For IE and Edge */
 }
 
 .candidate-grid::-webkit-scrollbar {
   display: none;
   /* For Chrome, Safari, and Opera */
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  /* For Firefox */
+  -ms-overflow-style: none;
+  /* For IE and Edge */
+
+scrollbar-width: none;
+/* For Firefox */
+-ms-overflow-style: none;
+max-height: 500px;
+/* For IE and Edge */
+}
+
+.hide-scrollbar ::-webkit-scrollbar {
+display: none;
+/* For Chrome, Safari, and Opera */
 }
 
 .candidate-card {

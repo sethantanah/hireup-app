@@ -1,189 +1,206 @@
-<!-- <div class="flex flex-row justify-end items-end">
-  <div class="view-toggle">
-    <button [class.active]="viewMode === 'table'" (click)="viewMode = 'table'" class="toggle-button">
-      <i class="fas fa-table"></i> Table
-    </button>
-    <button [class.active]="viewMode === 'cards'" (click)="viewMode = 'cards'" class="toggle-button">
-      <i class="fas fa-th-large"></i> Cards
-    </button>
-  </div>
-</div> -->
-
-<div *ngIf="dataService.showFilters === true" (click)="toggleFilters()"
-  class="position-absolute h-full w-full bg-white opacity-[0.1] z-999999999999999999999999999"
-  style="position: absolute;"></div>
-
-<div class="flex flex-row items-center">
-  <app-advance-filter (advanceFilterChange)="onAdvanceFilterChange($event)"
-    *ngIf="!isLoading && candidates.length > 0"></app-advance-filter>
-  <app-filters class="mt-5 ml-2" (filterChange)="onFilterChange($event)"
-    *ngIf="!isLoading && candidates.length > 0"></app-filters>
-</div>
-
-
-
 <!-- Loading Indicator -->
 <div *ngIf="isLoading" class="loading-indicator">
   <i class="fas fa-spinner fa-spin"></i> Loading...
 </div>
 
-
-
 <!-- No Data Card -->
-<div class="w-full h-full flex items-center justify-center" *ngIf="!isLoading && candidates.length === 0">
-  <div class="md:w-[400px] flex items-center justify-center p-4 mt-[100px]">
-    <div class="flex flex-col items-center justify-center p-8 bg-white rounded-xl shadow-sm max-w-md w-full mx-auto">
-      <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-        <i class="fas fa-folder-open text-3xl text-gray-500"></i>
+<div
+  class="w-full min-h-[80vh] flex items-center justify-center"
+  *ngIf="!isLoading && candidates.length === 0"
+>
+  <div class="max-w-sm w-full mx-0">
+    <div class="bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
+      <!-- Icon Container -->
+      <div class="mb-6 relative">
+        <div
+          class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto"
+        >
+          <i class="fas fa-folder-open text-2xl text-blue-500"></i>
+        </div>
+        <div class="absolute -right-2 top-0">
+          <div
+            class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center"
+          >
+            <i class="fas fa-search text-gray-400 text-sm"></i>
+          </div>
+        </div>
       </div>
-  
-      <h3 class="text-xl text-center font-semibold text-gray-800 mb-2">No Candidates Found</h3>
-      
-      <p class="text-gray-600 text-center mb-6">
-        There are no candidates to display at the moment.
-      </p>
-  
-      <button 
-        (click)="refreshData()" 
-        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 group"
-      >
-        <i class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"></i>
-        Refresh Data
-      </button>
+
+      <!-- Content -->
+      <div class="text-center space-y-3 mb-8">
+        <h3 class="text-xl font-bold text-gray-800">No Candidates Found</h3>
+        <p class="text-gray-600">
+          There are no candidates to display at the moment. Try refreshing the
+          data.
+        </p>
+      </div>
+
+      <!-- Action Button -->
+      <div class="flex justify-center">
+        <button
+          (click)="refreshData()"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow group"
+        >
+          <i
+            class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"
+          ></i>
+          <span>Refresh Data</span>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- <div *ngIf="!isLoading && filteredCandidates.length === 0 && candidates.length > 0" class="no-data-card">
-  <i class="fas fa-person"></i>
-  <h3>No Candidates Found</h3>
-</div> -->
+<div class="p-6">
+  <div
+    *ngIf="!isLoading && candidates.length > 0"
+    class="flex flex-col md:flex-row justify-center gap-2"
+    style="flex-shrink: 0"
+  >
+    <app-candidate-filters
+      (advanceFilterChange)="onAdvanceFilterChange($event)"
+      (filterChange)="onFilterChange($event)"
+      [filterFields]="filteredFields"
+      [popupView]="candidates[0].resume_data ? true : false"
+      [showResumeFilters]="candidates[0].resume_data ? true : false"
+    ></app-candidate-filters>
 
+    <button
+      (click)="toggleEmailingPopup()"
+      class="ml-auto w-[200px] h-[47px] mt-3 mb-auto shadow-md flex items-center gap-2 px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
+    >
+      <i class="fas fa-envelop text-gray-600"></i>
+      <span class="text-sm font-medium text-gray-700">Configure Emailing</span>
+    </button>
+  </div>
 
-<app-candidate-details></app-candidate-details>
+  <app-emails
+    *ngIf="applicationData"
+    [variables]="applicationData.formData.fields"
+    [applicationData]="applicationData"
+  ></app-emails>
 
-<div class="candidate-grid" *ngIf="!isLoading && viewMode == 'cards'" style="overflow: hidden;">
-  <ng-container *ngFor="let candidate of filteredCandidates">
-    <!-- Card for form_data -->
-    <div *ngIf="candidate.form_data && candidate.form_data | keyvalue" class="candidate-card">
-      <div class="card-header">
-        <!-- <h3>{{ candidate.form_data.full_name.value }}</h3>
-        <p class="subtitle">{{ candidate.form_data.years_of_experience.value }} years of experience</p>
+  <app-candidate-details></app-candidate-details>
+
+  <div
+    class="candidate-grid max-h[600px] grid grid-cols-1 md-grid-cols-3 lg:grid-cols-4"
+    *ngIf="!isLoading && viewMode == 'cards'"
+  >
+    <ng-container *ngFor="let candidate of filteredCandidates">
+      <div
+        class="w-[300px] md:w-[290px] max-w[400px] bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 mb-4 border border-gray-100"
+      >
+        <!-- Card Header -->
+        <div class="space-y-2 mb-6">
+          <div class="flex items-start justify-between">
+            <h3 class="text-lg font-bold text-gray-800 leading-tight">
+              {{ getDisplayName(candidate) }}
+            </h3>
+            <span
+              class="inline-flex px-2.5 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full"
+            >
+              Shortlisted
+            </span>
+          </div>
+          <p
+            class="text-sm text-gray-600 flex items-center gap-2"
+            *ngIf="getExperience(candidate)"
+          >
+            <i class="fas fa-briefcase text-gray-400"></i>
+            {{ getExperience(candidate) }} years experience
+          </p>
+        </div>
+
+        <!-- Card Body -->
+        <div class="space-y-4 mb-6">
+          <ng-container *ngIf="candidate.form_data">
+            <div
+              *ngFor="let field of getRelevantFields(candidate.form_data)"
+              class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+              <div class="flex-1">
+                <span class="text-xs font-medium text-gray-500 block mb-1">
+                  {{ formatFieldName(field.key) }}
+                </span>
+                <span class="text-sm text-gray-700">
+                  {{ field.value?.value || "N/A" }}
+                </span>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Card Footer -->
+        <div
+          class="flex items-center justify-between pt-4 border-t border-gray-100"
+        >
+          <button
+            (click)="viewDetails(candidate)"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+          >
+            <i class="fas fa-eye"></i>
+            <span>View Details</span>
+          </button>
+
+          <button
+            (click)="removeFromShortList(candidate)"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <ng-container *ngIf="!isUpdating">
+              <i class="fas fa-trash"></i>
+              <span>Remove</span>
+            </ng-container>
+            <div
+              *ngIf="isUpdating"
+              class="w-5 h-5 border-4 border-red-500 border-t-transparent rounded-full animate-spin"
+            ></div>
+          </button>
+        </div>
       </div>
-      <div class="card-body">
-        <p><i class="fas fa-graduation-cap"></i> {{ candidate.form_data.highest_degree.value }}</p>
-        <p><i class="fas fa-university"></i> {{ candidate.form_data.institution_name.value }}</p>
-        <p><i class="fas fa-check-circle"></i> {{ candidate.form_data.availability.value == "Yes"? "Available": "Not
-          Available" }}</p> -->
-      </div>
-      <div class="card-footer  flex flex-row">
-        <button (click)="viewDetails(candidate)" class="view-details-button">
-          <i class="fas fa-eye"></i> View Details
-        </button>
+    </ng-container>
 
-        <button (click)="removeFromShortList(candidate)" class=" hover:text-red-400 ml-auto">
-          <i *ngIf="!isUpdating" class="fas fa-trash"></i>
-          <div *ngIf="isUpdating"
-            class="w-5 h-5 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        </button>
-      </div>
-    </div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
 
-    <!-- Card for resume_data -->
-    <div *ngIf="!candidate.form_data && candidate.resume_data | keyvalue" class="candidate-card">
-      <div class="card-header">
-        <h3>{{ candidate.resume_data.personal_details.full_name }}</h3>
-        <!-- <p class="subtitle">{{ candidate.resume_data.personal_details.years_of_experience }} years of experience</p> -->
-      </div>
-      <div class="card-body">
-        <p><i class="fas fa-graduation-cap"></i> {{ candidate.resume_data.education[0].degree }}</p>
-        <p><i class="fas fa-university"></i> {{ candidate.resume_data.education[0].institution }}</p>
-        <!-- <p><i class="fas fa-check-circle"></i> {{ candidate.resume_data.personal_details.availability }}</p> -->
-      </div>
-      <div class="card-footer flex flex-row">
-        <button (click)="viewDetails(candidate)" class="view-details-button">
-          <i class="fas fa-eye"></i> View Details
-        </button>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
 
-        <label class="flex items-center space-x-2 ml-auto cursor-pointer">
-          <input type="checkbox"
-            class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring focus:ring-blue-300 focus:outline-none"
-            [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
-          <span class="text-sm text-gray-700">Shortlist</span>
-        </label>
-
-      </div>
-    </div>
-  </ng-container>
-
-
-  <div class="pt-12 bg-transparent"></div>
-  <div class="pt-12 bg-transparent"></div>
-  <div class="pt-12 bg-transparent"></div>
-  <div class="pt-12 bg-transparent"></div>
-  <div class="pt-12 bg-transparent"></div>
-
-</div>
-
-
-
-<!-- Candidate Table -->
-<div class="candidate-table-container" *ngIf="!isLoading && filteredCandidates.length > 0 && viewMode !== 'cards'">
-  <table class="candidate-table">
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Years of Experience</th>
-        <th>Highest Degree</th>
-        <th>Institution</th>
-        <th>Availability</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      <ng-container *ngFor="let candidate of filteredCandidates">
-        <!-- Row for form_data -->
-        <tr *ngIf="candidate.form_data && candidate.form_data | keyvalue">
-          <!-- <td>{{ candidate.form_data.full_name }}</td>
-          <td>{{ candidate.form_data.years_of_experience }}</td>
-          <td>{{ candidate.form_data.highest_degree }}</td>
-          <td>{{ candidate.form_data.institution_name }}</td>
-          <td>{{ candidate.form_data.availability }}</td> -->
-          <td class="flex flex-row">
-            <button (click)="viewDetails(candidate)" class="view-details-button">
-              <i class="fas fa-eye"></i> View Details
-            </button>
-
-            <label class="flex items-center space-x-2 ml-auto cursor-pointer">
-              <input type="checkbox"
-                class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring focus:ring-blue-300 focus:outline-none"
-                [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
-              <span class="text-sm text-gray-700">Shortlist</span>
-            </label>
-          </td>
-
-        </tr>
-
-        <!-- Row for resume_data -->
-        <tr *ngIf="!candidate.form_data && candidate.resume_data | keyvalue">
-          <td>{{ candidate.resume_data.personal_details.full_name }}</td>
-          <!-- <td>{{ candidate.resume_data.personal_details.years_of_experience }}</td> -->
-          <td>{{ candidate.resume_data.education[0].degree }}</td>
-          <td>{{ candidate.resume_data.education[0].institution }}</td>
-          <!-- <td>{{ candidate.resume_data.personal_details.availability }}</td> -->
-          <td>
-            <button (click)="viewDetails(candidate)" class="view-details-button">
-              <i class="fas fa-eye"></i> View Details
-            </button>
-            <label class="flex items-center space-x-2 ml-auto cursor-pointer">
-              <input type="checkbox"
-                class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring focus:ring-blue-300 focus:outline-none"
-                [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
-              <span class="text-sm text-gray-700">Shortlist</span>
-            </label>
-          </td>
-        </tr>
-      </ng-container>
-    </tbody>
-  </table>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+  </div>
 </div>

@@ -1,0 +1,30 @@
+<div class="my-3">
+  <!-- Toggle Button -->
+  <button 
+    (click)="isExpanded = !isExpanded"
+    class="w-full flex items-center justify-between p-3 bg-white rounded-lg shadow-sm hover:bg-gray-50 transition-colors"
+  >
+    <span class="font-medium text-gray-700">Filters</span>
+    <i class="fas" [class.fa-chevron-down]="!isExpanded" [class.fa-chevron-up]="isExpanded"></i>
+  </button>
+
+  <!-- Expandable Content -->
+  <div 
+    class="overflow-hidden transition-all duration-300"
+    [class.max-h-0]="!isExpanded"
+    [class.max-h-[1000px]]="isExpanded"
+  >
+    <div class="pt-0 flex flex-col gap-3">
+      <app-filters
+        (filterChange)="onFiltersChange($event)"
+        [filterFields]="filterFields"
+        [popupView]="popupView"
+      ></app-filters>
+
+      <app-advance-filter
+        (advanceFilterChange)="onAdvanceFilterChange($event)"
+        *ngIf="showResumeFilters"
+      ></app-advance-filter>
+    </div>
+  </div>
+</div>

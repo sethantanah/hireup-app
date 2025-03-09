@@ -3,36 +3,99 @@ import { Candidate } from '../../models/candidate.model';
 import { CommonModule } from '@angular/common';
 import { DataService } from '../../../../services/data.service';
 import { ApiService } from '../../../../services/api.service';
+import { JobPostData } from '../../../../models/jobpost.model';
+
+export const COMMON_FORM_FIELDS = [
+  'full_name',
+  'first_name',
+  'last_name',
+  'age',
+  'years_of_experience',
+  'email',
+  'phone',
+  'position',
+  'education',
+  'skills',
+];
 
 @Component({
   selector: 'app-shortlist-popup',
   imports: [CommonModule],
   templateUrl: './shortlist-popup.component.html',
-  styleUrl: './shortlist-popup.component.scss'
+  styleUrl: './shortlist-popup.component.scss',
 })
 export class ShortlistPopupComponent {
-   @Output() filterChange = new EventEmitter<any>();
+  @Output() filterChange = new EventEmitter<any>();
+
   isLoading: boolean = false;
   onError: boolean = false;
   showPopup: boolean = false;
   popupMessage: string = '';
   popupType: 'success' | 'error' = 'success';
-  constructor(public dataService: DataService, private apiService: ApiService) {
 
+  constructor(
+    public dataService: DataService,
+    private apiService: ApiService
+  ) {}
+
+  getDisplayName(candidate: any): string {
+    if (candidate.resume_data?.personal_details?.full_name) {
+      return candidate.resume_data.personal_details.full_name;
+    }
+
+    if (candidate.form_data) {
+      const nameFields = ['full_name', 'first_name', 'last_name', 'name'];
+      for (const field of nameFields) {
+        if (candidate.form_data[field]?.value) {
+          return candidate.form_data[field].value;
+        }
+      }
+    }
+
+    return 'N/A';
+  }
+
+  getExperience(candidate: any): string {
+    if (candidate.form_data?.years_of_experience?.value) {
+      return candidate.form_data.years_of_experience.value;
+    }
+    return '';
+  }
+
+  getRelevantFields(formData: any): any[] {
+    return Object.entries(formData)
+      .filter(([key]) => this.dataService.selectedCardFields.includes(key))
+      .map(([key, value]) => ({ key, value }));
+  }
+
+  formatFieldName(fieldName: string): string {
+    return fieldName
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 
   // Check if a candidate is shortlisted
   isShortlisted(candidate: Candidate): boolean {
-    return this.dataService.shortlistedCandidates.some((c) => c.id === candidate.id);
+    return this.dataService.shortlistedCandidates.some(
+      (c) => c.id === candidate.id
+    );
   }
 
   // Toggle shortlist status for a candidate
   toggleShortlist(candidate: Candidate) {
     if (this.isShortlisted(candidate)) {
-      this.dataService.shortlistedCandidates = this.dataService.shortlistedCandidates.filter((c) => c.id !== candidate.id);
+      this.dataService.shortlistedCandidates =
+        this.dataService.shortlistedCandidates.filter(
+          (c) => c.id !== candidate.id
+        );
     } else {
       this.dataService.shortlistedCandidates.push(candidate);
     }
+
+    this.dataService.saveShortlistedCandidates(
+      this.dataService.shortlistedCandidates
+    );
   }
 
   saveShortListing() {
@@ -44,7 +107,7 @@ export class ShortlistPopupComponent {
 
     this.apiService.shortListCandidates(ids).subscribe({
       next: () => {
-        this.showPopupMessage('Candidates shortlisting successful!', 'success')
+        this.showPopupMessage('Candidates shortlisting successful!', 'success');
         this.isLoading = false;
         this.dataService.shortlistedCandidates = [];
         this.filterChange.emit(ids);
@@ -52,10 +115,9 @@ export class ShortlistPopupComponent {
       error: () => {
         this.showPopupMessage('Candidates shortlisting failed!', 'error');
         this.isLoading = false;
-      }
-    })
+      },
+    });
   }
-
 
   showPopupMessage(message: string, type: 'success' | 'error'): void {
     this.popupMessage = message;

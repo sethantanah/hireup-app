@@ -12,7 +12,7 @@ import { JobPostDashboadComponent } from './pages/job-posts/job-post-dashboad/jo
 import { ApplicationViewComponent } from './pages/job-posts/manager/application-view/application-view.component';
 
 export const routes: Routes = [
-  // { path: '', component: LandingComponent },
+  { path: '', component: PageNotFoundComponent  },
   // { path: 'dashboard', component: DashboardComponent },
   { path: 'jobposts/:userId', component: JobPostDashboadComponent },
   { path: 'jobposts/manager/:jobId', component: ManagerComponent },
@@ -28,6 +28,14 @@ export const routes: Routes = [
   },
   {
     path: 'apply/:company/:applicationId/:formOnly',
+    component: ApplicationViewComponent,
+  },
+  {
+    path: 'apply/:company/:applicationId/:formOnly',
+    component: ApplicationViewComponent,
+  },
+  {
+    path: 'apply/:company/:applicationId',
     component: ApplicationViewComponent,
   },
   {

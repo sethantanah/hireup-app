@@ -35,7 +35,7 @@ export class DashboardComponent implements OnInit {
     private route: ActivatedRoute,
     private jobPostService: JobpostManagerService
   ) {
-    const jobpostId = this.route.snapshot.paramMap.get('jobId');
+    
   }
 
   ngOnInit(): void {

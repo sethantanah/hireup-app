@@ -128,6 +128,17 @@ export class ApiService {
   }
 
 
+  getRankedCandidates(jobpost_id: string) {
+    const apiUrl = environment.apiUrl + `/documents/ranked-documents?jobpost_id=${jobpost_id}`;
+    const headers = new HttpHeaders({
+      'accept': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+
+    return this.http.get(apiUrl, { headers });
+  }
+
+
   rankCandidates(formData: any): Observable<any> {
     const apiUrl = environment.apiUrl + `/shortlisting/rank-resumes`;
     const headers = new HttpHeaders({
@@ -148,8 +159,8 @@ export class ApiService {
     return this.http.post(apiUrl, resumes_ids, { headers });
   }
 
-  removeListCandidates(resumes_ids: string[]): Observable<any> {
-    const apiUrl = environment.apiUrl + `/shortlisting/remove-shortlist`;
+  removeListCandidates(resumes_ids: string[], jobpost_id: string): Observable<any> {
+    const apiUrl = environment.apiUrl + `/shortlisting/remove-shortlist/${jobpost_id}`;
     const headers = new HttpHeaders({
       'accept': 'application/json',
       'Authorization': `Bearer ${localStorage.getItem('token')}`

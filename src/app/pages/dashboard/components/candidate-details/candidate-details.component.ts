@@ -42,6 +42,10 @@ export class CandidateDetailsComponent {
     return formattedWords.join(' ');
   }
 
+  objectKeys(obj: any): string[] {
+    return obj ? Object.keys(obj) : [];
+  }
+
   // Close the popover
   close() {
     this.dataService.openCandidateDetails = false;

@@ -131,17 +131,24 @@ export class TemplatesManagerComponent implements OnInit {
       const fileField = this.jobAppData?.formData.fields.filter(
         (field) => field.key == key
       )[0];
+
       const matchFileType = input.files
-        ? fileField?.acceptedTypes?.filter((type) => {
-            return type == input.files![0].type;
-          })
+        ? fileField?.acceptedTypes
+            ?.toString()
+            .split(',')
+            .filter((type) => {
+              return (
+                type == `.${input.files![0].type.split('/')[1]}` ||
+                type == `${input.files![0].type.split('/')[1]}`
+              );
+            })
         : [];
 
       if (matchFileType?.length === 0) {
         this.showPopup = true;
         this.popupType = 'error';
         this.popupMessage = `You have selected an unsupported file type for ${fileField?.label}`;
-        setTimeout(() => (this.showPopup = false), 3000);
+        setTimeout(() => (this.showPopup = false), 5000);
         return;
       }
       this.uploadedFiles[key] = input.files[0];
@@ -289,12 +296,6 @@ export class TemplatesManagerComponent implements OnInit {
 
     // Create a FormData object
     const formData = new FormData();
-    // Append form values to FormData
-    formData.append('form_data', JSON.stringify(formattedData));
-    // Append uploaded files to FormData
-    Object.keys(this.uploadedFiles).forEach((key) => {
-      formData.append(key, this.uploadedFiles[key]);
-    });
 
     // Validate all fields before submission
     this.jobAppData?.formData?.fields.forEach((field: any) => {
@@ -316,6 +317,14 @@ export class TemplatesManagerComponent implements OnInit {
         };
       }
 
+      // Append form values to FormData
+      formData.append('form_data', JSON.stringify(formattedData));
+
+      // Append uploaded files to FormData
+      Object.keys(this.uploadedFiles).forEach((key) => {
+        formData.append('files', this.uploadedFiles[key]);
+      });
+
       if (this.mode === 'testing') {
         this.simulateSubmission();
       } else {
@@ -327,12 +336,14 @@ export class TemplatesManagerComponent implements OnInit {
   submit(formData: any) {
     this.apiService.submitForm(formData).subscribe({
       next: (data) => {
+        this.isSubmitting = false;
         this.isLoading = false;
         this.showSubmissionMessage = true; // Show success message
         this.form?.reset();
       },
       error: (error) => {
         console.error('Submission failed:', error);
+        this.isSubmitting = false;
         this.isLoading = false;
         this.onError = true;
         this.showPopupMessage(

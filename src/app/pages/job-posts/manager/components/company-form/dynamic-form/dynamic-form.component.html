@@ -1,6 +1,6 @@
 <div class="flex w-full">
   <!-- Sidebar -->
-  <div class="w-72 bg-gray-500 text-white p-6 shadow-lg rounded-lg">
+  <div class="w-72 bg-white text-white p-6 shadow-lg rounded-lg">
     <!-- Top Actions -->
     <div class="flex space-x-3 mb-8">
       <button
@@ -20,8 +20,8 @@
 
     <!-- Sections Header -->
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-semibold flex items-center">
-        <i class="fas fa-layer-group mr-2 text-blue-400"></i> Sections
+      <h2 class="text-xl text-gray-500 font-semibold flex items-center">
+        <i class="fas fa-layer-group mr-2 text-gray-500"></i> Sections
       </h2>
       <span class="text-sm text-gray-400">{{ sections.length }} sections</span>
     </div>
@@ -32,9 +32,9 @@
         *ngFor="let section of sections"
         class="group rounded-lg transition-all duration-300 cursor-pointer"
         [ngClass]="{
-          'bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg transform scale-102':
+          'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg transform scale-102':
             selectedSection === section,
-          'hover:bg-gray-800': selectedSection !== section
+          'hover:bg-gray-200': selectedSection !== section
         }"
         (click)="selectedSection = section"
       >
@@ -42,9 +42,17 @@
           <span class="flex items-center">
             <i
               class="fas fa-folder mr-2"
-              [ngClass]="{ 'text-blue-300': selectedSection === section }"
+              [ngClass]="{
+                'text-white-300': selectedSection === section,
+                'text-gray-600': selectedSection !== section
+              }"
             ></i>
-            <span [ngClass]="{ 'font-semibold': selectedSection === section }">
+            <span
+              [ngClass]="{
+                'font-semibold': selectedSection === section,
+                'text-gray-600 font-semibold': selectedSection !== section
+              }"
+            >
               {{ section }}
             </span>
           </span>
@@ -52,20 +60,32 @@
             class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <button
-              class="p-2 hover:bg-blue-500 rounded-lg transition-colors"
+              class="p-2 rounded-lg transition-colors"
               (click)="
                 openUpdateSectionPopup(section); $event.stopPropagation()
               "
             >
-              <i class="fas fa-edit"></i>
+              <i
+                class="fas fa-edit hover:text-blue-700"
+                [ngClass]="{
+                  'text-white-300': selectedSection === section,
+                  'text-gray-700': selectedSection !== section
+                }"
+              ></i>
             </button>
             <button
-              class="p-2 hover:bg-red-500 rounded-lg transition-colors"
+              class="p-2 rounded-lg transition-colors"
               (click)="
                 openDeleteSectionPopup(section); $event.stopPropagation()
               "
             >
-              <i class="fas fa-trash"></i>
+              <i
+                class="fas fa-trash hover:text-red-500"
+                [ngClass]="{
+                  'text-white-300': selectedSection === section,
+                  'text-gray-700': selectedSection !== section
+                }"
+              ></i>
             </button>
           </div>
         </div>
@@ -85,19 +105,19 @@
     class="flex-1 p-8 pt-0 overflow-y-auto"
   >
     <div class="bg-white rounded-lg shadow-lg p-6">
-      <div *ngIf="selectedSection" class="space-y-6">
+      <div *ngIf="selectedSection" class=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
         <div
           *ngFor="let field of getFieldsBySection(selectedSection)"
           class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-300"
         >
-          <div class="flex justify-between items-start mb-2">
+          <div class="flex justify-between items-start">
             <label class="block text-sm font-medium text-gray-700">
               {{ field.label }}
               <span *ngIf="field.required" class="text-red-500 ml-1">*</span>
             </label>
             <div class="flex space-x-2">
               <button
-                class="text-blue-500 hover:text-blue-700 transition-colors"
+                class="text-blue-500 hover:text-blue-700 transition-colors mr-3"
                 (click)="openUpdateFieldPopup(field)"
               >
                 <i class="fas fa-edit"></i>

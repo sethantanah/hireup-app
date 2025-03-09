@@ -260,6 +260,7 @@ export class JobPostDashboadComponent {
   }
 
   navigateTo(page: string, id: string) {
+    localStorage.setItem('jobpostId', id);
     const route = `/jobposts/${page}/`;
     const url = this.router.serializeUrl(
       this.router.createUrlTree([route, id])
