@@ -3,6 +3,9 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JobpostingsApiService } from '../../../services/jobpostings-api.service';
 import { FormsModule } from '@angular/forms';
+import { UserData, UserReq } from '../../../models/users.models';
+import { JobpostManagerService } from '../../../services/jobpost-manager.service';
+import { JobPostData } from '../../../models/jobpost.model';
 
 @Component({
   selector: 'app-job-post-dashboad',
@@ -34,12 +37,21 @@ export class JobPostDashboadComponent {
   popupAlertMessage: string = '';
   alertPopupType: string = '';
 
+  userData!: UserData;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
-    private apiService: JobpostingsApiService
+    private apiService: JobpostingsApiService,
+    private jobPostService: JobpostManagerService
   ) {
     this.loadData();
+
+    const userData = localStorage.getItem('USER');
+
+    if (userData) {
+      this.userData = JSON.parse(userData);
+    }
   }
 
   loadData() {
@@ -109,9 +121,40 @@ export class JobPostDashboadComponent {
       this.isCreatingJobpost = true;
       this.apiService.createUpdateJobPost(userId!, newJob).subscribe({
         next: (data) => {
-          localStorage.removeItem('applicationData');
+
           this.selectedJobPost = data.data;
           this.jobPostings.push(data.data);
+          
+          // Create Application Data
+          localStorage.removeItem('applicationData');
+          const applicationData: JobPostData =
+          this.jobPostService.getApplicationData();
+          applicationData.formData.fields = [];
+          applicationData.formData.fields.push({
+            type: 'file',
+            label: 'CV Document',
+            key: 'nfmpkuh7yov',
+            required: true,
+            section: 'Upload Documents',
+            min_length: '',
+            max_length: '',
+            instructions: '',
+          });
+          applicationData.sections = [];
+          applicationData.sections.push("Upload Documents")
+          this.jobPostService
+            .createUpdateJobPostData(this.selectedJobPost.id, applicationData)
+            .subscribe({
+              next: (res) => {
+                if (res.data) {
+                  applicationData!.id = res.data.id;
+                  this.jobPostService.upDateApplicationData(applicationData);
+                }
+              },
+              error: (err) => {
+                console.error(err);
+              },
+            });
           this.closeAddPopup();
         },
         error: (error) => {
@@ -249,9 +292,8 @@ export class JobPostDashboadComponent {
 
   openDetails(job: any) {}
 
-
   openAlertPopup(message: string, type: string) {
-    this.popupAlertMessage = message; 
+    this.popupAlertMessage = message;
     this.alertPopupType = type;
     this.showAlertPopup = true;
     setTimeout(() => {
@@ -266,5 +308,17 @@ export class JobPostDashboadComponent {
       this.router.createUrlTree([route, id])
     );
     window.open(url, '_blank');
+  }
+
+  // Add this method to your component class
+  getInitials(fullName: string): string {
+    if (!fullName) return '';
+
+    return fullName
+      .split(' ')
+      .map((name) => name.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2); // Limit to first 2 initials
   }
 }

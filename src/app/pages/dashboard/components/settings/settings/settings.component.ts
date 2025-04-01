@@ -38,9 +38,9 @@ export class SettingsComponent implements OnInit {
       label: 'Candidate Ranking',
       icon: 'fas fa-sort-amount-down',
     },
-    { id: 'notifications', label: 'Notifications', icon: 'fas fa-bell' },
-    { id: 'preferences', label: 'Preferences', icon: 'fas fa-cog' },
-    { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug' },
+    // { id: 'notifications', label: 'Notifications', icon: 'fas fa-bell' },
+    // { id: 'preferences', label: 'Preferences', icon: 'fas fa-cog' },
+    // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug' },
   ];
 
   loading: boolean = false;

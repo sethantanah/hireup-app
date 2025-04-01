@@ -4,10 +4,12 @@ import { CommonModule } from '@angular/common';
 import { CandidateRankingComponent } from '../components/candidate-ranking/candidate-ranking.component';
 import { ShortlistedComponent } from '../components/shortlisted/shortlisted.component';
 import { SettingsComponent } from '../components/settings/settings/settings.component';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { JobpostManagerService } from '../../../services/jobpost-manager.service';
 import { JobPostData } from '../../../models/jobpost.model';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { UserData, UserReq } from '../../../models/users.models';
+import { IndexedDbService } from '../../../services/indexed-db.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,11 +33,18 @@ export class DashboardComponent implements OnInit {
   loading: boolean = false;
   loadingText: string = 'Loading ...';
 
+   userData!: UserData;
+
   constructor(
+    private router: Router,
     private route: ActivatedRoute,
+    private indexedDbService: IndexedDbService,
     private jobPostService: JobpostManagerService
   ) {
-    
+    const userData = localStorage.getItem('USER');
+    if (userData) {
+      this.userData = JSON.parse(userData);
+    }
   }
 
   ngOnInit(): void {
@@ -70,4 +79,21 @@ export class DashboardComponent implements OnInit {
   toggleSidebarCollapse() {
     this.sidebarCollapse = !this.sidebarCollapse;
   }
+
+    // Add this method to your component class
+    getInitials(fullName: string): string {
+      if (!fullName) return '';
+  
+      return fullName
+        .split(' ')
+        .map((name) => name.charAt(0))
+        .join('')
+        .toUpperCase()
+        .substring(0, 2); // Limit to first 2 initials
+    }
+
+
+    back(){
+      this.router.navigate(['/jobposts', this.userData.id])
+    }
 }

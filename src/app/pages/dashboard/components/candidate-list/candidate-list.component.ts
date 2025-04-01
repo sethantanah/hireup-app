@@ -10,11 +10,11 @@ import { AdvanceFilterComponent } from '../advance-filter/advance-filter.compone
 import { ActivatedRoute } from '@angular/router';
 import { JobPostData } from '../../../../models/jobpost.model';
 import { CandidateFiltersComponent } from '../candidate-filters/candidate-filters.component';
+import { BulkDocumentUploadsComponent } from '../../../job-posts/manager/components/data-uploads/bulk-document-uploads/bulk-document-uploads.component';
 
 export const COMMON_FORM_FIELDS = [
   'full_name',
-  'first_name',
-  'last_name',
+  'email'
 ];
 
 @Component({
@@ -23,7 +23,8 @@ export const COMMON_FORM_FIELDS = [
     CommonModule,
     ShortlistPopupComponent,
     CandidateDetailsComponent,
-    CandidateFiltersComponent
+    CandidateFiltersComponent,
+    BulkDocumentUploadsComponent
   ],
   templateUrl: './candidate-list.component.html',
   styleUrl: './candidate-list.component.scss',
@@ -34,6 +35,8 @@ export class CandidateListComponent implements OnInit {
   filteredCandidates: Candidate[] = [];
   isLoading: boolean = true; // Loading state
   viewMode: string = 'cards';
+  jobPostId?: string;
+  
 
   filters = {
     search: '',
@@ -67,6 +70,7 @@ export class CandidateListComponent implements OnInit {
 
   ngOnInit(): void {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
+    this.jobPostId = jobpostId || '';
     this.dataService.saveJobId(jobpostId || '')
 
     if (jobpostId) {
@@ -291,9 +295,12 @@ export class CandidateListComponent implements OnInit {
     this.dataService.openShortList = true;
   }
 
+  openDataUpload(){
+   this.dataService.openDocumentsUpload = true;
+  }
+
   viewDetails(candidate: Candidate) {
     // console.log(candidate.id)
-    console.log(candidate);
     // Handle "View Details" action
     // candidate.form_data = this.transformObject(candidate.form_data);
     this.dataService.candidate = candidate;

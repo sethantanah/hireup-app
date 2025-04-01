@@ -1,29 +1,40 @@
-<div class="candidate-ranking-page p-3 min-h-screen">
+<div class="candidate-ranking-page md:p-5 pt-3 min-h-screen">
   <!-- Loading Indicator -->
   <div *ngIf="isLoading" class="loading-indicator">
     <i class="fas fa-spinner fa-spin"></i> Loading...
   </div>
 
   <!-- Gear Icon to Toggle Options -->
-  <div class="flex justify-start my-2">
-    <button
-    (click)="viewShortlist()"
-    class="shortlist-button inline-flex items-center gap-2 px-4 py-2.5 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow group"
-    *ngIf="!isLoading && candidates.length > 0"
-  >
-    <i class="fas fa-list group-hover:scale-110 transition-transform"></i>
-    <span>View Shortlist</span>
-    <span class="inline-flex items-center justify-center  text-white rounded-full text-sm">
-      ({{ dataService.shortlistedCandidates.length }})
-    </span>
-  </button>
-    <button
-      (click)="toggleOptions()"
-      class="ml-auto flex items-center gap-2 px-4 h-10  bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
-    >
-      <i class="fas fa-sliders-h text-gray-600"></i>
-      <span class="text-sm font-medium text-gray-700">Setup Ranking</span>
-    </button>
+  <div class="flex flex-col md:flex-row justify-start my-2 mt-0">
+    <div class="flex flex-row ml-auto gap-4">
+      <button
+        (click)="toggleOptions()"
+        class="flex items-center gap-2 w-[180px] px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
+      >
+        <i class="fas fa-sliders-h text-gray-600"></i>
+        <span class="text-sm font-medium text-gray-700">Setup Ranking</span>
+      </button>
+      <button
+        (click)="viewShortlist()"
+        class="shortlist-button inline-flex items-center gap-2 px-4 py-2.5 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow group"
+        *ngIf="!isLoading && candidates.length > 0"
+      >
+        <i class="fas fa-list group-hover:scale-110 transition-transform"></i>
+        <span>View Shortlist</span>
+        <span
+          class="inline-flex items-center justify-center text-white rounded-full text-sm"
+        >
+          ({{ dataService.shortlistedCandidates.length }})
+        </span>
+      </button>
+      <button
+        (click)="refreshData()"
+        [class.spinning]="isRefreshing"
+        class="refresh-btn flex items-center gap-2 px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
+      >
+        <i class="fas fa-sync-alt text-black hover:text-black"></i>
+      </button>
+    </div>
   </div>
 
   <!-- Options Panel (Hidden by Default) -->
@@ -33,7 +44,7 @@
     (click)="toggleOptions()"
   >
     <div
-      class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col"
+      class="bg-white shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col"
       (click)="$event.stopPropagation()"
     >
       <!-- Fixed Header -->
@@ -61,7 +72,10 @@
             <i class="fas fa-sort-amount-down"></i>
           </button>
 
-          <button (click)="toggleOptions()" class="p-2 text-gray-400 hover:text-gray-600">
+          <button
+            (click)="toggleOptions()"
+            class="p-2 text-gray-400 hover:text-gray-600"
+          >
             <i class="fas fa-times text-xl"></i>
           </button>
         </div>
@@ -194,80 +208,111 @@
     style="flex-wrap: wrap"
     *ngIf="!isLoading"
   >
-  <ng-container *ngFor="let candidate of candidates" style="flex-shrink: 0">
-    <div class="w-[300px] md:w-[290px] max-w[400px] bg-white rounded-xl shadow-lg p-5 mb-4 border border-gray-100" style="flex-shrink: 0">
-      <!-- Card Header -->
-      <div class="flex flex-col gap-2 mb-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-gray-800">{{ getDisplayName(candidate) }}</h3>
-          <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium">
-            {{ (candidate.ranking_score * 100).toFixed(0) }}%
-          </span>
+    <ng-container *ngFor="let candidate of candidates" style="flex-shrink: 0">
+      <div
+        class="w-[300px] md:w-[290px] max-w[400px] bg-white rounded-xl shadow-lg p-5 mb-4 border border-gray-100"
+        style="flex-shrink: 0"
+      >
+        <!-- Card Header -->
+        <div class="flex flex-col gap-2 mb-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-bold text-gray-800">
+              {{ getDisplayName(candidate) }}
+            </h3>
+            <span
+              class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
+            >
+              {{ (candidate.ranking_score * 100).toFixed(0) }}%
+            </span>
+          </div>
+          <p class="text-sm text-gray-600" *ngIf="getExperience(candidate)">
+            {{ getExperience(candidate) }} years of experience
+          </p>
         </div>
-        <p class="text-sm text-gray-600" *ngIf="getExperience(candidate)">
-          {{ getExperience(candidate) }} years of experience
-        </p>
-      </div>
-  
-      <!-- Scores Section -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-2">
-          <h4 class="text-sm font-semibold text-gray-700">Candidate Ranking</h4>
-          <button 
-            (click)="toggleAllScores()" 
-            class="text-xs text-blue-600 hover:text-blue-800"
-          >
-            {{ areAllScoresExpanded ? 'Collapse All' : 'Expand All' }}
-          </button>
-        </div>
-        
-        <div class="overflow-x-auto -mx-5 px-5">
-          <div class="flex gap-3 pb-2">
-            <div *ngFor="let score of candidate?.document_ranking?.individual_scores" 
-                 class="flex-none w-[200px] bg-gray-50 rounded-lg p-3">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-xs font-medium text-gray-600">{{ score.document_type }}</span>
-                <div class="flex items-center gap-2">
-                  <span class="text-sm font-bold text-gray-800">{{ (score.overall_score * 100).toFixed(0) }}%</span>
-                  <button 
-                    (click)="toggleScoreDetails(score)"
-                    class="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <i class="fas fa-chevron-down text-xs" 
-                       [ngClass]="{'transform rotate-180': isScoreExpanded(score)}">
-                    </i>
-                  </button>
+
+        <!-- Scores Section -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <h4 class="text-sm font-semibold text-gray-700">
+              Candidate Ranking
+            </h4>
+            <button
+              (click)="toggleAllScores()"
+              class="text-xs text-blue-600 hover:text-blue-800"
+            >
+              {{ areAllScoresExpanded ? "Collapse All" : "Expand All" }}
+            </button>
+          </div>
+
+          <div class="overflow-x-auto -mx-5 px-5">
+            <div class="flex gap-3 pb-2">
+              <div
+                *ngFor="
+                  let score of candidate?.document_ranking?.individual_scores
+                "
+                class="flex-none w-[200px] bg-gray-50 rounded-lg p-3"
+              >
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-gray-600">{{
+                    score.document_type
+                  }}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-gray-800"
+                      >{{ (score.overall_score * 100).toFixed(0) }}%</span
+                    >
+                    <button
+                      (click)="toggleScoreDetails(score)"
+                      class="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <i
+                        class="fas fa-chevron-down text-xs"
+                        [ngClass]="{
+                          'transform rotate-180': isScoreExpanded(score)
+                        }"
+                      >
+                      </i>
+                    </button>
+                  </div>
                 </div>
-              </div>
-              
-              <div *ngIf="isScoreExpanded(score)" 
-                   class="mt-2 space-y-1.5 border-t border-gray-200 pt-2">
-                <div *ngFor="let key of getScoreKeys(score)" 
-                     class="flex justify-between items-center">
-                  <ng-container *ngIf="key !== 'document_type' && key !== 'overall_score'">
-                    <span class="text-xs text-gray-500 capitalize">{{ key.replace('_', ' ') }}</span>
-                    <span class="text-xs font-medium text-gray-700">
-                      {{ (score[key] * 100).toFixed(0) }}%
-                    </span>
-                  </ng-container>
+
+                <div
+                  *ngIf="isScoreExpanded(score)"
+                  class="mt-2 space-y-1.5 border-t border-gray-200 pt-2"
+                >
+                  <div
+                    *ngFor="let key of getScoreKeys(score)"
+                    class="flex justify-between items-center"
+                  >
+                    <ng-container
+                      *ngIf="key !== 'document_type' && key !== 'overall_score'"
+                    >
+                      <span class="text-xs text-gray-500 capitalize">{{
+                        key.replace("_", " ")
+                      }}</span>
+                      <span class="text-xs font-medium text-gray-700">
+                        {{ (score[key] * 100).toFixed(0) }}%
+                      </span>
+                    </ng-container>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-  
-      <!-- Card Footer -->
-      <div class="flex items-center justify-between pt-3 border-t border-gray-100">
-        <button 
-          (click)="viewDetails(candidate)" 
-          class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-2"
+
+        <!-- Card Footer -->
+        <div
+          class="flex items-center justify-between pt-3 border-t border-gray-100"
         >
-          <i class="fas fa-eye"></i>
-          <span>View Details</span>
-        </button>
-  
-        <!-- <label class="flex items-center gap-2 cursor-pointer">
+          <button
+            (click)="viewDetails(candidate)"
+            class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-2"
+          >
+            <i class="fas fa-eye"></i>
+            <span>View Details</span>
+          </button>
+
+          <!-- <label class="flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -277,26 +322,30 @@
           <span class="text-sm text-gray-600">Shortlist</span>
         </label> -->
 
-        
-        <div class="relative">
+          <div class="relative">
             <input
               type="checkbox"
-              id="shortlist-{{candidate.id}}"
+              id="shortlist-{{ candidate.id }}"
               class="peer hidden"
               [checked]="isShortlisted(candidate)"
               (change)="toggleShortlist(candidate)"
             />
-            <label 
-              for="shortlist-{{candidate.id}}"
+            <label
+              for="shortlist-{{ candidate.id }}"
               class="inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm font-medium text-gray-600 hover:bg-gray-50 peer-checked:text-blue-600 peer-checked:bg-blue-50 transition-colors"
             >
-              <i class="fas" [ngClass]="isShortlisted(candidate) ? 'fa-check-circle' : 'fa-circle'"></i>
+              <i
+                class="fas"
+                [ngClass]="
+                  isShortlisted(candidate) ? 'fa-check-circle' : 'fa-circle'
+                "
+              ></i>
               Shortlist
             </label>
           </div>
+        </div>
       </div>
-    </div>
-  </ng-container>
+    </ng-container>
 
     <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
@@ -320,6 +369,12 @@
     <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
 
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
@@ -342,3 +397,12 @@
     <div class="pt-12 bg-transparent"></div>
   </div>
 </div>
+
+<app-alert-popup
+  [show]="!!alert"
+  [type]="alert?.type || 'success'"
+  [message]="alert?.message || ''"
+  [autoClose]="alert?.autoClose || true"
+  [duration]="alert?.duration || 5000"
+  (closed)="onAlertClosed()"
+></app-alert-popup>

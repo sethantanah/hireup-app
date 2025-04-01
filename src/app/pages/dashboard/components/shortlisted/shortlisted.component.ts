@@ -12,11 +12,7 @@ import { JobPostData } from '../../../../models/jobpost.model';
 import { CandidateFiltersComponent } from '../candidate-filters/candidate-filters.component';
 import { EmailsComponent } from '../notifications/emails/emails.component';
 
-export const COMMON_FORM_FIELDS = [
-  'full_name',
-  'first_name',
-  'last_name',
-];
+export const COMMON_FORM_FIELDS = ['full_name', 'first_name', 'last_name'];
 
 @Component({
   selector: 'app-shortlisted',
@@ -24,7 +20,7 @@ export const COMMON_FORM_FIELDS = [
     CommonModule,
     CandidateDetailsComponent,
     CandidateFiltersComponent,
-    EmailsComponent
+    EmailsComponent,
   ],
   templateUrl: './shortlisted.component.html',
   styleUrl: './shortlisted.component.scss',
@@ -62,6 +58,8 @@ export class ShortlistedComponent implements OnInit {
   private relevantFields = COMMON_FORM_FIELDS;
   filteredFields = COMMON_FORM_FIELDS;
 
+  emailsList: string[] = [];
+
   constructor(
     private apiService: ApiService,
     public dataService: DataService,
@@ -77,6 +75,7 @@ export class ShortlistedComponent implements OnInit {
           this.candidates = data as Candidate[];
           this.filteredCandidates = this.candidates;
           this.isLoading = false;
+          this.getEmailsList();
         },
         error: (error) => {
           this.isLoading = false;
@@ -109,8 +108,7 @@ export class ShortlistedComponent implements OnInit {
     }
   }
 
-  
- getDisplayName(candidate: any): string {
+  getDisplayName(candidate: any): string {
     if (candidate.resume_data?.personal_details?.full_name) {
       return candidate.resume_data.personal_details.full_name;
     }
@@ -150,53 +148,55 @@ export class ShortlistedComponent implements OnInit {
   onFilterChange(filters: any) {
     this.filteredCandidates = this.candidates.filter((candidate) => {
       const { form_data, resume_data } = candidate;
-  
+
       // Use form_data if available, else fall back to resume_data.personal_details
-      const data = form_data && Object.keys(form_data).length > 0
-        ? form_data
-        : (resume_data?.personal_details || {});
-  
+      const data =
+        form_data && Object.keys(form_data).length > 0
+          ? form_data
+          : resume_data?.personal_details || {};
+
       // Loop through all filter keys dynamically
       for (const key in filters) {
         const filterValue = filters[key];
-  
+
         // Skip empty filter values
-        if (!filterValue || filterValue.toString().trim() === "") {
+        if (!filterValue || filterValue.toString().trim() === '') {
           continue;
         }
-  
+
         // Check if the field exists in form_data first
-        let fieldValue = (data as FormData)[key]?.value || (data as FormData)[key];
-  
+        let fieldValue =
+          (data as FormData)[key]?.value || (data as FormData)[key];
+
         // If not found in form_data, look in resume_data
         if (!fieldValue && resume_data) {
           // Flatten resume_data and check for the key
           const resumeValue = this.findInResumeData(resume_data, key);
           fieldValue = resumeValue !== undefined ? resumeValue : null;
         }
-  
+
         // Perform a case-insensitive comparison for strings
         if (
-          typeof fieldValue === "string" &&
+          typeof fieldValue === 'string' &&
           !fieldValue.toLowerCase().includes(filterValue.toLowerCase())
         ) {
           return false;
         }
-  
+
         // Perform a direct comparison for other data types (numbers, etc.)
         if (
-          typeof fieldValue !== "string" &&
+          typeof fieldValue !== 'string' &&
           fieldValue !== null &&
           fieldValue !== filterValue
         ) {
           return false;
         }
       }
-  
+
       return true;
     });
   }
-  
+
   // Helper function to search deeply in resume_data
   findInResumeData(resumeData: any, key: string): any {
     for (const section in resumeData) {
@@ -213,7 +213,6 @@ export class ShortlistedComponent implements OnInit {
     }
     return undefined;
   }
-  
 
   onAdvanceFilterChange(filters: any) {
     this.advanceFilters = filters;
@@ -303,29 +302,54 @@ export class ShortlistedComponent implements OnInit {
   removeFromShortList(candidate: Candidate) {
     this.isUpdating = true;
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
-    this.apiService.removeListCandidates([candidate.id], jobpostId || '').subscribe({
-      next: (res) => {
-        this.isUpdating = false;
-        this.candidates = this.candidates.filter((cand) => {
-          cand.id != candidate.id;
-        });
+    this.apiService
+      .removeListCandidates([candidate.id], jobpostId || '')
+      .subscribe({
+        next: (res) => {
+          this.isUpdating = false;
+          this.candidates = this.candidates.filter((cand) => {
+            cand.id != candidate.id;
+          });
 
-        this.filteredCandidates = this.candidates;
-      },
-      error: (error) => {
-        alert('An error occured while updating!');
-        this.isUpdating = false;
-      },
-    });
+          this.filteredCandidates = this.candidates;
+          this.getEmailsList();
+        },
+        error: (error) => {
+          alert('An error occured while updating!');
+          this.isUpdating = false;
+        },
+      });
   }
 
   toggleFilters() {
     this.dataService.showFilters = false;
   }
 
-  toggleEmailingPopup(){
-   this.dataService.openEmailPopUp = true;
+  toggleEmailingPopup() {
+    this.dataService.openEmailPopUp = true;
   }
 
-  // npm install @ckeditor/ckeditor5-angular @ckeditor/ckeditor5-build-classic
+  getEmailsList() {
+    this.candidates.forEach((candidate) => {
+      if (candidate.form_data) {
+        try {
+          const email = candidate.form_data['email'].value;
+          if (typeof email === 'string') {
+            this.emailsList.push(email);
+          }
+        } catch (error) {}
+      }
+
+      if (candidate.resume_data) {
+        const email = candidate.resume_data.personal_details.email;
+        if (email) {
+          if (!this.emailsList.includes(email)) {
+            this.emailsList.push(email);
+          }
+        }
+      }
+    });
+
+    this.dataService.emailsList = this.emailsList;
+  }
 }

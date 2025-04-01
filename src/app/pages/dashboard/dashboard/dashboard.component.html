@@ -13,14 +13,20 @@
       <i class="fa fa-chevron-right" *ngIf="!sidebarCollapse"></i>
       <i class="fa fa-chevron-left" *ngIf="sidebarCollapse"></i>
     </button>
-    <h1><i class="fas fa-briefcase"></i>Dashboard</h1>
+    <h1><i class="fas fa-briefcase"></i>Applicants Management</h1>
     <!-- <div class="search-bar">
       <i class="fas fa-search"></i>
       <input type="text" placeholder="Global Search" />
     </div> -->
-    <div class="user-profile">
-      <i class="fas fa-user-circle"></i>
-      <span>SafetyCampaignGH</span>
+    <div class="user-profile" (click)="back()">
+      <div
+      class="w-7 h-7 mr-2 rounded-full bg-gray-300 flex items-center justify-center"
+    >
+      <span class="text-sm font-medium text-gray-700">{{
+        getInitials(userData.company_name)
+      }}</span>
+    </div>
+      <span>{{userData.company_name}}</span>
     </div>
   </header>
   <div class="content">
@@ -44,7 +50,7 @@
         >
           <i class="fas fa-check-square"></i>
           <!-- Represents selection better -->
-          <span>Shortlisting</span>
+          <span>Shortlisted</span>
         </a>
         <a
           [class.active]="activeSection === 'ranking'"
@@ -55,14 +61,14 @@
           <span>Ranking</span>
         </a>
 
-        <a
+        <!-- <a
           [class.active]="activeSection === 'job-postings'"
           (click)="setActiveSection('job-postings')"
         >
-          <i class="fas fa-briefcase"></i>
+          <i class="fas fa-briefcase"></i> -->
           <!-- More recognizable for jobs -->
-          <span>Job Postings</span>
-        </a>
+          <!-- <span>Job Postings</span>
+        </a> -->
         <!-- <a
           [class.active]="activeSection === 'analytics'"
           (click)="setActiveSection('analytics')"

@@ -132,7 +132,6 @@ export class FormattingService {
     return this.sanitizer.bypassSecurityTrustHtml(html);
   }
 
-
   cleanPhoneNumber(phone: string): string {
     return phone.replace(/[^\d+]/g, '');
   }
@@ -169,11 +168,30 @@ export class FormattingService {
         ...link,
         type: 'url',
         formattedUrl:
-          trimmedUrl.startsWith('http://') ||
-          trimmedUrl.startsWith('https://')
+          trimmedUrl.startsWith('http://') || trimmedUrl.startsWith('https://')
             ? trimmedUrl
             : `https://${trimmedUrl}`,
       };
     });
+  }
+
+  stripHtmlAndMarkdown(text: string) {
+    // Remove HTML tags but keep the text inside
+    text = text.replace(/<\/?[^>]+(>|$)/g, '');
+
+    // Handle markdown elements
+    text = text
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Bold **text**
+      .replace(/\*(.*?)\*/g, '$1') // Italic *text*
+      .replace(/__(.*?)__/g, '$1') // Bold __text__
+      .replace(/_(.*?)_/g, '$1') // Italic _text_
+      .replace(/~~(.*?)~~/g, '$1') // Strikethrough ~~text~~
+      .replace(/`(.*?)`/g, '$1') // Inline code `code`
+      .replace(/```[\s\S]*?```/g, '') // Code blocks ```code```
+      .replace(/^>\s?/gm, '') // Blockquotes > text
+      .replace(/!\[.*?\]\((.*?)\)/g, '[Image: $1]') // Images ![alt](url)
+      .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)'); // Links [text](url)
+
+    return text.trim();
   }
 }

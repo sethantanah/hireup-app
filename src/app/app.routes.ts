@@ -10,17 +10,21 @@ import { PageNotFoundComponent } from './pages/special/page-not-found/page-not-f
 import { SubmissionsComponent } from './pages/test/submissions/submissions.component';
 import { JobPostDashboadComponent } from './pages/job-posts/job-post-dashboad/job-post-dashboad.component';
 import { ApplicationViewComponent } from './pages/job-posts/manager/application-view/application-view.component';
+import { SignupComponent } from './pages/auth/signup/signup.component';
+import { SigninComponent } from './pages/auth/signin/signin.component';
+import { authGuard } from './guards/auth.guard';
+import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 
 export const routes: Routes = [
   { path: '', component: PageNotFoundComponent  },
   // { path: 'dashboard', component: DashboardComponent },
-  { path: 'jobposts/:userId', component: JobPostDashboadComponent },
-  { path: 'jobposts/manager/:jobId', component: ManagerComponent },
-  { path: 'jobposts/tests/:jobId', component: ListTestComponent },
-  { path: 'jobposts/applicants/:jobId', component: DashboardComponent },
+  { path: 'jobposts/:userId', component: JobPostDashboadComponent, canActivate: [authGuard] },
+  { path: 'jobposts/manager/:jobId', component: ManagerComponent, canActivate: [authGuard] },
+  { path: 'jobposts/tests/:jobId', component: ListTestComponent, canActivate: [authGuard]},
+  { path: 'jobposts/applicants/:jobId', component: DashboardComponent, canActivate: [authGuard] },
   {
     path: 'jobposts/tests/manager/create/:jobId',
-    component: CreateTestComponent,
+    component: CreateTestComponent, canActivate: [authGuard]
   },
   {
     path: 'preview/:templateId',
@@ -40,20 +44,24 @@ export const routes: Routes = [
   },
   {
     path: 'jobposts/tests/manager/update/:jobId/:testId',
-    component: CreateTestComponent,
-  },
-  // {
-  //   path: 'jobposts/tests/take-test/:testId',
-  //   component: PageNotFoundComponent,
-  //   canDeactivate: [canRefreshGuard]
-  // },
-  {
-    path: 'jobposts/tests/submissions/:testId',
-    component: SubmissionsComponent,
+    component: CreateTestComponent, canActivate: [authGuard]
   },
   {
     path: 'jobposts/tests/take-test/:testId',
     component: TakeTestComponent,
-    canDeactivate: [canRefreshGuard],
+    canDeactivate: [canRefreshGuard]
   },
+  {
+    path: 'jobposts/tests/submissions/:testId',
+    component: SubmissionsComponent, canActivate: [authGuard]
+  },
+  {
+    path: 'auth/signup',
+    component: SignupComponent,
+  },{
+    path: 'auth/signin',
+    component: SigninComponent,
+  },
+  { path: 'auth/callback', component: AuthCallbackComponent }, // New route
+  { path: '**', redirectTo: 'jobposts/:userId' }
 ];

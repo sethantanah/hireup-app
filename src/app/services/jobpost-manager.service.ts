@@ -45,7 +45,7 @@ export class JobpostManagerService {
         actionLink: '',
       },
       colorScheme: { primary: '', secondary: '' },
-      id: 0,
+      id: undefined,
       sections: ['General'],
       deadline: '',
       templateId: '',

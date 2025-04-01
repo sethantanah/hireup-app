@@ -5,18 +5,6 @@ import { DataService } from '../../../../services/data.service';
 import { ApiService } from '../../../../services/api.service';
 import { JobPostData } from '../../../../models/jobpost.model';
 
-export const COMMON_FORM_FIELDS = [
-  'full_name',
-  'first_name',
-  'last_name',
-  'age',
-  'years_of_experience',
-  'email',
-  'phone',
-  'position',
-  'education',
-  'skills',
-];
 
 @Component({
   selector: 'app-shortlist-popup',
@@ -33,10 +21,14 @@ export class ShortlistPopupComponent {
   popupMessage: string = '';
   popupType: 'success' | 'error' = 'success';
 
+  selectedFields: string[] = [];
+
   constructor(
     public dataService: DataService,
     private apiService: ApiService
-  ) {}
+  ) {
+    this.selectedFields = this.dataService.selectedCardFields;
+  }
 
   getDisplayName(candidate: any): string {
     if (candidate.resume_data?.personal_details?.full_name) {
@@ -62,9 +54,18 @@ export class ShortlistPopupComponent {
     return '';
   }
 
+  
   getRelevantFields(formData: any): any[] {
     return Object.entries(formData)
-      .filter(([key]) => this.dataService.selectedCardFields.includes(key))
+      .filter(([key]) =>{
+        const containsKey = this.dataService.selectedCardFields.includes(key);
+        if(containsKey){
+          if(!this.selectedFields.includes(key)){
+             this.selectedFields.push(key)
+          }
+        }
+        return containsKey;
+      })
       .map(([key, value]) => ({ key, value }));
   }
 

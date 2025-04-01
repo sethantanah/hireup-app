@@ -1,0 +1,179 @@
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+>
+  <div
+    class="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col"
+  >
+    <!-- Header -->
+    <div
+      class="p-6 border-b flex justify-between items-center bg-gray-50 rounded-t-xl"
+    >
+      <h2 class="text-md font-bold text-gray-800">Emails Manager</h2>
+      <button
+        (click)="close()"
+        class="p-2 hover:bg-gray-200 rounded-full transition-colors"
+        aria-label="Close"
+      >
+        <svg
+          class="w-6 h-6"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Left Panel -->
+      <div class="w-1/3 p-6 border-r overflow-y-auto">
+        <div class="space-y-6">
+          <!-- Threshold Input -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Emails per page</label
+            >
+            <input
+              type="number"
+              [(ngModel)]="threshold"
+              (change)="updateThreshold()"
+              class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              min="1"
+            />
+          </div>
+
+          <!-- Email Client Selection -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Email Client</label
+            >
+            <select
+              [(ngModel)]="emailClient"
+              class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="gmail">Gmail</option>
+              <option value="outlook">Outlook</option>
+              <option value="default">Default Mail Client</option>
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Content Type</label
+            >
+            <div class="flex gap-3">
+              <label class="flex items-center">
+                <input
+                  type="radio"
+                  [(ngModel)]="contentType"
+                  value="plain"
+                  class="mr-2"
+                />
+                Plain Text
+              </label>
+              <label class="flex items-center">
+                <input
+                  type="radio"
+                  [(ngModel)]="contentType"
+                  value="html"
+                  class="mr-2"
+                />
+                HTML
+              </label>
+              <label class="flex items-center">
+                <input
+                  type="radio"
+                  [(ngModel)]="contentType"
+                  value="markdown"
+                  class="mr-2"
+                />
+                Markdown
+              </label>
+            </div>
+          </div>
+
+          <!-- Subject Input -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Subject</label
+            >
+            <input
+              type="text"
+              disabled
+              [(ngModel)]="emailSubject"
+              class="border rounded-lg px-4 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter email subject"
+            />
+          </div>
+
+          <!-- Body Input -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Body</label
+            >
+            <div
+              [innerHtml]="getPreviewContent()"
+              class="px-4 border rounded-lg py-2 w-full  resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            ></div>
+            <!-- <textarea 
+                [(ngModel)]="emailBody"
+                class="border rounded-lg px-4 py-2 w-full h-32 resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter email body"
+              ></textarea> -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel -->
+      <div class="flex-1 p-6 flex flex-col">
+        <div class="mb-4 flex items-center justify-between">
+          <h3 class="text-xl font-semibold">
+            Recipients (Page {{ currentPage + 1 }} of {{ emailPages.length }})
+          </h3>
+          <button
+            (click)="sendEmails()"
+            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Send Emails
+          </button>
+        </div>
+
+        <!-- Email Grid -->
+        <div class="flex-1 overflow-y-auto">
+          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            <div
+              *ngFor="let email of emailPages[currentPage]?.emails"
+              class="p-3 bg-gray-50 rounded-lg border hover:shadow-md transition-shadow"
+            >
+              <p class="truncate">{{ email }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-4 flex justify-center space-x-2">
+          <button
+            *ngFor="let page of emailPages; let i = index"
+            (click)="currentPage = i"
+            [class]="
+              page.isSent
+                ? 'px-4 py-2 rounded-lg bg-green-100 text-green-800 border border-green-200 hover:bg-green-200'
+                : 'px-4 py-2 rounded-lg bg-gray-100 text-gray-800 border border-gray-200 hover:bg-gray-200'
+            "
+            [class.ring-2]="currentPage === i"
+            [class.ring-blue-500]="currentPage === i"
+          >
+            {{ i + 1 }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

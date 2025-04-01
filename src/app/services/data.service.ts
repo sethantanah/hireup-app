@@ -8,12 +8,14 @@ export class DataService {
   shortlistedCandidates: Candidate[] = [];
   candidate: Candidate | undefined;
   selectedCardFields: string[] = [];
+  emailsList: string[] = [];
 
   applicationId: string = '';
   openCandidateDetails: boolean = false;
   openShortList: boolean = false;
   showFilters: boolean = false;
   openEmailPopUp: boolean = false;
+  openDocumentsUpload: boolean = false;
   
   constructor() {
     this.shortlistedCandidates = this.retrieveShortlistedCandidates();

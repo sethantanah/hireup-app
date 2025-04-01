@@ -6,21 +6,36 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { FormattingService } from '../../../../../services/formatting.service';
 import { FormField, JobPostData } from '../../../../../models/jobpost.model';
+import { JobpostingsApiService } from '../../../../../services/jobpostings-api.service';
+import { ActivatedRoute } from '@angular/router';
+import { JobpostManagerService } from '../../../../../services/jobpost-manager.service';
+import { SendemailsPopupComponent } from './sendemails-popup/sendemails-popup.component';
+import { EmailData } from '../../../../../models/messaging.model';
+import { MessagingService } from '../../../../../services/messaging.service';
+import { AlertPopupComponent } from '../../../../components/alert-popup/alert-popup.component';
+import { AlertService } from '../../../../../services/alert.service';
 
-interface EmailTemplate {
-  subject: string;
-  body: string;
-  isAutoSend: boolean;
-}
+// interface EmailTemplate {
+//   subject: string;
+//   body: string;
+//   isAutoSend: boolean;
+// }
+
 @Component({
   selector: 'app-emails',
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    SendemailsPopupComponent,
+    AlertPopupComponent,
+  ],
   templateUrl: './emails.component.html',
   styleUrl: './emails.component.scss',
 })
 export class EmailsComponent implements OnInit {
   @Input() applicationData!: JobPostData | undefined;
   @Input() variables: FormField[] | undefined;
+  @Input() emailsList: string[] = [];
   showPreview = false;
   isOpen: boolean = false;
   activeView: 'general' | 'personalized' = 'general';
@@ -68,10 +83,23 @@ export class EmailsComponent implements OnInit {
   };
 
   showInsertVariables: boolean = false;
+  isSaving: boolean = false;
+
+  showEmailPopup = false;
+
+  emailsSent: boolean = false;
+  sendingEmail: boolean = false;
+  sendingEmailFailed: boolean = false;
+
+  alert: any = null;
 
   constructor(
+    private route: ActivatedRoute,
     public dataService: DataService,
-    private formatService: FormattingService
+    private messagingService: MessagingService,
+    private jobPostService: JobpostManagerService,
+    private formatService: FormattingService,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -84,6 +112,20 @@ export class EmailsComponent implements OnInit {
         });
       });
     }
+
+    if (this.applicationData?.emailTemplates) {
+      const emailTemps = this.applicationData.emailTemplates.filter(
+        (f) => f.stage === 'first_shortlist'
+      );
+
+      if (emailTemps.length > 0) {
+        this.emailTemplates = emailTemps[0].templates;
+      }
+    }
+
+    this.alertService.alert$.subscribe((alert) => {
+      this.alert = alert;
+    });
   }
 
   switchView(view: 'general' | 'personalized') {
@@ -91,27 +133,25 @@ export class EmailsComponent implements OnInit {
   }
 
   saveTemplate(type: 'shortlisted' | 'unshortlisted') {
-    const template = this.emailTemplates[this.activeView][type];
     const emailTemplate = {
-      id: `${this.activeView}_${type}`,
       stage: 'first_shortlist',
-      type: this.activeView,
-      candidate: type,
-      template: template,
+      templates: this.emailTemplates,
     };
 
-    if(this.applicationData?.emailTemplates){
-      const index = this.applicationData.emailTemplates.findIndex((template) => template.id === emailTemplate.id);
-      if(index > -1){
+    if (this.applicationData?.emailTemplates) {
+      const index = this.applicationData.emailTemplates.findIndex(
+        (template) => template.stage === emailTemplate.stage
+      );
+      if (index > -1) {
         this.applicationData.emailTemplates[index] = emailTemplate;
-      }else{
+      } else {
         this.applicationData.emailTemplates.push(emailTemplate);
       }
-    }else{
+    } else {
       this.applicationData!.emailTemplates = [emailTemplate];
     }
 
-    console.log(this.applicationData!.emailTemplates)
+    this.saveChanges(this.applicationData);
   }
 
   toggleAutoSend(type: 'shortlisted' | 'unshortlisted') {
@@ -144,7 +184,31 @@ export class EmailsComponent implements OnInit {
     } ${variable}`;
   }
 
+  saveChanges(applicationData: any): void {
+    const jobpostId = this.route.snapshot.paramMap.get('jobId');
+    if (jobpostId) {
+      this.isSaving = true;
+      this.jobPostService
+        .createUpdateJobPostData(jobpostId, applicationData)
+        .subscribe({
+          next: (data) => {
+            if (data.data) {
+              applicationData!.id = data.data.id;
+            }
+            this.isSaving = false;
+          },
+          error: (error) => {
+            this.isSaving = false;
+            console.error(error);
+          },
+        });
+    }
+  }
+
   sendEmails() {
+    this.sendingEmailFailed = false;
+    this.emailsSent = false;
+    this.sendingEmail = true;
     const selectedTemplates = Object.entries(this.selectedGroups)
       .filter(([_, isSelected]) => isSelected)
       .map(([group]) => ({
@@ -155,6 +219,52 @@ export class EmailsComponent implements OnInit {
           ],
       }));
 
-    console.log('Sending emails for:', selectedTemplates);
+    const emails_data: EmailData[] = [];
+
+    for (let index = 0; index < selectedTemplates.length; index++) {
+      const email_data: EmailData = {
+        html_template: '',
+        text_content: '',
+        subject: '',
+        short_listed: false,
+        variables: {},
+      };
+      const template = selectedTemplates[index];
+      email_data.html_template = template.template.body;
+      email_data.text_content = this.formatService.stripHtmlAndMarkdown(
+        template.template.body
+      );
+      email_data.subject = template.template.subject;
+      email_data.short_listed = template.group === 'shortlisted' ? true : false;
+      email_data.variables = this.formattingGuide.variables.map(
+        (variable) => variable.syntax
+      );
+      emails_data.push(email_data);
+    }
+    const jobpostId = this.route.snapshot.paramMap.get('jobId') ?? '';
+    this.messagingService
+      .sendEmails(emails_data, this.activeView, jobpostId)
+      .subscribe({
+        next: () => {
+          this.emailsSent = true;
+          this.sendingEmail = false;
+          this.alertService.showSuccess('Emails sent successfully!');
+        },
+        error: () => {
+          this.sendingEmail = false;
+          this.sendingEmailFailed = true;
+          this.alertService.showDanger(
+            'Failed to send emails. Please try again.'
+          );
+        },
+      });
+  }
+
+  closeEmailPopup() {
+    this.showEmailPopup = false;
+  }
+
+  onAlertClosed(): void {
+    this.alertService.clearAlert();
   }
 }

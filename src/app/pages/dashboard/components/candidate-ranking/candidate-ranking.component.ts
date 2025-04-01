@@ -5,18 +5,21 @@ import { ApiService } from '../../../../services/api.service';
 import { Candidate } from '../../models/candidate.model';
 import { DataService } from '../../../../services/data.service';
 import {
-  COMMON_FORM_FIELDS,
   ShortlistPopupComponent,
 } from '../shortlist-popup/shortlist-popup.component';
 import { CandidateDetailsComponent } from '../candidate-details/candidate-details.component';
 import { JobPostData } from '../../../../models/jobpost.model';
 import { ActivatedRoute } from '@angular/router';
+import { AlertPopupComponent } from '../../../components/alert-popup/alert-popup.component';
+import { AlertService } from '../../../../services/alert.service';
+import { COMMON_FORM_FIELDS } from '../candidate-list/candidate-list.component';
 
 @Component({
   selector: 'app-candidate-ranking',
   imports: [
     CommonModule,
     FormsModule,
+    AlertPopupComponent,
     ShortlistPopupComponent,
     CandidateDetailsComponent,
   ],
@@ -28,6 +31,7 @@ export class CandidateRankingComponent implements OnInit {
   candidates: Candidate[] = [];
   showOptions: boolean = false; // Controls visibility of the options panel
   isLoading: boolean = false; // Loading state
+  isRefreshing: boolean = false; // Loading state
   onError: boolean = false;
   file: File | undefined;
   jobDescription: string = '';
@@ -35,6 +39,7 @@ export class CandidateRankingComponent implements OnInit {
   selectedCategories: string[] = [];
   private expandedScores = new Set<any>();
   areAllScoresExpanded = false;
+  alert: any = null;
 
   private relevantFields = COMMON_FORM_FIELDS;
   filteredFields = COMMON_FORM_FIELDS;
@@ -42,10 +47,19 @@ export class CandidateRankingComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public dataService: DataService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
+    this.loadData();
+
+    this.alertService.alert$.subscribe((alert) => {
+      this.alert = alert;
+    });
+  }
+
+  loadData() {
     this.evaluationData = this.applicationData?.rankingSettings;
 
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
@@ -72,14 +86,30 @@ export class CandidateRankingComponent implements OnInit {
     }
   }
 
-  toggleOptions() {
-    this.showOptions = !this.showOptions;
-  }
+  refreshData() {
+    this.evaluationData = this.applicationData?.rankingSettings;
 
-  onFileUpload(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      this.file = file;
+    const jobpostId = this.route.snapshot.paramMap.get('jobId');
+    this.dataService.saveJobId(jobpostId || '');
+
+    if (jobpostId) {
+      this.isRefreshing = true; // Show loading indicator
+      this.apiService.getRankedCandidates(jobpostId).subscribe({
+        next: (data) => {
+          this.candidates = data as Candidate[];
+          this.isRefreshing = false;
+        },
+        error: (error) => {
+          this.isRefreshing = false;
+        },
+      });
+    }
+    if (this.applicationData) {
+      this.relevantFields =
+        this.applicationData?.cardSettings || COMMON_FORM_FIELDS;
+      this.filteredFields =
+        this.applicationData?.searchFilterSettings || COMMON_FORM_FIELDS;
+      this.dataService.selectedCardFields = this.relevantFields;
     }
   }
 
@@ -98,13 +128,26 @@ export class CandidateRankingComponent implements OnInit {
 
     this.apiService.rankCandidates(formData).subscribe({
       next: (data) => {
+        this.alertService.showSuccess('Resume ranking is being processed in the background. Refresh to see progress.');
         this.isLoading = false;
       },
-      error: (err) => {
+      error: (error) => {
         this.isLoading = false;
-        console.log(err);
+        console.error(error);
+        this.alertService.showDanger(error.error.detail);
       },
     });
+  }
+
+  toggleOptions() {
+    this.showOptions = !this.showOptions;
+  }
+
+  onFileUpload(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.file = file;
+    }
   }
 
   onFilterByIds(filters: string[]) {
@@ -255,5 +298,9 @@ export class CandidateRankingComponent implements OnInit {
 
   getScoreKeys(score: any): string[] {
     return Object.keys(score);
+  }
+
+  onAlertClosed(): void {
+    this.alertService.clearAlert();
   }
 }

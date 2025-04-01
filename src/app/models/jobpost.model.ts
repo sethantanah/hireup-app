@@ -81,7 +81,7 @@ export interface JobPostData {
   formData: FormData;
   submissionMessage: SubmissionMessage;
   colorScheme: ColorScheme;
-  id: number;
+  id?: number;
   sections: string[];
   deadline: string;
   templateId: string;

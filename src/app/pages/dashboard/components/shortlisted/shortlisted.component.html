@@ -51,10 +51,11 @@
   </div>
 </div>
 
-<div class="p-6">
+<div class="">
+<div class="p-6 pt-0">
   <div
     *ngIf="!isLoading && candidates.length > 0"
-    class="flex flex-col md:flex-row justify-center gap-2"
+    class="flex flex-col md:flex-row justify-center md:justify-end gap-2"
     style="flex-shrink: 0"
   >
     <app-candidate-filters
@@ -67,11 +68,14 @@
 
     <button
       (click)="toggleEmailingPopup()"
-      class="ml-auto w-[200px] h-[47px] mt-3 mb-auto shadow-md flex items-center gap-2 px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
+      style="flex-shrink: 0"
+      class="w-[160px] h-[47px] flex flex-row justify-center mr-5 mt-3 mb-auto shadow-md flex items-center gap-2 px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
     >
-      <i class="fas fa-envelop text-gray-600"></i>
-      <span class="text-sm font-medium text-gray-700">Configure Emailing</span>
+    <i class="fas fa-envelope text-gray-600"></i>
+      <span class="text-sm font-medium text-gray-700">Send Emails</span>
     </button>
+
+    <!-- <div class="hidden md:block w-[10%]"></div> -->
   </div>
 
   <app-emails
@@ -83,12 +87,14 @@
   <app-candidate-details></app-candidate-details>
 
   <div
-    class="candidate-grid max-h[600px] grid grid-cols-1 md-grid-cols-3 lg:grid-cols-4"
+    class="candidate-grid max-h[600px] flex flex-row flex-wrap:wrap"
+    style="flex-wrap: wrap"
     *ngIf="!isLoading && viewMode == 'cards'"
   >
     <ng-container *ngFor="let candidate of filteredCandidates">
       <div
-        class="w-[300px] md:w-[290px] max-w[400px] bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 mb-4 border border-gray-100"
+      style="flex-shrink: 0"
+        class="w-[300px] md:w-[290px] max-w[400px]  bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 mb-4 border border-gray-100"
       >
         <!-- Card Header -->
         <div class="space-y-2 mb-6">
@@ -116,7 +122,7 @@
           <ng-container *ngIf="candidate.form_data">
             <div
               *ngFor="let field of getRelevantFields(candidate.form_data)"
-              class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <i class="fas fa-info-circle text-blue-500 mt-1"></i>
               <div class="flex-1">
@@ -202,5 +208,11 @@
     <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
     <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
+    <div class="pt-12 bg-transparent"></div>
   </div>
+</div>
 </div>

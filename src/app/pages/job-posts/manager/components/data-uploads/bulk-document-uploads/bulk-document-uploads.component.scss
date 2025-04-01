@@ -1,0 +1,61 @@
+.container {
+    max-width: 600px;
+    margin: auto;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .btn-group {
+    margin: 20px 0;
+  }
+  
+  .btn {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  .gmail-btn {
+    background-color: #ea4335;
+    color: white;
+  }
+  
+  .outlook-btn {
+    background-color: #0078d4;
+    color: white;
+  }
+  
+  .search-section {
+    margin-top: 20px;
+  }
+  
+  input {
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+  }
+  
+  .search-btn {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .email-table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+  }
+  
+  .email-table th, .email-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .email-table th {
+    background-color: #f4f4f4;
+  }
+  

@@ -1,10 +1,10 @@
 <div
   class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
   (click)="dataService.toggleEmailPopUp()"
-  *ngIf="dataService.openEmailPopUp"
+  *ngIf="dataService.openEmailPopUp && !showEmailPopup"
 >
   <div
-    class="bg-white rounded-xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col"
+    class="bg-white rounded-xl shadow-2xl w-full ml-10 mr-10 h-[90vh] flex flex-col"
     (click)="$event.stopPropagation()"
   >
     <!-- Header -->
@@ -35,7 +35,7 @@
           >
             General Emails
           </button>
-          <button
+          <!-- <button
             [class.bg-blue-600]="activeView === 'personalized'"
             [class.text-white]="activeView === 'personalized'"
             [class.bg-gray-100]="activeView !== 'personalized'"
@@ -44,7 +44,7 @@
             class="w-full px-4 py-3 rounded-lg transition-colors text-left"
           >
             Personalized Emails
-          </button>
+          </button> -->
         </div>
       </div>
 
@@ -76,7 +76,7 @@
 
         <!-- Template Editor -->
         <div class="flex-1 overflow-y-auto p-6">
-          <div class="max-w-3xl mx-auto space-y-6">
+          <div class="max-w-3xl  space-y-6">
             <!-- Auto Send Toggle -->
             <!-- <div class="flex items-center justify-end gap-3">
                 <button 
@@ -288,9 +288,14 @@
 
               <button
                 (click)="saveTemplate(activeTab)"
-                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                [disabled]="isSaving"
               >
-                Save Template
+                <span
+                  *ngIf="isSaving"
+                  class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                ></span>
+                <span>{{ isSaving ? "Saving..." : "Save Template" }}</span>
               </button>
             </div>
           </div>
@@ -300,6 +305,7 @@
         <div class="px-6 py-4 border-t bg-gray-50">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
+             <span class="text-semibold">Send To</span>
               <label class="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -320,9 +326,33 @@
 
             <button
               (click)="sendEmails()"
-              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center"
+              [disabled]="sendingEmail"
             >
-              Send Emails
+              <span *ngIf="!sendingEmail">Send Emails</span>
+              <span *ngIf="sendingEmail" class="flex items-center">
+                <svg
+                  class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Sending...
+              </span>
             </button>
           </div>
         </div>
@@ -330,3 +360,21 @@
     </div>
   </div>
 </div>
+
+<app-alert-popup
+  [show]="!!alert"
+  [type]="alert?.type || 'success'"
+  [message]="alert?.message || ''"
+  [autoClose]="alert?.autoClose || true"
+  [duration]="alert?.duration || 5000"
+  (closed)="onAlertClosed()"
+></app-alert-popup>
+
+<!-- <app-sendemails-popup
+  [emails]="emailsList"
+  [emailSubject]="emailTemplates[activeView][activeTab].subject"
+  [emailBody]="emailTemplates[activeView][activeTab].body"
+  *ngIf="showEmailPopup"
+  (closePopup)="closeEmailPopup()"
+>
+</app-sendemails-popup> -->
