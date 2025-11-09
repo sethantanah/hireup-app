@@ -54,7 +54,7 @@ export class DynamicFormComponent {
      const applicationData: JobPostData = jobPostService.getApplicationData();
      applicationData.formData.fields = this.fields;
      applicationData.sections = this.sections;
-     this.jobPostService.upDateApplicationData(applicationData);
+     this.jobPostService.updateApplicationData(applicationData);
     }, 3000);
   }
 

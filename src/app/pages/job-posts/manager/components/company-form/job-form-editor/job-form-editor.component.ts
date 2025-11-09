@@ -58,12 +58,13 @@ export class JobFormEditorComponent implements OnInit {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
     this.loading = true;
     if (jobpostId) {
-      this.jobPostService.jobPostData(jobpostId).subscribe({
+      this.jobPostService.getJobPostData(jobpostId).subscribe({
         next: (data) => {
           this.loading = false;
-          if (data.length > 0) {
+          if (data.success) {
             const localData = this.jobPostService.getApplicationData();
-            const uploadedData = data[0].template_data;
+            const uploadedData = data?.data![0].template_data;
+           
             if (
               uploadedData.lastUpdated &&
               localData.lastUpdated &&
@@ -71,7 +72,7 @@ export class JobFormEditorComponent implements OnInit {
             ) {
               if (uploadedData.lastUpdated > localData.lastUpdated) {
                 this.applicationData = uploadedData;
-                this.jobPostService.upDateApplicationData(
+                this.jobPostService.updateApplicationData(
                   this.applicationData!
                 );
               } else {
@@ -79,7 +80,7 @@ export class JobFormEditorComponent implements OnInit {
               }
             } else {
               this.applicationData = uploadedData;
-              this.jobPostService.upDateApplicationData(this.applicationData!);
+              this.jobPostService.updateApplicationData(this.applicationData!);
             }
           } else {
             this.applicationData = this.jobPostService.getApplicationData();
@@ -91,7 +92,8 @@ export class JobFormEditorComponent implements OnInit {
         },
         error: (error) => {
           this.loading = false;
-          console.error(error);
+          // console.error(error);
+          this.applicationData = this.jobPostService.getApplicationData();
 
           setInterval(() => {
             this.autoSave();
@@ -121,7 +123,10 @@ export class JobFormEditorComponent implements OnInit {
   }
 
   addNavLink(): void {
-    this.applicationData!.company.navLinks.push({ text: '', url: '' });
+    this.applicationData!.company.navLinks.push({
+      text: '', url: '',
+      label: ''
+    });
   }
 
   deleteNavLink(index: number): void {
@@ -147,7 +152,7 @@ export class JobFormEditorComponent implements OnInit {
   autoSave() {
     if (this.applicationData) {
       this.applicationData.lastUpdated = Date.now(); // Set to the current timestamp
-      this.jobPostService.upDateApplicationData(this.applicationData);
+      this.jobPostService.updateApplicationData(this.applicationData);
     }
   }
 
@@ -157,12 +162,12 @@ export class JobFormEditorComponent implements OnInit {
       this.loading = true;
       this.loadingText = 'Saving ...';
       this.jobPostService
-        .createUpdateJobPostData(jobpostId, this.applicationData)
+        .createUpdateJobPostData(jobpostId, this.applicationData!)
         .subscribe({
           next: (data) => {
             if (data.data) {
               this.applicationData!.id = data.data.id;
-              this.jobPostService.upDateApplicationData(this.applicationData!);
+              this.jobPostService.updateApplicationData(this.applicationData!);
             }
             this.loading = false;
             this.loadingText = 'Loading ...';

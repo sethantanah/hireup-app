@@ -87,7 +87,7 @@
                 *ngIf="form"
                 [formGroup]="form"
                 (ngSubmit)="onSubmit()"
-                class="space-y-6"
+                class="space-y-6 text-left items-start"
               >
                 <!-- Form Fields -->
                 <div
@@ -342,18 +342,18 @@
                   </div>
                 </div>
                 <!-- Declaration Checkbox -->
-                <div *ngIf="jobAppData.applySection.declaration" class="mt-4">
-                  <label class="flex items-start space-x-2">
+                <div *ngIf="jobAppData.applySection.declaration" class="mt-4 flex items-start gap-1">
+
                     <input
                       type="checkbox"
                       formControlName="agreeToDeclaration"
                       id="acceptDeclaration"
-                      class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      class="h-4 max-w-4 ml-0 pl-0 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                     />
                     <span class="text-sm text-gray-700">{{
                       jobAppData.applySection.declaration
                     }}</span>
-                  </label>
+                 
                 </div>
                 <!-- Submit Button -->
                 <button

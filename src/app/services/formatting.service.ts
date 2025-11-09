@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { NavLink } from '../models/jobpost.model';
+import { FooterLink, NavLink } from '../models/jobpost.model';
 
 interface MarkdownRule {
   pattern: RegExp;
@@ -136,7 +136,7 @@ export class FormattingService {
     return phone.replace(/[^\d+]/g, '');
   }
 
-  processLinks(links: NavLink[]): FormatNavLink[] {
+  processLinks(links: NavLink[] | FooterLink[]): FormatNavLink[] {
     // Phone regex matches common formats including international
     const phoneRegex =
       /^(\+?\d{1,4}[-.\s]?)?(\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}[-.\s]?\d{0,4}$/;

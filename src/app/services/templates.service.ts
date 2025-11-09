@@ -32,6 +32,13 @@ export class TemplatesService {
       preview: 'assets/classic-template.jpg',
       formOnly: false
     },
+      {
+      id: '4',
+      title: 'Classic - Progress',
+      description: 'Classic template great for cooporate hiring.',
+      preview: 'assets/classic-template.jpg',
+      formOnly: false
+    },
   ];
   constructor() {}
 }

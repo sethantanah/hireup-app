@@ -4,62 +4,46 @@
 </div>
 
 <div class="p-6 pt-0">
-  <div
-    class="w-full flex flex-col md:flex-row justify-center md:justify-end gap-2"
-    style="flex-shrink: 0"
-  >
-    <button
-    *ngIf="!isLoading"
-      (click)="openDataUpload()"
+  <div class="w-full flex flex-col md:flex-row justify-center md:justify-end gap-2" style="flex-shrink: 0">
+    <button *ngIf="!isLoading" (click)="toggleView()"
+      class="shortlist-button h-[47px] mt-3 mb-auto shadow-md flex flex-row justify-center"
+      style="flex-shrink: 0">
+
+      <i class="fas" [ngClass]="viewMode === 'table' ? 'fa-th' : 'fa-list'"></i>
+      {{ viewMode === 'table' ? 'Cards View' : 'Table View' }}
+    </button>
+
+    <button *ngIf="!isLoading" (click)="openDataUpload()"
       class="shortlist-button w-[200px] h-[47px] mt-3 mb-auto shadow-md flex flex-row justify-center"
-      style="flex-shrink: 0"
-    >
+      style="flex-shrink: 0">
       <i class="fas fa-upload"></i> Import Documents
     </button>
-    <button
-      (click)="viewShortlist()"
+    <button (click)="viewShortlist()"
       class="shortlist-button w-[200px] h-[47px] mt-3 mb-auto shadow-md flex flex-row justify-center"
-      style="flex-shrink: 0"
-      *ngIf="!isLoading && candidates.length > 0"
-    >
+      style="flex-shrink: 0" *ngIf="!isLoading && candidates.length > 0">
       <i class="fas fa-list"></i> View Shortlist ({{
-        dataService.shortlistedCandidates.length
+      dataService.shortlistedCandidates.length
       }})
     </button>
-    <app-candidate-filters
-      (advanceFilterChange)="onAdvanceFilterChange($event)"
-      (filterChange)="onFilterChange($event)"
-      [filterFields]="filteredFields"
-      [popupView]="candidates[0].resume_data ? true : false"
-      [showResumeFilters]="candidates[0].resume_data ? true : false"
-      class="mr-5"
-      *ngIf="!isLoading && candidates.length > 0"
-    ></app-candidate-filters>
+    <app-candidate-filters (advanceFilterChange)="onAdvanceFilterChange($event)" (filterChange)="onFilterChange($event)"
+      [filterFields]="filteredFields" [popupView]="candidates[0].resume_data ? true : false"
+      [showResumeFilters]="candidates[0].resume_data ? true : false" class="mr-5 lg:mr-0"
+      *ngIf="!isLoading && candidates.length > 0"></app-candidate-filters>
   </div>
 
-  <app-bulk-document-uploads
-    [jobPostId]="jobPostId"
-    [jobAppData]="applicationData"
-  ></app-bulk-document-uploads>
+  <app-bulk-document-uploads [jobPostId]="jobPostId" [jobAppData]="applicationData"></app-bulk-document-uploads>
 
   <!-- No Data Card -->
-  <div
-    class="w-full min-h-[80vh] flex items-center justify-center"
-    *ngIf="!isLoading && candidates.length === 0"
-  >
+  <div class="w-full min-h-[80vh] flex items-center justify-center" *ngIf="!isLoading && candidates.length === 0">
     <div class="max-w-sm w-full mx-0">
       <div class="bg-white rounded-2xl shadow-lg p-4 border border-gray-100">
         <!-- Icon Container -->
         <div class="mb-6 relative">
-          <div
-            class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto"
-          >
+          <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto">
             <i class="fas fa-folder-open text-2xl text-blue-500"></i>
           </div>
           <div class="absolute -right-2 top-0">
-            <div
-              class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center"
-            >
+            <div class="w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center">
               <i class="fas fa-search text-gray-400 text-sm"></i>
             </div>
           </div>
@@ -76,13 +60,9 @@
 
         <!-- Action Button -->
         <div class="flex justify-center">
-          <button
-            (click)="refreshData()"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow group"
-          >
-            <i
-              class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"
-            ></i>
+          <button (click)="refreshData()"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-xl font-medium transition-all duration-200 shadow-sm hover:shadow group">
+            <i class="fas fa-sync-alt group-hover:rotate-180 transition-transform duration-500"></i>
             <span>Refresh Data</span>
           </button>
         </div>
@@ -91,41 +71,39 @@
   </div>
   <!-- No Data Card -->
 
-  <app-shortlist-popup
-    (filterChange)="onFilterByIds($event)"
-  ></app-shortlist-popup>
+  <app-shortlist-popup (filterChange)="onFilterByIds($event)"></app-shortlist-popup>
 
   <app-candidate-details></app-candidate-details>
 
-  <div
-    class="candidate-grid max-h[600px] flex flex-row flex-wrap:wrap"
-    style="flex-wrap: wrap"
-    *ngIf="!isLoading && viewMode == 'cards'"
-  >
-    <ng-container
-      *ngFor="let candidate of filteredCandidates"
-      style="flex-shrink: 0"
-    >
+  <ng-container *ngIf="!isLoading && this.candidates && viewMode == 'table'">
+    <app-table-view
+            [columns]="tableColumns"
+            [data]="this.candidates"
+            [pageSize]="pageSize"
+            [config]="tableConfig"
+            (rowClick)="onRowClick($event)"
+            (filteredDataChange)="onFilteredDataChange($event)"
+            (exportRequest)="onExportRequest($event)"
+      ></app-table-view>
+  </ng-container>
+
+  <div class="candidate-grid max-h[600px] flex flex-row flex-wrap:wrap" style="flex-wrap: wrap"
+    *ngIf="!isLoading && viewMode == 'cards'">
+    <ng-container *ngFor="let candidate of filteredCandidates" style="flex-shrink: 0">
       <div
         class="w-[300px] md:w-[290px] max-w[400px] bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-5 mb-4 border border-gray-100"
-        style="flex-shrink: 0"
-      >
+        style="flex-shrink: 0">
         <!-- Card Header -->
         <div class="space-y-2 mb-6">
           <div class="flex items-start justify-between">
             <h3 class="text-lg font-bold text-gray-800 leading-tight">
               {{ getDisplayName(candidate) }}
             </h3>
-            <span
-              class="inline-flex px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full"
-            >
+            <span class="inline-flex px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full">
               Active
             </span>
           </div>
-          <p
-            class="text-sm text-gray-600 flex items-center gap-2"
-            *ngIf="getExperience(candidate)"
-          >
+          <p class="text-sm text-gray-600 flex items-center gap-2" *ngIf="getExperience(candidate)">
             <i class="fas fa-briefcase text-gray-400"></i>
             {{ getExperience(candidate) }} years experience
           </p>
@@ -134,10 +112,8 @@
         <!-- Card Body -->
         <div class="space-y-4 mb-6">
           <ng-container *ngIf="candidate.form_data">
-            <div
-              *ngFor="let field of getRelevantFields(candidate.form_data)"
-              class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors"
-            >
+            <div *ngFor="let field of getRelevantFields(candidate.form_data)"
+              class="flex items-start gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors">
               <i class="fas fa-info-circle text-blue-500 mt-1"></i>
               <div class="flex-1">
                 <span class="text-xs font-medium text-gray-500 block mb-1">
@@ -152,35 +128,21 @@
         </div>
 
         <!-- Card Footer -->
-        <div
-          class="flex items-center justify-between pt-4 border-t border-gray-100"
-        >
-          <button
-            (click)="viewDetails(candidate)"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
-          >
+        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+          <button (click)="viewDetails(candidate)"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors">
             <i class="fas fa-eye"></i>
             <span>View Details</span>
           </button>
 
           <div class="relative">
-            <input
-              type="checkbox"
-              id="shortlist-{{ candidate.id }}"
-              class="peer hidden"
-              [checked]="isShortlisted(candidate)"
-              (change)="toggleShortlist(candidate)"
-            />
-            <label
-              for="shortlist-{{ candidate.id }}"
-              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm font-medium text-gray-600 hover:bg-gray-50 peer-checked:text-blue-600 peer-checked:bg-blue-50 transition-colors"
-            >
-              <i
-                class="fas"
-                [ngClass]="
+            <input type="checkbox" id="shortlist-{{ candidate.id }}" class="peer hidden"
+              [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
+            <label for="shortlist-{{ candidate.id }}"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm font-medium text-gray-600 hover:bg-gray-50 peer-checked:text-blue-600 peer-checked:bg-blue-50 transition-colors">
+              <i class="fas" [ngClass]="
                   isShortlisted(candidate) ? 'fa-check-circle' : 'fa-circle'
-                "
-              ></i>
+                "></i>
               Shortlist
             </label>
           </div>

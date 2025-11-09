@@ -34,7 +34,7 @@ export class PreviewComponent {
   selectTemplate(template: JobTemplate) {
     this.closePreview();
     this.applicationData!.templateId = template.id;
-    this.jobPostService.upDateApplicationData(this.applicationData!);
+    this.jobPostService.updateApplicationData(this.applicationData!);
 
     // this.jobPostService
     //   .createUpdateJobPostData(this.applicationData!)

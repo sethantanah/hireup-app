@@ -1,0 +1,307 @@
+<!-- table.component.html -->
+<div class="compact-table-container">
+    <!-- Compact Header -->
+    <div class="compact-header">
+        <div class="header-main">
+            <div class="search-box">
+                <svg class="icon-search" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="text" [(ngModel)]="globalSearch" (input)="onGlobalSearch()" placeholder="Search..."
+                    class="search-input">
+                <button *ngIf="globalSearch" (click)="clearGlobalSearch()" class="btn-clear-search">
+                    <svg class="icon-close" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button class="btn-icon" [class.active]="showFilterPanel" (click)="showFilterPanel = !showFilterPanel"
+                    title="Filters">
+                    <svg class="icon-filter" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"></path>
+                    </svg>
+                    <span *ngIf="filters.length > 0" class="badge">{{ filters.length }}</span>
+                </button>
+
+                <button class="btn-icon" [class.active]="showColumnPanel" (click)="showColumnPanel = !showColumnPanel"
+                    *ngIf="tableConfig.showColumnToggle" title="Columns">
+                    <svg class="icon-columns" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                        <line x1="15" y1="3" x2="15" y2="21"></line>
+                    </svg>
+                </button>
+
+                <div class="dropdown" *ngIf="tableConfig.showExport">
+                    <button class="btn-icon" title="Export">
+                        <svg class="icon-download" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu">
+                        <button (click)="exportData('shortlist')" class="dropdown-item flex flex-row gap-2">
+                            <svg class="icon-csv" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            Add to Shortlisted
+                        </button>
+                        <!-- <button (click)="exportData('unshortlist')" class="dropdown-item">
+              <svg class="icon-json" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <path d="M10 12h1v4h-1z"></path>
+                <path d="M14 12h1v4h-1z"></path>
+                <path d="M8 16h8"></path>
+              </svg>
+              Unshortlist
+            </button> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <!-- <div class="quick-stats">
+      <span class="stat">
+        <svg class="icon-records" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="8" y1="7" x2="8" y2="17"></line>
+          <line x1="16" y1="7" x2="16" y2="17"></line>
+        </svg>
+        {{ filteredData.length }}/{{ data?.length || 0 }} records
+      </span>
+      <span *ngIf="selectedRows.size > 0" class="stat selected">
+        <svg class="icon-selected" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        {{ selectedRows.size }} selected
+      </span>
+      <span *ngIf="filters.length > 0" class="stat filters">
+        <svg class="icon-filter" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"></path>
+        </svg>
+        {{ filters.length }} filters
+      </span>
+    </div> -->
+    </div>
+
+    <!-- Compact Filter Panel -->
+    <div class="compact-filter-panel" *ngIf="showFilterPanel">
+        <div class="filter-row">
+            <select [(ngModel)]="newFilter.field" class="form-control compact">
+                <option value="">Select field</option>
+                <option *ngFor="let col of columns" [value]="col.key" [disabled]="!col.filterable">
+                    {{ col.label }}
+                </option>
+            </select>
+
+            <select [(ngModel)]="newFilter.operator" class="form-control compact">
+                <option value="contains">Contains</option>
+                <option value="equals">Equals</option>
+                <option value="startsWith">Starts with</option>
+                <option value="endsWith">Ends with</option>
+            </select>
+
+            <input type="text" [(ngModel)]="newFilter.value" class="form-control compact" placeholder="Filter value"
+                (keyup.enter)="addFilter()">
+
+            <button class="btn btn-primary compact flex flex-row gap-2" (click)="addFilter()">
+                <svg class="icon-add mt-auto mb-auto" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add Filter
+            </button>
+            <button class="btn btn-outline compact flex flex-row gap-2" (click)="clearAllFilters()">
+                <svg class="icon-clear mt-auto mb-auto" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18"></path>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Clear All
+            </button>
+        </div>
+
+        <div class="active-filters-compact" *ngIf="filters.length > 0">
+            <div *ngFor="let filter of filters; let i = index" class="filter-tag-compact">
+                <span class="filter-label">{{ getColumnLabel(filter.field) }}</span>
+                <span class="filter-operator">{{ filter.operator }}</span>
+                <span class="filter-value">"{{ filter.value }}"</span>
+                <button (click)="removeFilter(i)" class="btn-tag-close">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18"></path>
+                        <path d="m6 6 12 12"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compact Column Panel -->
+    <div class="compact-column-panel" *ngIf="showColumnPanel">
+        <div class="column-grid">
+            <div *ngFor="let col of columns" class="column-item-compact">
+                <label class="checkbox-label">
+                    <input type="checkbox" [checked]="col.visible !== false" (change)="toggleColumnVisibility(col)">
+                    <span class="checkmark">
+                        <svg class="checkmark-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </span>
+                    {{ col.label }}
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compact Table -->
+    <div class="table-scroll-container">
+        <table class="compact-data-table" [class.striped]="tableConfig.striped">
+            <thead>
+                <tr>
+                    <th class="compact-checkbox" *ngIf="tableConfig.showRowNumbers">
+                        <label class="checkbox-label">
+                            <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()">
+                            <span class="checkmark">
+                                <svg class="checkmark-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                        </label>
+                    </th>
+                    <th *ngFor="let col of visibleColumns" [class.sortable]="col.sortable"
+                        (click)="col.sortable && sortData(col.key)" class="compact-header">
+                        <div class="th-content-compact">
+                            {{ col.label }}
+                            <span *ngIf="sortField === col.key" class="sort-indicator">
+                                <svg *ngIf="sortDirection === 'asc'" class="sort-asc" width="12" height="12"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m18 15-6-6-6 6"></path>
+                                </svg>
+                                <svg *ngIf="sortDirection === 'desc'" class="sort-desc" width="12" height="12"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="m6 9 6 6 6-6"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let row of paginatedData; let i = index" (click)="onRowClick(row, $event)"
+                    [class.selected]="selectedRows.has(row)">
+                    <td class="compact-checkbox" *ngIf="tableConfig.showRowNumbers">
+                        <label class="checkbox-label">
+                            <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)"
+                                class="row-checkbox">
+                            <span class="checkmark">
+                                <svg class="checkmark-icon" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                            </span>
+                        </label>
+                    </td>
+                    <td *ngFor="let col of visibleColumns" class="compact-cell">
+                        <div class="cell-content-compact" [title]="formatDisplayValue(getNestedValue(row, col.key))">
+                            {{ formatDisplayValue(getNestedValue(row, col.key)) }}
+                        </div>
+                    </td>
+                </tr>
+                <tr *ngIf="paginatedData.length === 0">
+                    <td [attr.colspan]="visibleColumns.length + (tableConfig.showRowNumbers ? 1 : 0)"
+                        class="no-data-compact">
+                        <div class="no-data-content">
+                            <svg class="icon-empty" width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1">
+                                <path
+                                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+                                </path>
+                                <polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline>
+                                <polyline points="7.5 19.79 7.5 14.6 3 12"></polyline>
+                                <polyline points="21 12 16.5 14.6 16.5 19.79"></polyline>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                            </svg>
+                            <span>{{ data?.length === 0 ? 'No data available' : 'No matching records found' }}</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Compact Pagination -->
+    <div class="compact-pagination" *ngIf="totalPages > 1">
+        <div class="pagination-info">
+            <span>Page {{ currentPage }} of {{ totalPages }}</span>
+            <span class="records-info">({{ filteredData.length }} total records)</span>
+        </div>
+
+        <div class="pagination-controls">
+            <button [disabled]="currentPage === 1" (click)="changePage(1)" class="page-btn compact" title="First page">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="11 17 6 12 11 7"></polyline>
+                    <polyline points="18 17 13 12 18 7"></polyline>
+                </svg>
+            </button>
+            <button [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)" class="page-btn compact"
+                title="Previous page">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+
+            <div class="page-numbers">
+                <button *ngFor="let page of pageNumbers" [class.active]="page === currentPage"
+                    [class.ellipsis]="page === -1" (click)="page !== -1 && changePage(page)" class="page-btn compact">
+                    {{ page === -1 ? '...' : page }}
+                </button>
+            </div>
+
+            <button [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)"
+                class="page-btn compact" title="Next page">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+            </button>
+            <button [disabled]="currentPage === totalPages" (click)="changePage(totalPages)" class="page-btn compact"
+                title="Last page">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="13 17 18 12 13 7"></polyline>
+                    <polyline points="6 17 11 12 6 7"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <div class="page-size">
+            <label for="page-size-select">Show</label>
+            <select id="page-size-select" [(ngModel)]="pageSize" (change)="currentPage = 1; applyFilters()"
+                class="page-size-select compact">
+                <option [value]="10">10</option>
+                <option [value]="25">25</option>
+                <option [value]="50">50</option>
+            </select>
+            <span>per page</span>
+        </div>
+    </div>
+</div>

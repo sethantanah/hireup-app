@@ -64,7 +64,7 @@ export class ShortlistedComponent implements OnInit {
     private apiService: ApiService,
     public dataService: DataService,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
@@ -220,7 +220,11 @@ export class ShortlistedComponent implements OnInit {
       const resumeData = candidate.resume_data;
 
       // Case-insensitive matching using toLowerCase()
-      const lowerCaseResumeText = candidate.resume_text?.toLowerCase() || '';
+      const jsonString = JSON.stringify(candidate, (key, value) => {
+        return typeof value === "function" ? undefined : value;
+      });
+
+      const lowerCaseResumeText = jsonString?.toLowerCase() || '';
       const lowerCaseSearchText = filters.search.toLowerCase();
       const matchAny = lowerCaseResumeText.includes(lowerCaseSearchText);
 
@@ -337,7 +341,7 @@ export class ShortlistedComponent implements OnInit {
           if (typeof email === 'string') {
             this.emailsList.push(email);
           }
-        } catch (error) {}
+        } catch (error) { }
       }
 
       if (candidate.resume_data) {

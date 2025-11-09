@@ -57,10 +57,10 @@ export class JobPostDashboadComponent {
   loadData() {
     const userId = this.route.snapshot.paramMap.get('userId');
     this.loading = true;
-    this.apiService.jobpostings(userId ?? '').subscribe({
+    this.apiService.getJobPostings(userId ?? '').subscribe({
       next: (data) => {
         this.jobPostings = data as any[];
-        if (this.jobPostings.length > 0) {
+        if (this.jobPostings?.length > 0) {
           this.selectProject(this.jobPostings[0]);
         }
         this.loading = false;
@@ -76,8 +76,7 @@ export class JobPostDashboadComponent {
     const userId = this.route.snapshot.paramMap.get('userId');
     this.isRefreshing = true;
 
-    // Simulate an async operation
-    this.apiService.jobpostings(userId ?? '').subscribe({
+    this.apiService.getJobPostings(userId ?? '').subscribe({
       next: (data) => {
         this.jobPostings = data as any[];
         if (this.jobPostings.length > 0) {
@@ -121,34 +120,46 @@ export class JobPostDashboadComponent {
       this.isCreatingJobpost = true;
       this.apiService.createUpdateJobPost(userId!, newJob).subscribe({
         next: (data) => {
-
           this.selectedJobPost = data.data;
-          this.jobPostings.push(data.data);
-          
+          this.jobPostings?.push(data.data);
+
           // Create Application Data
           localStorage.removeItem('applicationData');
           const applicationData: JobPostData =
-          this.jobPostService.getApplicationData();
+            this.jobPostService.getApplicationDataRaw();
           applicationData.formData.fields = [];
-          applicationData.formData.fields.push({
-            type: 'file',
-            label: 'CV Document',
-            key: 'nfmpkuh7yov',
-            required: true,
-            section: 'Upload Documents',
-            min_length: '',
-            max_length: '',
-            instructions: '',
-          });
+          applicationData.formData.fields.push(...[
+            {
+              type: 'text',
+              label: 'Full Name',
+              key: 'nfmpkuh7yov',
+              required: true,
+              section: 'Biographical Information',
+              min_length: '',
+              max_length: '',
+              instructions: '',
+            },
+            {
+              type: 'file',
+              label: 'Resume / CV',
+              key: 'qfwpduh7yovyu',
+              required: true,
+              section: 'Upload Documents',
+              min_length: '',
+              max_length: '',
+              instructions: '',
+            }
+          ]);
           applicationData.sections = [];
-          applicationData.sections.push("Upload Documents")
+          applicationData.sections.push(...["Biographical Information", "Upload Documents"]);
           this.jobPostService
             .createUpdateJobPostData(this.selectedJobPost.id, applicationData)
             .subscribe({
               next: (res) => {
                 if (res.data) {
                   applicationData!.id = res.data.id;
-                  this.jobPostService.upDateApplicationData(applicationData);
+                  console.log('Updating service application data 33', applicationData);
+                  this.jobPostService.updateApplicationData(applicationData);
                 }
               },
               error: (err) => {
@@ -246,7 +257,7 @@ export class JobPostDashboadComponent {
     this.sharePopover = false;
   }
 
-  publishJob(jobId: string) {}
+  publishJob(jobId: string) { }
 
   shareJob(jobId: any) {
     // Extract the base URL of the current site
@@ -262,7 +273,7 @@ export class JobPostDashboadComponent {
           text: `Job post: ${this.selectedJobPost.title}`, // Customize the text
           url: shareUrl, // The URL to share
         })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           console.error('Error sharing test:', error);
         });
@@ -280,7 +291,7 @@ export class JobPostDashboadComponent {
     this.openAlertPopup('URL copied to clipboard', 'success');
   }
 
-  getEmbedCode(jobId: string) {}
+  getEmbedCode(jobId: string) { }
 
   embedJobForm(jobId: string) {
     const baseUrl = window.location.origin;
@@ -290,7 +301,7 @@ export class JobPostDashboadComponent {
     this.openAlertPopup('Embed code copied to clipboard', 'success');
   }
 
-  openDetails(job: any) {}
+  openDetails(job: any) { }
 
   openAlertPopup(message: string, type: string) {
     this.popupAlertMessage = message;

@@ -51,10 +51,10 @@ export class DashboardComponent implements OnInit {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
     this.loading = true;
     if (jobpostId) {
-      this.jobPostService.jobPostData(jobpostId).subscribe({
+      this.jobPostService.getJobPostData(jobpostId).subscribe({
         next: (data) => {
           this.loading = false;
-          this.applicationData = data[0].template_data;
+          this.applicationData = data !== undefined ? data.data![0].template_data : undefined;
         },
         error: (error) => {
           this.loading = false;

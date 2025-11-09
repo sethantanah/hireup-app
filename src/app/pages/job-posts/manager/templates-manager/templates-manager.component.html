@@ -1,10 +1,11 @@
-<!--Classic Template-->
+<!-- Template 1: Classic (Redesigned) -->
 <div *ngIf="templateId === '1' && jobAppData">
   <div
-    class="max-w-4xl mx-auto p-3 sm:p-6 bg-white rounded-lg"
+    class="max-w-4xl mx-auto p-3 sm:p-6 bg-white rounded-lg shadow-sm"
     [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
-      '--secondary-color': jobAppData?.colorScheme?.secondary
+      '--secondary-color': jobAppData?.colorScheme?.secondary,
+      '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
     }"
   >
     <!-- Company Header -->
@@ -22,7 +23,6 @@
           >
             {{ jobAppData.company.name }}
           </h1>
-      
         </div>
 
         <!-- Mobile Menu Button -->
@@ -73,7 +73,7 @@
             [href]="link.formattedUrl"
             [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
             [attr.target]="link.type === 'url' ? '_blank' : null"
-            class="text-sm text-[var(--secondary-color)] hover:underline"
+            class="text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] transition-colors"
           >
             {{ link.text }}
           </a>
@@ -98,6 +98,7 @@
         </div>
       </div>
     </div>
+    
     <!-- Job Details -->
     <div class="mb-8" *ngIf="formOnly === false">
       <h2 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)]">
@@ -110,14 +111,16 @@
         "
       ></p>
     </div>
+    
     <!-- Deadline Check -->
     <div
       *ngIf="deadlinePassed"
-      class="text-center py-4 sm:py-6 bg-red-50 rounded-lg"
+      class="text-center py-4 sm:py-6 bg-red-50 rounded-lg border border-red-200"
     >
       <h3 class="text-lg sm:text-xl font-bold text-red-600">Deadline Ended</h3>
       <p class="text-gray-600">The application deadline has passed.</p>
     </div>
+    
     <!-- Application Form -->
     <div *ngIf="!deadlinePassed" class="mb-8">
       <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)]">
@@ -126,10 +129,11 @@
       <p class="mt-2 text-gray-700">
         {{ jobAppData.applySection.instructions }}
       </p>
+      
       <!-- Section Tabs -->
       <div
         *ngIf="jobAppData.sections.length > 1"
-        class="mb-6 mt-5 bg-gray-200 p-2 rounded-lg"
+        class="mb-6 mt-5 bg-gray-100 p-2 rounded-lg"
       >
         <div class="flex flex-wrap gap-2">
           <button
@@ -137,10 +141,8 @@
             (click)="setCurrentSection(section)"
             [class]="
               section == activeSection
-                ? 'px-4 py-2 bg-[' +
-                  (jobAppData.colorScheme?.primary || 'rgb(59 130 246)') +
-                  '] text-white rounded-md text-sm font-medium transition-all duration-200'
-                : 'px-4 py-2 text-gray-600 rounded-md text-sm font-medium hover:bg-gray-100 transition-all duration-200'
+                ? 'px-4 py-2 bg-[var(--primary-color)] text-white rounded-md text-sm font-medium transition-all duration-200'
+                : 'px-4 py-2 text-gray-600 rounded-md text-sm font-medium hover:bg-gray-200 transition-all duration-200'
             "
           >
             {{ section }}
@@ -148,7 +150,6 @@
         </div>
       </div>
 
-      <!-- Form Fields -->
       <!-- Form Fields -->
       <form
         *ngIf="form"
@@ -179,14 +180,14 @@
           <!-- Text Input -->
           <input
             *ngIf="
-              ['text', 'email', 'tel', 'number', 'date'].includes(field.type)
+              ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
             "
             [type]="field.type"
             [id]="field.key"
-            [minlength]="field.min_length"
-            [maxlength]="field.max_length"
+            [minlength]="field.min_length || null"
+            [maxlength]="field.max_length || null"
             [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
           />
 
           <!-- Textarea -->
@@ -194,11 +195,10 @@
             *ngIf="field.type === 'textarea'"
             [id]="field.key"
             [formControlName]="field.key"
-            [minlength]="field.min_length"
-            [maxlength]="field.max_length"
+            [minlength]="field.min_length || null"
+            [maxlength]="field.max_length || null"
             rows="4"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            rows="4"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
           ></textarea>
 
           <!-- Select -->
@@ -206,7 +206,7 @@
             *ngIf="field.type === 'select'"
             [id]="field.key"
             [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
           >
             <option value="">Select an option</option>
             <option *ngFor="let option of field.options" [value]="option">
@@ -222,7 +222,7 @@
             [formControlName]="field.key"
             [accept]="field.acceptedTypes"
             (change)="onFileChange($event, field.key)"
-            class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+            class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]"
           />
 
           <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
@@ -232,54 +232,78 @@
             >
           </p>
         </div>
-        <!-- Submit Button -->
-
+        
+        <!-- Navigation Buttons for Multi-Section Forms -->
+        <div *ngIf="jobAppData.sections.length > 1" class="flex justify-between mt-8">
+          <button
+            type="button"
+            (click)="goToPreviousSection()"
+            [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+            class="px-6 py-2 border border-[var(--primary-color)] text-[var(--primary-color)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--primary-color)] hover:text-white transition-colors"
+          >
+            Previous
+          </button>
+          
+          <button
+            type="button"
+            (click)="goToNextSection()"
+            [disabled]="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
+            class="px-6 py-2 bg-[var(--primary-color)] text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--secondary-color)] transition-colors"
+          >
+            Next
+          </button>
+        </div>
+        
         <!-- Declaration Checkbox -->
-        <div *ngIf="jobAppData.applySection.declaration" class="mt-4">
+        <div *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1" class="mt-4">
           <label class="flex items-start space-x-2">
             <input
               type="checkbox"
               formControlName="agreeToDeclaration"
               id="acceptDeclaration"
-              class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              class="mt-1 h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]"
             />
             <span class="text-sm text-gray-700">{{
               jobAppData.applySection.declaration
             }}</span>
           </label>
         </div>
-        <button
-          type="submit"
-          [disabled]="form.invalid || isSubmitting"
-          class="w-full px-6 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          <span *ngIf="!isSubmitting">Submit Application</span>
-          <span *ngIf="isSubmitting" class="flex items-center justify-center">
-            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-                fill="none"
-              />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            Submitting...
-          </span>
-        </button>
+        
+        <!-- Submit Button (Only show on last section) -->
+        <div *ngIf="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1" class="mt-6">
+          <button
+            type="submit"
+            [disabled]="form.invalid || isSubmitting"
+            class="w-full px-6 py-3 text-white bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-md"
+          >
+            <span *ngIf="!isSubmitting">Submit Application</span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                  fill="none"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Submitting...
+            </span>
+          </button>
+        </div>
       </form>
     </div>
 
     <!-- Footer -->
     <div
-      class="mt-8 bg-[var(--primary-color)]  rounded-md p-8 bg-gray-50 text-center border-t pt-6"
+      class="mt-8 bg-gray-50 rounded-md p-8 text-center border-t pt-6"
     >
       <p class="text-sm text-gray-600">
         {{ jobAppData.footer.copyrightText }}
@@ -292,7 +316,7 @@
           [href]="link.formattedUrl"
           [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
           [attr.target]="link.type === 'url' ? '_blank' : null"
-          class="text-sm text-[var(--secondary-color)] hover:underline"
+          class="text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:underline transition-colors"
         >
           {{ link.text }}
         </a>
@@ -300,95 +324,56 @@
     </div>
   </div>
 </div>
-<!--End Classic Template-->
+<!-- End Template 1 -->
 
-
-
-
-<!--Classic Grid Template-->
+<!-- Template 2: Modern Card (New Design) -->
 <div *ngIf="templateId === '2' && jobAppData">
   <div
-    class="max-w-6xl mx-auto p-3 sm:p-6 bg-white rounded-lg"
+    class="max-w-4xl mx-auto p-3 sm:p-6"
     [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
-      '--secondary-color': jobAppData?.colorScheme?.secondary
+      '--secondary-color': jobAppData?.colorScheme?.secondary,
+      '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
     }"
   >
-    <!-- Company Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <img
-            [src]="jobAppData.company.logoUrl"
-            alt="Company Logo"
-            class="h-10 sm:h-12"
-          />
-          <h1
-            *ngIf="jobAppData.company.logoUrl.length == 0"
-            class="text-xl sm:text-2xl font-bold text-[var(--primary-color)]"
-          >
-            {{ jobAppData.company.name }}
-          </h1>
-      
+    <!-- Header Card -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden mb-6">
+      <div class="bg-gradient-to-r from-[var(--primary-color)] to-[var(--secondary-color)] p-6 text-white">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <img
+              [src]="jobAppData.company.logoUrl"
+              alt="Company Logo"
+              class="h-12 sm:h-16 bg-white p-2 rounded-lg"
+            />
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-bold">{{ jobAppData.company.name }}</h1>
+              <p class="text-white/80 text-sm mt-1">{{ jobAppData.job.title }}</p>
+            </div>
+          </div>
+          
+          <!-- Desktop Navigation -->
+          <nav class="hidden sm:flex space-x-4">
+            <a
+              *ngFor="
+                let link of formattingService.processLinks(
+                  jobAppData.company!.navLinks
+                )
+              "
+              [href]="link.formattedUrl"
+              [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
+              [attr.target]="link.type === 'url' ? '_blank' : null"
+              class="text-sm text-white/90 hover:text-white transition-colors"
+            >
+              {{ link.text }}
+            </a>
+          </nav>
         </div>
-
-        <!-- Mobile Menu Button -->
-        <button
-          (click)="toggleMenu()"
-          class="p-2 text-gray-600 sm:hidden hover:text-gray-900 focus:outline-none"
-          aria-label="Toggle menu"
-        >
-          <svg
-            *ngIf="!isMenuOpen"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-          <svg
-            *ngIf="isMenuOpen"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <!-- Desktop Navigation -->
-        <nav class="hidden sm:flex space-x-4">
-          <a
-            *ngFor="
-              let link of formattingService.processLinks(
-                jobAppData.company!.navLinks
-              )
-            "
-            [href]="link.formattedUrl"
-            [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
-            [attr.target]="link.type === 'url' ? '_blank' : null"
-            class="text-sm text-[var(--secondary-color)] hover:underline"
-          >
-            {{ link.text }}
-          </a>
-        </nav>
       </div>
+      
       <!-- Mobile Navigation -->
-      <div *ngIf="isMenuOpen" class="sm:hidden mt-4">
-        <div class="px-2 pt-2 pb-3 space-y-1 bg-gray-50 rounded-lg">
+      <div class="p-4 border-b" *ngIf="isMenuOpen">
+        <div class="flex flex-col space-y-2">
           <a
             *ngFor="
               let link of formattingService.processLinks(
@@ -398,7 +383,7 @@
             [href]="link.formattedUrl"
             [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
             [attr.target]="link.type === 'url' ? '_blank' : null"
-            class="block px-3 py-2 text-base text-[var(--secondary-color)] hover:bg-gray-100 rounded-md"
+            class="px-3 py-2 text-base text-[var(--secondary-color)] hover:bg-gray-100 rounded-md"
           >
             {{ link.text }}
           </a>
@@ -406,198 +391,227 @@
       </div>
     </div>
 
-
-
- 
-
-    <!-- Deadline Check -->
-    <div
-      *ngIf="deadlinePassed"
-      class="text-center py-4 sm:py-6 bg-red-50 rounded-lg"
-    >
-      <h3 class="text-lg sm:text-xl font-bold text-red-600">Deadline Ended</h3>
-      <p class="text-gray-600">The application deadline has passed.</p>
-    </div>
-
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-         <!-- Job Details -->
-    <div class="mb-8">
-      <h2 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)]">
-        {{ jobAppData.job.title }}
-      </h2>
-      <p
-        class="mt-2 text-gray-700"
-        [innerHTML]="
-          formattingService.parseMarkdown(jobAppData.job.description)
-        "
-      ></p>
-    </div>
-   
-    <!-- Application Form -->
-    <div *ngIf="!deadlinePassed" class="mb-8 md:shadow-lg md:p-10">
-      <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)]">
-        {{ jobAppData.applySection.title }}
-      </h3>
-      <p class="mt-2 text-gray-700">
-        {{ jobAppData.applySection.instructions }}
-      </p>
-      <!-- Section Tabs -->
-      <div
-        *ngIf="jobAppData.sections.length > 1"
-        class="mb-6 mt-5 bg-gray-200 p-2 rounded-lg"
-      >
-        <div class="flex flex-wrap gap-2">
-          <button
-            *ngFor="let section of jobAppData.sections"
-            (click)="setCurrentSection(section)"
-            [class]="
-              section == activeSection
-                ? 'px-4 py-2 bg-[' +
-                  (jobAppData.colorScheme?.primary || 'rgb(59 130 246)') +
-                  '] text-white rounded-md text-sm font-medium transition-all duration-200'
-                : 'px-4 py-2 text-gray-600 rounded-md text-sm font-medium hover:bg-gray-100 transition-all duration-200'
-            "
-          >
-            {{ section }}
-          </button>
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Job Details Sidebar -->
+      <div class="lg:col-span-1" *ngIf="formOnly === false">
+        <div class="bg-white rounded-xl shadow-md p-6 sticky top-6">
+          <h3 class="text-lg font-semibold text-[var(--primary-color)] mb-4">Job Details</h3>
+          <div class="space-y-4">
+            <div
+              class="text-gray-700 prose prose-sm max-w-none"
+              [innerHTML]="
+                formattingService.parseMarkdown(jobAppData.job.description)
+              "
+            ></div>
+          </div>
         </div>
       </div>
-
-      <!-- Form Fields -->
-      <!-- Form Fields -->
-      <form
-        *ngIf="form"
-        [formGroup]="form"
-        (ngSubmit)="onSubmit()"
-        class="space-y-6"
-      >
-        <!-- Form Fields -->
-        <div
-          *ngFor="let field of jobAppData.formData.fields"
-          [hidden]="field.section !== activeSection"
-          class="mb-4"
-        >
-          <label
-            [for]="field.key"
-            class="block text-sm font-medium text-gray-700"
-          >
-            {{ field.label }}
-            <span *ngIf="field.required" class="text-red-500">*</span>
-          </label>
-
-          <p
-            *ngIf="field.instructions"
-            class="mt-1 text-sm text-gray-500"
-            [innerHTML]="formattingService.parseMarkdown(field.instructions)"
-          ></p>
-
-          <!-- Text Input -->
-          <input
-            *ngIf="
-              ['text', 'email', 'tel', 'number', 'date'].includes(field.type)
-            "
-            [type]="field.type"
-            [id]="field.key"
-            [minlength]="field.min_length"
-            [maxlength]="field.max_length"
-            [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          />
-
-          <!-- Textarea -->
-          <textarea
-            *ngIf="field.type === 'textarea'"
-            [id]="field.key"
-            [formControlName]="field.key"
-            [minlength]="field.min_length"
-            [maxlength]="field.max_length"
-            rows="4"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            rows="4"
-          ></textarea>
-
-          <!-- Select -->
-          <select
-            *ngIf="field.type === 'select'"
-            [id]="field.key"
-            [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">Select an option</option>
-            <option *ngFor="let option of field.options" [value]="option">
-              {{ option }}
-            </option>
-          </select>
-
-          <!-- File Input -->
-          <input
-            *ngIf="field.type === 'file'"
-            type="file"
-            [id]="field.key"
-            [formControlName]="field.key"
-            [accept]="field.acceptedTypes"
-            (change)="onFileChange($event, field.key)"
-            class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
-          />
-
-          <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
-            Accepted formats: {{ field.acceptedTypes }}
-            <span *ngIf="field.max_length"
-              >, Max size: {{ field.max_length }}MB</span
-            >
+      
+      <!-- Application Form -->
+      <div class="lg:col-span-2" *ngIf="!deadlinePassed">
+        <div class="bg-white rounded-xl shadow-md p-6">
+          <h3 class="text-xl font-semibold text-[var(--primary-color)] mb-2">
+            {{ jobAppData.applySection.title }}
+          </h3>
+          <p class="text-gray-600 mb-6">
+            {{ jobAppData.applySection.instructions }}
           </p>
-        </div>
-        <!-- Submit Button -->
+          
+          <!-- Section Progress -->
+          <div *ngIf="jobAppData.sections.length > 1" class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-sm font-medium text-gray-700">Progress</span>
+              <span class="text-sm text-gray-500">
+                {{ jobAppData.sections.indexOf(activeSection) + 1 }} of {{ jobAppData.sections.length }}
+              </span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="bg-[var(--primary-color)] h-2 rounded-full transition-all duration-300" 
+                [style.width]="((jobAppData.sections.indexOf(activeSection) + 1) / jobAppData.sections.length) * 100 + '%'">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Section Tabs -->
+          <div
+            *ngIf="jobAppData.sections.length > 1"
+            class="mb-6 flex overflow-x-auto pb-2 space-x-2"
+          >
+            <button
+              *ngFor="let section of jobAppData.sections"
+              (click)="setCurrentSection(section)"
+              [class]="
+                section == activeSection
+                  ? 'px-4 py-2 bg-[var(--primary-color)] text-white rounded-lg text-sm font-medium transition-all duration-200 flex-shrink-0'
+                  : 'px-4 py-2 text-gray-600 bg-gray-100 rounded-lg text-sm font-medium hover:bg-gray-200 transition-all duration-200 flex-shrink-0'
+              "
+            >
+              {{ section }}
+            </button>
+          </div>
 
-        <!-- Declaration Checkbox -->
-        <div *ngIf="jobAppData.applySection.declaration" class="mt-4">
-          <label class="flex items-start space-x-2">
-            <input
-              type="checkbox"
-              formControlName="agreeToDeclaration"
-              id="acceptDeclaration"
-              class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-            />
-            <span class="text-sm text-gray-700">{{
-              jobAppData.applySection.declaration
-            }}</span>
-          </label>
+          <!-- Form Fields -->
+          <form
+            *ngIf="form"
+            [formGroup]="form"
+            (ngSubmit)="onSubmit()"
+            class="space-y-6"
+          >
+            <!-- Form Fields -->
+            <div
+              *ngFor="let field of jobAppData.formData.fields"
+              [hidden]="field.section !== activeSection"
+              class="mb-4"
+            >
+              <label
+                [for]="field.key"
+                class="block text-sm font-medium text-gray-700"
+              >
+                {{ field.label }}
+                <span *ngIf="field.required" class="text-red-500">*</span>
+              </label>
+
+              <p
+                *ngIf="field.instructions"
+                class="mt-1 text-sm text-gray-500"
+                [innerHTML]="formattingService.parseMarkdown(field.instructions)"
+              ></p>
+
+              <!-- Text Input -->
+              <input
+                *ngIf="
+                  ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
+                "
+                [type]="field.type"
+                [id]="field.key"
+                [minlength]="field.min_length || null"
+                [maxlength]="field.max_length || null"
+                [formControlName]="field.key"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
+              />
+
+              <!-- Textarea -->
+              <textarea
+                *ngIf="field.type === 'textarea'"
+                [id]="field.key"
+                [formControlName]="field.key"
+                [minlength]="field.min_length || null"
+                [maxlength]="field.max_length || null"
+                rows="4"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
+              ></textarea>
+
+              <!-- Select -->
+              <select
+                *ngIf="field.type === 'select'"
+                [id]="field.key"
+                [formControlName]="field.key"
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
+              >
+                <option value="">Select an option</option>
+                <option *ngFor="let option of field.options" [value]="option">
+                  {{ option }}
+                </option>
+              </select>
+
+              <!-- File Input -->
+              <input
+                *ngIf="field.type === 'file'"
+                type="file"
+                [id]="field.key"
+                [formControlName]="field.key"
+                [accept]="field.acceptedTypes"
+                (change)="onFileChange($event, field.key)"
+                class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]"
+              />
+
+              <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
+                Accepted formats: {{ field.acceptedTypes }}
+                <span *ngIf="field.max_length"
+                  >, Max size: {{ field.max_length }}MB</span
+                >
+              </p>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div *ngIf="jobAppData.sections.length > 1" class="flex justify-between mt-8">
+              <button
+                type="button"
+                (click)="goToPreviousSection()"
+                [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+                class="px-6 py-3 border border-[var(--primary-color)] text-[var(--primary-color)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--primary-color)] hover:text-white transition-colors flex items-center"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </button>
+              
+              <button
+                *ngIf="jobAppData.sections.indexOf(activeSection) < jobAppData.sections.length - 1"
+                type="button"
+                (click)="goToNextSection()"
+                class="px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg hover:bg-[var(--secondary-color)] transition-colors flex items-center"
+              >
+                Next
+                <svg class="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+              
+              <!-- Submit Button (Only show on last section) -->
+              <button
+                *ngIf="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
+                type="submit"
+                [disabled]="form.invalid || isSubmitting"
+                class="px-6 py-3 text-white bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-md"
+              >
+                <span *ngIf="!isSubmitting">Submit Application</span>
+                <span *ngIf="isSubmitting" class="flex items-center justify-center">
+                  <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      fill="none"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Submitting...
+                </span>
+              </button>
+            </div>
+            
+            <!-- Declaration Checkbox -->
+            <div *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1" class="mt-4">
+              <label class="flex items-start space-x-2">
+                <input
+                  type="checkbox"
+                  formControlName="agreeToDeclaration"
+                  id="acceptDeclaration"
+                  class="mt-1 h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]"
+                />
+                <span class="text-sm text-gray-700">{{
+                  jobAppData.applySection.declaration
+                }}</span>
+              </label>
+            </div>
+          </form>
         </div>
-        <button
-          type="submit"
-          [disabled]="form.invalid || isSubmitting"
-          class="w-full px-6 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          <span *ngIf="!isSubmitting">Submit Application</span>
-          <span *ngIf="isSubmitting" class="flex items-center justify-center">
-            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-                fill="none"
-              />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            Submitting...
-          </span>
-        </button>
-      </form>
-    </div>
+      </div>
     </div>
 
     <!-- Footer -->
-    <div
-      class="mt-8 bg-[var(--primary-color)]  rounded-md p-8 bg-gray-50 text-center border-t pt-6"
-    >
+    <div class="mt-8 bg-white rounded-xl shadow-md p-6 text-center">
       <p class="text-sm text-gray-600">
         {{ jobAppData.footer.copyrightText }}
       </p>
@@ -609,7 +623,7 @@
           [href]="link.formattedUrl"
           [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
           [attr.target]="link.type === 'url' ? '_blank' : null"
-          class="text-sm text-[var(--secondary-color)] hover:underline"
+          class="text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] hover:underline transition-colors"
         >
           {{ link.text }}
         </a>
@@ -617,170 +631,64 @@
     </div>
   </div>
 </div>
-<!--End Classic Template-->
+<!-- End Template 2 -->
 
-
-
-<!--Classic Grid 2 Template-->
+<!-- Template 3: Minimalist (New Design) -->
 <div *ngIf="templateId === '3' && jobAppData">
   <div
-    class="max-w-6xl mx-auto p-3 sm:p-6 bg-white rounded-lg"
+    class="max-w-3xl mx-auto p-3 sm:p-6"
     [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
-      '--secondary-color': jobAppData?.colorScheme?.secondary
+      '--secondary-color': jobAppData?.colorScheme?.secondary,
+      '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
     }"
   >
-    <!-- Company Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between" *ngIf="formOnly === false">
-        <div class="flex items-center space-x-4">
-          <img
-            [src]="jobAppData.company.logoUrl"
-            alt="Company Logo"
-            class="h-10 sm:h-12"
-          />
-          <h1
-            *ngIf="jobAppData.company.logoUrl.length == 0"
-            class="text-xl sm:text-2xl font-bold text-[var(--primary-color)]"
-          >
-            {{ jobAppData.company.name }}
-          </h1>
-         
-        </div>
-
-        <!-- Mobile Menu Button -->
-        <button
-          (click)="toggleMenu()"
-          class="p-2 text-gray-600 sm:hidden hover:text-gray-900 focus:outline-none"
-          aria-label="Toggle menu"
-        >
-          <svg
-            *ngIf="!isMenuOpen"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-          <svg
-            *ngIf="isMenuOpen"
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
-        <!-- Desktop Navigation -->
-        <nav class="hidden sm:flex space-x-4">
-          <a
-            *ngFor="
-              let link of formattingService.processLinks(
-                jobAppData.company!.navLinks
-              )
-            "
-            [href]="link.formattedUrl"
-            [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
-            [attr.target]="link.type === 'url' ? '_blank' : null"
-            class="text-sm text-[var(--secondary-color)] hover:underline"
-          >
-            {{ link.text }}
-          </a>
-        </nav>
+    <!-- Simple Header -->
+    <div class="text-center mb-8" *ngIf="formOnly === false">
+      <div class="flex justify-center mb-4">
+        <img
+          [src]="jobAppData.company.logoUrl"
+          alt="Company Logo"
+          class="h-12 sm:h-16"
+        />
       </div>
-      <!-- Mobile Navigation -->
-      <div *ngIf="isMenuOpen" class="sm:hidden mt-4">
-        <div class="px-2 pt-2 pb-3 space-y-1 bg-gray-50 rounded-lg">
-          <a
-            *ngFor="
-              let link of formattingService.processLinks(
-                jobAppData.company.navLinks
-              )
-            "
-            [href]="link.formattedUrl"
-            [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
-            [attr.target]="link.type === 'url' ? '_blank' : null"
-            class="block px-3 py-2 text-base text-[var(--secondary-color)] hover:bg-gray-100 rounded-md"
-          >
-            {{ link.text }}
-          </a>
-        </div>
-      </div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-[var(--primary-color)]">
+        {{ jobAppData.company.name }}
+      </h1>
+      <h2 class="text-xl sm:text-2xl text-gray-700 mt-2">
+        {{ jobAppData.job.title }}
+      </h2>
     </div>
-
-
-
- 
 
     <!-- Deadline Check -->
     <div
       *ngIf="deadlinePassed"
-      class="text-center py-4 sm:py-6 bg-red-50 rounded-lg"
+      class="text-center py-4 sm:py-6 bg-red-50 rounded-lg border border-red-200 mb-6"
     >
       <h3 class="text-lg sm:text-xl font-bold text-red-600">Deadline Ended</h3>
       <p class="text-gray-600">The application deadline has passed.</p>
     </div>
 
-
-    <div class="grid grid-cols-1">
-         <!-- Job Details -->
-    <div class="mb-8" *ngIf="formOnly === false">
-      <h2 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)]">
-        {{ jobAppData.job.title }}
-      </h2>
-      <p
-        class="mt-2 text-gray-700"
-        [innerHTML]="
-          formattingService.parseMarkdown(jobAppData.job.description)
-        "
-      ></p>
-    </div>
-   
     <!-- Application Form -->
-    <div *ngIf="!deadlinePassed" class="mb-8">
-      <h3 class="text-xl sm:text-2xl font-semibold text-[var(--primary-color)]">
+    <div *ngIf="!deadlinePassed" class="bg-white rounded-lg border border-gray-200 p-6">
+      <h3 class="text-xl font-semibold text-[var(--primary-color)] mb-2">
         {{ jobAppData.applySection.title }}
       </h3>
-      <p class="mt-2 text-gray-700">
+      <p class="text-gray-600 mb-6">
         {{ jobAppData.applySection.instructions }}
       </p>
-      <!-- Section Tabs -->
-      <div
-        *ngIf="jobAppData.sections.length > 1"
-        class="mb-6 mt-5 bg-gray-200 p-2 rounded-lg"
-      >
-        <div class="flex flex-wrap gap-2">
-          <button
-            *ngFor="let section of jobAppData.sections"
-            (click)="setCurrentSection(section)"
-            [class]="
-              section == activeSection
-                ? 'px-4 py-2 bg-[' +
-                  (jobAppData.colorScheme?.primary || 'rgb(59 130 246)') +
-                  '] text-white rounded-md text-sm font-medium transition-all duration-200'
-                : 'px-4 py-2 text-gray-600 rounded-md text-sm font-medium hover:bg-gray-100 transition-all duration-200'
-            "
-          >
-            {{ section }}
-          </button>
+      
+      <!-- Section Indicator -->
+      <div *ngIf="jobAppData.sections.length > 1" class="mb-6">
+        <div class="flex items-center space-x-2">
+          <span class="text-sm font-medium text-gray-700">Section:</span>
+          <span class="text-sm font-semibold text-[var(--primary-color)]">{{ activeSection }}</span>
+          <span class="text-sm text-gray-500 ml-auto">
+            {{ jobAppData.sections.indexOf(activeSection) + 1 }} of {{ jobAppData.sections.length }}
+          </span>
         </div>
       </div>
 
-      <!-- Form Fields -->
       <!-- Form Fields -->
       <form
         *ngIf="form"
@@ -789,8 +697,6 @@
         class="space-y-6"
       >
         <!-- Form Fields -->
-         <div class=" grid grid-cols-1 md:grid-cols-2 gap-5">
-        
         <div
           *ngFor="let field of jobAppData.formData.fields"
           [hidden]="field.section !== activeSection"
@@ -813,14 +719,14 @@
           <!-- Text Input -->
           <input
             *ngIf="
-              ['text', 'email', 'tel', 'number', 'date'].includes(field.type)
+              ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
             "
             [type]="field.type"
             [id]="field.key"
-            [minlength]="field.min_length"
-            [maxlength]="field.max_length"
+            [minlength]="field.min_length || null"
+            [maxlength]="field.max_length || null"
             [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]"
           />
 
           <!-- Textarea -->
@@ -828,11 +734,10 @@
             *ngIf="field.type === 'textarea'"
             [id]="field.key"
             [formControlName]="field.key"
-            [minlength]="field.min_length"
-            [maxlength]="field.max_length"
+            [minlength]="field.min_length || null"
+            [maxlength]="field.max_length || null"
             rows="4"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            rows="4"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]"
           ></textarea>
 
           <!-- Select -->
@@ -840,7 +745,7 @@
             *ngIf="field.type === 'select'"
             [id]="field.key"
             [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]"
           >
             <option value="">Select an option</option>
             <option *ngFor="let option of field.options" [value]="option">
@@ -856,7 +761,7 @@
             [formControlName]="field.key"
             [accept]="field.acceptedTypes"
             (change)="onFileChange($event, field.key)"
-            class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+            class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]"
           />
 
           <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
@@ -866,58 +771,76 @@
             >
           </p>
         </div>
-      </div>
-        <!-- Submit Button -->
-
+        
+        <!-- Navigation Buttons -->
+        <div *ngIf="jobAppData.sections.length > 1" class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+          <button
+            type="button"
+            (click)="goToPreviousSection()"
+            [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+            class="px-4 py-2 text-[var(--primary-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors"
+          >
+            ← Previous
+          </button>
+          
+          <button
+            *ngIf="jobAppData.sections.indexOf(activeSection) < jobAppData.sections.length - 1"
+            type="button"
+            (click)="goToNextSection()"
+            class="px-4 py-2 text-[var(--primary-color)] rounded-md hover:bg-gray-100 transition-colors"
+          >
+            Next →
+          </button>
+          
+          <!-- Submit Button (Only show on last section) -->
+          <button
+            *ngIf="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
+            type="submit"
+            [disabled]="form.invalid || isSubmitting"
+            class="px-6 py-2 text-white bg-[var(--primary-color)] rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-[var(--secondary-color)] transition-colors"
+          >
+            <span *ngIf="!isSubmitting">Submit Application</span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                  fill="none"
+                />
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+              Submitting...
+            </span>
+          </button>
+        </div>
+        
         <!-- Declaration Checkbox -->
-        <div *ngIf="jobAppData.applySection.declaration" class="mt-4">
+        <div *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1" class="mt-4">
           <label class="flex items-start space-x-2">
             <input
               type="checkbox"
               formControlName="agreeToDeclaration"
               id="acceptDeclaration"
-              class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              class="mt-1 h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]"
             />
             <span class="text-sm text-gray-700">{{
               jobAppData.applySection.declaration
             }}</span>
           </label>
         </div>
-
-        <button
-          type="submit"
-          [disabled]="form.invalid || isSubmitting"
-          class="w-full px-6 py-3 text-white bg-blue-600 hover:bg-blue-700 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200"
-        >
-          <span *ngIf="!isSubmitting">Submit Application</span>
-          <span *ngIf="isSubmitting" class="flex items-center justify-center">
-            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-                fill="none"
-              />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-            Submitting...
-          </span>
-        </button>
       </form>
     </div>
-    </div>
 
-    <!-- Footer -->
-    <div
-      class="mt-8 bg-[var(--primary-color)] rounded-md p-8 bg-gray-50 text-center border-t pt-6"
-    >
+    <!-- Simple Footer -->
+    <div class="mt-8 text-center">
       <p class="text-sm text-gray-600">
         {{ jobAppData.footer.copyrightText }}
       </p>
@@ -929,7 +852,7 @@
           [href]="link.formattedUrl"
           [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
           [attr.target]="link.type === 'url' ? '_blank' : null"
-          class="text-sm text-[var(--secondary-color)] hover:underline"
+          class="text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] transition-colors"
         >
           {{ link.text }}
         </a>
@@ -937,8 +860,291 @@
     </div>
   </div>
 </div>
-<!--End Classic Template-->
+<!-- End Template 3 -->
 
+<!-- Template 4: Sidebar Layout (New Design) -->
+<div *ngIf="templateId === '4' && jobAppData">
+  <div
+    class="min-h-screen bg-gray-50"
+    [ngStyle]="{
+      '--primary-color': jobAppData?.colorScheme?.primary,
+      '--secondary-color': jobAppData?.colorScheme?.secondary,
+      '--accent-color': jobAppData?.colorScheme?.accent || jobAppData.colorScheme?.primary
+    }"
+  >
+    <!-- Header -->
+    <header class="bg-white shadow-sm" *ngIf="formOnly === false">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+          <div class="flex items-center">
+            <img
+              [src]="jobAppData.company.logoUrl"
+              alt="Company Logo"
+              class="h-8 sm:h-10 mr-4"
+            />
+            <h1 class="text-xl font-bold text-[var(--primary-color)]">
+              {{ jobAppData.company.name }}
+            </h1>
+          </div>
+          <nav class="hidden md:flex space-x-8">
+            <a
+              *ngFor="
+                let link of formattingService.processLinks(
+                  jobAppData.company!.navLinks
+                )
+              "
+              [href]="link.formattedUrl"
+              [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
+              [attr.target]="link.type === 'url' ? '_blank' : null"
+              class="text-sm font-medium text-gray-500 hover:text-[var(--primary-color)] transition-colors"
+            >
+              {{ link.text }}
+            </a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div class="px-4 py-6 sm:px-0">
+        <div class="flex flex-col lg:flex-row gap-8">
+          <!-- Sidebar -->
+          <div class="lg:w-1/3" *ngIf="formOnly === false">
+            <div class="bg-white rounded-lg shadow-sm p-6 sticky top-6">
+              <h2 class="text-2xl font-bold text-[var(--primary-color)] mb-2">
+                {{ jobAppData.job.title }}
+              </h2>
+              <div
+                class="text-gray-600 prose prose-sm max-w-none mt-4"
+                [innerHTML]="
+                  formattingService.parseMarkdown(jobAppData.job.description)
+                "
+              ></div>
+              
+              <!-- Progress for multi-section forms -->
+              <div *ngIf="jobAppData.sections.length > 1" class="mt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-3">Application Progress</h3>
+                <div class="space-y-3">
+                  <div *ngFor="let section of jobAppData.sections; let i = index" 
+                       class="flex items-center">
+                    <div [class]="
+                      jobAppData.sections.indexOf(activeSection) >= i 
+                        ? 'w-3 h-3 rounded-full bg-[var(--primary-color)] mr-3'
+                        : 'w-3 h-3 rounded-full bg-gray-300 mr-3'
+                    "></div>
+                    <span [class]="
+                      jobAppData.sections.indexOf(activeSection) >= i
+                        ? 'text-sm font-medium text-[var(--primary-color)]'
+                        : 'text-sm text-gray-500'
+                    ">{{ section }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Content -->
+          <div class="lg:w-2/3">
+            <!-- Deadline Check -->
+            <div
+              *ngIf="deadlinePassed"
+              class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
+            >
+              <h3 class="text-lg font-bold text-red-600">Deadline Ended</h3>
+              <p class="text-gray-600">The application deadline has passed.</p>
+            </div>
+
+            <!-- Application Form -->
+            <div *ngIf="!deadlinePassed" class="bg-white rounded-lg shadow-sm p-6">
+              <h3 class="text-2xl font-semibold text-[var(--primary-color)] mb-2">
+                {{ jobAppData.applySection.title }}
+              </h3>
+              <p class="text-gray-600 mb-6">
+                {{ jobAppData.applySection.instructions }}
+              </p>
+
+              <!-- Form Fields -->
+              <form
+                *ngIf="form"
+                [formGroup]="form"
+                (ngSubmit)="onSubmit()"
+                class="space-y-6"
+              >
+                <!-- Form Fields -->
+                <div
+                  *ngFor="let field of jobAppData.formData.fields"
+                  [hidden]="field.section !== activeSection"
+                  class="mb-4"
+                >
+                  <label
+                    [for]="field.key"
+                    class="block text-sm font-medium text-gray-700"
+                  >
+                    {{ field.label }}
+                    <span *ngIf="field.required" class="text-red-500">*</span>
+                  </label>
+
+                  <p
+                    *ngIf="field.instructions"
+                    class="mt-1 text-sm text-gray-500"
+                    [innerHTML]="formattingService.parseMarkdown(field.instructions)"
+                  ></p>
+
+                  <!-- Text Input -->
+                  <input
+                    *ngIf="
+                      ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
+                    "
+                    [type]="field.type"
+                    [id]="field.key"
+                    [minlength]="field.min_length || null"
+                    [maxlength]="field.max_length || null"
+                    [formControlName]="field.key"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
+                  />
+
+                  <!-- Textarea -->
+                  <textarea
+                    *ngIf="field.type === 'textarea'"
+                    [id]="field.key"
+                    [formControlName]="field.key"
+                    [minlength]="field.min_length || null"
+                    [maxlength]="field.max_length || null"
+                    rows="4"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
+                  ></textarea>
+
+                  <!-- Select -->
+                  <select
+                    *ngIf="field.type === 'select'"
+                    [id]="field.key"
+                    [formControlName]="field.key"
+                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"
+                  >
+                    <option value="">Select an option</option>
+                    <option *ngFor="let option of field.options" [value]="option">
+                      {{ option }}
+                    </option>
+                  </select>
+
+                  <!-- File Input -->
+                  <input
+                    *ngIf="field.type === 'file'"
+                    type="file"
+                    [id]="field.key"
+                    [formControlName]="field.key"
+                    [accept]="field.acceptedTypes"
+                    (change)="onFileChange($event, field.key)"
+                    class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]"
+                  />
+
+                  <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
+                    Accepted formats: {{ field.acceptedTypes }}
+                    <span *ngIf="field.max_length"
+                      >, Max size: {{ field.max_length }}MB</span
+                    >
+                  </p>
+                </div>
+                
+                <!-- Navigation Buttons -->
+                <div *ngIf="jobAppData.sections.length > 1" class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+                  <button
+                    type="button"
+                    (click)="goToPreviousSection()"
+                    [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+                    class="px-6 py-2 border border-[var(--primary-color)] text-[var(--primary-color)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--primary-color)] hover:text-white transition-colors"
+                  >
+                    Previous
+                  </button>
+                  
+                  <button
+                    *ngIf="jobAppData.sections.indexOf(activeSection) < jobAppData.sections.length - 1"
+                    type="button"
+                    (click)="goToNextSection()"
+                    class="px-6 py-2 bg-[var(--primary-color)] text-white rounded-lg hover:bg-[var(--secondary-color)] transition-colors"
+                  >
+                    Next
+                  </button>
+                  
+                  <!-- Submit Button (Only show on last section) -->
+                  <button
+                    *ngIf="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
+                    type="submit"
+                    [disabled]="form.invalid || isSubmitting"
+                    class="px-6 py-2 text-white bg-[var(--primary-color)] rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-[var(--secondary-color)] transition-colors"
+                  >
+                    <span *ngIf="!isSubmitting">Submit Application</span>
+                    <span *ngIf="isSubmitting" class="flex items-center justify-center">
+                      <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                        <circle
+                          class="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          fill="none"
+                        />
+                        <path
+                          class="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Submitting...
+                    </span>
+                  </button>
+                </div>
+                
+                <!-- Declaration Checkbox -->
+                <div *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1" class="mt-4">
+                  <label class="flex items-start space-x-2">
+                    <input
+                      type="checkbox"
+                      formControlName="agreeToDeclaration"
+                      id="acceptDeclaration"
+                      class="mt-1 h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]"
+                    />
+                    <span class="text-sm text-gray-700">{{
+                      jobAppData.applySection.declaration
+                    }}</span>
+                  </label>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+      <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="text-center">
+          <p class="text-sm text-gray-600">
+            {{ jobAppData.footer.copyrightText }}
+          </p>
+          <nav class="mt-2 flex flex-wrap justify-center gap-4">
+            <a
+              *ngFor="
+                let link of formattingService.processLinks(jobAppData.footer.links)
+              "
+              [href]="link.formattedUrl"
+              [attr.rel]="link.type === 'url' ? 'noopener noreferrer' : null"
+              [attr.target]="link.type === 'url' ? '_blank' : null"
+              class="text-sm text-[var(--secondary-color)] hover:text-[var(--primary-color)] transition-colors"
+            >
+              {{ link.text }}
+            </a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+<!-- End Template 4 -->
+
+<!-- Keep your existing popup components as they are -->
 <!-- Submission Popover -->
 <div *ngIf="showSubmissionMessage"
      class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
@@ -1046,5 +1252,4 @@
     </div>
   </div>
 </div>
-
 <!-- End Error Popup-->

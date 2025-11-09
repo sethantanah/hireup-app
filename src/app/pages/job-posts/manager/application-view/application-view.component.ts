@@ -38,11 +38,11 @@ export class ApplicationViewComponent implements OnInit {
 
     if (applicationId) {
       this.loading = true;
-      this.jobPostService.jobPostData(applicationId).subscribe({
+      this.jobPostService.getJobPostData(applicationId).subscribe({
         next: (data) => {
           this.loading = false;
           this.mode = 'submission';
-          this.applicationData = data[0].template_data;
+          this.applicationData = data?.data![0].template_data;
           this.templateId = this.applicationData!.templateId || '1';
         },
         error: (error) => {

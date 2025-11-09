@@ -15,11 +15,9 @@ export class AuthCallbackComponent implements OnInit {
     const code = urlParams.get('code');
 
     if (code) {
-      console.log('OAuth Code Received:', code);
       localStorage.setItem('oauth_code', code); // Store code in local storage
       this.router.navigate(['/dashboard']); // Redirect to dashboard after login
     } else {
-      console.error('No OAuth code found');
       this.router.navigate(['/auth/signin']); // Redirect to login if authentication fails
     }
   }

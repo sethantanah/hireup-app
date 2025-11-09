@@ -8,6 +8,7 @@ import { JobPostData } from '../../../../../models/jobpost.model';
 import { LoaderComponent } from '../../../../components/loader/loader.component';
 import { SearchFilterSettingsComponent } from '../search-filter-settings/search-filter-settings.component';
 import { CandidateRankingSettingsComponent } from '../candidate-ranking-settings/candidate-ranking-settings.component';
+import e from 'express';
 export type SettingType =
   | 'card-display'
   | 'search-filter'
@@ -84,12 +85,18 @@ export class SettingsComponent implements OnInit {
         .createUpdateJobPostData(jobpostId, applicationData)
         .subscribe({
           next: (data) => {
-            if (data.data) {
-              applicationData!.id = data.data.id;
-              this.updateApplicationData.emit(applicationData);
+            try {
+              if (data.data) {
+                applicationData!.id = data.data.id;
+                this.updateApplicationData.emit(applicationData);
+              }
+            } catch (e) {
+              console.error('Error updating application data:', e);
+            } finally {
+              this.loading = false;
+              this.loadingText = 'Loading ...';
             }
-            this.loading = false;
-            this.loadingText = 'Loading ...';
+
           },
           error: (error) => {
             this.loading = false;
