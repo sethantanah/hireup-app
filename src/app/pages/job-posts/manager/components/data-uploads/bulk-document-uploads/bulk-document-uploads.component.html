@@ -114,13 +114,13 @@
                   <input
                     *ngIf="
                       ['text', 'email', 'tel', 'number', 'date'].includes(
-                        field.type
+                        field.type || 'text'
                       ) && activeTab !== 'uploadqueue'
                     "
                     [type]="field.type"
                     [id]="field.key"
-                    [minlength]="field.min_length"
-                    [maxlength]="field.max_length"
+                    [minlength]="field.min_length || null"
+                    [maxlength]="field.max_length || null"
                     [formControlName]="field.key"
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -131,8 +131,8 @@
                     "
                     [id]="field.key"
                     [formControlName]="field.key"
-                    [minlength]="field.min_length"
-                    [maxlength]="field.max_length"
+                    [minlength]="field.min_length || null"
+                    [maxlength]="field.max_length || null"
                     rows="4"
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   ></textarea>

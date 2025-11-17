@@ -17,7 +17,7 @@ import { AuthCallbackComponent } from './components/auth-callback/auth-callback.
 
 export const routes: Routes = [
   { path: '', component: PageNotFoundComponent  },
-  { path: 'dashboard', component: DashboardComponent },
+    { path: 'dashboard', component: JobPostDashboadComponent, canActivate: [authGuard] },
   { path: 'jobposts/:userId', component: JobPostDashboadComponent, canActivate: [authGuard] },
   { path: 'jobposts/manager/:jobId', component: ManagerComponent, canActivate: [authGuard] },
   { path: 'jobposts/tests/:jobId', component: ListTestComponent, canActivate: [authGuard]},
@@ -67,5 +67,5 @@ export const routes: Routes = [
     component: SigninComponent,
   },
   { path: 'auth/callback', component: AuthCallbackComponent }, // New route
-  { path: '**', redirectTo: 'jobposts/:userId' }
+  { path: '**', redirectTo: 'dashboard' }
 ];

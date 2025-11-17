@@ -39,6 +39,12 @@ export class JobPostDashboadComponent {
 
   userData!: UserData;
 
+  sidebarOpen = false;
+
+  toggleSidebar() {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -51,11 +57,16 @@ export class JobPostDashboadComponent {
 
     if (userData) {
       this.userData = JSON.parse(userData);
+    } else {
+      this.router.navigate(['auth/signin']);
     }
   }
 
   loadData() {
-    const userId = this.route.snapshot.paramMap.get('userId');
+    const userId = this.route.snapshot.paramMap.get('userId') || this.userData?.id;
+    if (!userId) this.router.navigate(['/auth/signin']);
+
+
     this.loading = true;
     this.apiService.getJobPostings(userId ?? '').subscribe({
       next: (data) => {
@@ -128,37 +139,13 @@ export class JobPostDashboadComponent {
           const applicationData: JobPostData =
             this.jobPostService.getApplicationDataRaw();
           applicationData.formData.fields = [];
-          applicationData.formData.fields.push(...[
-            {
-              type: 'text',
-              label: 'Full Name',
-              key: 'nfmpkuh7yov',
-              required: true,
-              section: 'Biographical Information',
-              min_length: '',
-              max_length: '',
-              instructions: '',
-            },
-            {
-              type: 'file',
-              label: 'Resume / CV',
-              key: 'qfwpduh7yovyu',
-              required: true,
-              section: 'Upload Documents',
-              min_length: '',
-              max_length: '',
-              instructions: '',
-            }
-          ]);
           applicationData.sections = [];
-          applicationData.sections.push(...["Biographical Information", "Upload Documents"]);
           this.jobPostService
             .createUpdateJobPostData(this.selectedJobPost.id, applicationData)
             .subscribe({
               next: (res) => {
                 if (res.data) {
                   applicationData!.id = res.data.id;
-                  console.log('Updating service application data 33', applicationData);
                   this.jobPostService.updateApplicationData(applicationData);
                 }
               },

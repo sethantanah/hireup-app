@@ -33,7 +33,7 @@ export class DashboardComponent implements OnInit {
   loading: boolean = false;
   loadingText: string = 'Loading ...';
 
-   userData!: UserData;
+  userData!: UserData;
 
   constructor(
     private router: Router,
@@ -49,8 +49,9 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
-    this.loading = true;
+
     if (jobpostId) {
+      this.loading = true;
       this.jobPostService.getJobPostData(jobpostId).subscribe({
         next: (data) => {
           this.loading = false;
@@ -80,20 +81,20 @@ export class DashboardComponent implements OnInit {
     this.sidebarCollapse = !this.sidebarCollapse;
   }
 
-    // Add this method to your component class
-    getInitials(fullName: string): string {
-      if (!fullName) return '';
-  
-      return fullName
-        .split(' ')
-        .map((name) => name.charAt(0))
-        .join('')
-        .toUpperCase()
-        .substring(0, 2); // Limit to first 2 initials
-    }
+  // Add this method to your component class
+  getInitials(fullName: string): string {
+    if (!fullName) return '';
+
+    return fullName
+      .split(' ')
+      .map((name) => name.charAt(0))
+      .join('')
+      .toUpperCase()
+      .substring(0, 2); // Limit to first 2 initials
+  }
 
 
-    back(){
-      this.router.navigate(['/jobposts', this.userData.id])
-    }
+  back() {
+    this.router.navigate(['/jobposts', this.userData.id])
+  }
 }

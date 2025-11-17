@@ -108,6 +108,10 @@ export class TemplatesManagerComponent implements OnInit {
       this.form?.addControl(field.key, this.fb.control('', validators));
     });
 
+    if (this.jobAppData?.applySection.declaration) {
+      this.form?.addControl('agreeToDeclaration', this.fb.control('', [Validators.required]));
+    }
+
     // Initialize checkbox value
     this.formValues['agreeToDeclaration'] = false;
   }
@@ -134,14 +138,14 @@ export class TemplatesManagerComponent implements OnInit {
 
       const matchFileType = input.files
         ? fileField?.acceptedTypes
-            ?.toString()
-            .split(',')
-            .filter((type) => {
-              return (
-                type == `.${input.files![0].type.split('/')[1]}` ||
-                type == `${input.files![0].type.split('/')[1]}`
-              );
-            })
+          ?.toString()
+          .split(',')
+          .filter((type) => {
+            return (
+              type == `.${input.files![0].type.split('/')[1]}` ||
+              type == `${input.files![0].type.split('/')[1]}`
+            );
+          })
         : [];
 
       if (matchFileType?.length === 0) {
