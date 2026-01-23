@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { JobpostManagerService } from '../../../../../../services/jobpost-manager.service';
 import { FormField, JobPostData } from '../../../../../../models/jobpost.model';
 import { CommonModule } from '@angular/common';
@@ -11,7 +11,8 @@ import { FormattingService } from '../../../../../../services/formatting.service
   templateUrl: './dynamic-form.component.html',
   styleUrl: './dynamic-form.component.scss',
 })
-export class DynamicFormComponent {
+export class DynamicFormComponent implements OnInit {
+  @Input() formType: string = "Application Form";
   sections: string[] = ['General']; // Array of section names
   fields: FormField[] = []; // All fields across sections
   selectedSection: string = this.sections[0];
@@ -45,18 +46,47 @@ export class DynamicFormComponent {
     private jobPostService: JobpostManagerService,
     public formattingService: FormattingService
   ) {
-    const applicationData: JobPostData = jobPostService.getApplicationData();
-    this.fields = applicationData.formData.fields;
-    this.sections = applicationData.sections;
-    this.selectedSection = this.sections[0];
+  }
+  ngOnInit(): void {
+    const applicationData: JobPostData = this.jobPostService.getApplicationData();
+
+    if (this.formType === "Application Form") {
+      this.fields = applicationData.formData.fields;
+      this.sections = applicationData.sections;
+      this.selectedSection = this.sections[0];
+    } else {
+      if (applicationData.requestForDataForm) {
+        this.fields = applicationData.requestForDataForm.fields;
+        this.sections = applicationData.additionalSections || ["Personal Details"];
+        this.selectedSection = this.sections[0];
+      } else {
+        applicationData.requestForDataForm = { fields: [] }
+         this.fields = applicationData.requestForDataForm.fields;
+        this.sections = applicationData.additionalSections || ["Personal Details"];
+        this.selectedSection = this.sections[0];
+      }
+
+    }
+
 
     setInterval(() => {
-     const applicationData: JobPostData = jobPostService.getApplicationData();
-     applicationData.formData.fields = this.fields;
-     applicationData.sections = this.sections;
-     this.jobPostService.updateApplicationData(applicationData);
+      const applicationData: JobPostData = this.jobPostService.getApplicationData();
+      if (this.formType === "Application Form") {
+        applicationData.formData.fields = this.fields;
+        applicationData.sections = this.sections;
+      } else {
+        if (applicationData.requestForDataForm) {
+          applicationData.requestForDataForm.fields = this.fields;
+          applicationData.additionalSections = this.sections;
+        }
+      }
+
+  this.jobPostService.updateApplicationData(applicationData);
+
+
     }, 3000);
   }
+
 
   // Open the section popup
   openSectionPopup(): void {

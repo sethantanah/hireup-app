@@ -10,7 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
-import { ColorScheme, JobPostData } from '../../../../models/jobpost.model';
+import { ColorScheme, FormField, JobPostData } from '../../../../models/jobpost.model';
 import { FormattingService } from '../../../../services/formatting.service';
 import { animate, style, transition, trigger } from '@angular/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -42,6 +42,7 @@ export class TemplatesManagerComponent implements OnInit {
   @Input() jobAppData: JobPostData | undefined;
   @Input() templateId: string = '1';
   @Input() mode: string = 'testing';
+  @Input() formType: string = "Application Form"
   @Input() formOnly: boolean = false;
   form: FormGroup | undefined; // FormGroup for the user-facing form
 
@@ -73,6 +74,12 @@ export class TemplatesManagerComponent implements OnInit {
   deadlinePassed: boolean = false;
   deadline: any;
 
+
+  get errorMessages(): string[] {
+    return Object.values(this.errors || {});
+  }
+
+
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -83,6 +90,7 @@ export class TemplatesManagerComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.formType = this.route.snapshot.paramMap.get('applicationType') || this.route.snapshot.paramMap.get('formOnly') || this.formType;
     this.activeSection = this.jobAppData?.sections[0] || 'General';
 
     // Check deadline
@@ -129,6 +137,30 @@ export class TemplatesManagerComponent implements OnInit {
     this.form = this.fb.group(formGroup);
   }
 
+  getMaxPagesByKey(
+    fields: FormField[],
+    key: string
+  ): number | null {
+    const field = fields.find(
+      f => f.type === 'file' && f.key === key
+    );
+
+    return typeof field?.max_pages === 'number'
+      ? field.max_pages
+      : null;
+  }
+
+  getFileLabel(
+    fields: FormField[],
+    key: string
+  ): string {
+    const field = fields.find(
+      f => f.type === 'file' && f.key === key
+    );
+
+    return field!.label
+  }
+
   onFileChange(event: Event, key: string): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -156,7 +188,33 @@ export class TemplatesManagerComponent implements OnInit {
         return;
       }
       this.uploadedFiles[key] = input.files[0];
-      delete this.errors[key];
+
+
+      // Check Pages Contraint
+      const maxPages = this.getMaxPagesByKey(this.jobAppData?.formData.fields!, key);
+      if (maxPages) {
+        this.isLoading = true;
+        this.apiService.checkPageSize(input.files![0]).subscribe({
+          next: (data: any) => {
+            this.isLoading = false;
+            if (data.pages <= maxPages) {
+              delete this.errors[`error-${key}`];
+            } else {
+              this.errors[`error-${key}`] = `${this.getFileLabel(this.jobAppData?.formData.fields!, key)} exceeds the accepted maximun pages of ${maxPages}.`;
+              this.showPopupMessage(
+                `Uploaded file exceeds the accepted maximun pages of ${maxPages}`,
+                'error'
+              );
+            }
+          },
+          error: (error) => {
+            this.isLoading = false;
+            delete this.errors[key];
+          }
+        })
+      } else {
+        delete this.errors[key];
+      }
     }
   }
 
@@ -308,6 +366,15 @@ export class TemplatesManagerComponent implements OnInit {
       }
     });
 
+
+    if (Object.keys(this.errors).length > 0) {
+      this.showPopupMessage(
+        'There are errors in the form. Fix them and try again.',
+        'error'
+      );
+      return;
+    }
+
     if (this.jobPostId) {
       formData.append('jobPostId', this.jobPostId);
       // Proceed with form submission
@@ -338,24 +405,46 @@ export class TemplatesManagerComponent implements OnInit {
   }
 
   submit(formData: any) {
-    this.apiService.submitForm(formData).subscribe({
-      next: (data) => {
-        this.isSubmitting = false;
-        this.isLoading = false;
-        this.showSubmissionMessage = true; // Show success message
-        this.form?.reset();
-      },
-      error: (error) => {
-        console.error('Submission failed:', error);
-        this.isSubmitting = false;
-        this.isLoading = false;
-        this.onError = true;
-        this.showPopupMessage(
-          'Failed to submit application. Please try again.',
-          'error'
-        );
-      },
-    });
+
+    if (this.formType == "Additional Data") {
+      this.apiService.submitForm(formData, this.formType).subscribe({
+        next: (data) => {
+          this.isSubmitting = false;
+          this.isLoading = false;
+          this.showSubmissionMessage = true; // Show success message
+          this.form?.reset();
+        },
+        error: (error) => {
+          console.error('Submission failed:', error);
+          this.isSubmitting = false;
+          this.isLoading = false;
+          this.onError = true;
+          this.showPopupMessage(
+            'Failed to submit application. Please try again.',
+            'error'
+          );
+        },
+      });
+    } else {
+      this.apiService.submitForm(formData).subscribe({
+        next: (data) => {
+          this.isSubmitting = false;
+          this.isLoading = false;
+          this.showSubmissionMessage = true; // Show success message
+          this.form?.reset();
+        },
+        error: (error) => {
+          console.error('Submission failed:', error);
+          this.isSubmitting = false;
+          this.isLoading = false;
+          this.onError = true;
+          this.showPopupMessage(
+            'Failed to submit application. Please try again.',
+            'error'
+          );
+        },
+      });
+    }
   }
 
   simulateSubmission() {

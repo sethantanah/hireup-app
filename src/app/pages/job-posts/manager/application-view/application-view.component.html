@@ -1,11 +1,12 @@
 <app-loader *ngIf="loading"></app-loader>
 
 <app-templates-manager
-  *ngIf="applicationData"
+  *ngIf="applicationData && formType"
   [templateId]="templateId"
   [jobAppData]="applicationData"
   [mode]="mode"
   [formOnly]="formOnly"
   [jobPostId]="jobPostId"
+  [formType]="formType"
   
 ></app-templates-manager>

@@ -45,7 +45,7 @@ export class ListTestComponent {
     const url = this.router.serializeUrl(
       this.router.createUrlTree(['/jobposts/tests/manager/create', projectId])
     );
-    window.open(url, '_blank');
+    window.open(url, '_self');
   }
 
   // Method to edit a test
@@ -58,7 +58,7 @@ export class ListTestComponent {
         test.id,
       ])
     );
-    window.open(url, '_blank');
+    window.open(url, '_self');
   }
 
 

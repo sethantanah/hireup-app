@@ -1,4 +1,6 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { TestData, TestResponse } from '../../../models/test.model';
 import {
   FormBuilder,
@@ -14,6 +16,10 @@ import { ActivatedRoute } from '@angular/router';
 import { PreventCopyPasteDirective } from '../../../directives/prevent-copy-paste.directive';
 import { PreventScreenShotDirective } from '../../../directives/prevent-screen-shot.directive';
 import { CanComponentDeactivate } from '../../../can-refresh.guard';
+import { CrosswordBuilderComponent } from '../compenents/crossword-builder/crossword-builder.component';
+import { CrosswordPuzzleComponent } from '../compenents/crossword-puzzel/crossword-puzzle.component';
+import { TimerService } from '../../../services/timer.service';
+import { TestSyncService } from '../../../services/test-sync.service';
 
 @Component({
   selector: 'app-take-test',
@@ -23,89 +29,208 @@ import { CanComponentDeactivate } from '../../../can-refresh.guard';
     FormsModule,
     PreventCopyPasteDirective,
     PreventScreenShotDirective,
+    CrosswordBuilderComponent,
+    CrosswordPuzzleComponent
   ],
-  providers: [],
   templateUrl: './take-test.component.html',
   styleUrl: './take-test.component.scss',
 })
-export class TakeTestComponent implements CanComponentDeactivate {
-  hasUnsavedChanges = true;
-  canDeactivate(): boolean {
-    if (this.hasUnsavedChanges) {
-      return confirm('You have unsaved changes! Do you really want to leave?');
-    }
-    return true;
-  }
-
-  @HostListener('window:beforeunload', ['$event'])
-  unloadNotification($event: any): void {
-    if (this.hasUnsavedChanges) {
-      $event.returnValue = true; // This will trigger the browser's confirmation prompt
-    }
+export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private timerInterval: any;
+  private testStartTime: number = 0;
+  private testId: string | null = null;
+  private readonly TIMER_KEY_PREFIX = 'test_timer_';
+  private readonly PROGRESS_KEY_PREFIX = 'test_progress_';
+  private readonly CREDENTIALS_KEY = 'applicateCredentials';
+  
+  // Track unsaved changes - only true during active test
+  get hasUnsavedChanges(): boolean {
+    return this.currentView === 'form' && this.timer > 0;
   }
 
   testData: TestData | undefined;
-
   currentView: 'instructions' | 'form' | 'thankyou' = 'instructions';
   showPopup = false;
   isLoading = false;
   errorMessage: string | null = null;
   userForm: FormGroup;
-  timer: number = 0; // Convert duration to seconds
+  timer: number = 0;
   currentSection: number = 0;
   showWarning: boolean = false;
   timeUp: boolean = false;
-
   testResponses: TestResponse[] = [];
-
   testScore: number = 0;
   testPercentage: number = 0;
   loading: boolean = true;
+  isTabActive: boolean = true;
 
   constructor(
+    @Inject(PLATFORM_ID) private platformId: any,
     private fb: FormBuilder,
     public testService: JobtestApiService,
     private route: ActivatedRoute,
-    public formattingService: FormattingService
+    public formattingService: FormattingService,
+    private timerService: TimerService,
+    private testSyncService: TestSyncService
   ) {
     this.userForm = this.fb.group({
-      name: ['', Validators.required],
+      name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
     });
 
-    const testId = this.route.snapshot.paramMap.get('testId');
-    if (testId) {
-      this.loading = true;
-      this.testService.jobTest(testId).subscribe({
-        next: (data) => {
-          this.testData = data[0].test_data;
-          if (this.testData) {
-            this.timer = this.testData.sections[0].duration * 60;
+    this.testId = this.route.snapshot.paramMap.get('testId');
+    this.initializeTest();
+  }
 
+  ngOnInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      this.setupVisibilityTracking();
+      this.checkForExistingTestProgress();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.cleanupTimers();
+    
+    // Only clear progress if test is not complete
+    if (this.currentView !== 'thankyou') {
+      this.saveTestProgress();
+    }
+  }
+
+  canDeactivate(): boolean {
+    if (this.hasUnsavedChanges) {
+      return confirm('You have an ongoing test. Are you sure you want to leave? All progress will be saved.');
+    }
+    return true;
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  unloadNotification($event: BeforeUnloadEvent): void {
+    if (this.hasUnsavedChanges) {
+      $event.preventDefault();
+      $event.returnValue = 'You have an ongoing test. Are you sure you want to leave?';
+    }
+  }
+
+  private initializeTest(): void {
+    if (this.testId) {
+      this.loading = true;
+      this.testService.jobTest(this.testId).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: (data) => {
+          this.testData = data.test_data;
+          if (this.testData) {
+            // Initialize timer for first section
+            this.timer = this.testData.sections[0].duration * 60;
+            
+            // Initialize responses
             this.testResponses = this.testData.formData.fields.map((field) => ({
               question: field.question,
               answer: '',
             }));
-
+            
             this.loading = false;
+            this.checkForResumePossibility();
           }
         },
         error: (error) => {
           this.loading = false;
-          console.error(error);
+          this.errorMessage = 'Failed to load test. Please try again.';
+          console.error('Test loading error:', error);
         },
       });
     }
   }
 
-  // Start the test
+  private checkForResumePossibility(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const credentials = sessionStorage.getItem(this.CREDENTIALS_KEY);
+    const progress = localStorage.getItem(`${this.PROGRESS_KEY_PREFIX}${this.testId}`);
+    
+    if (credentials && progress) {
+      const progressData = JSON.parse(progress);
+      // Only resume if progress is less than 1 hour old
+      if (Date.now() - progressData.timestamp < 3600000) {
+        if (confirm('You have an unfinished test. Would you like to resume?')) {
+          this.resumeTest(progressData);
+        } else {
+          this.clearTestProgress();
+        }
+      } else {
+        this.clearTestProgress();
+      }
+    }
+  }
+
+  private resumeTest(progressData: any): void {
+    this.currentView = progressData.currentView;
+    this.currentSection = progressData.currentSection;
+    this.timer = progressData.timer;
+    this.testResponses = progressData.testResponses || [];
+    
+    if (this.currentView === 'form') {
+      this.startTimer();
+    }
+  }
+
+  private checkForExistingTestProgress(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.testId) return;
+
+    const progressKey = `${this.PROGRESS_KEY_PREFIX}${this.testId}`;
+    const progress = localStorage.getItem(progressKey);
+    
+    if (progress) {
+      const progressData = JSON.parse(progress);
+      // Auto-resume if test was active and timer hasn't expired
+      if (progressData.currentView === 'form' && Date.now() - progressData.timestamp < 300000) { // 5 minutes
+        this.resumeTest(progressData);
+      }
+    }
+  }
+
+  private setupVisibilityTracking(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    document.addEventListener('visibilitychange', () => {
+      this.isTabActive = !document.hidden;
+      
+      if (this.isTabActive && this.currentView === 'form') {
+        // Tab became active - update timer based on actual elapsed time
+        this.updateTimerFromBackground();
+      } else if (!this.isTabActive) {
+        // Tab went to background - save progress
+        this.saveTestProgress();
+      }
+    });
+  }
+
+  private updateTimerFromBackground(): void {
+    if (!this.testStartTime) return;
+    
+    const elapsedSeconds = Math.floor((Date.now() - this.testStartTime) / 1000);
+    const sectionDuration = this.testData!.sections[this.currentSection].duration * 60;
+    const remaining = Math.max(0, sectionDuration - elapsedSeconds);
+    
+    this.timer = remaining;
+    
+    // Restart timer with corrected time
+    this.cleanupTimers();
+    this.startTimer();
+  }
+
   startTest(): void {
     this.showPopup = true;
   }
 
-  // Submit user details
   submitUserDetails(): void {
     if (this.userForm.invalid) {
+      this.markFormGroupTouched(this.userForm);
       this.errorMessage = 'Please fill out all fields correctly.';
       return;
     }
@@ -113,67 +238,100 @@ export class TakeTestComponent implements CanComponentDeactivate {
     this.isLoading = true;
     this.errorMessage = null;
 
-    // this.isLoading = false;
-    // this.errorMessage = null;
-    // this.showPopup = false;
-    // this.currentView = 'form';
-    // this.startTimer();
-
-    // Simulate an API call
     this.testService
       .checkApplicantCredentials(
         this.userForm.get('email')!.value,
         this.userForm.get('name')!.value
       )
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           this.isLoading = false;
-          this.errorMessage = null;
           this.showPopup = false;
           this.currentView = 'form';
+          
+          // Store credentials in sessionStorage (clears on browser close)
+          sessionStorage.setItem(this.CREDENTIALS_KEY, JSON.stringify({
+            ...data,
+            timestamp: Date.now()
+          }));
+          
+          // Start the test
+          this.testStartTime = Date.now();
           this.startTimer();
-
-          localStorage.setItem(
-            'applicateCredentials',
-            JSON.stringify({
-              ...data,
-            })
-          );
+          this.saveTestProgress();
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error.error.detail;
-          console.error(error);
+          this.errorMessage = error.error?.detail || 'Invalid credentials. Please try again.';
+          console.error('Credential check error:', error);
         },
       });
   }
 
-  // Start the timer
   startTimer(): void {
-    const interval = setInterval(() => {
-      this.timer--;
-      if (this.timer <= 0) {
-        this.timer = 0;
-        clearInterval(interval);
-        if (this.testData!.sections.length - 1 > this.currentSection) {
-          this.timeUp = true;
-          const navAlert = setTimeout(() => {
-            clearInterval(navAlert);
-            this.navigateSection();
-          }, 2500);
-        } else {
-          this.submitTest();
+    // Clear any existing timer
+    this.cleanupTimers();
+    
+    // Store start time for accurate background time calculation
+    this.testStartTime = Date.now();
+    
+    // Start timer service for persistence
+    const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${this.currentSection}`;
+    this.timerService.startTimer(
+      timerKey,
+      this.timer,
+      () => this.handleTimeUp()
+    );
+    
+    // Update UI timer every second
+    this.timerInterval = setInterval(() => {
+      if (this.timer > 0) {
+        this.timer--;
+        
+        // Auto-save progress every 30 seconds
+        if (this.timer % 30 === 0) {
+          this.saveTestProgress();
         }
+      } else {
+        this.cleanupTimers();
       }
     }, 1000);
   }
 
+  private handleTimeUp(): void {
+    this.cleanupTimers();
+    this.timeUp = true;
+    
+    setTimeout(() => {
+      if (this.testData!.sections.length - 1 > this.currentSection) {
+        this.navigateSection();
+      } else {
+        this.submitTest();
+      }
+    }, 2500);
+  }
+
+  private cleanupTimers(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+    
+    // Clear timer service entries
+    if (this.testId) {
+      const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${this.currentSection}`;
+      this.timerService.clearTimer(timerKey);
+    }
+  }
+
   getTimerColor(timeLeft: number): string {
-    if (timeLeft <= 300) {
-      // 5 minutes
+    const totalSectionTime = (this.testData?.sections[this.currentSection]?.duration ?? 0) * 60;
+    const percentageLeft = totalSectionTime > 0 ? (timeLeft / totalSectionTime) * 100 : 0;
+    
+    if (percentageLeft <= 25) {
       return 'bg-red-50 text-red-600';
-    } else if (timeLeft <= 600) {
-      // 10 minutes
+    } else if (percentageLeft <= 50) {
       return 'bg-yellow-50 text-yellow-600';
     }
     return 'bg-indigo-50 text-indigo-600';
@@ -193,79 +351,106 @@ export class TakeTestComponent implements CanComponentDeactivate {
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
+      second: '2-digit'
     });
   }
 
   getTotaltime(): number {
-    let totalTime = 0;
-    this.testData?.sections.forEach((section: any) => {
-      totalTime += section.duration;
-    });
-
-    return totalTime;
+    return this.testData?.sections.reduce((total, section) => total + section.duration, 0) || 0;
   }
 
-  goToHome(): void {
-    // Implement your navigation logic here
+  getCurrentSectionTime(): number {
+    return this.testData?.sections[this.currentSection]?.duration || 0;
   }
 
-  navigateSection() {
-    if (this.testData!.sections.length - 1 > this.currentSection) {
-      this.currentSection = this.currentSection + 1;
-      this.timer = this.testData!.sections[this.currentSection].duration * 60;
-
-      // Simulate an API call
-      this.isLoading = false;
-      this.showPopup = false;
+  navigateSection(): void {
+    if (this.testData && this.testData.sections.length - 1 > this.currentSection) {
+      // Save current section progress
+      this.saveTestProgress();
+      
+      // Move to next section
+      this.currentSection++;
+      this.timer = this.testData.sections[this.currentSection].duration * 60;
       this.timeUp = false;
+      
+      // Start timer for new section
+      this.testStartTime = Date.now();
       this.startTimer();
+      
+      // Update progress
+      this.saveTestProgress();
     }
   }
 
-  showNavigationWarning() {
-    this.showWarning = true;
+  showNavigationWarning(): void {
+    if (this.timer > 0 && this.testData!.sections.length - 1 > this.currentSection) {
+      this.showWarning = true;
+    } else {
+      this.navigateSection();
+    }
   }
 
-  closeWarning() {
+  closeWarning(): void {
     this.showWarning = false;
   }
 
-  confirmNavigation() {
+  confirmNavigation(): void {
     this.navigateSection();
     this.showWarning = false;
   }
 
-  calculateScore(): number {
-    let totalScore = 0;
+  onCrosswordCompleted(field: any, event: any): void {
+    // Update the response for this field
+    const responseIndex = this.testResponses.findIndex(r => r.question === field.question);
+    if (responseIndex !== -1) {
+      if(event.score > 0){
+        this.testScore += event.score/10;
+      }
+      this.saveTestProgress(); // Auto-save on crossword completion
+    }
+  }
 
-    // Iterate through each response
+  onAnswerChange(question: string, answer: string): void {
+    const responseIndex = this.testResponses.findIndex(r => r.question === question);
+    if (responseIndex !== -1) {
+      this.testResponses[responseIndex].answer = answer;
+      
+      // Debounced auto-save
+      if (this.autoSaveTimeout) {
+        clearTimeout(this.autoSaveTimeout);
+      }
+      this.autoSaveTimeout = setTimeout(() => {
+        this.saveTestProgress();
+      }, 1000);
+    }
+  }
+
+  private autoSaveTimeout: any;
+
+  calculateScore(): number {
+    if (!this.testData) return 0;
+
+    let totalScore = 0;
     this.testResponses.forEach((response) => {
-      // Find the corresponding field in the test data
       const field = this.testData!.formData.fields.find(
         (f) => f.question === response.question
       );
 
-      if (field) {
-        // Determine the section of the field
-        // If field.section is null or undefined, default to the first section (sectionId = 1)
-        const sectionId = field.section ?? 1; // Use nullish coalescing operator
+      if (field && field.type !== 'crossword') {
+        const sectionId = field.section ?? 1;
         const section = this.testData!.sections.find(
           (s) => s.sectionId === sectionId
         );
 
         if (section) {
-          // Determine the scoring rules
           let scoring = section.scoring;
-
-          // If both wrong and correct are 0, use the scoring of the first section
           if (scoring.wrong === 0 && scoring.correct === 0) {
             scoring = this.testData!.sections[0].scoring;
           }
 
-          // Compare the user's answer with the correct answer
           if (response.answer === field.answer) {
             totalScore += scoring.correct;
-          } else {
+          } else if (response.answer.trim() !== '') {
             totalScore += scoring.wrong;
           }
         }
@@ -275,72 +460,130 @@ export class TakeTestComponent implements CanComponentDeactivate {
     return totalScore;
   }
 
-  formatResponses(): {
+  formatResponses(): Array<{
     question: string;
     response: string;
     correct_answer: string;
-  }[] {
-    // Initialize an array to store the formatted responses
-    const formattedResponses: {
-      question: string;
-      response: string;
-      correct_answer: string;
-    }[] = [];
+    section?: number;
+  }> {
+    if (!this.testData) return [];
 
-    // Iterate through each response
-    this.testResponses.forEach((response) => {
-      // Find the corresponding field in the test data
+    return this.testResponses.map((response) => {
       const field = this.testData!.formData.fields.find(
         (f) => f.question === response.question
       );
-
-      if (field) {
-        // Push the formatted response to the array
-        formattedResponses.push({
-          question: field.question,
-          response: response.answer,
-          correct_answer: field.answer,
-        });
-      }
+      
+      return {
+        question: response.question,
+        response: response.answer,
+        correct_answer: field?.answer || '',
+        section: field?.section
+      };
     });
-
-    return formattedResponses;
   }
 
-  // Submit the test
   submitTest(): void {
+    this.cleanupTimers();
+    
     const score = this.calculateScore();
-    this.testScore = score;
-    this.testPercentage = (score / this.testData!.formData.fields.length)*100;
+    this.testScore = this.testScore + score;
+    this.testPercentage = this.testData ? 
+      (this.testScore / this.testData.formData.fields.length) * 100 : 0;
 
-    // Check if the user passed
-    const passmark = this.testData!.sections[0].scoring.passmark; // Assuming passmark is the same for all sections
-
-    const resData = localStorage.getItem('applicateCredentials');
-    if (resData) {
-      const testId = this.route.snapshot.paramMap.get('testId');
-      const res = JSON.parse(resData);
-
+    const credentials = sessionStorage.getItem(this.CREDENTIALS_KEY);
+    if (credentials && this.testId) {
+      const res = JSON.parse(credentials);
+      
       const reqData = {
         applicant_name: res.name,
         applicant_email: res.email,
         applicant_id: res.applicant_id,
         test_response: this.formatResponses(),
-        test_score: score,
-        test_id: testId,
+        test_score: this.testScore,
+        test_id: this.testId,
+        time_taken: Math.floor((Date.now() - res.timestamp) / 1000), // Total time in seconds
+        completed_at: new Date().toISOString()
       };
 
-      this.testService.saveTestResponse(reqData).subscribe({
+      // Save to IndexedDB for offline capability
+      this.testSyncService.saveOfflineTest(reqData).then(() => {
+        console.log('Test saved for offline sync');
+      });
+
+      // Attempt to submit online
+      this.testService.saveTestResponse(reqData).pipe(
+        takeUntil(this.destroy$)
+      ).subscribe({
         next: () => {
-          localStorage.removeItem('applicateCredentials');
+          this.clearTestProgress();
+          this.currentView = 'thankyou';
         },
         error: (error) => {
-          localStorage.removeItem('applicateCredentials');
-          console.error(error);
+          console.error('Online submission failed, saved for offline:', error);
+          // Still show thank you page since we saved offline
+          this.clearTestProgress();
+          this.currentView = 'thankyou';
         },
       });
+    } else {
+      this.clearTestProgress();
+      this.currentView = 'thankyou';
     }
+  }
 
-    this.currentView = 'thankyou';
+  private saveTestProgress(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.testId) return;
+
+    const progress = {
+      currentView: this.currentView,
+      currentSection: this.currentSection,
+      testResponses: this.testResponses,
+      timer: this.timer,
+      timestamp: Date.now(),
+      testId: this.testId
+    };
+
+    localStorage.setItem(
+      `${this.PROGRESS_KEY_PREFIX}${this.testId}`,
+      JSON.stringify(progress)
+    );
+  }
+
+  private clearTestProgress(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    // Clear all test-related data
+    sessionStorage.removeItem(this.CREDENTIALS_KEY);
+    
+    if (this.testId) {
+      localStorage.removeItem(`${this.PROGRESS_KEY_PREFIX}${this.testId}`);
+      
+      // Clear all timer keys for this test
+      for (let i = 0; i < 10; i++) { // Assuming max 10 sections
+        const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${i}`;
+        this.timerService.clearTimer(timerKey);
+        localStorage.removeItem(`timer_${timerKey}`);
+      }
+    }
+  }
+
+  private markFormGroupTouched(formGroup: FormGroup): void {
+    Object.values(formGroup.controls).forEach(control => {
+      control.markAsTouched();
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched(control);
+      }
+    });
+  }
+
+  // Helper method for emergency save (call from template if needed)
+  emergencySave(): void {
+    this.saveTestProgress();
+    alert('Progress saved! You can resume later.');
+  }
+
+
+    goToHome(): void {
+    // Implement your navigation logic here
   }
 }

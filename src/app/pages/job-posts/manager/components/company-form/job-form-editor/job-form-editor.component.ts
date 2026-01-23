@@ -8,6 +8,11 @@ import { DynamicFormComponent } from '../dynamic-form/dynamic-form.component';
 import { PreviewComponent } from '../preview/preview.component';
 import { LoaderComponent } from '../../../../../components/loader/loader.component';
 import { ActivatedRoute } from '@angular/router';
+import { EmailTemplatesComponent } from '../email-templates/email-templates.component';
+import { ApplicationStagesComponent } from '../application-stages/application-stages.component';
+import { ApplicantManagementService } from '../../../../../../services/applicant-management.service';
+import { error } from 'console';
+import { CandidateRankingSettingsComponent } from '../../../../../dashboard/components/settings/candidate-ranking-settings/candidate-ranking-settings.component';
 
 @Component({
   selector: 'app-job-form-editor',
@@ -17,6 +22,9 @@ import { ActivatedRoute } from '@angular/router';
     DynamicFormComponent,
     PreviewComponent,
     LoaderComponent,
+    ApplicationStagesComponent,
+    EmailTemplatesComponent,
+    CandidateRankingSettingsComponent,
   ],
   templateUrl: './job-form-editor.component.html',
   styleUrl: './job-form-editor.component.scss',
@@ -30,6 +38,9 @@ export class JobFormEditorComponent implements OnInit {
     'Submission Message',
     'Contact Section',
     'Application Form',
+    'Request For Additional Data',
+    'Application Stages',
+    'Auto Screening'
   ];
 
   templateSections = ['Job Templates', 'Email Templates', 'Color Scheme'];
@@ -48,11 +59,15 @@ export class JobFormEditorComponent implements OnInit {
     primary: '',
     secondary: '',
   };
+
+  stageMetrics: Record<string, any> | undefined
+
   constructor(
     private route: ActivatedRoute,
     private jobPostService: JobpostManagerService,
+    private applicantManagementService: ApplicantManagementService,
     public formattingService: FormattingService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
@@ -64,7 +79,7 @@ export class JobFormEditorComponent implements OnInit {
           if (data.success) {
             const localData = this.jobPostService.getApplicationData();
             const uploadedData = data?.data![0].template_data;
-           
+
             if (
               uploadedData.lastUpdated &&
               localData.lastUpdated &&
@@ -105,6 +120,7 @@ export class JobFormEditorComponent implements OnInit {
 
   selectSection(section: string): void {
     this.selectedSection = section;
+    this.jobPostService.formType = section;
   }
 
   getSectionIcon(section: string): string {
@@ -116,8 +132,11 @@ export class JobFormEditorComponent implements OnInit {
       'Submission Message': 'fa-paper-plane',
       'Contact Section': 'fa-address-book',
       'Application Form': 'fa-wpforms',
+      'Request For Additional Data': 'fa-wpforms',
+      'Auto Screening': 'fa-search',
       'Job Templates': 'fa-copy',
       'Email Templates': 'fa-envelope-open-text',
+      'Application Stages': 'fa-list-check',
     };
     return icons[section] || 'fa-pen-to-square';
   }
@@ -179,5 +198,11 @@ export class JobFormEditorComponent implements OnInit {
           },
         });
     }
+  }
+
+  saveAutoScreenRequiremnts(data: any) {
+    this.applicationData = data;
+    this.jobPostService.updateApplicationData(this.applicationData!);
+    this.saveChanges();
   }
 }

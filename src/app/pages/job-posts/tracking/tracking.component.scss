@@ -1,0 +1,38 @@
+/* Add to your component's styles */
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+
+/* Smooth transitions */
+.application-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.application-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient animations */
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .timeline-content {
+    padding-left: 2rem;
+  }
+  
+  .stage-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

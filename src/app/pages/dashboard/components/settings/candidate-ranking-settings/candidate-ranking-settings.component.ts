@@ -14,6 +14,7 @@ export interface EvaluationMetric {
 }
 
 export interface Requirement {
+  evaluation_type?: string;
   document_type: string;
   criteria: string;
   evaluation_metrics: EvaluationMetric[];
@@ -27,6 +28,9 @@ export interface Requirement {
 })
 export class CandidateRankingSettingsComponent implements OnInit {
   @Input() applicationData!: JobPostData;
+  @Input() title: string = "Candidate Ranking Settings"
+  @Input() subtitle: string = "Configure how candidates are ranked"
+  @Input() evaluationType: string = "ranking"
   @Output() saveChanges = new EventEmitter<any>();
 
   requirementsForm: FormGroup;
@@ -45,18 +49,25 @@ export class CandidateRankingSettingsComponent implements OnInit {
       this.documentTypes.push('Form Data');
     }
 
+
     if (result.fileFields) {
       result.fileFields.forEach((field: any) => {
         this.documentTypes.push(field.label);
       });
     }
 
-    console.log(this.applicationData.rankingSettings)
 
-    if (this.applicationData.rankingSettings) {
-      this.savedRequirements = this.applicationData.rankingSettings;
-      this.populateForm(this.applicationData.rankingSettings);
-    }
+    if (this.evaluationType === "ranking") {
+      if (this.applicationData.rankingSettings) {
+        this.savedRequirements = this.applicationData.rankingSettings;
+        this.populateForm(this.applicationData.rankingSettings);
+      }
+    }else {
+        if (this.applicationData.shortListingSettings) {
+          this.savedRequirements = this.applicationData.shortListingSettings;
+          this.populateForm(this.applicationData.shortListingSettings);
+        }
+      }
   }
 
 
@@ -161,11 +172,17 @@ export class CandidateRankingSettingsComponent implements OnInit {
   onSubmit() {
     const formValue = this.requirementsForm.value;
     formValue.requirements.forEach((requirement: Requirement) => {
+      requirement.evaluation_type = this.evaluationType;
       this.savedRequirements[requirement.document_type] = requirement;
     });
 
     if (this.applicationData) {
-      this.applicationData.rankingSettings = this.savedRequirements;
+      if (this.evaluationType === "ranking") {
+        this.applicationData.rankingSettings = this.savedRequirements;
+      } else {
+        this.applicationData.shortListingSettings = this.savedRequirements;
+      }
+
       this.saveChanges.emit(this.applicationData);
     }
   }

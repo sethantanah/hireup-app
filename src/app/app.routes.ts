@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { LandingComponent } from './pages/landing/landing.component';
 import { DashboardComponent } from './pages/dashboard/dashboard/dashboard.component';
 import { ManagerComponent } from './pages/job-posts/manager/manager.component';
 import { ListTestComponent } from './pages/test/list-test/list-test.component';
@@ -14,14 +13,20 @@ import { SignupComponent } from './pages/auth/signup/signup.component';
 import { SigninComponent } from './pages/auth/signin/signin.component';
 import { authGuard } from './guards/auth.guard';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
+import { TrackingComponent } from './pages/job-posts/tracking/tracking.component';
+import { LandingComponent } from './pages/landing/landing.component';
 
 export const routes: Routes = [
-  { path: '', component: PageNotFoundComponent  },
-    { path: 'dashboard', component: JobPostDashboadComponent, canActivate: [authGuard] },
+  {
+    path: '', loadComponent: () =>
+      import('./pages/landing/landing.component')
+        .then(m => m.LandingComponent)
+  },
+  { path: 'dashboard', component: JobPostDashboadComponent, canActivate: [authGuard] },
   { path: 'jobposts/:userId', component: JobPostDashboadComponent, canActivate: [authGuard] },
   { path: 'jobposts/manager/:jobId', component: ManagerComponent, canActivate: [authGuard] },
-  { path: 'jobposts/tests/:jobId', component: ListTestComponent, canActivate: [authGuard]},
-  { path: 'jobposts/applicants/:jobId', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'jobposts/tests/:jobId', component: ListTestComponent, canActivate: [authGuard] },
+  { path: 'jobposts/applicants/:jobId/:stageId', component: DashboardComponent, canActivate: [authGuard] },
   {
     path: 'jobposts/tests/manager/create/:jobId',
     component: CreateTestComponent, canActivate: [authGuard]
@@ -36,6 +41,10 @@ export const routes: Routes = [
   },
   {
     path: 'apply/:company/:applicationId/:formOnly',
+    component: ApplicationViewComponent,
+  },
+  {
+    path: 'apply/:company/:applicationId/:applicationType',
     component: ApplicationViewComponent,
   },
   {
@@ -55,17 +64,29 @@ export const routes: Routes = [
     path: 'jobposts/tests/submissions/:testId',
     component: SubmissionsComponent, canActivate: [authGuard]
   },
-   {
+  {
+    path: 'jobpost/tracking',
+    component: TrackingComponent
+  },
+  {
     path: 'auth',
-    component: SignupComponent,
+    component: SigninComponent,
   },
   {
     path: 'auth/signup',
     component: SignupComponent,
-  },{
+  }, {
     path: 'auth/signin',
     component: SigninComponent,
   },
+  {
+    path: 'auth/login',
+    component: SigninComponent,
+  },
+  {
+    path: 'auth/register',
+    component: SignupComponent,
+  },
   { path: 'auth/callback', component: AuthCallbackComponent }, // New route
-  { path: '**', redirectTo: 'dashboard' }
+  { path: '**', component: PageNotFoundComponent }
 ];

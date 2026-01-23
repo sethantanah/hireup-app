@@ -16,18 +16,42 @@ import { EmailAttachment } from '../pages/job-posts/manager/components/data-uplo
 export class ApiService {
   private candidates: Candidate[] = [];
   jobpost_id: string = '';
-  baseURL =  environment.apiUrl + `/applications`;
+  baseURL = environment.apiUrl + `/applications`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
 
-  submitForm(formData: any): Observable<any> {
+  submitForm(formData: any, type?: string): Observable<any> {
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
 
+    if (type) {
+      this.baseURL = environment.apiUrl + `/resubmission`;
+    }
+
     return this.http.post(`${this.baseURL}/submit-application`, formData, { headers });
+  }
+
+
+  checkPageSize(
+    file: File
+  ): Observable<any> {
+
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.http.post(
+      `${this.baseURL}/count-pages`,
+      formData,
+      { headers }
+    );
   }
 
   // Add this method to your existing ApiService
@@ -102,10 +126,23 @@ export class ApiService {
     return this.http.post(apiUrl, formData, { headers });
   }
 
-  shortListCandidates(resumes_ids: string[]): Observable<any> {
+  shortListCandidates(resumes_ids: string[] | Record<string, any>, jobId?: string): Observable<any> {
     const apiUrl =
       environment.apiUrl +
-      `/shortlisting/shortlist/jobpost_id=${this.jobpost_id}`;
+      `/shortlisting/shortlist/${jobId || this.jobpost_id}`;
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.post(apiUrl, resumes_ids, { headers });
+  }
+
+
+  rejectCandidates(resumes_ids: string[], jobId?: string): Observable<any> {
+    const apiUrl =
+      environment.apiUrl +
+      `/shortlisting/reject/${jobId || this.jobpost_id}`;
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -142,12 +179,12 @@ export class ApiService {
 
   getEmailAttachments(source: string, query: string): Observable<any> {
     const apiUrl = environment.apiUrl + `/connect-mail/gmail-attachments`;
-  
+
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`, // Optional if you're using cookies for auth
     });
-  
+
     return this.http.get(apiUrl, {
       headers: headers,
       params: { subject: query }

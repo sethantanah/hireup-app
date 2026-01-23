@@ -5,15 +5,13 @@
     <div class="flex space-x-3 mb-8">
       <button
         class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300"
-        (click)="openSectionPopup()"
-      >
+        (click)="openSectionPopup()">
         <i class="fas fa-plus mr-2"></i> Add Section
       </button>
 
       <button
         class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-all duration-300"
-        (click)="openFieldPopup()"
-      >
+        (click)="openFieldPopup()">
         <i class="fas fa-plus-square mr-2"></i> Add Field
       </button>
     </div>
@@ -28,64 +26,41 @@
 
     <!-- Sections List -->
     <ul class="space-y-2">
-      <li
-        *ngFor="let section of sections"
-        class="group rounded-lg transition-all duration-300 cursor-pointer"
+      <li *ngFor="let section of sections" class="group rounded-lg transition-all duration-300 cursor-pointer"
         [ngClass]="{
           'bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg transform scale-102':
             selectedSection === section,
           'hover:bg-gray-200': selectedSection !== section
-        }"
-        (click)="selectedSection = section"
-      >
+        }" (click)="selectedSection = section">
         <div class="flex items-center justify-between p-3">
           <span class="flex items-center">
-            <i
-              class="fas fa-folder mr-2"
-              [ngClass]="{
+            <i class="fas fa-folder mr-2" [ngClass]="{
                 'text-white-300': selectedSection === section,
                 'text-gray-600': selectedSection !== section
-              }"
-            ></i>
-            <span
-              [ngClass]="{
+              }"></i>
+            <span [ngClass]="{
                 'font-semibold': selectedSection === section,
                 'text-gray-600 font-semibold': selectedSection !== section
-              }"
-            >
+              }">
               {{ section }}
             </span>
           </span>
-          <div
-            class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity"
-          >
-            <button
-              class="p-2 rounded-lg transition-colors"
-              (click)="
+          <div class="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button class="p-2 rounded-lg transition-colors" (click)="
                 openUpdateSectionPopup(section); $event.stopPropagation()
-              "
-            >
-              <i
-                class="fas fa-edit hover:text-blue-700"
-                [ngClass]="{
+              ">
+              <i class="fas fa-edit hover:text-blue-700" [ngClass]="{
                   'text-white-300': selectedSection === section,
                   'text-gray-700': selectedSection !== section
-                }"
-              ></i>
+                }"></i>
             </button>
-            <button
-              class="p-2 rounded-lg transition-colors"
-              (click)="
+            <button class="p-2 rounded-lg transition-colors" (click)="
                 openDeleteSectionPopup(section); $event.stopPropagation()
-              "
-            >
-              <i
-                class="fas fa-trash hover:text-red-500"
-                [ngClass]="{
+              ">
+              <i class="fas fa-trash hover:text-red-500" [ngClass]="{
                   'text-white-300': selectedSection === section,
                   'text-gray-700': selectedSection !== section
-                }"
-              ></i>
+                }"></i>
             </button>
           </div>
         </div>
@@ -100,88 +75,55 @@
   </div>
 
   <!-- Main Content -->
-  <div
-    *ngIf="getFieldsBySection(selectedSection).length > 0"
-    class="flex-1 p-8 pt-0 overflow-y-auto"
-  >
+  <div *ngIf="getFieldsBySection(selectedSection).length > 0" class="flex-1 p-8 pt-0 overflow-y-auto">
     <div class="bg-white rounded-lg shadow-lg p-6">
       <div *ngIf="selectedSection" class=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5">
-        <div
-          *ngFor="let field of getFieldsBySection(selectedSection)"
-          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-300"
-        >
+        <div *ngFor="let field of getFieldsBySection(selectedSection)"
+          class="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-blue-300 transition-all duration-300">
           <div class="flex justify-between items-start">
             <label class="block text-sm font-medium text-gray-700">
               {{ field.label }}
               <span *ngIf="field.required" class="text-red-500 ml-1">*</span>
             </label>
             <div class="flex space-x-2">
-              <button
-                class="text-blue-500 hover:text-blue-700 transition-colors mr-3"
-                (click)="openUpdateFieldPopup(field)"
-              >
+              <button class="text-blue-500 hover:text-blue-700 transition-colors mr-3"
+                (click)="openUpdateFieldPopup(field)">
                 <i class="fas fa-edit"></i>
               </button>
-              <button
-                class="text-red-500 hover:text-red-700 transition-colors"
-                (click)="deleteField(field.key)"
-              >
+              <button class="text-red-500 hover:text-red-700 transition-colors" (click)="deleteField(field.key)">
                 <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>
 
           <div [ngSwitch]="field.type">
-            <input
-              *ngSwitchCase="'text'"
-              type="text"
-              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-            />
-            <input
-              *ngSwitchCase="'date'"
-              type="date"
+            <input *ngSwitchCase="'text'" type="text"
+              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300" />
+            <input *ngSwitchCase="'date'" type="date"
+              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <input *ngSwitchCase="'email'" type="email"
+              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <input *ngSwitchCase="'tel'" type="tel"
+              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+            <textarea *ngSwitchCase="'textarea'"
               class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <input
-              *ngSwitchCase="'email'"
-              type="email"
-              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <input
-              *ngSwitchCase="'tel'"
-              type="tel"
-              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <textarea
-              *ngSwitchCase="'textarea'"
-              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              rows="4"
-            ></textarea>
-            <select
-              *ngSwitchCase="'select'"
-              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
+              rows="4"></textarea>
+            <select *ngSwitchCase="'select'"
+              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
               <option value="">Select an option</option>
               <option *ngFor="let option of field.options" [value]="option">
                 {{ option }}
               </option>
             </select>
-            <input
-              *ngSwitchCase="'file'"
-              type="file"
-              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
+            <input *ngSwitchCase="'file'" type="file"
+              class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
           </div>
 
           <div class="flex flex-row" *ngIf="field.instructions.length > 0">
             <i class="fas fa-info-circle mr-1 mt-auto mb-auto"></i>
-            <p
-              *ngIf="field.instructions"
-              class="mt-2 text-sm text-gray-500 mt-1"
-              [innerHTML]="
+            <p *ngIf="field.instructions" class="mt-2 text-sm text-gray-500 mt-1" [innerHTML]="
                 formattingService.parseMarkdown(field.instructions || '')
-              "
-            ></p>
+              "></p>
           </div>
         </div>
       </div>
@@ -189,34 +131,26 @@
   </div>
 
   <!-- Update Section Popup -->
-  <div
-    *ngIf="showUpdateSectionPopup"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
+  <div *ngIf="showUpdateSectionPopup"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-96 shadow-xl">
       <h2 class="text-xl font-bold mb-4 flex items-center">
         <i class="fas fa-edit mr-2"></i> Update Section
       </h2>
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700"
-            >Section Name</label
-          >
-          <input
-            [(ngModel)]="updatedSectionName"
-            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <label class="block text-sm font-medium text-gray-700">Section Name</label>
+          <input [(ngModel)]="updatedSectionName"
+            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <button
           class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-          (click)="updateSection()"
-        >
+          (click)="updateSection()">
           <i class="fas fa-save mr-2"></i> Update Section
         </button>
         <button
           class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-          (click)="showUpdateSectionPopup = false"
-        >
+          (click)="showUpdateSectionPopup = false">
           <i class="fas fa-times mr-2"></i> Cancel
         </button>
       </div>
@@ -224,34 +158,25 @@
   </div>
 
   <!-- Popup for Adding Sections -->
-  <div
-    *ngIf="showSectionPopup"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
+  <div *ngIf="showSectionPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-96 shadow-xl">
       <h2 class="text-xl font-bold mb-4 flex items-center">
         <i class="fas fa-plus-circle mr-2"></i> Add Section
       </h2>
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700"
-            >Section Name</label
-          >
-          <input
-            [(ngModel)]="newSectionName"
-            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
+          <label class="block text-sm font-medium text-gray-700">Section Name</label>
+          <input [(ngModel)]="newSectionName"
+            class="mt-1 block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
         </div>
         <button
           class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-          (click)="addSection()"
-        >
+          (click)="addSection()">
           <i class="fas fa-plus mr-2"></i> Add Section
         </button>
         <button
           class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-          (click)="showSectionPopup = false"
-        >
+          (click)="showSectionPopup = false">
           <i class="fas fa-times mr-2"></i> Cancel
         </button>
       </div>
@@ -259,10 +184,8 @@
   </div>
 
   <!-- Popup for Deleting Sections -->
-  <div
-    *ngIf="showDeleteSectionPopup"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
+  <div *ngIf="showDeleteSectionPopup"
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-96 shadow-xl">
       <h2 class="text-xl font-bold mb-4 flex items-center">
         <i class="fas fa-trash-alt mr-2"></i> Delete Section
@@ -275,14 +198,12 @@
       <div class="space-y-4">
         <button
           class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-          (click)="deleteSection()"
-        >
+          (click)="deleteSection()">
           <i class="fas fa-trash mr-2"></i> Delete
         </button>
         <button
           class="w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-          (click)="showDeleteSectionPopup = false"
-        >
+          (click)="showDeleteSectionPopup = false">
           <i class="fas fa-times mr-2"></i> Cancel
         </button>
       </div>
@@ -292,24 +213,15 @@
   <!-- Popup for Adding Fields -->
   <!-- Update Field Popup -->
   <!-- Common fields for all types -->
-  <div
-    *ngIf="showFieldPopup"
-    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-  >
+  <div *ngIf="showFieldPopup" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white p-6 rounded-lg w-[600px] shadow-xl max-h-[90vh]">
       <!-- Type-specific fields -->
-      <div
-        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-        (click)="closeDialog($event)"
-      >
-        <div
-          class="bg-white p-8 pt-4 rounded-xl w-[700px] shadow-2xl max-h-[90vh] relative"
-        >
+      <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        (click)="closeDialog($event)">
+        <div class="bg-white p-8 pt-4 rounded-xl w-[700px] shadow-2xl max-h-[90vh] relative">
           <!-- Close Button -->
-          <button
-            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
-            (click)="closeDialog()"
-          >
+          <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+            (click)="closeDialog()">
             <i class="fas fa-times text-xl"></i>
           </button>
 
@@ -335,19 +247,15 @@
                   <i class="fas fa-layer-group mr-2"></i>Section
                 </label>
                 <div class="relative">
-                  <select
-                    [(ngModel)]="newField.section"
+                  <select [(ngModel)]="newField.section"
                     class="block w-full p-3 pl-4 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none"
-                    required
-                  >
+                    required>
                     <option value="" disabled selected>Select a section</option>
                     <option *ngFor="let section of sections" [value]="section">
                       {{ section }}
                     </option>
                   </select>
-                  <div
-                    class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
-                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <i class="fas fa-chevron-down text-gray-400"></i>
                   </div>
                 </div>
@@ -359,11 +267,9 @@
                   <i class="fas fa-cube mr-2"></i>Field Type
                 </label>
                 <div class="relative">
-                  <select
-                    [(ngModel)]="newField.type"
+                  <select [(ngModel)]="newField.type"
                     class="block w-full p-3 pl-4 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white appearance-none"
-                    required
-                  >
+                    required>
                     <option value="" disabled selected>
                       Choose field type
                     </option>
@@ -372,9 +278,7 @@
                       {{ type | titlecase }}
                     </option>
                   </select>
-                  <div
-                    class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none"
-                  >
+                  <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                     <i class="fas fa-chevron-down text-gray-400"></i>
                   </div>
                 </div>
@@ -385,12 +289,9 @@
                 <label class="block text-sm font-medium text-gray-700 mb-2">
                   <i class="fas fa-tag mr-2"></i>Field Label
                 </label>
-                <input
-                  [(ngModel)]="newField.label"
+                <input [(ngModel)]="newField.label"
                   class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Enter field label"
-                  required
-                />
+                  placeholder="Enter field label" required />
               </div>
             </div>
 
@@ -398,130 +299,87 @@
             <div class="space-y-6">
               <!-- Type-specific fields -->
               <!-- Text and Textarea fields -->
-              <div
-                *ngIf="['text', 'textarea'].includes(newField.type!)"
-                class="bg-gray-50 p-6 rounded-lg space-y-6"
-              >
+              <div *ngIf="['text', 'textarea'].includes(newField.type!)" class="bg-gray-50 p-6 rounded-lg space-y-6">
                 <h3 class="font-semibold text-gray-700 mb-4">
                   Length Constraints
                 </h3>
                 <div class="grid grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Minimum Length</label
-                    >
-                    <input
-                      type="number"
-                      [(ngModel)]="newField.min_length"
-                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Length</label>
+                    <input type="number" [(ngModel)]="newField.min_length"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Maximum Length</label
-                    >
-                    <input
-                      type="number"
-                      [(ngModel)]="newField.max_length"
-                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Length</label>
+                    <input type="number" [(ngModel)]="newField.max_length"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                   </div>
+
                 </div>
               </div>
 
               <!-- Date field -->
-              <div
-                *ngIf="newField.type === 'date'"
-                class="bg-gray-50 p-6 rounded-lg space-y-6"
-              >
+              <div *ngIf="newField.type === 'date'" class="bg-gray-50 p-6 rounded-lg space-y-6">
                 <h3 class="font-semibold text-gray-700 mb-4">Date Range</h3>
                 <div class="grid grid-cols-2 gap-6">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Minimum Date</label
-                    >
-                    <input
-                      type="date"
-                      [(ngModel)]="newField.min_length"
-                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Date</label>
+                    <input type="date" [(ngModel)]="newField.min_length"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Maximum Date</label
-                    >
-                    <input
-                      type="date"
-                      [(ngModel)]="newField.max_length"
-                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maximum Date</label>
+                    <input type="date" [(ngModel)]="newField.max_length"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                   </div>
                 </div>
               </div>
 
               <!-- Select field -->
-              <div
-                *ngIf="newField.type === 'select'"
-                class="bg-gray-50 p-6 rounded-lg space-y-4"
-              >
+              <div *ngIf="newField.type === 'select'" class="bg-gray-50 p-6 rounded-lg space-y-4">
                 <h3 class="font-semibold text-gray-700 mb-4">
                   Options Configuration
                 </h3>
                 <div class="space-y-3">
-                  <div
-                    *ngFor="let option of newField.options; let i = index"
-                    class="flex items-center space-x-3"
-                  >
-                    <input
-                      *ngIf="newField.options"
-                      [(ngModel)]="newField.options[i]"
+                  <div *ngFor="let option of newField.options; let i = index" class="flex items-center space-x-3">
+                    <input *ngIf="newField.options" [(ngModel)]="newField.options[i]"
                       class="flex-1 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="Enter option value"
-                    />
-                    <button
-                      class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-all"
-                      (click)="removeOption(i)"
-                    >
+                      placeholder="Enter option value" />
+                    <button class="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-all"
+                      (click)="removeOption(i)">
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </div>
                 </div>
                 <button
                   class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 mt-4"
-                  (click)="addUpdateOption()"
-                >
+                  (click)="addUpdateOption()">
                   <i class="fas fa-plus mr-2"></i> Add Option
                 </button>
               </div>
 
               <!-- File field -->
-              <div
-                *ngIf="newField.type === 'file'"
-                class="bg-gray-50 p-6 rounded-lg space-y-6"
-              >
+              <div *ngIf="newField.type === 'file'" class="bg-gray-50 p-6 rounded-lg space-y-6">
                 <h3 class="font-semibold text-gray-700 mb-4">
                   File Upload Settings
                 </h3>
                 <div class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Accepted File Types</label
-                    >
-                    <input
-                      [(ngModel)]="newField.acceptedTypes"
-                      placeholder=".pdf,.doc,.docx"
-                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Accepted File Types</label>
+                    <input [(ngModel)]="newField.acceptedTypes" placeholder=".pdf,.doc,.docx"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                   </div>
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2"
-                      >Maximum File Size (MB)</label
-                    >
-                    <input
-                      type="number"
-                      [(ngModel)]="newField.max_length"
-                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Maximum File Size (MB)</label>
+                    <input type="number" [(ngModel)]="newField.max_length"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  </div>
+
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Number Of Pages</label>
+                    <input type="number" [(ngModel)]="newField.max_pages"
+                      class="block w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
                   </div>
                 </div>
               </div>
@@ -531,91 +389,60 @@
                 <h3 class="font-semibold text-gray-700 mb-4">
                   General Settings
                 </h3>
-                <div
-                  class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200"
-                >
-                  <input
-                    type="checkbox"
-                    [(ngModel)]="newField.required"
-                    class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <label class="text-sm font-medium text-gray-700"
-                    >Required Field</label
-                  >
+                <div class="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200">
+                  <input type="checkbox" [(ngModel)]="newField.required"
+                    class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500" />
+                  <label class="text-sm font-medium text-gray-700">Required Field</label>
                 </div>
                 <div>
                   <div class="flex items-center justify-between mb-2">
                     <label class="text-sm font-medium text-slate-700">
                       <i class="fa-solid fa-list mr-2"></i>Instructions
                     </label>
-                    <button
-                      (click)="showMarkdownGuide = !showMarkdownGuide"
-                      class="text-slate-500 hover:text-slate-700 flex items-center gap-1 text-sm"
-                    >
+                    <button (click)="showMarkdownGuide = !showMarkdownGuide"
+                      class="text-slate-500 hover:text-slate-700 flex items-center gap-1 text-sm">
                       <i class="fa-solid fa-circle-info"></i>
                       Formatting Guide
                     </button>
                   </div>
 
-                  <textarea
-                    [(ngModel)]="newField.instructions"
-                    rows="6"
+                  <textarea [(ngModel)]="newField.instructions" rows="6"
                     class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Enter job description"
-                  ></textarea>
+                    placeholder="Enter job description"></textarea>
 
-                  <div
-                    class="mt-2 flex items-center gap-2 text-sm text-slate-500"
-                  >
+                  <div class="mt-2 flex items-center gap-2 text-sm text-slate-500">
                     <i class="fa-brands fa-markdown"></i>
                     <span>Markdown formatting supported</span>
                   </div>
 
                   <!-- Markdown Guide -->
-                  <div
-                    *ngIf="showMarkdownGuide"
-                    class="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200"
-                  >
+                  <div *ngIf="showMarkdownGuide" class="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
                     <h4 class="font-medium text-slate-700 mb-3">
                       Markdown Formatting Guide
                     </h4>
                     <div class="grid grid-cols-2 gap-4 text-sm">
                       <div>
                         <code class="bg-white px-2 py-1 rounded">**bold**</code>
-                        <span class="text-slate-600 ml-2"
-                          >→ <strong>bold</strong></span
-                        >
+                        <span class="text-slate-600 ml-2">→ <strong>bold</strong></span>
                       </div>
                       <div>
                         <code class="bg-white px-2 py-1 rounded">*italic*</code>
-                        <span class="text-slate-600 ml-2"
-                          >→ <em>italic</em></span
-                        >
+                        <span class="text-slate-600 ml-2">→ <em>italic</em></span>
                       </div>
                       <div>
-                        <code class="bg-white px-2 py-1 rounded"
-                          ># Heading 1</code
-                        >
+                        <code class="bg-white px-2 py-1 rounded"># Heading 1</code>
                         <span class="text-slate-600 ml-2">→ Large heading</span>
                       </div>
                       <div>
-                        <code class="bg-white px-2 py-1 rounded"
-                          >## Heading 2</code
-                        >
-                        <span class="text-slate-600 ml-2"
-                          >→ Medium heading</span
-                        >
+                        <code class="bg-white px-2 py-1 rounded">## Heading 2</code>
+                        <span class="text-slate-600 ml-2">→ Medium heading</span>
                       </div>
                       <div>
-                        <code class="bg-white px-2 py-1 rounded"
-                          >- List item</code
-                        >
+                        <code class="bg-white px-2 py-1 rounded">- List item</code>
                         <span class="text-slate-600 ml-2">→ Bullet point</span>
                       </div>
                       <div>
-                        <code class="bg-white px-2 py-1 rounded"
-                          >[Link](url)</code
-                        >
+                        <code class="bg-white px-2 py-1 rounded">[Link](url)</code>
                         <span class="text-slate-600 ml-2">→ Hyperlink</span>
                       </div>
                     </div>
@@ -630,14 +457,12 @@
             <div class="flex space-x-4 pt-3 pb-0" *ngIf="!showUpdateFieldPopup">
               <button
                 class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-                (click)="addField()"
-              >
+                (click)="addField()">
                 <i class="fas fa-plus mr-2"></i> Add Field
               </button>
               <button
                 class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-                (click)="showFieldPopup = false"
-              >
+                (click)="showFieldPopup = false">
                 <i class="fas fa-times mr-2"></i> Cancel
               </button>
             </div>
@@ -645,14 +470,12 @@
             <div class="flex space-x-4 pt-3 pb-0" *ngIf="showUpdateFieldPopup">
               <button
                 class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-                (click)="saveField()"
-              >
+                (click)="saveField()">
                 <i class="fas fa-save mr-2"></i> Save Field
               </button>
               <button
                 class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300"
-                (click)="closeDialog()"
-              >
+                (click)="closeDialog()">
                 <i class="fas fa-times mr-2"></i> Cancel
               </button>
             </div>

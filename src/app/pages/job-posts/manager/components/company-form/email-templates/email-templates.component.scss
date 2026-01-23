@@ -1,0 +1,47 @@
+.email-preview-container {
+  iframe {
+    border: none;
+    width: 100%;
+    min-height: 600px;
+  }
+  
+  // Style for the email preview to make it look like a real email client
+  .email-preview-frame {
+    width: 100%;
+    height: 600px;
+    border: none;
+    background: white;
+  }
+}
+
+// Ensure email content is properly displayed in preview
+:host ::ng-deep .email-preview-container {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  
+  .container {
+    max-width: 600px !important;
+  }
+}
+
+// Code editor styling
+textarea {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.5;
+}
+
+// Placeholder buttons styling
+button {
+  transition: all 0.2s ease-in-out;
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}

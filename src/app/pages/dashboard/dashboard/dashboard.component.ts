@@ -10,6 +10,7 @@ import { JobPostData } from '../../../models/jobpost.model';
 import { LoaderComponent } from '../../components/loader/loader.component';
 import { UserData, UserReq } from '../../../models/users.models';
 import { IndexedDbService } from '../../../services/indexed-db.service';
+import { DataService } from '../../../services/data.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,17 +35,24 @@ export class DashboardComponent implements OnInit {
   loadingText: string = 'Loading ...';
 
   userData!: UserData;
+  applicationStage = "Application Review";
+
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private indexedDbService: IndexedDbService,
-    private jobPostService: JobpostManagerService
+    private jobPostService: JobpostManagerService,
+    public dataService: DataService
+
   ) {
     const userData = localStorage.getItem('USER');
     if (userData) {
       this.userData = JSON.parse(userData);
     }
+
+       const stageId = this.route.snapshot.paramMap.get('stageId') || '';
+       this.applicationStage = stageId.replace("stage_", "").replace("_", " ")
   }
 
   ngOnInit(): void {
@@ -55,7 +63,11 @@ export class DashboardComponent implements OnInit {
       this.jobPostService.getJobPostData(jobpostId).subscribe({
         next: (data) => {
           this.loading = false;
+          this.dataService.saveMetrics(data.data![0].application_metrics, jobpostId)
+          const stageId = this.route.snapshot.paramMap.get('stageId') || '';
+          this.dataService.totalShortListedCandidates = this.dataService.getStageMetrics(stageId, "successful_count");
           this.applicationData = data !== undefined ? data.data![0].template_data : undefined;
+          this.jobPostService.updateApplicationData(this.applicationData!);
         },
         error: (error) => {
           this.loading = false;
@@ -67,6 +79,7 @@ export class DashboardComponent implements OnInit {
 
   updateApplicationData(data: any) {
     this.applicationData = data;
+    this.jobPostService.updateApplicationData(this.applicationData!);
   }
 
   setActiveSection(section: string) {
@@ -80,6 +93,18 @@ export class DashboardComponent implements OnInit {
   toggleSidebarCollapse() {
     this.sidebarCollapse = !this.sidebarCollapse;
   }
+
+  // Method to get section description
+  getSectionDescription(section: string): string {
+    const descriptions: { [key: string]: string } = {
+      'candidates': 'Manage and review all candidate applications',
+      'shortlisting': 'View and manage shortlisted candidates for this position',
+      'ranking': 'Rank candidates based on evaluation criteria',
+      'settings': 'Configure application settings and preferences'
+    };
+    return descriptions[section] || 'Manage recruitment activities';
+  }
+
 
   // Add this method to your component class
   getInitials(fullName: string): string {

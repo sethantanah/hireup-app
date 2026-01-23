@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 export interface TableColumn {
   key: string;
@@ -72,12 +73,44 @@ export class TableViewComponent implements OnInit, OnChanges {
     return { ...this.defaultConfig, ...this.config };
   }
 
+
+  constructor(private route: ActivatedRoute) {
+    this.columns = this.columns.filter(
+      (col, index, self) =>
+        index === self.findIndex(c => c.key === col.key)
+    );
+  }
+
   ngOnInit() {
+
+    this.columns = this.columns.filter(
+      (col, index, self) =>
+        index === self.findIndex(c => c.key === col.key)
+    );
     this.applyFilters();
   }
 
   ngOnChanges() {
     this.applyFilters();
+  }
+
+  getStartRecord(): number {
+    return (this.currentPage - 1) * this.pageSize + 1;
+  }
+
+  getEndRecord(): number {
+    return Math.min(this.currentPage * this.pageSize, this.filteredData.length);
+  }
+
+
+  showAllColumns(): void {
+    this.columns.forEach(col => col.visible = true);
+    // this.updateVisibleColumns();
+  }
+
+  hideAllColumns(): void {
+    this.columns.forEach(col => col.visible = false);
+    // this.updateVisibleColumns();
   }
 
   getColumnLabel(key: string): string {
@@ -238,9 +271,18 @@ export class TableViewComponent implements OnInit, OnChanges {
 
   exportData(format: 'shortlist' | 'unshortlist') {
     const dataToExport = this.selectedRows.size > 0 ?
-      Array.from(this.selectedRows) : this.filteredData;
+      Array.from(this.selectedRows) : [];
+
+
+    this.filteredData = this.filteredData.filter(
+      (data) => !dataToExport.some(item => item.id === data.id)
+    );
 
     this.exportRequest.emit({ data: dataToExport, format });
+
+    if (dataToExport.length > 0) {
+      alert("Shortlisting in Progress!");
+    }
   }
 
   get paginatedData() {
@@ -315,5 +357,18 @@ export class TableViewComponent implements OnInit, OnChanges {
   onRowClick(row: any, event: MouseEvent) {
     if ((event.target as HTMLElement).closest('.row-checkbox')) return;
     this.rowClick.emit(row);
+  }
+
+
+  getCandidateStatus(candidate: any): string {
+    const stageId = this.route.snapshot.paramMap.get('stageId') || '';
+    const status = candidate.application_stages?.[stageId.replace("stage_", "")]?.["status"]
+    if (status === "pending") {
+      return "New";
+    } else if (status === "unshortlisted") {
+      return "Rejected";
+    } else {
+      return "Shortlisted"
+    }
   }
 }

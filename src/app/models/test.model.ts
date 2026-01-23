@@ -11,6 +11,7 @@ export interface Field {
   question: string;
   answer: string;
   options?: string[];
+  puzzleData?: any;
   section?: number;
   subsection?: number;
 }

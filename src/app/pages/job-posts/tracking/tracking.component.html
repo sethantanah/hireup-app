@@ -1,0 +1,316 @@
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl shadow-lg mb-6">
+        <i class="fas fa-search text-white text-2xl"></i>
+      </div>
+      <h1 class="text-4xl font-bold text-gray-900 mb-3">
+        Track Your Application Status
+      </h1>
+      <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+        Enter your email to check the status of your job applications and track progress through each hiring stage.
+      </p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="bg-white rounded-2xl shadow-xl p-6 mb-8 border border-gray-200">
+      <div class="mb-4">
+        <label for="email-input" class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-envelope text-indigo-500 mr-2"></i>
+          Enter Your Email Address
+        </label>
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="fas fa-user text-gray-400"></i>
+          </div>
+          <input
+            id="email-input"
+            type="email"
+            [(ngModel)]="email"
+            placeholder="your.email@example.com"
+            class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
+            [class.border-indigo-500]="email"
+            [class.border-red-300]="errorMessage"
+          />
+          <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <button
+              *ngIf="email"
+              (click)="email = ''; errorMessage = ''"
+              class="text-gray-400 hover:text-gray-600 p-1"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <button
+        class="group relative w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+        (click)="loadCandidateStatus()"
+        [disabled]="!email || loading"
+      >
+        <div class="absolute inset-0 bg-gradient-to-r from-indigo-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl"></div>
+        <span class="relative flex items-center justify-center gap-2">
+          <ng-container *ngIf="!loading; else loadingSpinner">
+            <i class="fas fa-search"></i>
+            Check Application Status
+          </ng-container>
+          <ng-template #loadingSpinner>
+            <i class="fas fa-circle-notch fa-spin"></i>
+            Searching Applications...
+          </ng-template>
+        </span>
+      </button>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+            <i class="fas fa-exclamation-circle text-red-600"></i>
+          </div>
+          <div>
+            <p class="text-sm font-medium text-red-800">{{ errorMessage }}</p>
+            <p class="text-xs text-red-600 mt-1">Please check your email and try again.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Status Section -->
+    <div *ngIf="candidateStatus$ | async as results; else noResults">
+      <!-- Summary Stats -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+          <div class="text-sm font-medium text-gray-600">Total Applications</div>
+          <div class="text-2xl font-bold text-gray-900">{{ results.length }}</div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+          <div class="text-sm font-medium text-gray-600">Active</div>
+          <div class="text-2xl font-bold text-green-600">
+            {{ getActiveApplications(results) }}
+          </div>
+        </div>
+        <div class="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+          <div class="text-sm font-medium text-gray-600">Completed Stages</div>
+          <div class="text-2xl font-bold text-blue-600">
+            {{ getCompletedStages(results) }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Applications List -->
+      <div class="space-y-6">
+        <div *ngFor="let app of results; let i = index" class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+          <!-- Application Header -->
+          <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-1">{{ app.job_title }}</h3>
+                <div class="flex items-center gap-3 text-sm text-gray-600">
+                  <!-- <span class="flex items-center gap-1">
+                    <i class="fas fa-building text-gray-400"></i>
+                    {{ app.company_name || 'Company' }}
+                  </span> -->
+                  <!-- <span class="flex items-center gap-1">
+                    <i class="fas fa-calendar text-gray-400"></i>
+                    Applied {{ formatDate(app.applied_date) }}
+                  </span> -->
+                </div>
+              </div>
+              
+              <!-- Status Badge -->
+              <div class="flex items-center gap-3">
+                <span 
+                  class="px-3 py-1 rounded-full text-sm font-medium"
+                  [ngClass]="getStatusClass(app.current_stage)"
+                >
+                  {{ app.current_stage }}
+                </span>
+                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <i class="fas fa-briefcase text-indigo-600"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Current Status -->
+          <div class="p-6">
+            <div class="mb-6">
+              <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                Current Status
+              </h4>
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center">
+                  <i class="fas fa-flag-checkered text-indigo-600"></i>
+                </div>
+                <div>
+                  <div class="text-lg font-semibold text-gray-900">{{ app.current_stage }}</div>
+                  <!-- <div class="text-sm text-gray-600 flex items-center gap-2">
+                    <i class="fas fa-clock text-gray-400"></i>
+                    Last updated {{ formatDate(app.last_updated) }}
+                  </div> -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Timeline -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-sm font-semibold text-gray-700 uppercase tracking-wide">
+                  Hiring Progress
+                </h4>
+                <span class="text-xs text-gray-500">
+                  {{ getProgressPercentage(app.history) }}% Complete
+                </span>
+              </div>
+              
+              <!-- Progress Bar -->
+              <div class="h-2 bg-gray-200 rounded-full overflow-hidden mb-6">
+                <div 
+                  class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500"
+                  [style.width.%]="getProgressPercentage(app.history)"
+                ></div>
+              </div>
+
+              <!-- Timeline -->
+              <div class="relative pl-8">
+                <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+                
+                <div *ngFor="let stage of app.history; let last = last" 
+                     class="relative mb-6 last:mb-0">
+                  <!-- Timeline Dot -->
+                  <div 
+                    class="absolute -left-9 w-5 h-5 rounded-full border-4 border-white z-10"
+                    [ngClass]="{
+                      'bg-green-500': stage.status === 'completed',
+                      'bg-indigo-500': stage.status === 'active',
+                      'bg-gray-300': stage.status === 'pending',
+                      'bg-red-500': stage.status === 'rejected'
+                    }"
+                  ></div>
+
+                  <!-- Stage Card -->
+                  <div 
+                    class="bg-gray-50 rounded-xl p-4 border transition-all duration-200"
+                    [class.bg-white]="stage.is_current"
+                    [class.border-indigo-200]="stage.is_current"
+                    [class.border-gray-200]="!stage.is_current"
+                    [class.shadow-sm]="stage.is_current"
+                  >
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div class="flex items-center gap-3 mb-1">
+                          <h5 class="font-semibold text-gray-900">{{ stage.stage_name }}</h5>
+                          <!-- <span 
+                            class="px-2 py-1 text-xs rounded-full font-medium"
+                            [ngClass]="getStageStatusClass(stage.status)"
+                          >
+                            {{ stage.status }}
+                          </span> -->
+                        </div>
+                        <div class="flex flex-wrap gap-3 text-sm text-gray-600">
+                          <!-- <span class="flex items-center gap-1">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ formatDate(stage.date) }}
+                          </span> -->
+                          <span *ngIf="stage.emailed" class="flex items-center gap-1 text-green-600">
+                            <i class="fas fa-envelope"></i>
+                            Notified via email
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div class="flex items-center gap-2">
+                        <span *ngIf="stage.is_current" 
+                              class="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm rounded-full font-medium">
+                          Current
+                        </span>
+                        <i 
+                          class="fas text-gray-400"
+                          [ngClass]="{
+                            'fa-check-circle text-green-500': stage.status === 'completed',
+                            'fa-spinner fa-spin text-indigo-500': stage.status === 'active',
+                            'fa-clock text-gray-400': stage.status === 'pending',
+                            'fa-times-circle text-red-500': stage.status === 'rejected'
+                          }"
+                        ></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <!-- <div class="p-4 border-t border-gray-100 bg-gray-50">
+            <div class="flex flex-wrap gap-3">
+              <button class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 text-sm">
+                <i class="fas fa-download"></i>
+                Download Application
+              </button>
+              <button class="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-lg hover:from-blue-100 hover:to-blue-200 transition-colors flex items-center gap-2 text-sm">
+                <i class="fas fa-question-circle"></i>
+                Need Help?
+              </button>
+            </div>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noResults>
+      <!-- Empty State -->
+      <div *ngIf="!loading" class="bg-white rounded-2xl shadow-lg p-12 text-center border border-gray-200">
+        <div class="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-file-alt text-gray-400 text-3xl"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-3">No Applications Found</h3>
+        <p class="text-gray-600 mb-8 max-w-md mx-auto">
+          Enter your email address above to track your job applications. 
+          If you've recently applied, your applications will appear here.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+            <i class="fas fa-question-circle"></i>
+            How Tracking Works
+          </button>
+          <button class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2">
+            <i class="fas fa-paper-plane"></i>
+            Contact Support
+          </button>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- FAQ Section -->
+    <div class="mt-12 pt-8 border-t border-gray-200">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+        Frequently Asked Questions
+      </h3>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h4 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <i class="fas fa-question-circle text-indigo-500"></i>
+            How often is status updated?
+          </h4>
+          <p class="text-gray-600 text-sm">
+            Application status is updated in real-time as recruiters update your progress. 
+            You'll see changes immediately.
+          </p>
+        </div>
+        <div class="bg-white rounded-xl p-5 border border-gray-200">
+          <h4 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+            <i class="fas fa-envelope text-indigo-500"></i>
+            Will I receive notifications?
+          </h4>
+          <p class="text-gray-600 text-sm">
+            Yes! You'll receive email notifications at each stage of the process. 
+            Check your inbox for updates.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

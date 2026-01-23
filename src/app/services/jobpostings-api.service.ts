@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext, HttpContextToken, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { environment } from '../../environment/environment';
+import { JobPost } from '../models/jobpost.model';
 
 // Response Interfaces
 export interface JobPosting {
@@ -89,7 +90,7 @@ export class JobpostingsApiService {
    */
   createUpdateJobPost(
     userId: string, 
-    jobPostData: JobPostingCreateUpdateRequest
+    jobPostData: Partial<JobPost>
   ): Observable<JobPostingCreateUpdateResponse> {
     if (!userId) {
       return throwError(() => new Error('User ID is required'));

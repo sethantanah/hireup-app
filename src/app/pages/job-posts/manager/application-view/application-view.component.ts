@@ -18,6 +18,7 @@ export class ApplicationViewComponent implements OnInit {
   mode: string = 'testing';
   formOnly: boolean = false;
   loading: boolean = false;
+  formType: string | undefined;
 
   jobPostId: string = '';
 
@@ -44,6 +45,17 @@ export class ApplicationViewComponent implements OnInit {
           this.mode = 'submission';
           this.applicationData = data?.data![0].template_data;
           this.templateId = this.applicationData!.templateId || '1';
+
+
+          const formType = this.route.snapshot.paramMap.get('applicationType') || this.route.snapshot.paramMap.get('formOnly') || "Application";
+          if (formType == "Additional Data") {
+            if (this.applicationData && this.applicationData.additionalSections && this.applicationData.requestForDataForm) {
+              this.applicationData.sections = this.applicationData.additionalSections;
+              this.applicationData.formData = this.applicationData.requestForDataForm;
+            }
+          }
+
+          this.formType = formType;
         },
         error: (error) => {
           this.loading = false;
@@ -53,6 +65,19 @@ export class ApplicationViewComponent implements OnInit {
     } else {
       this.templateId = this.route.snapshot.paramMap.get('templateId') || '1';
       this.applicationData = this.jobPostService.getApplicationData();
+
+      const formType = this.route.snapshot.paramMap.get('applicationType') || this.route.snapshot.paramMap.get('formOnly') || "Application";
+      if (formType == "Additional Data") {
+        console.log("hello", this.applicationData, this.applicationData && this.applicationData.additionalSections && this.applicationData.requestForDataForm)
+        if (this.applicationData && this.applicationData.additionalSections && this.applicationData.requestForDataForm) {
+          this.applicationData.sections = this.applicationData.additionalSections;
+          this.applicationData.formData = this.applicationData.requestForDataForm;
+        }
+      }
+
+      this.formType = formType;
     }
+
+
   }
 }

@@ -1,44 +1,32 @@
-import { Component, HostListener, OnInit } from '@angular/core';
-import { UploadResumeComponent } from '../../components/upload-resume/upload-resume.component';
-import { HeaderComponent } from '../../components/header/header.component';
-import { FooterComponent } from '../../components/footer/footer.component';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../../services/api.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
-  selector: 'app-landing',
-  imports: [CommonModule, UploadResumeComponent],
+  selector: 'app-landing-page',
+  standalone: true,
+  imports: [CommonModule, RouterModule],
   templateUrl: './landing.component.html',
-  styleUrl: './landing.component.scss'
+  styleUrls: ['./landing.component.scss']
 })
-export class LandingComponent implements OnInit{
-  // Mock API response data
-  landingPageData: any = null;
+export class LandingComponent {
 
-  isNavOpen = false; // Controls the visibility of the mobile navigation menu
-  isMobile = false; // Tracks if the screen is in mobile view
-
-
-  // Close navigation menu on larger screens
-  @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
-    this.isMobile = window.innerWidth < 768; // 768px is the breakpoint for 'md' in Tailwind
-    if (!this.isMobile) {
-      this.isNavOpen = false; // Close the nav menu when resizing to a larger screen
+  constructor() { 
+  }
+  
+  scrollToFeatures(): void {
+    const element = document.getElementById('features');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
-  constructor(private apiService: ApiService) {
-    // this.landingPageData = apiService.getData(this.apiService.jobpost_id);
-  }
-
-
-  ngOnInit() {
-    this.isMobile = window.innerWidth < 768; // Check if the screen is mobile on initial load
-  }
-
-  // Toggle navigation menu
-  toggleNav() {
-    this.isNavOpen = !this.isNavOpen;
+  contactSales(): void {
+    // You can implement contact sales logic here
+    // For now, let's scroll to contact section
+    const element = document.getElementById('contact');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
   }
 }

@@ -1,21 +1,11 @@
-<div
-  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
-  (click)="dataService.toggleEmailPopUp()"
-  *ngIf="dataService.openEmailPopUp && !showEmailPopup"
->
-  <div
-    class="bg-white rounded-xl shadow-2xl w-full ml-10 mr-10 h-[90vh] flex flex-col"
-    (click)="$event.stopPropagation()"
-  >
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+  (click)="dataService.toggleEmailPopUp()" *ngIf="dataService.openEmailPopUp && !showEmailPopup">
+  <div class="bg-white rounded-xl shadow-2xl w-full ml-10 mr-10 h-[90vh] flex flex-col"
+    (click)="$event.stopPropagation()">
     <!-- Header -->
-    <div
-      class="px-6 py-4 border-b flex items-center justify-between bg-white sticky top-0 z-10"
-    >
-      <h2 class="text-2xl font-semibold">Email Configuration</h2>
-      <button
-        (click)="dataService.toggleEmailPopUp()"
-        class="text-gray-500 hover:text-gray-700"
-      >
+    <div class="px-6 py-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
+      <h2 class="text-2xl font-semibold">Notify Candidates</h2>
+      <button (click)="dataService.toggleEmailPopUp()" class="text-gray-500 hover:text-gray-700">
         <i class="fas fa-times text-xl"></i>
       </button>
     </div>
@@ -24,8 +14,70 @@
     <div class="flex flex-1 overflow-hidden">
       <!-- Left Sidebar - View Toggle -->
       <div class="w-64 border-r bg-gray-50 p-4">
-        <div class="space-y-2">
-          <button
+        <div class="space-y-2 h-[100%] overflow-y-auto">
+          <div class="font-semibold">Current Stage Templates</div>
+
+          <button *ngFor="let temp of emailTemplates" (click)="setTemplate(temp)" class="
+    w-full px-4 py-3 rounded-lg text-left transition-all border
+    flex flex-col gap-1
+    bg-white hover:bg-gray-100
+  " [ngClass]="{
+    'border-blue-500 bg-blue-50 hover:bg-blue-100': emailTemplate?.id === temp.id,
+    'border-gray-200': emailTemplate?.id !== temp.id
+  }">
+            <div class="font-semibold text-gray-800 flex justify-between items-center">
+              <span>{{ temp.name }} Template</span>
+
+              <!-- Active indicator -->
+              <span *ngIf="emailTemplate?.id === temp.id" class="text-xs px-2 py-1 rounded bg-blue-500 text-white">
+                Selected
+              </span>
+            </div>
+
+            <div class="text-sm text-gray-600">
+              Application Stage: <span class="font-medium">{{ temp.stageId?.replace("stage", "")?.replaceAll("_", " ")
+                }}</span>
+            </div>
+
+            <div class="text-sm text-gray-600">
+              To be sent to: <span  *ngIf="temp.for !== 'other'" span class="font-medium text-green-600">{{ temp.for }}
+                candidates</span>
+              <span *ngIf="temp.for === 'other'" span class="font-medium text-green-600">All candidates in current Stage</span>
+            </div>
+          </button>
+
+
+          <div class="font-semibold">More Templates</div>
+          <button *ngFor="let temp of otherEmailTemplates" (click)="setTemplate(temp)" class="
+    w-full px-4 py-3 rounded-lg text-left transition-all border
+    flex flex-col gap-1
+    bg-white hover:bg-gray-100
+  " [ngClass]="{
+    'border-blue-500 bg-blue-50 hover:bg-blue-100': emailTemplate?.id === temp.id,
+    'border-gray-200': emailTemplate?.id !== temp.id
+  }">
+            <div class="font-semibold text-gray-800 flex justify-between items-center">
+              <span>{{ temp.name }} Template</span>
+
+              <!-- Active indicator -->
+              <span *ngIf="emailTemplate?.id === temp.id" class="text-xs px-2 py-1 rounded bg-blue-500 text-white">
+                Selected
+              </span>
+            </div>
+
+            <div class="text-sm text-gray-600">
+              Application Stage: <span class="font-medium">{{ temp.stageId?.replace("stage", "")?.replaceAll("_", " ") || 'any stage'
+                }}</span>
+            </div>
+
+            <div class="text-sm text-gray-600">
+              To be sent to: <span *ngIf="temp.for !== 'other'" span class="font-medium text-green-600">{{ temp.for }}
+                candidates</span>
+              <span *ngIf="temp.for === 'other'" span class="font-medium text-green-600">All candidates in current Stage</span>
+            </div>
+          </button>
+
+          <!-- <button
             [class.bg-blue-600]="activeView === 'general'"
             [class.text-white]="activeView === 'general'"
             [class.bg-gray-100]="activeView !== 'general'"
@@ -35,7 +87,7 @@
           >
             General Emails
           </button>
-          <!-- <button
+          <button
             [class.bg-blue-600]="activeView === 'personalized'"
             [class.text-white]="activeView === 'personalized'"
             [class.bg-gray-100]="activeView !== 'personalized'"
@@ -53,23 +105,22 @@
         <!-- Tabs -->
         <div class="border-b bg-gray-50">
           <div class="flex">
-            <button
-              [class.border-blue-600]="activeTab === 'shortlisted'"
-              [class.text-blue-600]="activeTab === 'shortlisted'"
-              (click)="activeTab = 'shortlisted'"
+            <button [class.border-blue-600]="activeTab === 'shortlisted'"
+              [class.text-blue-600]="activeTab === 'shortlisted'" (click)="switchTemplate('shortlisted')"
               class="px-6 py-3 font-medium border-b-2 transition-colors"
-              [class.border-transparent]="activeTab !== 'shortlisted'"
-            >
+              [class.border-transparent]="activeTab !== 'shortlisted'">
               Shortlisted Candidates
             </button>
-            <button
-              [class.border-blue-600]="activeTab === 'unshortlisted'"
-              [class.text-blue-600]="activeTab === 'unshortlisted'"
-              (click)="activeTab = 'unshortlisted'"
+            <button [class.border-blue-600]="activeTab === 'unshortlisted'"
+              [class.text-blue-600]="activeTab === 'unshortlisted'" (click)="switchTemplate('unshortlisted')"
               class="px-6 py-3 font-medium border-b-2 transition-colors"
-              [class.border-transparent]="activeTab !== 'unshortlisted'"
-            >
+              [class.border-transparent]="activeTab !== 'unshortlisted'">
               Unshortlisted Candidates
+            </button>
+            <button [class.border-blue-600]="activeTab === 'other'" [class.text-blue-600]="activeTab === 'other'"
+              (click)="switchTemplate('other')" class="px-6 py-3 font-medium border-b-2 transition-colors"
+              [class.border-transparent]="activeTab !== 'other'">
+              All Candidates in Current Stage
             </button>
           </div>
         </div>
@@ -77,6 +128,7 @@
         <!-- Template Editor -->
         <div class="flex-1 overflow-y-auto p-6">
           <div class="max-w-3xl  space-y-6">
+
             <!-- Auto Send Toggle -->
             <!-- <div class="flex items-center justify-end gap-3">
                 <button 
@@ -97,14 +149,9 @@
             <!-- Template Form -->
             <div class="space-y-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1"
-                  >Subject</label
-                >
-                <input
-                  [(ngModel)]="emailTemplates[activeView][activeTab].subject"
-                  class="w-full px-4 py-2 border rounded-lg"
-                  placeholder="Enter email subject"
-                />
+                <label class="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <input [(ngModel)]="emailTemplate.subject" class="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Enter email subject" />
               </div>
 
               <div>
@@ -115,55 +162,36 @@
                 <div class="space-y-4">
                   <div>
                     <div class="flex items-center justify-between mb-1">
-                      <label class="block text-sm font-medium text-gray-700"
-                        >Email Body</label
-                      >
+                      <label class="block text-sm font-medium text-gray-700">Email Body</label>
                       <div class="flex items-center gap-3">
-                        <button
-                          (click)="toggleshowPreview()"
-                          class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                        >
-                          <i
-                            class="fas"
-                            [class.fa-eye]="!showPreview"
-                            [class.fa-edit]="showPreview"
-                          ></i>
+                        <button (click)="toggleshowPreview()"
+                          class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                          <i class="fas" [class.fa-eye]="!showPreview" [class.fa-edit]="showPreview"></i>
                           {{ showPreview ? "Edit" : "Preview" }}
                         </button>
-                        <button
-                          (click)="showFormattingGuide = !showFormattingGuide"
-                          class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                        >
-                          <i
-                            class="fas"
-                            [class.fa-chevron-down]="!showFormattingGuide"
-                            [class.fa-chevron-up]="showFormattingGuide"
-                          ></i>
+                        <button (click)="showFormattingGuide = !showFormattingGuide"
+                          class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                          <i class="fas" [class.fa-chevron-down]="!showFormattingGuide"
+                            [class.fa-chevron-up]="showFormattingGuide"></i>
                           Formatting Guide
                         </button>
                       </div>
                     </div>
 
                     <!-- Formatting Guide -->
-                    <div
-                      *ngIf="showFormattingGuide"
-                      class="mb-4 p-4 bg-gray-50 rounded-lg border"
-                    >
+                    <div *ngIf="showFormattingGuide" class="mb-4 p-4 bg-gray-50 rounded-lg border">
                       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Basic Formatting -->
                         <div>
                           <h4 class="font-medium mb-2">Basic Formatting</h4>
                           <div class="space-y-2">
-                            <div
-                              *ngFor="let item of formattingGuide.basics"
-                              class="text-sm"
-                            >
+                            <div *ngFor="let item of formattingGuide.basics" class="text-sm">
                               <code class="bg-gray-100 px-2 py-1 rounded">{{
                                 item.syntax
                               }}</code>
                               <span class="text-gray-600 ml-2">{{
                                 item.description
-                              }}</span>
+                                }}</span>
                             </div>
                           </div>
                         </div>
@@ -172,16 +200,13 @@
                         <div>
                           <h4 class="font-medium mb-2">Lists</h4>
                           <div class="space-y-2">
-                            <div
-                              *ngFor="let item of formattingGuide.lists"
-                              class="text-sm"
-                            >
+                            <div *ngFor="let item of formattingGuide.lists" class="text-sm">
                               <code class="bg-gray-100 px-2 py-1 rounded">{{
                                 item.syntax
                               }}</code>
                               <span class="text-gray-600 ml-2">{{
                                 item.description
-                              }}</span>
+                                }}</span>
                             </div>
                           </div>
                         </div>
@@ -190,16 +215,13 @@
                         <div>
                           <h4 class="font-medium mb-2">Structure</h4>
                           <div class="space-y-2">
-                            <div
-                              *ngFor="let item of formattingGuide.structure"
-                              class="text-sm"
-                            >
+                            <div *ngFor="let item of formattingGuide.structure" class="text-sm">
                               <code class="bg-gray-100 px-2 py-1 rounded">{{
                                 item.syntax
                               }}</code>
                               <span class="text-gray-600 ml-2">{{
                                 item.description
-                              }}</span>
+                                }}</span>
                             </div>
                           </div>
                         </div>
@@ -208,16 +230,13 @@
                         <div *ngIf="activeView === 'personalized'">
                           <h4 class="font-medium mb-2">Available Variables</h4>
                           <div class="space-y-2">
-                            <div
-                              *ngFor="let item of formattingGuide.variables"
-                              class="text-sm"
-                            >
+                            <div *ngFor="let item of formattingGuide.variables" class="text-sm">
                               <code class="bg-gray-100 px-2 py-1 rounded">{{
                                 item.syntax
                               }}</code>
                               <span class="text-gray-600 ml-2">{{
                                 item.description
-                              }}</span>
+                                }}</span>
                             </div>
                           </div>
                         </div>
@@ -228,53 +247,32 @@
                     <div class="relative">
                       <div class="relative">
                         <!-- Editor -->
-                        <textarea
-                          *ngIf="!showPreview"
-                          [(ngModel)]="
-                            emailTemplates[activeView][activeTab].body
-                          "
-                          class="w-full px-4 py-3 border rounded-lg h-64 font-mono text-sm"
-                          placeholder="Enter your email content using Markdown or HTML formatting..."
-                        ></textarea>
+                        <textarea *ngIf="!showPreview" [(ngModel)]="
+                            emailTemplate.body
+                          " class="w-full px-4 py-3 border rounded-lg h-64 font-mono text-sm"
+                          placeholder="Enter your email content using Markdown or HTML formatting..."></textarea>
 
                         <!-- Preview -->
-                        <div
-                          *ngIf="showPreview"
-                          class="w-full px-4 py-3 border rounded-lg h-64 overflow-y-auto bg-white"
-                        >
-                          <div
-                            class="prose max-w-none"
-                            [innerHTML]="getPreviewContent()"
-                          ></div>
+                        <div *ngIf="showPreview"
+                          class="w-full px-4 py-3 border rounded-lg h-64 overflow-y-auto bg-white">
+                          <div class="prose max-w-none" [innerHTML]="getPreviewContent()"></div>
                         </div>
                       </div>
 
                       <!-- Quick Insert Variables -->
-                      <div
-                        class="absolute bottom-2 right-2"
-                        *ngIf="activeView === 'personalized'"
-                      >
+                      <div class="absolute bottom-2 right-2" *ngIf="activeView === 'personalized'">
                         <div class="relative">
-                          <button
-                            (click)="showInsertVariables = !showInsertVariables"
-                            class="px-3 py-1.5 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-1"
-                          >
+                          <button (click)="showInsertVariables = !showInsertVariables"
+                            class="px-3 py-1.5 text-sm bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center gap-1">
                             <i class="fas fa-plus"></i>
                             Insert Variable
                           </button>
-                          <div
-                            *ngIf="showInsertVariables"
-                            (click)="showInsertVariables = false"
-                            class="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border p-2 group-hover:block"
-                          >
+                          <div *ngIf="showInsertVariables" (click)="showInsertVariables = false"
+                            class="absolute bottom-full right-0 mb-2 w-48 bg-white rounded-lg shadow-lg border p-2 group-hover:block">
                             <div (click)="$event.stopPropagation()">
-                              <button
-                                (click)="insertVariable(variable.syntax)"
-                                *ngFor="
+                              <button (click)="insertVariable(variable.syntax)" *ngFor="
                                   let variable of formattingGuide.variables
-                                "
-                                class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 rounded"
-                              >
+                                " class="w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 rounded">
                                 {{ variable.description }}
                               </button>
                             </div>
@@ -286,15 +284,11 @@
                 </div>
               </div>
 
-              <button
-                (click)="saveTemplate(activeTab)"
+              <button (click)="saveTemplate(activeTab)"
                 class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 disabled:opacity-70 disabled:cursor-not-allowed"
-                [disabled]="isSaving"
-              >
-                <span
-                  *ngIf="isSaving"
-                  class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
-                ></span>
+                [disabled]="isSaving">
+                <span *ngIf="isSaving"
+                  class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 <span>{{ isSaving ? "Saving..." : "Save Template" }}</span>
               </button>
             </div>
@@ -305,51 +299,31 @@
         <div class="px-6 py-4 border-t bg-gray-50">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-             <span class="text-semibold">Send To</span>
-              <label class="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="selectedGroups.shortlisted"
-                  class="rounded text-blue-600"
-                />
+              <span class="text-semibold">Send To:</span>
+              <p class="font-semibold">
+                {{emailTemplate.for === "shortlisted" ? "Shortlisted Candidates" : emailTemplate.for === "unshortlisted" ? "Unshortlisted Candidates" : "All Candidates" }}
+              </p>
+              <!-- <label class="flex items-center gap-2">
+                <input type="checkbox" [(ngModel)]="selectedGroups.shortlisted" class="rounded text-blue-600" />
                 <span>Shortlisted</span>
               </label>
               <label class="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  [(ngModel)]="selectedGroups.unshortlisted"
-                  class="rounded text-blue-600"
-                />
+                <input type="checkbox" [(ngModel)]="selectedGroups.unshortlisted" class="rounded text-blue-600" />
                 <span>Unshortlisted</span>
-              </label>
+              </label> -->
             </div>
 
-            <button
-              (click)="sendEmails()"
+            <button (click)="sendEmails()"
               class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-green-400 disabled:cursor-not-allowed flex items-center justify-center"
-              [disabled]="sendingEmail"
-            >
+              [disabled]="sendingEmail">
               <span *ngIf="!sendingEmail">Send Emails</span>
               <span *ngIf="sendingEmail" class="flex items-center">
-                <svg
-                  class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                  viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                  </path>
                 </svg>
                 Sending...
               </span>
@@ -361,14 +335,9 @@
   </div>
 </div>
 
-<app-alert-popup
-  [show]="!!alert"
-  [type]="alert?.type || 'success'"
-  [message]="alert?.message || ''"
-  [autoClose]="alert?.autoClose || true"
-  [duration]="alert?.duration || 5000"
-  (closed)="onAlertClosed()"
-></app-alert-popup>
+<app-alert-popup [show]="!!alert" [type]="alert?.type || 'success'" [message]="alert?.message || ''"
+  [autoClose]="alert?.autoClose || true" [duration]="alert?.duration || 5000"
+  (closed)="onAlertClosed()"></app-alert-popup>
 
 <!-- <app-sendemails-popup
   [emails]="emailsList"

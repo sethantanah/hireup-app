@@ -1,0 +1,251 @@
+<div class="crossword-builder" *ngIf="!previewOnly">
+    <div class="builder-header">
+        <h2 class="text-xl font-bold mb-4">Crossword Puzzle Builder</h2>
+        <div class="text-sm text-gray-600 mb-4">
+            <p>Mode: <span class="font-medium">{{ isEditing ? 'Editing Words' : 'Selecting Area' }}</span></p>
+            <p class="mt-1">{{ isEditing ? 'Click words on the right to edit them. Only word letters are shown.' :
+                'Click and drag to select cells for a new word. Word letters are preserved.' }}</p>
+        </div>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="mode-toggle mb-4">
+        <div class="flex gap-4">
+            <button class="px-4 py-2 rounded" [class.bg-blue-600]="!isEditing" [class.text-white]="!isEditing"
+                [class.bg-gray-200]="isEditing" (click)="switchToSelectionMode()">
+                Select Word Area
+            </button>
+            <button class="px-4 py-2 rounded" [class.bg-blue-600]="isEditing" [class.text-white]="isEditing"
+                [class.bg-gray-200]="!isEditing" (click)="switchToEditMode()">
+                Edit Words
+            </button>
+        </div>
+    </div>
+
+    <div class="builder-layout">
+        <!-- Grid Builder -->
+        <div class="grid-builder">
+            <div class="grid-controls mb-4">
+                <div class="flex gap-4 items-center flex-wrap">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Grid Size</label>
+                        <input type="number" [(ngModel)]="gridSize" (change)="initializeGrid()" min="5" max="20"
+                            class="w-20 px-3 py-2 border rounded">
+                    </div>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" (click)="clearGrid()">
+                        Clear Grid
+                    </button>
+                    <button class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                        (click)="importPuzzle()">
+                        Import JSON
+                    </button>
+                    <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                        (click)="openPreview()">
+                        Preview Puzzle
+                    </button>
+                    <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                        (click)="fillNonWordCells()">
+                        Fill Empty Cells
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <div class="grid" [style.gridTemplateColumns]="'repeat(' + gridSize + ', 1fr)'"
+                    (mousedown)="onMouseDown($event)" (mouseup)="onMouseUp($event)" (mousemove)="onMouseMove($event)">
+                    <ng-container *ngFor="let row of displayGrid; let i = index">
+                        <ng-container *ngFor="let cell of row; let j = index">
+                            <div class="builder-cell" [class.black]="cell.isBlack" [class.selected]="cell.isSelected"
+                                [class.word-cell]="isWordCell(i, j)" [class.has-letter]="cell.value && !cell.isBlack"
+                                [attr.data-row]="i" [attr.data-col]="j">
+                                <div class="cell-content">
+                                    {{ cell.value }}
+                                </div>
+                                <div class="cell-info" *ngIf="!cell.isBlack">
+                                    <span class="cell-number" *ngIf="getCellNumber(i, j)">
+                                        {{ getCellNumber(i, j) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </ng-container>
+                </div>
+
+                <div class="mt-4 text-sm text-gray-600">
+                    <p>Selected: {{ currentSelection.length }} cells</p>
+                    <p *ngIf="currentSelection.length > 0">
+                        Direction: {{ getSelectionDirection() }}
+                    </p>
+                    <p>Word cells: {{ getWordCellCount() }} / {{ gridSize * gridSize - getBlackCellCount() }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Word List & Editor -->
+        <div class="word-editor">
+            <!-- Add Word Form -->
+            <div class="add-word-section mb-6" *ngIf="currentSelection.length > 0 && !isEditing">
+                <h3 class="text-lg font-semibold mb-4">Add New Word</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Word</label>
+                        <input type="text" [(ngModel)]="newWord" class="w-full px-3 py-2 border rounded"
+                            placeholder="Enter the word" (input)="onWordInput()" />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Length: {{ newWord.length }} (Selected cells: {{ currentSelection.length }})
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Clue</label>
+                        <textarea [(ngModel)]="newClue" rows="2" class="w-full px-3 py-2 border rounded"
+                            placeholder="Enter clue for this word"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Direction</label>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 rounded" [class.bg-blue-600]="selectionDirection === 'across'"
+                                [class.text-white]="selectionDirection === 'across'"
+                                [class.bg-gray-200]="selectionDirection !== 'across'"
+                                (click)="selectionDirection = 'across'">
+                                Across
+                            </button>
+                            <button class="px-3 py-1 rounded" [class.bg-blue-600]="selectionDirection === 'down'"
+                                [class.text-white]="selectionDirection === 'down'"
+                                [class.bg-gray-200]="selectionDirection !== 'down'"
+                                (click)="selectionDirection = 'down'">
+                                Down
+                            </button>
+                            <button class="px-3 py-1 rounded" [class.bg-blue-600]="selectionDirection === 'diagonal'"
+                                [class.text-white]="selectionDirection === 'diagonal'"
+                                [class.bg-gray-200]="selectionDirection !== 'diagonal'"
+                                (click)="selectionDirection = 'diagonal'">
+                                Diagonal
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2">
+                        <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            (click)="addWordFromSelection()" [disabled]="!canAddWord()"
+                            [class.opacity-50]="!canAddWord()" [class.cursor-not-allowed]="!canAddWord()">
+                            Add Word
+                        </button>
+                        <button class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300" (click)="clearSelection()">
+                            Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Word List -->
+            <div class="word-list-section">
+                <h3 class="text-lg font-semibold mb-4">Words ({{ clues.length }})</h3>
+
+                <div class="space-y-3 max-h-[400px] overflow-y-auto">
+                    <div *ngFor="let clue of clues; let i = index"
+                        class="word-item p-3 border rounded hover:bg-gray-50 cursor-pointer"
+                        [class.bg-blue-50]="editingClueIndex === i" (click)="editWord(clue, i)">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium">{{ clue.number }}.</span>
+                                    <span class="font-bold text-lg">{{ clue.answer }}</span>
+                                    <span class="text-sm px-2 py-1 rounded bg-gray-100">
+                                        {{ clue.direction }}
+                                    </span>
+                                </div>
+                                <p class="text-sm text-gray-600 mt-1">{{ clue.clue }}</p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Starts at: ({{ clue.row + 1 }}, {{ clue.col + 1 }})
+                                </p>
+                            </div>
+                            <div class="flex gap-1">
+                                <button class="p-1 text-blue-600 hover:text-blue-800"
+                                    (click)="highlightWord(clue); $event.stopPropagation()">
+                                    Show
+                                </button>
+                                <button class="p-1 text-red-600 hover:text-red-800"
+                                    (click)="removeClue(i); $event.stopPropagation()">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Edit Form -->
+                        <div *ngIf="editingClueIndex === i" class="mt-3 pt-3 border-t">
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Word</label>
+                                    <input type="text" [(ngModel)]="editingWord" class="w-full px-3 py-2 border rounded"
+                                        (input)="onEditingWordInput()" />
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium mb-1">Clue</label>
+                                    <textarea [(ngModel)]="editingClueText" rows="2"
+                                        class="w-full px-3 py-2 border rounded"></textarea>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <button class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                                        (click)="saveEditedWord()">
+                                        Save
+                                    </button>
+                                    <button class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+                                        (click)="cancelEdit()">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export & Controls -->
+    <div class="export-section mt-8 pt-6 border-t">
+        <div class="flex gap-4">
+            <button class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700" (click)="exportPuzzle()">
+                Export Puzzle
+            </button>
+            <button class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700" (click)="fillNonWordCells()">
+                Fill Empty Cells
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div *ngIf="showPreview" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        <div class="p-4 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold">Puzzle Preview</h3>
+            <button class="p-2 text-gray-500 hover:text-gray-700" (click)="showPreview = false">
+                Close
+            </button>
+        </div>
+        <div class="p-6 overflow-auto">
+            <app-crossword-puzzle [puzzle]="getPreviewPuzzle()"
+                (puzzleSubmitted)="onPreviewSubmitted($event)"></app-crossword-puzzle>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="flex flex-col" *ngIf="!previewOnly">
+    <h3 class="font-bold">Instructions</h3>
+    <textarea [(ngModel)]="instructions" (ngModelChange)="onIntructChange($event)"
+        class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        placeholder="Instructions">
+</textarea>
+
+    <div [innerHTML]="formattingService.parseMarkdown(instructions)"></div>
+
+</div>
+<app-crossword-puzzle *ngIf="previewOnly" [activeMode]="previewOnly" [puzzle]="getPreviewPuzzle()"
+    (puzzleSubmitted)="onPreviewSubmitted($event)"></app-crossword-puzzle>

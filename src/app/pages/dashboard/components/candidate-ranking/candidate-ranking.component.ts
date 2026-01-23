@@ -43,13 +43,15 @@ export class CandidateRankingComponent implements OnInit {
 
   private relevantFields = COMMON_FORM_FIELDS;
   filteredFields = COMMON_FORM_FIELDS;
+  applicationStage = "application_review"
 
   constructor(
     private apiService: ApiService,
     public dataService: DataService,
     private route: ActivatedRoute,
     private alertService: AlertService
-  ) {}
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadData();
@@ -57,6 +59,8 @@ export class CandidateRankingComponent implements OnInit {
     this.alertService.alert$.subscribe((alert) => {
       this.alert = alert;
     });
+    const stageId = this.route.snapshot.paramMap.get('stageId') || this.applicationStage;
+    this.applicationStage = stageId.replace("stage_", "");
   }
 
   loadData() {
@@ -68,7 +72,10 @@ export class CandidateRankingComponent implements OnInit {
     if (jobpostId) {
       this.isLoading = true; // Show loading indicator
       this.apiService.getRankedCandidates(jobpostId).subscribe({
-        next: (data) => {
+        next: (data: any) => {
+          data.forEach((element: any) => {
+            element.document_ranking = element.document_ranking?.[this.applicationStage] ?? [];
+          });
           this.candidates = data as Candidate[];
           this.isLoading = false;
         },
@@ -82,7 +89,7 @@ export class CandidateRankingComponent implements OnInit {
         this.applicationData?.cardSettings || COMMON_FORM_FIELDS;
       this.filteredFields =
         this.applicationData?.searchFilterSettings || COMMON_FORM_FIELDS;
-      this.dataService.selectedCardFields = this.relevantFields;
+      this.dataService.selectedCardFields = [...this.relevantFields];
     }
   }
 
@@ -95,7 +102,10 @@ export class CandidateRankingComponent implements OnInit {
     if (jobpostId) {
       this.isRefreshing = true; // Show loading indicator
       this.apiService.getRankedCandidates(jobpostId).subscribe({
-        next: (data) => {
+        next: (data: any) => {
+          data.forEach((element: any) => {
+            element.document_ranking = element.document_ranking?.[this.applicationStage] ?? [];
+          });
           this.candidates = data as Candidate[];
           this.isRefreshing = false;
         },
@@ -109,7 +119,7 @@ export class CandidateRankingComponent implements OnInit {
         this.applicationData?.cardSettings || COMMON_FORM_FIELDS;
       this.filteredFields =
         this.applicationData?.searchFilterSettings || COMMON_FORM_FIELDS;
-      this.dataService.selectedCardFields = this.relevantFields;
+      this.dataService.selectedCardFields = [...this.relevantFields];
     }
   }
 
@@ -125,6 +135,7 @@ export class CandidateRankingComponent implements OnInit {
     );
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
     formData.append('jobpost_id', jobpostId || '');
+    formData.append('application_stage', this.applicationStage);
 
     this.apiService.rankCandidates(formData).subscribe({
       next: (data) => {

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from '../../environment/environment';
-import { CompanyInfo, FormField, FormSection, JobInfo, JobPostData, JobPostDataCreateUpdateResponse, JobPostDataResponse, JobPostManagerError, NavLink } from '../models/jobpost.model';
+import { ApplicationStage, CompanyInfo, FormField, FormSection, JobInfo, JobPostData, JobPostDataCreateUpdateResponse, JobPostDataResponse, JobPostManagerError, NavLink, StageMetrics } from '../models/jobpost.model';
 
 
 @Injectable({
@@ -13,6 +13,140 @@ export class JobpostManagerService {
   private applicationData!: JobPostData;
   private readonly localStorageKey = 'jobpost_application_data';
   private readonly dataVersion = '1.0.0';
+
+  formType = "Application Form"
+
+
+   // Default application stages
+  defaultStages: ApplicationStage[] = [
+   {
+       id: 'stage_application_review',
+       jobpost_id: '',
+       name: 'Application Review',
+       description: 'Initial application screening and document verification',
+       order: 1,
+       hide_stage: false,
+       is_active: true,
+       is_skippable: false,
+       stage_type: 'standard',
+       required_approvals: 1,
+       auto_advance_days: 2,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_application_review')
+     },
+     {
+       id: 'stage_phone_screening',
+       jobpost_id: '',
+       name: 'Phone Screening',
+       description: 'Initial phone interview and basic qualification check',
+       order: 2,
+       is_active: true,
+       is_skippable: false,
+       hide_stage: false,
+       stage_type: 'evaluation',
+       required_approvals: 1,
+       auto_advance_days: 3,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_phone_screening')
+     },
+     {
+       id: 'stage_technical_assessment',
+       jobpost_id: '',
+       name: 'Technical Assessment',
+       description: 'Skills evaluation and technical knowledge testing',
+       order: 3,
+       is_active: true,
+       hide_stage: false,
+       is_skippable: false,
+       stage_type: 'evaluation',
+       required_approvals: 1,
+       auto_advance_days: 5,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_technical_assessment')
+     },
+     {
+       id: 'stage_interview',
+       jobpost_id: '',
+       name: 'Interview',
+       description: 'In-person or virtual interview with hiring team',
+       order: 4,
+       is_active: true,
+       hide_stage: false,
+       is_skippable: false,
+       stage_type: 'approval',
+       required_approvals: 2,
+       auto_advance_days: 4,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_interview')
+     },
+     {
+       id: 'stage_final_decision',
+       jobpost_id: '',
+       name: 'Final Decision',
+       description: 'Hiring committee review and final selection',
+       order: 5,
+       is_active: true,
+       hide_stage: false,
+       is_skippable: false,
+       stage_type: 'approval',
+       required_approvals: 1,
+       auto_advance_days: 2,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_final_decision')
+     },
+     {
+       id: 'stage_offer_sent',
+       jobpost_id: '',
+       name: 'Offer Sent',
+       description: 'Job offer extended to selected candidate',
+       order: 6,
+       is_active: true,
+       hide_stage: false,
+       is_skippable: false,
+       stage_type: 'notification',
+       required_approvals: undefined,
+       auto_advance_days: 1,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_offer_sent')
+     },
+     {
+       id: 'stage_rejected',
+       jobpost_id: '',
+       name: 'Rejected',
+       description: 'Application not successful at this time',
+       order: 7,
+       is_active: true,
+       hide_stage: false,
+       is_skippable: true,
+       stage_type: 'notification',
+       required_approvals: undefined,
+       auto_advance_days: 1,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_rejected')
+     }
+  ];
+
+
+createDefaultMetrics(stageId: string, jobId?: string): StageMetrics {
+    return {
+      jobpost_id: jobId || '',
+      stage_id: stageId,
+      candidate_count: 0,
+      completed_count: 0,
+      successful_count: 0,
+      rejected_count: 0,
+      average_completion_time_hours: 0,
+      conversion_rate: 0,
+      metrics_snapshot: {
+        weekly_trend: [0, 0, 0, 0],
+        completion_rate: 0,
+        success_rate: 0,
+        average_time: '0 days',
+        bottlenecks: []
+      }
+    };
+  }
+
 
   constructor() {
     this.initializeApplicationData();
@@ -67,6 +201,10 @@ export class JobpostManagerService {
         fields: [
         ]
       },
+      requestForDataForm: {
+        fields: [
+        ]
+      },
       submissionMessage: {
         title: 'Application Submitted!',
         message: 'Thank you for your application. We will review your submission and get back to you soon.',
@@ -81,6 +219,7 @@ export class JobpostManagerService {
         text: '#1f2937'
       },
       sections: ['General'],
+      additionalSections: ['General'],
       deadline: '',
       templateId: '1',
       lastUpdated: timestamp,
@@ -103,6 +242,19 @@ export class JobpostManagerService {
               id: this.generateId(),
               title: 'Application Form',
               fields: data.formData.fields || []
+            }
+          ]
+        };
+      }
+
+         if (Array.isArray(data.requestForDataForm?.fields)) {
+        // Convert old flat fields structure to section-based structure
+        data.formData = {
+          sections: [
+            {
+              id: this.generateId(),
+              title: 'Documents',
+              fields: data.requestForDataForm.fields || []
             }
           ]
         };

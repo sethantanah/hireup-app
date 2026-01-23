@@ -3,6 +3,7 @@ export interface Candidate {
   form_data: FormData;
   uploaded_files: any;
   resume_text?: string,
+  application_stages?: Record<string, any>;
   resume_data: {
     personal_details: {
       full_name: string;
@@ -72,6 +73,8 @@ export interface Candidate {
 
   document_ranking: any;
   ranking_score: any;
+  created_at?: number;
+  submitted_at?: number;
 }
 
 

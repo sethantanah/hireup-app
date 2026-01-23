@@ -47,6 +47,7 @@ export interface FormField {
   required?: boolean;
   min_length?: string | number;
   max_length?: string | number;
+  max_pages?: string | number;
   instructions: string;
   placeholder?: string;
   options?: string[]; // For select fields
@@ -85,17 +86,22 @@ export interface ColorScheme {
   text?: string;
 }
 
+
+
 export interface JobPostData {
+  applicationData?: {};
   company: Company;
   job: Job;
   applySection: ApplySection;
   benefits: Benefit;
   footer: Footer;
   formData: FormData;
+  requestForDataForm?: FormData;
   submissionMessage: SubmissionMessage;
   colorScheme: ColorScheme;
   id?: string;
   sections: string[];
+  additionalSections?: string[]
   deadline: string;
   templateId: string;
   lastUpdated?: number;
@@ -103,8 +109,22 @@ export interface JobPostData {
   searchFilterSettings?: string[];
   cardDisplaySettings?: string[];
   rankingSettings?: DocumentEvaluationSchema;
-  emailTemplates?: any[];
+  shortListingSettings?: DocumentEvaluationSchema;
+  emailTemplates?: EmailTemplate[];
+  applicationStages?: ApplicationStage[];
   version?: string;
+}
+
+
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+  stageId?: string;
+  type: 'auto' | 'manual';
+  placeholders: string[];
+  for?: string;
 }
 
 interface EvaluationMetric {
@@ -113,6 +133,7 @@ interface EvaluationMetric {
 }
 
 interface DocumentCriteria {
+  evalution_type?: string;
   document_type: string;
   criteria: string;
   evaluation_metrics: EvaluationMetric[];
@@ -182,6 +203,7 @@ interface JobPostDataDataBase {
   id: string;
   jobpost_id: JobPostData;
   created_at?: number;
+  application_metrics: any;
   template_data: JobPostData;
 }
 
@@ -206,4 +228,128 @@ export interface JobPostManagerError {
   message: string;
   details?: string;
   timestamp: number;
+}
+
+
+
+
+// JOB POST DATA MODEL INTERFACES
+export interface JobPost {
+  id: string;
+  last_updated?: number;
+  card_settings?: string[];
+  search_filter_settings?: string[];
+  card_display_settings?: string[];
+  ranking_settings?: DocumentEvaluationSchema;
+  created_at?: string;
+  updated_at?: string;
+  title: string;
+  user_id: string;
+  received_documents: number;
+  short_listed: number;
+  sent_emails: number;
+  total_views: number;
+  application_deadline?: string;
+  status: 'draft' | 'published' | 'closed' | 'archived';
+  department?: string;
+  location?: string;
+  employment_type?: 'full_time' | 'part_time' | 'contract' | 'internship' | 'remote';
+  experience_level?: 'entry' | 'mid' | 'senior' | 'executive';
+  salary_range?: SalaryRange;
+  template_data?: JobPostData;
+  stage_metrics?: StageMetricsSummary;
+  current_stage_id?: string;
+  hiring_team?: HiringTeamMember[];
+  constraints?: string[];
+  tags?: string[];
+  application_stages?: ApplicationStage[];
+  stage_progress?: StageProgress[];
+}
+
+export interface ApplicationStage {
+  id: string;
+  jobpost_id: string;
+  name: string;
+  description?: string;
+  order: number;
+  is_active: boolean;
+  hide_stage?: boolean;
+  is_skippable: boolean;
+  stage_type: 'standard' | 'evaluation' | 'approval' | 'notification';
+  required_approvals?: number;
+  auto_advance_days?: number;
+  email_template_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  metrics?: StageMetrics;
+}
+
+export interface StageMetrics {
+  id?: string;
+  jobpost_id: string;
+  stage_id: string;
+  candidate_count: number;
+  completed_count: number;
+  successful_count: number;
+  rejected_count: number;
+  average_completion_time_hours?: number;
+  conversion_rate?: number;
+  last_updated?: string;
+  metrics_snapshot?: {
+    weekly_trend?: number[];
+    completion_rate?: number;
+    success_rate?: number;
+    average_time?: string;
+    bottlenecks?: string[];
+  };
+}
+
+export interface StageMetricsSummary {
+  total_candidates: number;
+  active_stages: number;
+  overall_conversion_rate: number;
+  average_time_to_hire: number;
+  stage_breakdown: {
+    [stageId: string]: {
+      name: string;
+      candidate_count: number;
+      completion_rate: number;
+      success_rate: number;
+      average_time: string;
+    };
+  };
+}
+
+export interface StageProgress {
+  stage_id: string;
+  stage_name: string;
+  candidate_count: number;
+  completed_count: number;
+  pending_count: number;
+  success_rate: number;
+  average_duration: string;
+  is_current: boolean;
+}
+
+export interface SalaryRange {
+  min: number;
+  max: number;
+  currency: string;
+  is_public: boolean;
+}
+
+export interface HiringTeamMember {
+  user_id: string;
+  full_name: string;
+  email: string;
+  role: 'hiring_manager' | 'recruiter' | 'interviewer' | 'approver';
+  stages: string[]; // Stage IDs this member is involved in
+}
+
+
+export interface EvaluationCriteria {
+  name: string;
+  weight: number;
+  description: string;
+  max_score: number;
 }

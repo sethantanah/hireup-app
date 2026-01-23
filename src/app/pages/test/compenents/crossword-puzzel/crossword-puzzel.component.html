@@ -1,0 +1,362 @@
+<div class="crossword-container" [class.completed-puzzle]="isComplete">
+  <!-- Header -->
+  <div class="crossword-header" *ngIf="!activeMode">
+    <div class="header-content"  *ngIf="!activeMode">
+      <h3 class="puzzle-title">{{ puzzle.title }}</h3>
+      <p class="puzzle-description">{{ puzzle.description }}</p>
+      <div class="instructions">
+        <p>Click and drag to highlight words. Words can be horizontal, vertical, or diagonal.</p>
+        <div class="instructions-grid">
+          <div class="instruction-item">
+            <div class="instruction-icon across"></div>
+            <span>Across</span>
+          </div>
+          <div class="instruction-item">
+            <div class="instruction-icon down"></div>
+            <span>Down</span>
+          </div>
+          <div class="instruction-item">
+            <div class="instruction-icon diagonal"></div>
+            <span>Diagonal</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <button 
+     *ngIf="!activeMode"
+      class="reset-btn"
+      (click)="initializeLocalData()"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+      Reset Puzzle
+    </button>
+  </div>
+
+  <!-- Score & Progress -->
+  <div class="progress-section"  *ngIf="!activeMode">
+    <div class="score-card" *ngIf="hasSubmitted">
+      <div class="score-header">
+        <div class="score-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <div class="score-details">
+          <h4 class="score-title">Puzzle Complete!</h4>
+          <div class="score-metrics">
+            <div class="metric">
+              <span class="metric-label">Score</span>
+              <span class="metric-value">{{ userScore }} / {{ puzzle.totalScore }}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Words Found</span>
+              <span class="metric-value">{{ getCorrectCount() }} / {{ totalClues }}</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Percentage</span>
+              <span class="metric-value">{{ getPercentage() }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="progress-bar">
+        <div 
+          class="progress-fill"
+          [style.width]="getPercentage() + '%'"
+        ></div>
+      </div>
+    </div>
+
+    <div class="progress-indicator" *ngIf="!hasSubmitted">
+      <div class="progress-label">
+        <span class="progress-text">Progress</span>
+        <span class="progress-count">{{ getCorrectCount() }}/{{ totalClues }}</span>
+      </div>
+      <div class="progress-track">
+        <div 
+          class="progress-thumb"
+          [style.width]="(getCorrectCount() / totalClues * 100) + '%'"
+        ></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="crossword-content">
+    <!-- Grid Section -->
+    <div class="grid-section">
+      <div class="grid-container">
+        <div 
+          class="grid-wrapper"
+          (mousedown)="onMouseDown($event)"
+          (mouseup)="onMouseUp($event)"
+          (mousemove)="onMouseMove($event)"
+          (mouseleave)="onMouseLeave()"
+        >
+          <div 
+            class="crossword-grid"
+            [style.gridTemplateColumns]="'repeat(' + size + ', 1fr)'"
+          >
+            <ng-container *ngFor="let row of localGrid; let i = index">
+              <ng-container *ngFor="let cell of row; let j = index">
+                <div 
+                  class="crossword-cell"
+                  [ngClass]="getCellClasses(cell)"
+                  [attr.data-row]="i"
+                  [attr.data-col]="j"
+                >
+                  <div class="cell-content">
+                    <div class="cell-number" *ngIf="getCellNumber(i, j)">
+                      {{ getCellNumber(i, j) }}
+                    </div>
+                    <div class="cell-letter">
+                      {{ cell.value }}
+                    </div>
+                  </div>
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Status Indicators -->
+      <div class="status-indicators">
+        <div class="status-item" *ngIf="currentSelection.length > 0 && !hasSubmitted && !activeMode">
+          <div class="status-icon selected"></div>
+          <div class="status-details">
+            <span class="status-label">Selected Word</span>
+            <span class="status-value">{{ getSelectedWord() }}</span>
+          </div>
+        </div>
+        
+        <div class="status-item" *ngIf="getAllSelectedCells().length > 0 && !hasSubmitted && !activeMode">
+          <div class="status-icon active"></div>
+          <div class="status-details">
+            <span class="status-label">Active Cells</span>
+            <span class="status-value">{{ getAllSelectedCells().length }} selected</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clues & Info Panel -->
+    <div class="info-panel"  *ngIf="!activeMode">
+      <!-- Active Selections -->
+      <div class="info-card active-selections" *ngIf="getAllSelectedCells().length > 0 && !hasSubmitted && activeMode">
+        <div class="info-card-header">
+          <h4 class="info-card-title">Active Selections</h4>
+          <span class="info-card-badge">{{ getAllSelectedCells().length }}</span>
+        </div>
+        <div class="selected-cells-grid">
+          <div 
+            *ngFor="let cell of getAllSelectedCells()"
+            class="selected-cell-item"
+          >
+            <span class="cell-coords">[{{ cell.row + 1 }}, {{ cell.col + 1 }}]</span>
+            <span class="cell-letter">{{ localGrid[cell.row][cell.col].value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Found Words -->
+      <div class="info-card found-words" *ngIf="getCorrectCount() > 0 && !activeMode">
+        <div class="info-card-header">
+          <h4 class="info-card-title">Found Words</h4>
+          <span class="info-card-badge">{{ getCorrectCount() }}</span>
+        </div>
+        <div class="words-grid">
+          <div 
+            *ngFor="let clue of getFoundClues()"
+            class="word-chip"
+          >
+            <span class="word-number">{{ clue.number }}</span>
+            <span class="word-text">{{ clue.answer }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clue List -->
+      <div class="info-card clue-list"  *ngIf="!activeMode">
+        <div class="info-card-header">
+          <h4 class="info-card-title">Word List</h4>
+          <div class="progress-indicator-small">
+            <span>{{ getCorrectCount() }}/{{ totalClues }}</span>
+          </div>
+        </div>
+        
+        <div class="clue-sections">
+          <!-- Across Clues -->
+          <div class="clue-section" *ngIf="getCluesByDirection('across').length > 0">
+            <div class="section-header">
+              <div class="direction-marker across"></div>
+              <h5 class="section-title">Across</h5>
+            </div>
+            <div class="clue-items">
+              <div 
+                *ngFor="let clue of getCluesByDirection('across')"
+                class="clue-item"
+                [class.solved]="clue.solved"
+                (mouseenter)="highlightClue(clue)"
+                (mouseleave)="clearClueHighlight()"
+              >
+                <div class="clue-number">{{ clue.number }}</div>
+                <div class="clue-content">
+                  <p class="clue-text">{{ clue.clue }}</p>
+                  <div class="clue-meta">
+                    <span class="clue-length">{{ clue.length }} letters</span>
+                    <span class="clue-status" *ngIf="clue.solved">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Down Clues -->
+          <div class="clue-section" *ngIf="getCluesByDirection('down').length > 0">
+            <div class="section-header">
+              <div class="direction-marker down"></div>
+              <h5 class="section-title">Down</h5>
+            </div>
+            <div class="clue-items">
+              <div 
+                *ngFor="let clue of getCluesByDirection('down')"
+                class="clue-item"
+                [class.solved]="clue.solved"
+                (mouseenter)="highlightClue(clue)"
+                (mouseleave)="clearClueHighlight()"
+              >
+                <div class="clue-number">{{ clue.number }}</div>
+                <div class="clue-content">
+                  <p class="clue-text">{{ clue.clue }}</p>
+                  <div class="clue-meta">
+                    <span class="clue-length">{{ clue.length }} letters</span>
+                    <span class="clue-status" *ngIf="clue.solved">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Diagonal Clues -->
+          <div class="clue-section" *ngIf="getCluesByDirection('diagonal').length > 0">
+            <div class="section-header">
+              <div class="direction-marker diagonal"></div>
+              <h5 class="section-title">Diagonal</h5>
+            </div>
+            <div class="clue-items">
+              <div 
+                *ngFor="let clue of getCluesByDirection('diagonal')"
+                class="clue-item"
+                [class.solved]="clue.solved"
+                (mouseenter)="highlightClue(clue)"
+                (mouseleave)="clearClueHighlight()"
+              >
+                <div class="clue-number">{{ clue.number }}</div>
+                <div class="clue-content">
+                  <p class="clue-text">{{ clue.clue }}</p>
+                  <div class="clue-meta">
+                    <span class="clue-length">{{ clue.length }} letters</span>
+                    <span class="clue-status" *ngIf="clue.solved">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Summary -->
+      <div class="info-card results-summary" *ngIf="hasSubmitted && !activeMode">
+        <div class="info-card-header">
+          <h4 class="info-card-title">Results Summary</h4>
+        </div>
+        <div class="results-grid">
+          <div class="result-item correct">
+            <span class="result-label">Correct Words</span>
+            <span class="result-value">{{ getCorrectCount() }}</span>
+          </div>
+          <div class="result-item score">
+            <span class="result-label">Score</span>
+            <span class="result-value">{{ userScore }}/{{ puzzle.totalScore }}</span>
+          </div>
+        </div>
+        
+        <!-- Missed Words -->
+        <div class="missed-words" *ngIf="getMissedCount() > 0">
+          <h5 class="missed-title">Words You Missed</h5>
+          <div class="missed-list">
+            <div 
+              *ngFor="let clue of getMissedClues()"
+              class="missed-item"
+            >
+              <span class="missed-number">{{ clue.number }}.</span>
+              <span class="missed-clue">{{ clue.clue }}</span>
+              <span class="missed-answer">{{ clue.answer }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-section">
+    <div class="controls-grid">
+      <button 
+        class="control-btn primary"
+        (click)="submitPuzzle()"
+        [disabled]="hasSubmitted"
+        [class.disabled]="hasSubmitted"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        {{ hasSubmitted ? 'Submitted' : 'Submit Puzzle' }}
+      </button>
+      
+      <button 
+
+        class="control-btn secondary"
+        (click)="clearAllSelections()"
+        [disabled]="hasSubmitted"
+        [class.disabled]="hasSubmitted"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+        Clear All Selections
+      </button>
+
+      <button 
+      *ngIf="!activeMode"
+        class="control-btn tertiary"
+        (click)="revealAllWords()"
+        [disabled]="hasSubmitted"
+        [class.disabled]="hasSubmitted"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        Reveal All
+      </button>
+    </div>
+  </div>
+</div>

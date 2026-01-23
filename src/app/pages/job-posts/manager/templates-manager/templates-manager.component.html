@@ -350,8 +350,8 @@
             </div>
 
             <!-- Navigation Buttons -->
-            <div *ngIf="jobAppData.sections.length > 1" class="flex justify-between mt-8">
-              <button type="button" (click)="goToPreviousSection()"
+            <div   class="flex justify-between mt-8">
+              <button *ngIf="jobAppData.sections.length > 1" type="button" (click)="goToPreviousSection()"
                 [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
                 class="px-6 py-3 border border-[var(--primary-color)] text-[var(--primary-color)] rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[var(--primary-color)] hover:text-white transition-colors flex items-center">
                 <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -370,7 +370,7 @@
               </button>
 
               <!-- Submit Button (Only show on last section) -->
-              <button *ngIf="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
+              <button *ngIf="jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1"
                 type="submit" [disabled]="form.invalid || isSubmitting"
                 class="px-6 py-3 text-white bg-[var(--primary-color)] hover:bg-[var(--secondary-color)] rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-md">
                 <span *ngIf="!isSubmitting">Submit Application</span>
@@ -384,14 +384,16 @@
                   Submitting...
                 </span>
               </button>
-            </div>
+              </div>
+          
 
             <!-- Declaration Checkbox -->
             <div
               *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
               class="mt-4">
               <label class="flex items-start space-x-2">
-                <input type="checkbox" key="agreeToDeclaration" formControlName="agreeToDeclaration" id="acceptDeclaration"
+                <input type="checkbox" key="agreeToDeclaration" formControlName="agreeToDeclaration"
+                  id="acceptDeclaration"
                   class="mt-1 h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
                 <span class="text-sm text-gray-700">{{
                   jobAppData.applySection.declaration
@@ -514,8 +516,8 @@
         </div>
 
         <!-- Navigation Buttons -->
-        <div *ngIf="jobAppData.sections.length > 1" class="flex justify-between mt-8 pt-6 border-t border-gray-200">
-          <button type="button" (click)="goToPreviousSection()"
+        <div class="flex justify-between mt-8 pt-6 border-t border-gray-200">
+          <button *ngIf="jobAppData.sections.length > 1" type="button" (click)="goToPreviousSection()"
             [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
             class="px-4 py-2 text-[var(--primary-color)] rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100 transition-colors">
             ← Previous
@@ -528,7 +530,7 @@
           </button>
 
           <!-- Submit Button (Only show on last section) -->
-          <button *ngIf="jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1" type="submit"
+          <button *ngIf="jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" type="submit"
             [disabled]="form.invalid || isSubmitting"
             class="px-6 py-2 text-white bg-[var(--primary-color)] rounded-md disabled:bg-gray-400 disabled:cursor-not-allowed hover:bg-[var(--secondary-color)] transition-colors">
             <span *ngIf="!isSubmitting">Submit Application</span>
@@ -742,7 +744,8 @@
                   *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) === jobAppData.sections.length - 1"
                   class="mt-4">
                   <label class="flex items-start space-x-2">
-                    <input type="checkbox" key="agreeToDeclaration" formControlName="agreeToDeclaration" id="acceptDeclaration"
+                    <input type="checkbox" key="agreeToDeclaration" formControlName="agreeToDeclaration"
+                      id="acceptDeclaration"
                       class="mt-1 h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
                     <span class="text-sm text-gray-700">{{
                       jobAppData.applySection.declaration
@@ -817,17 +820,44 @@
 
       <!-- Actions -->
       <div class="mt-8 flex flex-col gap-3">
-      <a href="{jobAppData?.submissionMessage?.actionLink}">
+        <a [href]="jobAppData?.submissionMessage?.actionLink" target="_blank" rel="noopener noreferrer">
           <button class="w-full px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-medium
-                 hover:bg-[var(--secondary-color)] transform hover:scale-[1.02] 
-                 transition-all duration-200 shadow-lg shadow-[var(--primary-color)]/20">
-          {{ jobAppData?.submissionMessage?.actionText }}
-        </button>
-      </a>
+           hover:bg-[var(--secondary-color)] transform hover:scale-[1.02]
+           transition-all duration-200 shadow-lg shadow-[var(--primary-color)]/20">
+            {{ jobAppData?.submissionMessage?.actionText }}
+          </button>
+        </a>
+
       </div>
     </div>
   </div>
 </div>
+
+
+<div
+  *ngIf="errorMessages.length"
+  class="fixed bottom-4 right-4 left-4 sm:left-auto bg-red-50 border border-red-200 text-red-600 px-4 py-2 rounded-lg shadow-lg"
+>
+  <div class="flex items-start gap-3">
+    <span class="text-red-600 text-lg leading-none">⚠</span>
+
+    <div class="flex-1">
+      <h4 class="text-sm font-semibold text-red-800 mb-2">
+        Please fix the following issue{{ errorMessages.length > 1 ? 's' : '' }}:
+      </h4>
+
+      <ul class="list-disc list-inside space-y-1">
+        <li
+          *ngFor="let message of errorMessages"
+          class="text-sm text-red-700"
+        >
+          {{ message }}
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
 
 <!-- Error Alert -->
 <div *ngIf="showError"

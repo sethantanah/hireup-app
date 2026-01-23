@@ -1,0 +1,59 @@
+:host {
+  display: block;
+}
+
+// Custom animations
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+// Smooth scrolling
+html {
+  scroll-behavior: smooth;
+}
+
+// Gradient text
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// Card hover effects
+.feature-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-8px);
+    
+    .feature-icon {
+      transform: scale(1.1);
+    }
+  }
+}
+
+.feature-icon {
+  transition: transform 0.3s ease;
+}
+
+// Pricing card highlight
+.pricing-card-highlight {
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .pricing-card-highlight {
+    transform: scale(1) !important;
+  }
+}

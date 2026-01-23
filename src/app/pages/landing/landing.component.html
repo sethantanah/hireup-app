@@ -1,61 +1,339 @@
-<main class="min-h-screen shadow-lg bg-gray-50 font-sans" *ngIf="landingPageData">
-  <!-- Header -->
-  <header class="bg-white shadow-sm w-full">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-      <!-- Company Logo -->
-      <div class="text-2xl font-bold" [ngStyle]="{ color: landingPageData.colorsScheme.primary }">
-        <img [src]="landingPageData.company.logoUrl" alt="Company Logo" class="h-10">
-      </div>
+ <!-- Navigation -->
 
-      <!-- Hamburger Menu (Mobile) -->
-      <button
-        class="md:hidden p-2 focus:outline-none"
-        (click)="toggleNav()"
-        aria-label="Toggle navigation"
-      >
-        <i class="fas fa-bars text-xl" [ngStyle]="{ color: landingPageData.colorsScheme.primary }"></i>
-      </button>
+ <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-briefcase text-white text-lg"></i>
+                    </div>
+                    <span class="ml-3 text-xl font-bold text-gray-900">TalentFlow</span>
+                    <span class="ml-2 text-sm text-indigo-600 font-semibold bg-indigo-50 px-2 py-1 rounded-full">ATS</span>
+                </div>
 
-      <!-- Navigation Links -->
-      <nav
-        class="hidden md:flex space-x-6"
-        [ngClass]="{ 'hidden': !isNavOpen, 'flex flex-col absolute top-16 right-0 bg-white shadow-lg p-4 space-y-4': isNavOpen && isMobile }"
-      >
-        <a
-          *ngFor="let link of landingPageData.company.navLinks"
-          [href]="link.url"
-          class="text-[var(--gray-700)] hover:text-[var(--electric-violet)] transition-colors"
-          [ngStyle]="{ color: landingPageData.colorsScheme.primary }"
-        >
-          {{ link.text }}
-        </a>
-      </nav>
-    </div>
-  </header>
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                        Features
+                    </a>
+                    <a href="#pricing" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                        Pricing
+                    </a>
+                    <a href="#contact" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                        Contact
+                    </a>
+                </div>
 
-  <!-- Hero Section -->
-  <div class="flex flex-col md:flex-row items-center justify-center bg-[var(--gray-50)] py-12 md:py-20">
-    <!-- Upload Resume Component -->
-    <div class="flex-1 flex items-center justify-center px-6">
-      <app-upload-resume [submissionMessage]="landingPageData.submissionMessage" [colorScheme]="landingPageData.colorsScheme" [formData]="landingPageData.formData"></app-upload-resume>
-    </div>
-  </div>
+                <!-- Auth Buttons -->
+                <div class="flex items-center space-x-4">
+                    <button 
+                        routerLink="/auth/login" 
+                        class="px-6 py-2.5 text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition-colors"
+                    >
+                        Sign In
+                    </button>
+                    <button 
+                        routerLink="/dashboard" 
+                        class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                    >
+                        Get Started
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-  <!-- Footer -->
-  <footer class="bg-[var(--gray-900)] text-white py-8">
-    <div class="container mx-auto px-6 text-center">
-      <p class="text-[var(--gray-400)]">
-        &copy; 2023 {{ landingPageData.company.name }}. All rights reserved.
-      </p>
-      <div class="mt-4 space-x-6">
-        <a
-          *ngFor="let link of landingPageData.footer.links"
-          [href]="link.url"
-          class="text-[var(--gray-400)] hover:text-[var(--bright-blue)] transition-colors"
-        >
-          {{ link.text }}
-        </a>
-      </div>
-    </div>
-  </footer>
-</main>
+    <!-- Hero Section -->
+    <section class="pt-20 pb-32 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full text-indigo-700 font-semibold text-sm mb-8">
+                    <i class="fas fa-star text-amber-500"></i>
+                    Trusted by 500+ companies worldwide
+                </div>
+
+                <!-- Main Headline -->
+                <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
+                    Streamline Your
+                    <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        Hiring Process
+                    </span>
+                </h1>
+
+                <!-- Subheadline -->
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
+                    Enterprise-grade Applicant Tracking System designed to simplify recruitment, 
+                    automate workflows, and help you find the perfect candidates faster.
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+                    <button 
+                        routerLink="/auth/register"
+                        class="group px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-3"
+                    >
+                        <span>Start Free Trial</span>
+                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    
+                    <button 
+                        (click)="scrollToFeatures()"
+                        class="px-8 py-4 bg-white text-gray-800 font-semibold rounded-xl shadow-lg hover:shadow-xl border border-gray-200 hover:border-gray-300 transform hover:-translate-y-1 transition-all duration-200"
+                    >
+                        <i class="fas fa-play-circle mr-2 text-indigo-600"></i>
+                        Watch Demo
+                    </button>
+                </div>
+
+                <!-- Stats -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900 mb-2">10K+</div>
+                        <div class="text-gray-600">Candidates Hired</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900 mb-2">500+</div>
+                        <div class="text-gray-600">Companies</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900 mb-2">99.9%</div>
+                        <div class="text-gray-600">Uptime</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl font-bold text-gray-900 mb-2">24/7</div>
+                        <div class="text-gray-600">Support</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Powerful Features for Modern Recruitment
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Everything you need to manage your hiring process efficiently
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+                    <div class="w-14 h-14 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-users text-indigo-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Candidate Management</h3>
+                    <p class="text-gray-600">
+                        Track applicants through every stage with our intuitive pipeline management.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+                    <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-envelope text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Automated Emails</h3>
+                    <p class="text-gray-600">
+                        Send personalized emails and notifications to candidates automatically.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+                    <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center mb-6">
+                        <i class="fas fa-chart-line text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Analytics Dashboard</h3>
+                    <p class="text-gray-600">
+                        Get insights into your hiring process with detailed analytics and reports.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                    Simple, Transparent Pricing
+                </h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Choose the plan that fits your hiring needs
+                </p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Free Plan -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-gray-900">Free</span>
+                        <span class="text-gray-600">/ forever</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>Up to 50 candidates</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>Basic email templates</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>Single job posting</span>
+                        </li>
+                    </ul>
+                    <button 
+                        routerLink="/auth/register"
+                        class="w-full py-3 bg-gray-100 text-gray-800 font-semibold rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                        Get Started
+                    </button>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-8 shadow-xl relative transform scale-105">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span class="px-4 py-1 bg-white text-indigo-600 font-semibold rounded-full text-sm">
+                            MOST POPULAR
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-2">Professional</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-white">$29</span>
+                        <span class="text-indigo-200">/ month</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-white"></i>
+                            <span class="text-white">Unlimited candidates</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-white"></i>
+                            <span class="text-white">Advanced email templates</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-white"></i>
+                            <span class="text-white">Multiple job postings</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-white"></i>
+                            <span class="text-white">Analytics dashboard</span>
+                        </li>
+                    </ul>
+                    <button 
+                        routerLink="/auth/register"
+                        class="w-full py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                        Start Free Trial
+                    </button>
+                </div>
+
+                <!-- Enterprise Plan -->
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold text-gray-900">Custom</span>
+                        <span class="text-gray-600">/ tailored</span>
+                    </div>
+                    <ul class="space-y-3 mb-8">
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>Everything in Pro</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>Dedicated support</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>Custom integrations</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check text-green-500"></i>
+                            <span>API access</span>
+                        </li>
+                    </ul>
+                    <button 
+                        (click)="contactSales()"
+                        class="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-black transition-colors"
+                    >
+                        Contact Sales
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-briefcase text-white text-lg"></i>
+                        </div>
+                        <span class="ml-3 text-xl font-bold text-white">TalentFlow</span>
+                    </div>
+                    <p class="text-gray-400 text-sm">
+                        Modern Applicant Tracking System for growing businesses.
+                    </p>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
+                        <li><a href="#pricing" class="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
+                        <li><button routerLink="/auth/register" class="text-gray-400 hover:text-white transition-colors">Sign Up</button></li>
+                        <li><button routerLink="/dashboard" class="text-gray-400 hover:text-white transition-colors">Start Hiring</button></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Legal</h4>
+                    <ul class="space-y-2">
+                        <li><a routerLink="/privacy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a routerLink="/terms" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a routerLink="/cookies" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div id="contact">
+                    <h4 class="text-white font-semibold mb-4">Contact Us</h4>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-envelope text-gray-400"></i>
+                            <a href="mailto:support&#64;talentflow.com" class="text-gray-400 hover:text-white transition-colors">
+                                support&#64;talentflow.com
+                            </a>
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-phone text-gray-400"></i>
+                            <span class="text-gray-400">+1 (555) 123-4567</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
+                <p>© 2024 TalentFlow ATS. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>

@@ -32,6 +32,12 @@ export class AuthService {
     return this.http.post(apiUrl, formParams, { headers });
   }
 
+  logOut(){
+     localStorage.removeItem('USER');
+      this.router.navigate(['auth/signin']);
+    
+  }
+
 
 
   // Email Connection
