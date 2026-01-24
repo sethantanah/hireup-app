@@ -43,10 +43,10 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   private readonly TIMER_KEY_PREFIX = 'test_timer_';
   private readonly PROGRESS_KEY_PREFIX = 'test_progress_';
   private readonly CREDENTIALS_KEY = 'applicateCredentials';
-  
+
   // Track unsaved changes - only true during active test
   get hasUnsavedChanges(): boolean {
-    return this.currentView === 'form' && this.timer > 0;
+    return this.currentView === 'form' && this.sectionStarted[this.currentSection] && this.timer > 0;
   }
 
   testData: TestData | undefined;
@@ -64,6 +64,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   testPercentage: number = 0;
   loading: boolean = true;
   isTabActive: boolean = true;
+  sectionStarted: boolean[] = []; // Track which sections have been started
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: any,
@@ -94,7 +95,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     this.destroy$.next();
     this.destroy$.complete();
     this.cleanupTimers();
-    
+
     // Only clear progress if test is not complete
     if (this.currentView !== 'thankyou') {
       this.saveTestProgress();
@@ -103,7 +104,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
   canDeactivate(): boolean {
     if (this.hasUnsavedChanges) {
-      return confirm('You have an ongoing test. Are you sure you want to leave? All progress will be saved.');
+      return confirm('You have an ongoing test section. Are you sure you want to leave? All progress will be saved.');
     }
     return true;
   }
@@ -112,7 +113,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   unloadNotification($event: BeforeUnloadEvent): void {
     if (this.hasUnsavedChanges) {
       $event.preventDefault();
-      $event.returnValue = 'You have an ongoing test. Are you sure you want to leave?';
+      $event.returnValue = 'You have an ongoing test section. Are you sure you want to leave?';
     }
   }
 
@@ -127,13 +128,16 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
           if (this.testData) {
             // Initialize timer for first section
             this.timer = this.testData.sections[0].duration * 60;
-            
+
+            // Initialize section started status (all false initially)
+            this.sectionStarted = new Array(this.testData.sections.length).fill(false);
+
             // Initialize responses
             this.testResponses = this.testData.formData.fields.map((field) => ({
               question: field.question,
               answer: '',
             }));
-            
+
             this.loading = false;
             this.checkForResumePossibility();
           }
@@ -152,7 +156,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
     const credentials = sessionStorage.getItem(this.CREDENTIALS_KEY);
     const progress = localStorage.getItem(`${this.PROGRESS_KEY_PREFIX}${this.testId}`);
-    
+
     if (credentials && progress) {
       const progressData = JSON.parse(progress);
       // Only resume if progress is less than 1 hour old
@@ -173,8 +177,10 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     this.currentSection = progressData.currentSection;
     this.timer = progressData.timer;
     this.testResponses = progressData.testResponses || [];
-    
-    if (this.currentView === 'form') {
+    this.sectionStarted = progressData.sectionStarted || new Array(this.testData?.sections.length).fill(false);
+
+    if (this.currentView === 'form' && this.sectionStarted[this.currentSection]) {
+      this.testStartTime = Date.now() - ((this.testData!.sections[this.currentSection].duration * 60 - this.timer) * 1000);
       this.startTimer();
     }
   }
@@ -184,7 +190,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
     const progressKey = `${this.PROGRESS_KEY_PREFIX}${this.testId}`;
     const progress = localStorage.getItem(progressKey);
-    
+
     if (progress) {
       const progressData = JSON.parse(progress);
       // Auto-resume if test was active and timer hasn't expired
@@ -199,8 +205,8 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
     document.addEventListener('visibilitychange', () => {
       this.isTabActive = !document.hidden;
-      
-      if (this.isTabActive && this.currentView === 'form') {
+
+      if (this.isTabActive && this.currentView === 'form' && this.sectionStarted[this.currentSection]) {
         // Tab became active - update timer based on actual elapsed time
         this.updateTimerFromBackground();
       } else if (!this.isTabActive) {
@@ -212,13 +218,13 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
   private updateTimerFromBackground(): void {
     if (!this.testStartTime) return;
-    
+
     const elapsedSeconds = Math.floor((Date.now() - this.testStartTime) / 1000);
     const sectionDuration = this.testData!.sections[this.currentSection].duration * 60;
     const remaining = Math.max(0, sectionDuration - elapsedSeconds);
-    
+
     this.timer = remaining;
-    
+
     // Restart timer with corrected time
     this.cleanupTimers();
     this.startTimer();
@@ -249,16 +255,15 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
           this.isLoading = false;
           this.showPopup = false;
           this.currentView = 'form';
-          
+
           // Store credentials in sessionStorage (clears on browser close)
           sessionStorage.setItem(this.CREDENTIALS_KEY, JSON.stringify({
             ...data,
             timestamp: Date.now()
           }));
-          
-          // Start the test
-          this.testStartTime = Date.now();
-          this.startTimer();
+
+          // Don't start timer automatically - wait for "Begin Section" click
+          // Just save initial progress
           this.saveTestProgress();
         },
         error: (error) => {
@@ -269,13 +274,68 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       });
   }
 
+  beginSection(sectionIndex: number): void {
+    if (sectionIndex >= 0 && sectionIndex < this.testData!.sections.length) {
+      // Mark section as started
+      this.sectionStarted[sectionIndex] = true;
+
+      // Set timer for this section
+      this.timer = this.testData!.sections[sectionIndex].duration * 60;
+
+      // Start the timer
+      this.testStartTime = Date.now();
+      this.startTimer();
+
+      // Save progress
+      this.saveTestProgress();
+
+      // Scroll to top to show questions
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getSectionQuestionCount(sectionIndex: number): number {
+    if (!this.testData || sectionIndex < 0 || sectionIndex >= this.testData.sections.length) {
+      return 0;
+    }
+
+    const section = this.testData.sections[sectionIndex];
+    return this.testData.formData.fields.filter(field =>
+      field.section === section.sectionId ||
+      (section.sectionId === 1 && field.section === undefined)
+    ).length;
+  }
+
+
+  // In your component class
+  getCurrentSectionFields(): any[] {
+    if (!this.testData || !this.testData.formData?.fields || this.currentSection === undefined) {
+      return [];
+    }
+
+    const currentSectionId = this.testData.sections[this.currentSection].sectionId;
+
+    return this.testData.formData.fields.filter(field => {
+      // Case 1: Field has section property and matches current section
+      if (field.section !== undefined && field.section === currentSectionId) {
+        return true;
+      }
+
+      // Case 2: Current section is 1 and field has no section property (default to section 1)
+      if (currentSectionId === 1 && field.section === undefined) {
+        return true;
+      }
+
+      return false;
+    });
+  }
   startTimer(): void {
     // Clear any existing timer
     this.cleanupTimers();
-    
+
     // Store start time for accurate background time calculation
     this.testStartTime = Date.now();
-    
+
     // Start timer service for persistence
     const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${this.currentSection}`;
     this.timerService.startTimer(
@@ -283,12 +343,12 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       this.timer,
       () => this.handleTimeUp()
     );
-    
+
     // Update UI timer every second
     this.timerInterval = setInterval(() => {
       if (this.timer > 0) {
         this.timer--;
-        
+
         // Auto-save progress every 30 seconds
         if (this.timer % 30 === 0) {
           this.saveTestProgress();
@@ -302,7 +362,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   private handleTimeUp(): void {
     this.cleanupTimers();
     this.timeUp = true;
-    
+
     setTimeout(() => {
       if (this.testData!.sections.length - 1 > this.currentSection) {
         this.navigateSection();
@@ -317,7 +377,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       clearInterval(this.timerInterval);
       this.timerInterval = null;
     }
-    
+
     // Clear timer service entries
     if (this.testId) {
       const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${this.currentSection}`;
@@ -328,7 +388,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   getTimerColor(timeLeft: number): string {
     const totalSectionTime = (this.testData?.sections[this.currentSection]?.duration ?? 0) * 60;
     const percentageLeft = totalSectionTime > 0 ? (timeLeft / totalSectionTime) * 100 : 0;
-    
+
     if (percentageLeft <= 25) {
       return 'bg-red-50 text-red-600';
     } else if (percentageLeft <= 50) {
@@ -367,18 +427,25 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     if (this.testData && this.testData.sections.length - 1 > this.currentSection) {
       // Save current section progress
       this.saveTestProgress();
-      
+
       // Move to next section
       this.currentSection++;
+
+      // Reset timer for next section (won't start until Begin Section is clicked)
       this.timer = this.testData.sections[this.currentSection].duration * 60;
       this.timeUp = false;
-      
-      // Start timer for new section
-      this.testStartTime = Date.now();
-      this.startTimer();
-      
+
+      // Stop any running timers
+      this.cleanupTimers();
+
+      // Reset test start time
+      this.testStartTime = 0;
+
       // Update progress
       this.saveTestProgress();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -397,14 +464,15 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   confirmNavigation(): void {
     this.navigateSection();
     this.showWarning = false;
+    this.scrollToTop();
   }
 
   onCrosswordCompleted(field: any, event: any): void {
     // Update the response for this field
     const responseIndex = this.testResponses.findIndex(r => r.question === field.question);
     if (responseIndex !== -1) {
-      if(event.score > 0){
-        this.testScore += event.score/10;
+      if (event.score > 0) {
+        this.testScore += event.score / 10;
       }
       this.saveTestProgress(); // Auto-save on crossword completion
     }
@@ -414,7 +482,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     const responseIndex = this.testResponses.findIndex(r => r.question === question);
     if (responseIndex !== -1) {
       this.testResponses[responseIndex].answer = answer;
-      
+
       // Debounced auto-save
       if (this.autoSaveTimeout) {
         clearTimeout(this.autoSaveTimeout);
@@ -472,7 +540,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       const field = this.testData!.formData.fields.find(
         (f) => f.question === response.question
       );
-      
+
       return {
         question: response.question,
         response: response.answer,
@@ -484,16 +552,16 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
   submitTest(): void {
     this.cleanupTimers();
-    
+
     const score = this.calculateScore();
     this.testScore = this.testScore + score;
-    this.testPercentage = this.testData ? 
+    this.testPercentage = this.testData ?
       (this.testScore / this.testData.formData.fields.length) * 100 : 0;
 
     const credentials = sessionStorage.getItem(this.CREDENTIALS_KEY);
     if (credentials && this.testId) {
       const res = JSON.parse(credentials);
-      
+
       const reqData = {
         applicant_name: res.name,
         applicant_email: res.email,
@@ -538,6 +606,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       currentView: this.currentView,
       currentSection: this.currentSection,
       testResponses: this.testResponses,
+      sectionStarted: this.sectionStarted, // Save which sections have been started
       timer: this.timer,
       timestamp: Date.now(),
       testId: this.testId
@@ -554,10 +623,10 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
     // Clear all test-related data
     sessionStorage.removeItem(this.CREDENTIALS_KEY);
-    
+
     if (this.testId) {
       localStorage.removeItem(`${this.PROGRESS_KEY_PREFIX}${this.testId}`);
-      
+
       // Clear all timer keys for this test
       for (let i = 0; i < 10; i++) { // Assuming max 10 sections
         const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${i}`;
@@ -582,8 +651,11 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     alert('Progress saved! You can resume later.');
   }
 
-
-    goToHome(): void {
+  goToHome(): void {
     // Implement your navigation logic here
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

@@ -22,6 +22,9 @@ export interface FormData {
 
 export interface TestData {
   id: string;
+  testTitle?: string;
+  description?: string;
+  testDuration?: number;
   formData: FormData;
   sections: FormSection[];
 }
