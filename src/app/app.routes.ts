@@ -15,6 +15,8 @@ import { authGuard } from './guards/auth.guard';
 import { AuthCallbackComponent } from './components/auth-callback/auth-callback.component';
 import { TrackingComponent } from './pages/job-posts/tracking/tracking.component';
 import { LandingComponent } from './pages/landing/landing.component';
+import { SubmitEndorsementComponent } from './pages/job-posts/submit-endorsement/submit-endorsement.component';
+import { JobReferencesComponent } from './pages/job-posts/job-references/job-references.component';
 
 export const routes: Routes = [
   {
@@ -86,6 +88,14 @@ export const routes: Routes = [
   {
     path: 'auth/register',
     component: SignupComponent,
+  },
+  {
+    path: 'submit/endorsement/:jobId/:applicationId',
+    component: SubmitEndorsementComponent,
+  },
+  {
+    path: 'job-endorsements/:jobId',
+    component: JobReferencesComponent,
   },
   { path: 'auth/callback', component: AuthCallbackComponent }, // New route
   { path: '**', component: PageNotFoundComponent }

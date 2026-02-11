@@ -304,7 +304,10 @@ export class CreateTestComponent implements OnInit {
     this.testService.deleteField(questionKey.question.toLowerCase());
   }
 
-  createSection() {
+  createSection(index?: number) {
+    if (!this.test) return;
+    
+    const sectionIndex = this.test.sections.length === 0 ? this.test.sections.length + 1 : this.test.sections[this.test.sections.length - 1].sectionId + 1;
     const section: FormSection = {
       title: '',
       scoring: {
@@ -315,11 +318,15 @@ export class CreateTestComponent implements OnInit {
       },
       instructions: '',
       duration: 50,
-      sectionId: this.test!.sections.length + 1,
+      sectionId: sectionIndex
     };
 
-    this.testService.createSection(section);
+
+
+
+    this.testService.createSection(section, index);
     this.selectedSection = section.sectionId;
+    // this.saveTestMetadata();
   }
 
   deleteSection(section: FormSection) {
@@ -349,7 +356,6 @@ export class CreateTestComponent implements OnInit {
           sec.subsection = [subSection];
         }
 
-        console.log(sec, "SEC")
       }
     });
   }

@@ -34,6 +34,24 @@ export class ApiService {
     return this.http.post(`${this.baseURL}/submit-application`, formData, { headers });
   }
 
+  submit_endorsement(formData: any): Observable<any> {
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.post(`${environment.apiUrl}/document-validation/submit-endorsement`, formData, { headers });
+  }
+
+  get_references(jobpost_id: string): Observable<any> {
+    const apiUrl = environment.apiUrl + `/document-validation/endorsements/${jobpost_id}`;
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+    return this.http.get(apiUrl, { headers });
+  }
+
 
   checkPageSize(
     file: File

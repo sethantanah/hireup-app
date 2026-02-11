@@ -20,28 +20,13 @@ interface FormatNavLink {
 export class FormattingService {
   private rules: MarkdownRule[] = [
     // Headers
-    {
-      pattern: /^# (.*$)/gm,
-      replacement: '<h1 class="text-3xl font-bold mb-6">$1</h1>',
-    },
-    {
-      pattern: /^## (.*$)/gm,
-      replacement: '<h2 class="text-2xl font-bold mb-4">$1</h2>',
-    },
-    {
-      pattern: /^### (.*$)/gm,
-      replacement: '<h3 class="text-xl font-bold mb-3">$1</h3>',
-    },
+    { pattern: /^# (.*$)/gm, replacement: '<h1 class="text-3xl font-bold mb-6">$1</h1>' },
+    { pattern: /^## (.*$)/gm, replacement: '<h2 class="text-2xl font-bold mb-4">$1</h2>' },
+    { pattern: /^### (.*$)/gm, replacement: '<h3 class="text-xl font-bold mb-3">$1</h3>' },
 
     // Text styling
-    {
-      pattern: /\*\*(.*?)\*\*/g,
-      replacement: '<strong class="font-bold">$1</strong>',
-    },
-    {
-      pattern: /\*(.*?)\*/g,
-      replacement: '<em class="italic">$1</em>',
-    },
+    { pattern: /\*\*(.*?)\*\*/g, replacement: '<strong class="font-bold">$1</strong>' },
+    { pattern: /\*(.*?)\*/g, replacement: '<em class="italic">$1</em>' },
 
     // Lists
     {
@@ -49,10 +34,7 @@ export class FormattingService {
       replacement:
         '<li class="flex flex-row items-start gap-2"><span class="mt-1.5 h-1.5 w-1.5 rounded-full bg-slate-500 flex-shrink-0"></span>$1</li>',
     },
-    {
-      pattern: /(<li.*?>.*?<\/li>[\n]*)+/g,
-      replacement: '<ul class="space-y-1.5 my-4">$&</ul>',
-    },
+    { pattern: /(<li.*?>.*?<\/li>[\n]*)+/g, replacement: '<ul class="space-y-1.5 my-4">$&</ul>' },
 
     // Numbered Lists
     {
@@ -60,10 +42,7 @@ export class FormattingService {
       replacement:
         '<li class="flex items-start gap-2"><span class="font-medium text-slate-600">$1</span>$2</li>',
     },
-    {
-      pattern: /(<li.*?\d+\..*?<\/li>[\n]*)+/g,
-      replacement: '<ol class="space-y-1.5 my-4 list-none">$&</ol>',
-    },
+    { pattern: /(<li.*?\d+\..*?<\/li>[\n]*)+/g, replacement: '<ol class="space-y-1.5 my-4 list-none">$&</ol>' },
 
     // Links
     {
@@ -99,32 +78,30 @@ export class FormattingService {
     },
 
     // Horizontal Rule
-    {
-      pattern: /^---$/gm,
-      replacement: '<hr class="my-8 border-t border-slate-200">',
-    },
+    { pattern: /^---$/gm, replacement: '<hr class="my-8 border-t border-slate-200">' },
 
     // Paragraphs
-    {
-      pattern: /^(?!<[a-z])(.*$)/gm,
-      replacement: '<p class="mb-4">$1</p>',
-    },
+    { pattern: /^(?!<[a-z])(.*$)/gm, replacement: '<p class="mb-4">$1</p>' },
 
     // Clean up empty paragraphs
-    {
-      pattern: /<p>\s*<\/p>/g,
-      replacement: '',
-    },
+    { pattern: /<p>\s*<\/p>/g, replacement: '' },
   ];
 
   constructor(private sanitizer: DomSanitizer) {}
 
-  parseMarkdown(markdown: string): SafeHtml {
+  parseMarkdown(markdown: string, hidden: boolean = false): SafeHtml {
     let html = markdown;
+
+    // Handle hidden sections
+    const hiddenPattern = /=== HIDDEN ===([\s\S]*?)=== HIDDEN ===/g;
+    html = hidden
+      ? html.replace(hiddenPattern, '$1') // show content without markers
+      : html.replace(hiddenPattern, ''); // remove hidden content entirely
 
     // Pre-process to handle line breaks
     html = html.replace(/\r\n|\r|\n/g, '\n');
 
+    // Apply markdown rules
     this.rules.forEach((rule) => {
       html = html.replace(rule.pattern, rule.replacement);
     });
@@ -137,33 +114,20 @@ export class FormattingService {
   }
 
   processLinks(links: NavLink[] | FooterLink[]): FormatNavLink[] {
-    // Phone regex matches common formats including international
     const phoneRegex =
       /^(\+?\d{1,4}[-.\s]?)?(\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}[-.\s]?\d{0,4}$/;
-    // Email regex for basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return links.map((link) => {
       const trimmedUrl = link.url.trim();
 
-      // Check if it's a phone number
       if (phoneRegex.test(trimmedUrl)) {
-        return {
-          ...link,
-          type: 'phone',
-          formattedUrl: `tel:${this.cleanPhoneNumber(trimmedUrl)}`,
-        };
+        return { ...link, type: 'phone', formattedUrl: `tel:${this.cleanPhoneNumber(trimmedUrl)}` };
       }
 
-      // Check if it's an email
       if (emailRegex.test(trimmedUrl)) {
-        return {
-          ...link,
-          type: 'email',
-          formattedUrl: `mailto:${trimmedUrl}`,
-        };
+        return { ...link, type: 'email', formattedUrl: `mailto:${trimmedUrl}` };
       }
 
-      // Handle URLs
       return {
         ...link,
         type: 'url',
@@ -176,21 +140,18 @@ export class FormattingService {
   }
 
   stripHtmlAndMarkdown(text: string) {
-    // Remove HTML tags but keep the text inside
     text = text.replace(/<\/?[^>]+(>|$)/g, '');
-
-    // Handle markdown elements
     text = text
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Bold **text**
-      .replace(/\*(.*?)\*/g, '$1') // Italic *text*
-      .replace(/__(.*?)__/g, '$1') // Bold __text__
-      .replace(/_(.*?)_/g, '$1') // Italic _text_
-      .replace(/~~(.*?)~~/g, '$1') // Strikethrough ~~text~~
-      .replace(/`(.*?)`/g, '$1') // Inline code `code`
-      .replace(/```[\s\S]*?```/g, '') // Code blocks ```code```
-      .replace(/^>\s?/gm, '') // Blockquotes > text
-      .replace(/!\[.*?\]\((.*?)\)/g, '[Image: $1]') // Images ![alt](url)
-      .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)'); // Links [text](url)
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/__(.*?)__/g, '$1')
+      .replace(/_(.*?)_/g, '$1')
+      .replace(/~~(.*?)~~/g, '$1')
+      .replace(/`(.*?)`/g, '$1')
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/^>\s?/gm, '')
+      .replace(/!\[.*?\]\((.*?)\)/g, '[Image: $1]')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)');
 
     return text.trim();
   }

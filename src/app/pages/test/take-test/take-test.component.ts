@@ -43,6 +43,11 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   private readonly TIMER_KEY_PREFIX = 'test_timer_';
   private readonly PROGRESS_KEY_PREFIX = 'test_progress_';
   private readonly CREDENTIALS_KEY = 'applicateCredentials';
+  private isNavigating: boolean = false;
+  private autoSaveTimeout: any;
+  private timeUpTriggered: boolean = false;
+  private timerExpired: boolean = false; // Track if timer has actually expired
+  private navigationTimeout: any; // Track navigation timeout
 
   // Track unsaved changes - only true during active test
   get hasUnsavedChanges(): boolean {
@@ -95,6 +100,16 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     this.destroy$.next();
     this.destroy$.complete();
     this.cleanupTimers();
+
+    // Clear auto-save timeout
+    if (this.autoSaveTimeout) {
+      clearTimeout(this.autoSaveTimeout);
+    }
+
+    // Clear navigation timeout
+    if (this.navigationTimeout) {
+      clearTimeout(this.navigationTimeout);
+    }
 
     // Only clear progress if test is not complete
     if (this.currentView !== 'thankyou') {
@@ -178,6 +193,8 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     this.timer = progressData.timer;
     this.testResponses = progressData.testResponses || [];
     this.sectionStarted = progressData.sectionStarted || new Array(this.testData?.sections.length).fill(false);
+    this.timerExpired = false;
+    this.timeUpTriggered = false;
 
     if (this.currentView === 'form' && this.sectionStarted[this.currentSection]) {
       this.testStartTime = Date.now() - ((this.testData!.sections[this.currentSection].duration * 60 - this.timer) * 1000);
@@ -217,17 +234,28 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   }
 
   private updateTimerFromBackground(): void {
-    if (!this.testStartTime) return;
+    if (!this.testStartTime || !this.testData || this.timerExpired) return;
 
     const elapsedSeconds = Math.floor((Date.now() - this.testStartTime) / 1000);
     const sectionDuration = this.testData!.sections[this.currentSection].duration * 60;
     const remaining = Math.max(0, sectionDuration - elapsedSeconds);
 
-    this.timer = remaining;
-
-    // Restart timer with corrected time
-    this.cleanupTimers();
-    this.startTimer();
+    // Only update if the difference is significant (more than 2 seconds)
+    if (Math.abs(this.timer - remaining) > 2) {
+      console.log(`Timer recalculated after background: ${remaining} seconds remaining (was ${this.timer})`);
+      this.timer = remaining;
+      
+      // Restart timer with corrected time
+      this.cleanupTimers();
+      
+      // If timer is 0 or negative, trigger time up
+      if (this.timer <= 0 && !this.timerExpired) {
+        this.timerExpired = true;
+        this.handleTimeUp();
+      } else if (this.timer > 0) {
+        this.startTimer();
+      }
+    }
   }
 
   startTest(): void {
@@ -276,6 +304,11 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
 
   beginSection(sectionIndex: number): void {
     if (sectionIndex >= 0 && sectionIndex < this.testData!.sections.length) {
+      // Reset timer expired flag
+      this.timerExpired = false;
+      this.timeUpTriggered = false;
+      this.timeUp = false;
+      
       // Mark section as started
       this.sectionStarted[sectionIndex] = true;
 
@@ -306,7 +339,6 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
     ).length;
   }
 
-
   // In your component class
   getCurrentSectionFields(): any[] {
     if (!this.testData || !this.testData.formData?.fields || this.currentSection === undefined) {
@@ -329,53 +361,133 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       return false;
     });
   }
+
   startTimer(): void {
+    console.log(`Starting timer for section ${this.currentSection}, initial time: ${this.timer}`);
+    
     // Clear any existing timer
     this.cleanupTimers();
+    
+    // Reset time-up flags
+    this.timeUpTriggered = false;
+    this.timeUp = false;
+    this.timerExpired = false;
 
     // Store start time for accurate background time calculation
     this.testStartTime = Date.now();
 
-    // Start timer service for persistence
+    // Store expiry time in localStorage for reference
     const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${this.currentSection}`;
-    this.timerService.startTimer(
-      timerKey,
-      this.timer,
-      () => this.handleTimeUp()
-    );
+    const expiryTime = Date.now() + (this.timer * 1000);
+    localStorage.setItem(`${timerKey}_expiry`, expiryTime.toString());
 
-    // Update UI timer every second
+    // Start timer service for persistence only (no callback)
+    this.timerService.startTimer(timerKey, this.timer, () => {
+      // This callback is intentionally empty - we rely solely on UI timer
+      // This prevents premature navigation from timer service
+      console.log(`TimerService background sync for section ${this.currentSection}`);
+    });
+
+    // SINGLE source of truth: UI timer updates every second
     this.timerInterval = setInterval(() => {
+      if (this.timerExpired) {
+        // If timer already expired, don't do anything
+        return;
+      }
+      
       if (this.timer > 0) {
         this.timer--;
-
+        
         // Auto-save progress every 30 seconds
         if (this.timer % 30 === 0) {
           this.saveTestProgress();
         }
-      } else {
-        this.cleanupTimers();
+        
+        // When UI timer reaches 0, handle time up
+        if (this.timer === 0) {
+          console.log(`UI Timer reached 0 for section ${this.currentSection}`);
+          this.timerExpired = true;
+          this.cleanupTimers();
+          this.handleTimeUp();
+        }
       }
     }, 1000);
   }
 
   private handleTimeUp(): void {
-    this.cleanupTimers();
+    // Prevent multiple time-up triggers
+    if (this.timeUpTriggered || this.isNavigating || this.timerExpired === false) {
+      console.log('Time-up already triggered, navigation in progress, or timer not actually expired, skipping');
+      return;
+    }
+    
+    console.log(`Time up triggered for section ${this.currentSection}`);
+    this.timeUpTriggered = true;
+    this.isNavigating = true;
     this.timeUp = true;
+    
+    this.cleanupTimers();
 
-    setTimeout(() => {
-      if (this.testData!.sections.length - 1 > this.currentSection) {
-        this.navigateSection();
-      } else {
-        this.submitTest();
+    // Clear any auto-save timeout
+    if (this.autoSaveTimeout) {
+      clearTimeout(this.autoSaveTimeout);
+    }
+
+    // Clear any existing navigation timeout
+    if (this.navigationTimeout) {
+      clearTimeout(this.navigationTimeout);
+    }
+
+    // Save final progress before navigating
+    this.saveTestProgress();
+
+    // Navigate after a short delay to show time-up message
+    this.navigationTimeout = setTimeout(() => {
+      try {
+        console.log(`Processing navigation for section ${this.currentSection}`);
+        if (this.testData!.sections.length - 1 > this.currentSection) {
+          // Navigate to next section
+          this.currentSection++;
+          
+          // Reset timer for next section
+          this.timer = this.testData!.sections[this.currentSection].duration * 60;
+          this.timeUp = false;
+          this.timeUpTriggered = false;
+          this.timerExpired = false;
+          this.isNavigating = false;
+          
+          // Save progress for new section
+          this.saveTestProgress();
+          
+          // Scroll to top
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          
+          console.log(`Successfully navigated to section ${this.currentSection}`);
+        } else {
+          // Submit test
+          this.submitTest();
+        }
+      } catch (error) {
+        console.error('Error during time-up navigation:', error);
+        this.timeUpTriggered = false;
+        this.isNavigating = false;
+      } finally {
+        this.navigationTimeout = null;
       }
-    }, 2500);
+    }, 2000); // 2 second delay to show time-up message
   }
 
   private cleanupTimers(): void {
+    console.log(`Cleaning up timers for section ${this.currentSection}`);
+    
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
+    }
+    
+    if (this.navigationTimeout) {
+      clearTimeout(this.navigationTimeout);
+      this.navigationTimeout = null;
     }
 
     // Clear timer service entries
@@ -424,28 +536,53 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   }
 
   navigateSection(): void {
+    // Prevent navigation if already in progress
+    if (this.isNavigating) {
+      console.log('Navigation already in progress, skipping');
+      return;
+    }
+    
     if (this.testData && this.testData.sections.length - 1 > this.currentSection) {
-      // Save current section progress
-      this.saveTestProgress();
-
-      // Move to next section
-      this.currentSection++;
-
-      // Reset timer for next section (won't start until Begin Section is clicked)
-      this.timer = this.testData.sections[this.currentSection].duration * 60;
-      this.timeUp = false;
-
-      // Stop any running timers
-      this.cleanupTimers();
-
-      // Reset test start time
-      this.testStartTime = 0;
-
-      // Update progress
-      this.saveTestProgress();
-
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      console.log(`Navigating from section ${this.currentSection} to ${this.currentSection + 1}`);
+      this.isNavigating = true;
+      
+      try {
+        // Stop all timers first
+        this.cleanupTimers();
+        
+        // Clear any pending navigation timeout
+        if (this.navigationTimeout) {
+          clearTimeout(this.navigationTimeout);
+          this.navigationTimeout = null;
+        }
+        
+        // Save current section progress
+        this.saveTestProgress();
+        
+        // Move to next section
+        this.currentSection++;
+        
+        // Reset all timer-related state
+        this.timer = this.testData.sections[this.currentSection].duration * 60;
+        this.timeUp = false;
+        this.timeUpTriggered = false;
+        this.timerExpired = false;
+        this.testStartTime = 0;
+        
+        // Save progress for new section
+        this.saveTestProgress();
+        
+        // Reset navigation flag
+        this.isNavigating = false;
+        
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        console.log(`Successfully navigated to section ${this.currentSection}`);
+      } catch (error) {
+        console.error('Error during navigation:', error);
+        this.isNavigating = false;
+      }
     }
   }
 
@@ -492,8 +629,6 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       }, 1000);
     }
   }
-
-  private autoSaveTimeout: any;
 
   calculateScore(): number {
     if (!this.testData) return 0;
@@ -551,7 +686,15 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   }
 
   submitTest(): void {
+    console.log('Submitting test');
+    this.isNavigating = true;
     this.cleanupTimers();
+
+    // Clear any pending navigation timeout
+    if (this.navigationTimeout) {
+      clearTimeout(this.navigationTimeout);
+      this.navigationTimeout = null;
+    }
 
     const score = this.calculateScore();
     this.testScore = this.testScore + score;
@@ -585,17 +728,20 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
         next: () => {
           this.clearTestProgress();
           this.currentView = 'thankyou';
+          this.isNavigating = false;
         },
         error: (error) => {
           console.error('Online submission failed, saved for offline:', error);
           // Still show thank you page since we saved offline
           this.clearTestProgress();
           this.currentView = 'thankyou';
+          this.isNavigating = false;
         },
       });
     } else {
       this.clearTestProgress();
       this.currentView = 'thankyou';
+      this.isNavigating = false;
     }
   }
 
@@ -609,7 +755,8 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
       sectionStarted: this.sectionStarted, // Save which sections have been started
       timer: this.timer,
       timestamp: Date.now(),
-      testId: this.testId
+      testId: this.testId,
+      timerExpired: this.timerExpired
     };
 
     localStorage.setItem(
@@ -632,6 +779,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
         const timerKey = `${this.TIMER_KEY_PREFIX}${this.testId}_${i}`;
         this.timerService.clearTimer(timerKey);
         localStorage.removeItem(`timer_${timerKey}`);
+        localStorage.removeItem(`${timerKey}_expiry`);
       }
     }
   }

@@ -170,7 +170,7 @@
 
           <div [innerHTML]="
               formattingService.parseMarkdown(
-                testData.sections[currentSection].instructions
+                testData.sections[currentSection].instructions, sectionStarted[currentSection]
               )
             " class="prose prose-sm prose-indigo max-w-none"></div>
 
@@ -178,7 +178,7 @@
           <div *ngIf="testData.sections[currentSection].subsection">
             <div *ngFor="let subsection of testData.sections[currentSection].subsection; let x = index" class="mt-6">
               <div [innerHTML]="
-                  formattingService.parseMarkdown(subsection.instructions)
+                  formattingService.parseMarkdown(subsection.instructions, sectionStarted[currentSection])
                 " class="prose prose-sm prose-indigo max-w-none p-4 bg-gray-50 rounded-lg bg-white pb-10 "></div>
             </div>
             <div class="h-10"></div>
@@ -293,10 +293,11 @@
 
                   <!-- 1:: Crossword display -->
                   <div *ngIf="field.type === 'crossword' && field.puzzleData" class="mt-4 ml-11">
-                    <div [innerHTML]="formattingService.parseMarkdown(field!.puzzleData!.description)"></div>
+                  
                     <app-crossword-builder [grid]="field!.puzzleData!.grid" [clues]="field!.puzzleData!.clues"
                       [previewOnly]="true"
                       (puzzleSubmitted)="onCrosswordCompleted(field, $event)"></app-crossword-builder>
+                        <div [innerHTML]="formattingService.parseMarkdown(field!.puzzleData!.description)"></div>
                   </div>
                 </div>
               </div>

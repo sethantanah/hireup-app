@@ -90,8 +90,8 @@ export class ListTestComponent {
     if (navigator.share) {
       navigator
         .share({
-          title: test.test_data.sections[0].title, // Assuming the test has a title
-          text: `Check out this test: ${test.test_data.sections[0].title}`, // Customize the text
+          title: test.test_data.testTitle, // Assuming the test has a title
+          text: `Check out this test: ${test.test_data.testTitle}`, // Customize the text
           url: shareUrl, // The URL to share
         })
         .then(() => {

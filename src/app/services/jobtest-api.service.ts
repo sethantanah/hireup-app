@@ -160,8 +160,12 @@ export class JobtestApiService {
     localStorage.removeItem(this.storageKey);
   }
 
-  createSection(section: FormSection) {
-    this.test?.sections.push(section);
+  createSection(section: FormSection, index?: number) {
+    if (index !== undefined) {
+      this.test!.sections.splice(index, 0, section);
+    } else {
+      this.test?.sections.push(section);
+    }
   }
 
   createSubSection(sectionId: number, subSection: FormSubSection) {
