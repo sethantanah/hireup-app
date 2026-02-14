@@ -1,7 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, OnDestroy, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { Field } from '../../../../models/test.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Observable, Subscription } from 'rxjs';
 
 export interface CrosswordCell {
   value: string;
@@ -50,9 +51,10 @@ export interface CrosswordField extends Field {
   templateUrl: './crossword-puzzel.component.html',
   styleUrls: ['./crossword-puzzel.component.scss'],
 })
-export class CrosswordPuzzleComponent implements OnInit {
+export class CrosswordPuzzleComponent implements OnInit, OnDestroy {
   @Input() puzzle!: CrosswordPuzzle;
   @Input() activeMode: boolean = false;
+  @Input() autoSubmitTrigger?: Observable<void>;
   @Output() puzzleSubmitted = new EventEmitter<{ score: number, total: number, percentage: number }>();
 
   // LOCAL COPIES to prevent external modifications
@@ -72,11 +74,27 @@ export class CrosswordPuzzleComponent implements OnInit {
   // Timer for auto-submit
   private autoSubmitTimer: any = null;
   private readonly AUTO_SUBMIT_DELAY = 500; // 500ms delay for auto-submit
+  private triggerSubscription?: Subscription;
 
   constructor(private cdr: ChangeDetectorRef) { }
 
   ngOnInit() {
     this.initializeLocalData();
+    if (this.autoSubmitTrigger) {
+      this.triggerSubscription = this.autoSubmitTrigger.subscribe(() => {
+        console.log('Crossword auto-submit trigger received');
+        this.submitPuzzle();
+      });
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.triggerSubscription) {
+      this.triggerSubscription.unsubscribe();
+    }
+    if (this.autoSubmitTimer) {
+      clearTimeout(this.autoSubmitTimer);
+    }
   }
 
   initializeLocalData() {
@@ -103,7 +121,7 @@ export class CrosswordPuzzleComponent implements OnInit {
         cell.isSelected = false;
         cell.isIncorrect = false;
         cell.isHighlighted = false;
-        
+
         // Reset correct status for active mode
         if (this.activeMode) {
           cell.isCorrect = false;
@@ -164,7 +182,7 @@ export class CrosswordPuzzleComponent implements OnInit {
   getCellClasses(cell: CrosswordCell): any {
     const key = `${cell.row},${cell.col}`;
     const isPermanentlyHighlighted = this.permanentHighlights.has(key);
-    
+
     const classes: any = {
       'black': cell.isBlack,
       'selected': cell.isSelected,
@@ -499,7 +517,7 @@ export class CrosswordPuzzleComponent implements OnInit {
       for (let j = 0; j < this.size; j++) {
         const key = `${i},${j}`;
         const isPermanentlyHighlighted = this.permanentHighlights.has(key);
-        
+
         // Only clear selection if cell is not permanently highlighted
         if (this.localGrid[i][j].isSelected && !isPermanentlyHighlighted) {
           this.localGrid[i][j].isSelected = false;

@@ -229,7 +229,7 @@
             </button>
         </div>
         <div class="p-6 overflow-auto">
-            <app-crossword-puzzle [puzzle]="getPreviewPuzzle()"
+            <app-crossword-puzzle [puzzle]="getPreviewPuzzle()" [autoSubmitTrigger]="autoSubmitTrigger"
                 (puzzleSubmitted)="onPreviewSubmitted($event)"></app-crossword-puzzle>
         </div>
     </div>
@@ -248,4 +248,4 @@
 
 </div>
 <app-crossword-puzzle *ngIf="previewOnly" [activeMode]="previewOnly" [puzzle]="getPreviewPuzzle()"
-    (puzzleSubmitted)="onPreviewSubmitted($event)"></app-crossword-puzzle>
+    [autoSubmitTrigger]="autoSubmitTrigger" (puzzleSubmitted)="onPreviewSubmitted($event)"></app-crossword-puzzle>

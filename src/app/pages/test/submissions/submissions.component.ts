@@ -163,6 +163,7 @@ export class SubmissionsComponent {
     this.testService.testResponses(testId ?? '').subscribe({
       next: (data) => {
         this.applicants = data;
+        console.log(this.applicants);
         this.applicants.forEach((app) => {
           if (app.test_score >= this.passMark) {
             this.shortlistedApplicants.add(app.id);

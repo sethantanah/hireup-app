@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrosswordCell, CrosswordClue, CrosswordPuzzle, CrosswordPuzzleComponent } from '../crossword-puzzel/crossword-puzzle.component';
 import { FormattingService } from '../../../../services/formatting.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-crossword-builder',
@@ -15,7 +16,8 @@ export class CrosswordBuilderComponent implements OnChanges {
   @Input() grid: CrosswordCell[][] = [];
   @Input() clues: CrosswordClue[] = [];
   @Input() previewOnly: boolean = false;
-   @Input()  instructions: string = "";
+  @Input() instructions: string = "";
+  @Input() autoSubmitTrigger?: Observable<void>;
   @Output() puzzleUpdated = new EventEmitter<CrosswordPuzzle>();
   @Output() puzzleSubmitted = new EventEmitter<{ score: number, total: number, percentage: number }>();
 
@@ -33,7 +35,7 @@ export class CrosswordBuilderComponent implements OnChanges {
   editingClueIndex: number | null = null;
   editingWord = '';
   editingClueText = '';
-  
+
 
   showPreview = false;
   nextClueNumber = 1;
@@ -43,7 +45,7 @@ export class CrosswordBuilderComponent implements OnChanges {
 
   instruct: string = "Hello Word"
 
-  constructor( public formattingService: FormattingService) {
+  constructor(public formattingService: FormattingService) {
     this.initializeGrid();
   }
 
@@ -744,7 +746,7 @@ export class CrosswordBuilderComponent implements OnChanges {
     this.puzzleUpdated.emit(puzzle);
   }
 
-  onIntructChange(ev: string){
+  onIntructChange(ev: string) {
     const puzzle: CrosswordPuzzle = {
       id: 'builder-' + Date.now(),
       title: 'Crossword Puzzle',
