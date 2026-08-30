@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { JobpostManagerService } from '../../../../../../services/jobpost-manager.service';
 import { FormField, JobPostData } from '../../../../../../models/jobpost.model';
 import { CommonModule } from '@angular/common';
@@ -11,8 +11,10 @@ import { FormattingService } from '../../../../../../services/formatting.service
   templateUrl: './dynamic-form.component.html',
   styleUrl: './dynamic-form.component.scss',
 })
-export class DynamicFormComponent implements OnInit {
+export class DynamicFormComponent implements OnInit, OnDestroy {
   @Input() formType: string = "Application Form";
+  @Output() formChange = new EventEmitter<JobPostData>();
+
   sections: string[] = ['General']; // Array of section names
   fields: FormField[] = []; // All fields across sections
   selectedSection: string = this.sections[0];
@@ -28,7 +30,8 @@ export class DynamicFormComponent implements OnInit {
   sectionToUpdate = '';
 
   showUpdateFieldPopup = false;
-  showMarkdownGuide = false
+  showMarkdownGuide = false;
+  private syncTimer: any;
 
   newField: FormField = {
     type: 'text',
@@ -39,54 +42,68 @@ export class DynamicFormComponent implements OnInit {
     min_length: '',
     max_length: '',
     instructions: '',
+    allowMultiSelect: false,
+    allowOther: false,
+    options: [],
   };
-  fieldTypes = ['text', 'date', 'email', 'tel', 'select', 'textarea', 'file'];
+  fieldTypes = ['text', 'date', 'email', 'tel', 'select', 'checkbox', 'textarea', 'file'];
 
   constructor(
     private jobPostService: JobpostManagerService,
     public formattingService: FormattingService
-  ) {
-  }
+  ) {}
+
   ngOnInit(): void {
     const applicationData: JobPostData = this.jobPostService.getApplicationData();
 
     if (this.formType === "Application Form") {
-      this.fields = applicationData.formData.fields;
-      this.sections = applicationData.sections;
-      this.selectedSection = this.sections[0];
+      this.fields = applicationData.formData?.fields || [];
+      this.sections = applicationData.sections && applicationData.sections.length > 0 ? applicationData.sections : ['General'];
+      this.selectedSection = this.sections[0] || 'General';
     } else {
       if (applicationData.requestForDataForm) {
+        this.fields = applicationData.requestForDataForm.fields || [];
+        this.sections = applicationData.additionalSections || ["Personal Details"];
+        this.selectedSection = this.sections[0] || "Personal Details";
+      } else {
+        applicationData.requestForDataForm = { fields: [] };
         this.fields = applicationData.requestForDataForm.fields;
         this.sections = applicationData.additionalSections || ["Personal Details"];
-        this.selectedSection = this.sections[0];
-      } else {
-        applicationData.requestForDataForm = { fields: [] }
-         this.fields = applicationData.requestForDataForm.fields;
-        this.sections = applicationData.additionalSections || ["Personal Details"];
-        this.selectedSection = this.sections[0];
+        this.selectedSection = this.sections[0] || "Personal Details";
       }
-
     }
 
-
-    setInterval(() => {
-      const applicationData: JobPostData = this.jobPostService.getApplicationData();
-      if (this.formType === "Application Form") {
-        applicationData.formData.fields = this.fields;
-        applicationData.sections = this.sections;
-      } else {
-        if (applicationData.requestForDataForm) {
-          applicationData.requestForDataForm.fields = this.fields;
-          applicationData.additionalSections = this.sections;
-        }
-      }
-
-  this.jobPostService.updateApplicationData(applicationData);
-
-
-    }, 3000);
+    this.syncTimer = setInterval(() => {
+      this.syncData();
+    }, 2000);
   }
 
+  ngOnDestroy(): void {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+    }
+    this.syncData();
+  }
+
+  syncData(): void {
+    const applicationData: JobPostData = this.jobPostService.getApplicationData();
+    if (this.formType === "Application Form") {
+      if (!applicationData.formData) {
+        applicationData.formData = { fields: [] };
+      }
+      applicationData.formData.fields = [...this.fields];
+      applicationData.sections = [...this.sections];
+    } else {
+      if (!applicationData.requestForDataForm) {
+        applicationData.requestForDataForm = { fields: [] };
+      }
+      applicationData.requestForDataForm.fields = [...this.fields];
+      applicationData.additionalSections = [...this.sections];
+    }
+
+    this.jobPostService.updateApplicationData(applicationData);
+    this.formChange.emit(applicationData);
+  }
 
   // Open the section popup
   openSectionPopup(): void {
@@ -101,6 +118,7 @@ export class DynamicFormComponent implements OnInit {
       if (!this.selectedSection) {
         this.selectedSection = this.newSectionName; // Auto-select the first section
       }
+      this.syncData();
     }
     this.showSectionPopup = false;
   }
@@ -123,6 +141,7 @@ export class DynamicFormComponent implements OnInit {
       this.selectedSection = this.sections[0] || ''; // Select the first section if available
     }
     this.showDeleteSectionPopup = false;
+    this.syncData();
   }
 
   // Open the field popup
@@ -136,6 +155,9 @@ export class DynamicFormComponent implements OnInit {
       min_length: '',
       max_length: '',
       instructions: '',
+      allowMultiSelect: false,
+      allowOther: false,
+      options: [],
     };
     this.showFieldPopup = true;
     this.showUpdateFieldPopup = false;
@@ -152,6 +174,7 @@ export class DynamicFormComponent implements OnInit {
     this.newField.key = this.generateUniqueId();
     this.fields.push({ ...this.newField });
     this.showFieldPopup = false;
+    this.syncData();
   }
 
   updateField() {
@@ -160,7 +183,8 @@ export class DynamicFormComponent implements OnInit {
       this.fields[index] = { ...this.newField };
     }
     this.showUpdateFieldPopup = false;
-    this.newField = this.newField;
+    this.showFieldPopup = false;
+    this.syncData();
   }
 
   addOption() {
@@ -191,6 +215,7 @@ export class DynamicFormComponent implements OnInit {
   // Delete a field
   deleteField(fieldKey: string): void {
     this.fields = this.fields.filter((field) => field.key !== fieldKey);
+    this.syncData();
   }
 
   removeOption(index: number) {
@@ -204,6 +229,66 @@ export class DynamicFormComponent implements OnInit {
       this.newField.options = [];
     }
     this.newField.options.push('');
+  }
+
+  hasDelimiters(text?: string): boolean {
+    return !!text && (text.includes(',') || text.includes(';'));
+  }
+
+  splitOption(index: number): void {
+    if (!this.newField.options || index < 0 || index >= this.newField.options.length) {
+      return;
+    }
+    const raw = this.newField.options[index];
+    if (!raw) return;
+
+    const items = raw
+      .split(/[,;]/)
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+
+    if (items.length > 0) {
+      this.newField.options.splice(index, 1, ...items);
+    }
+  }
+
+  splitAllDelimitedOptions(): void {
+    if (!this.newField.options) return;
+    const newOptions: string[] = [];
+    this.newField.options.forEach((opt) => {
+      if (opt && (opt.includes(',') || opt.includes(';'))) {
+        const splitItems = opt
+          .split(/[,;]/)
+          .map((i) => i.trim())
+          .filter((i) => i.length > 0);
+        newOptions.push(...splitItems);
+      } else if (opt && opt.trim().length > 0) {
+        newOptions.push(opt.trim());
+      }
+    });
+    this.newField.options = newOptions;
+  }
+
+  handleOptionPaste(event: ClipboardEvent, index: number): void {
+    const pastedText = event.clipboardData?.getData('text');
+    if (pastedText && (pastedText.includes(',') || pastedText.includes(';'))) {
+      event.preventDefault();
+      const splitItems = pastedText
+        .split(/[,;]/)
+        .map((i) => i.trim())
+        .filter((i) => i.length > 0);
+
+      if (!this.newField.options) {
+        this.newField.options = [];
+      }
+      if (splitItems.length > 0) {
+        if (this.newField.options[index] === '' || !this.newField.options[index]) {
+          this.newField.options.splice(index, 1, ...splitItems);
+        } else {
+          this.newField.options.splice(index + 1, 0, ...splitItems);
+        }
+      }
+    }
   }
 
   // Add this method
@@ -261,6 +346,7 @@ export class DynamicFormComponent implements OnInit {
     this.showUpdateSectionPopup = false;
     this.sectionToUpdate = '';
     this.updatedSectionName = '';
+    this.syncData();
   }
 
   // Get fields for the selected section
@@ -279,9 +365,11 @@ export class DynamicFormComponent implements OnInit {
       date: 'fas fa-calendar',
       tel: 'fas fa-phone',
       textarea: 'fas fa-paragraph',
-      select: 'fas fa-list',
+      select: 'fas fa-list-ul',
+      checkbox: 'fas fa-check-square',
       file: 'fas fa-file-upload',
+      email: 'fas fa-envelope',
     };
-    return icons[type as keyof typeof icons] || 'fas fa-question';
+    return icons[type as keyof typeof icons] || 'fas fa-align-left';
   }
 }

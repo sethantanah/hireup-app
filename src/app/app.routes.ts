@@ -17,6 +17,7 @@ import { TrackingComponent } from './pages/job-posts/tracking/tracking.component
 import { LandingComponent } from './pages/landing/landing.component';
 import { SubmitEndorsementComponent } from './pages/job-posts/submit-endorsement/submit-endorsement.component';
 import { JobReferencesComponent } from './pages/job-posts/job-references/job-references.component';
+import { CandidatePortalComponent } from './pages/candidate/candidate-portal/candidate-portal.component';
 
 export const routes: Routes = [
   {
@@ -77,7 +78,8 @@ export const routes: Routes = [
   {
     path: 'auth/signup',
     component: SignupComponent,
-  }, {
+  }, 
+  {
     path: 'auth/signin',
     component: SigninComponent,
   },
@@ -90,12 +92,33 @@ export const routes: Routes = [
     component: SignupComponent,
   },
   {
+    path: 'auth/recruiter/login',
+    component: SigninComponent,
+  },
+  {
+    path: 'auth/recruiter/register',
+    component: SignupComponent,
+  },
+  {
+    path: 'auth/candidate/login',
+    component: SigninComponent,
+  },
+  {
+    path: 'auth/candidate/register',
+    component: SignupComponent,
+  },
+  {
     path: 'submit/endorsement/:jobId/:applicationId',
     component: SubmitEndorsementComponent,
   },
   {
     path: 'job-endorsements/:jobId',
     component: JobReferencesComponent,
+  },
+  {
+    path: 'candidate-portal',
+    component: CandidatePortalComponent,
+    canActivate: [authGuard]
   },
   { path: 'auth/callback', component: AuthCallbackComponent }, // New route
   { path: '**', component: PageNotFoundComponent }

@@ -6,194 +6,89 @@
 
   <!-- Gear Icon to Toggle Options -->
   <div class="flex flex-col md:flex-row justify-start my-2 mt-0">
-    <div class="flex flex-row ml-auto gap-4">
+    <div class="flex flex-row ml-auto gap-3">
       <button
         (click)="toggleOptions()"
-        class="flex items-center gap-2 w-[180px] px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
+        class="flex items-center gap-2 px-4 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs text-xs font-bold"
       >
-        <i class="fas fa-sliders-h text-gray-600"></i>
-        <span class="text-sm font-medium text-gray-700">Setup Ranking</span>
+        <i class="fas fa-sliders-h text-slate-500"></i>
+        <span>Setup Ranking</span>
       </button>
       <button
         (click)="viewShortlist()"
-        class="shortlist-button inline-flex items-center gap-2 px-4 py-2.5 h-10 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg font-medium transition-all duration-200 shadow-sm hover:shadow group"
+        class="inline-flex items-center gap-2 px-4 h-10 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl font-bold text-xs transition-all duration-200 shadow-xs hover:shadow-md group"
         *ngIf="!isLoading && candidates.length > 0"
       >
         <i class="fas fa-list group-hover:scale-110 transition-transform"></i>
         <span>View Shortlist</span>
         <span
-          class="inline-flex items-center justify-center text-white rounded-full text-sm"
+          class="inline-flex items-center justify-center bg-white/20 text-white rounded-full px-2 py-0.5 text-[11px] font-extrabold"
         >
-          ({{ dataService.shortlistedCandidates.length }})
+          {{ dataService.shortlistedCandidates.length }}
         </span>
       </button>
       <button
         (click)="refreshData()"
         [class.spinning]="isRefreshing"
-        class="refresh-btn flex items-center gap-2 px-4 h-10 bg-white rounded-lg shadow-md hover:bg-gray-50 transition-colors duration-200"
+        class="refresh-btn flex items-center justify-center px-3 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs"
+        title="Refresh Candidates"
       >
-        <i class="fas fa-sync-alt text-black hover:text-black"></i>
+        <i class="fas fa-sync-alt text-xs"></i>
       </button>
     </div>
   </div>
 
-  <!-- Options Panel (Hidden by Default) -->
+  <!-- Options Panel (Evaluation Settings Modal) -->
   <div
     *ngIf="showOptions"
-    class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    class="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-50 flex items-center justify-center p-4"
     (click)="toggleOptions()"
   >
     <div
-      class="bg-white shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col"
+      class="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-2xl rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
       (click)="$event.stopPropagation()"
     >
-      <!-- Fixed Header -->
+      <!-- Modal Header -->
       <div
-        class="p-6 border-b flex flex-wrap items-center justify-between gap-4 bg-gray-50"
+        class="p-6 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-4 bg-slate-50/80 sticky top-0 z-10"
       >
         <div>
-          <h2 class="text-2xl font-semibold text-gray-800">
-            Evaluation Settings
+          <h2 class="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+            <i class="fas fa-sliders-h text-indigo-600"></i>
+            <span>Evaluation & Ranking Settings</span>
           </h2>
-          <p class="text-sm text-gray-500 mt-1">
-            Configure criteria and weights for candidate evaluation
+          <p class="text-xs font-medium text-slate-500 mt-1">
+            Configure evaluation categories, criteria, and scoring weights for candidate evaluation
           </p>
         </div>
-        <div class="flex gap-3">
-          <!-- <button (click)="resetSettings()" class="btn-outline">
-                <i class="fas fa-undo"></i>
-                <span>Reset</span>
-              </button> -->
+        <div class="flex items-center gap-3">
           <button
             (click)="onSubmit()"
-            class="btn-primary inline-flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium;"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl transition-all shadow-xs hover:shadow-md text-xs font-bold"
           >
+            <i class="fas fa-play text-xs"></i>
             <span>Start Ranking</span>
-            <i class="fas fa-sort-amount-down"></i>
           </button>
 
           <button
             (click)="toggleOptions()"
-            class="p-2 text-gray-400 hover:text-gray-600"
+            class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg"
           >
-            <i class="fas fa-times text-xl"></i>
+            <i class="fas fa-times text-lg"></i>
           </button>
         </div>
       </div>
 
-      <!-- Scrollable Content -->
-      <div class="flex-1 overflow-y-auto">
-        <div class="p-6 space-y-8">
-          <!-- Category Selection -->
-          <div class="space-y-3">
-            <label class="text-sm font-medium text-gray-700"
-              >Select Evaluation Categories</label
-            >
-            <div class="flex flex-wrap gap-3">
-              <button
-                *ngFor="let category of getEvaluationCategories()"
-                (click)="toggleCategory(category)"
-                [class]="
-                  selectedCategories.includes(category)
-                    ? 'btn-selected'
-                    : 'btn-unselected'
-                "
-                [ngClass]="{
-                  'px-4 py-2 text-sm font-medium rounded-lg transition-colors': true,
-                  'bg-blue-600 text-white':
-                    selectedCategories.includes(category),
-                  'border border-gray-300 text-gray-700 hover:bg-gray-50':
-                    !selectedCategories.includes(category)
-                }"
-              >
-                {{ formatCategoryName(category) }}
-              </button>
-            </div>
-          </div>
-
-          <!-- Evaluation Categories -->
-          <div class="space-y-6">
-            <div
-              *ngFor="let category of selectedCategories"
-              class="bg-white rounded-xl border border-gray-100 overflow-hidden"
-            >
-              <div
-                class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center"
-              >
-                <h3 class="text-lg font-medium text-gray-800">
-                  {{
-                    isResumeCategory(category)
-                      ? "Job Description"
-                      : formatCategoryName(category)
-                  }}
-                </h3>
-                <button
-                  (click)="removeCategory(category)"
-                  class="text-gray-400 hover:text-red-500 transition-colors flex items-center gap-2"
-                >
-                  <i class="fas fa-times"></i>
-                  <span class="text-sm">Remove from evaluation</span>
-                </button>
-              </div>
-
-              <div class="p-6 space-y-6">
-                <!-- Criteria Textarea -->
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700">
-                    {{
-                      isResumeCategory(category)
-                        ? "Job Requirements"
-                        : "Evaluation Criteria"
-                    }}
-                  </label>
-                  <textarea
-                    [(ngModel)]="evaluationData[category].criteria"
-                    rows="4"
-                    class="w-full px-4 py-2 border border-gray-200 rounded-lg"
-                    [placeholder]="
-                      'Define criteria for ' +
-                      formatCategoryName(category).toLowerCase()
-                    "
-                  ></textarea>
-                </div>
-
-                <!-- Metrics Table -->
-                <div class="space-y-2">
-                  <label class="text-sm font-medium text-gray-700"
-                    >Scoring Weights</label
-                  >
-                  <div class="space-y-3">
-                    <div
-                      *ngFor="
-                        let metric of evaluationData[category]
-                          .evaluation_metrics
-                      "
-                      class="flex items-center gap-6 p-3 bg-gray-50 rounded-lg"
-                    >
-                      <span
-                        class="text-sm font-medium text-gray-600 min-w-[120px]"
-                        >{{ metric.score }}</span
-                      >
-                      <div class="flex-1 flex items-center gap-4">
-                        <input
-                          type="range"
-                          [(ngModel)]="metric.weight"
-                          min="0"
-                          max="100"
-                          class="flex-1 accent-blue-600"
-                        />
-                        <span
-                          class="text-sm font-medium text-gray-600 w-12 text-right"
-                          >{{ metric.weight }}%</span
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <!-- Scrollable Settings Form Content -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <app-candidate-ranking-settings
+          *ngIf="applicationData"
+          [applicationData]="applicationData"
+          title="Evaluation Criteria & Scoring Weights"
+          subtitle="Define rules for parsing document types and dynamic candidate criteria"
+          evaluationType="ranking"
+          (saveChanges)="onSettingsSaved($event)"
+        ></app-candidate-ranking-settings>
       </div>
     </div>
   </div>
@@ -203,69 +98,69 @@
   ></app-shortlist-popup>
   <app-candidate-details></app-candidate-details>
 
+  <!-- Candidate Cards Grid (3 Columns on Large Screens) -->
   <div
-    class="candidate-grid max-h[600px] flex flex-row flex-wrap:wrap"
-    style="flex-wrap: wrap"
+    class="candidate-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4"
     *ngIf="!isLoading"
   >
-    <ng-container *ngFor="let candidate of candidates" style="flex-shrink: 0">
+    <ng-container *ngFor="let candidate of candidates">
       <div
-        class="w-[300px] md:w-[290px] max-w[400px] bg-white rounded-xl shadow-lg p-5 mb-4 border border-gray-100"
-        style="flex-shrink: 0"
+        class="w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-xs hover:shadow-xl border border-slate-200/80 hover:border-indigo-300 p-5 transition-all duration-300 flex flex-col justify-between"
       >
         <!-- Card Header -->
         <div class="flex flex-col gap-2 mb-4">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-bold text-gray-800">
+            <h3 class="text-base font-bold text-slate-900 truncate">
               {{ getDisplayName(candidate) }}
             </h3>
             <span
-              class="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium"
+              class="px-2.5 py-1 bg-indigo-50 border border-indigo-200/80 text-indigo-700 rounded-full text-xs font-extrabold"
             >
               {{ (candidate.ranking_score * 100).toFixed(0) }}%
             </span>
           </div>
-          <p class="text-sm text-gray-600" *ngIf="getExperience(candidate)">
-            {{ getExperience(candidate) }} years of experience
+          <p class="text-xs font-medium text-slate-500 flex items-center gap-1.5" *ngIf="getExperience(candidate)">
+            <i class="fas fa-briefcase text-slate-400"></i>
+            <span>{{ getExperience(candidate) }} yrs experience</span>
           </p>
         </div>
 
         <!-- Scores Section -->
-        <div class="mb-6">
+        <div class="mb-5">
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-sm font-semibold text-gray-700">
-              Candidate Ranking
+            <h4 class="text-xs font-bold text-slate-700">
+              Score Breakdown
             </h4>
             <button
               (click)="toggleAllScores()"
-              class="text-xs text-blue-600 hover:text-blue-800"
+              class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
             >
               {{ areAllScoresExpanded ? "Collapse All" : "Expand All" }}
             </button>
           </div>
 
           <div class="overflow-x-auto -mx-5 px-5">
-            <div class="flex gap-3 pb-2">
+            <div class="flex gap-2.5 pb-2">
               <div
                 *ngFor="
                   let score of candidate?.document_ranking?.individual_scores
                 "
-                class="flex-none w-[200px] bg-gray-50 rounded-lg p-3"
+                class="flex-none w-[190px] bg-slate-50/80 rounded-xl p-3 border border-slate-200/60"
               >
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs font-medium text-gray-600">{{
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-xs font-bold text-slate-700 truncate">{{
                     score.document_type
                   }}</span>
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-gray-800"
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-xs font-extrabold text-slate-900"
                       >{{ (score.overall_score * 100).toFixed(0) }}%</span
                     >
                     <button
                       (click)="toggleScoreDetails(score)"
-                      class="text-gray-400 hover:text-gray-600 transition-colors"
+                      class="text-slate-400 hover:text-slate-600 transition-colors"
                     >
                       <i
-                        class="fas fa-chevron-down text-xs"
+                        class="fas fa-chevron-down text-[10px]"
                         [ngClass]="{
                           'transform rotate-180': isScoreExpanded(score)
                         }"
@@ -277,7 +172,7 @@
 
                 <div
                   *ngIf="isScoreExpanded(score)"
-                  class="mt-2 space-y-1.5 border-t border-gray-200 pt-2"
+                  class="mt-2 space-y-1 border-t border-slate-200/60 pt-2"
                 >
                   <div
                     *ngFor="let key of getScoreKeys(score)"
@@ -286,10 +181,10 @@
                     <ng-container
                       *ngIf="key !== 'document_type' && key !== 'overall_score'"
                     >
-                      <span class="text-xs text-gray-500 capitalize">{{
+                      <span class="text-[11px] text-slate-500 capitalize">{{
                         key.replace("_", " ")
                       }}</span>
-                      <span class="text-xs font-medium text-gray-700">
+                      <span class="text-[11px] font-bold text-slate-800">
                         {{ (score[key] * 100).toFixed(0) }}%
                       </span>
                     </ng-container>
@@ -302,25 +197,15 @@
 
         <!-- Card Footer -->
         <div
-          class="flex items-center justify-between pt-3 border-t border-gray-100"
+          class="flex items-center justify-between pt-3 border-t border-slate-100"
         >
           <button
             (click)="viewDetails(candidate)"
-            class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center gap-2"
+            class="px-3 py-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/80 rounded-lg transition-colors flex items-center gap-1.5"
           >
-            <i class="fas fa-eye"></i>
+            <i class="fas fa-eye text-xs"></i>
             <span>View Details</span>
           </button>
-
-          <!-- <label class="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            [checked]="isShortlisted(candidate)"
-            (change)="toggleShortlist(candidate)"
-          />
-          <span class="text-sm text-gray-600">Shortlist</span>
-        </label> -->
 
           <div class="relative">
             <input
@@ -332,12 +217,12 @@
             />
             <label
               for="shortlist-{{ candidate.id }}"
-              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm font-medium text-gray-600 hover:bg-gray-50 peer-checked:text-blue-600 peer-checked:bg-blue-50 transition-colors"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-xs font-bold text-slate-600 hover:bg-slate-100/80 peer-checked:text-emerald-700 peer-checked:bg-emerald-50 transition-colors"
             >
               <i
-                class="fas"
+                class="fas text-xs"
                 [ngClass]="
-                  isShortlisted(candidate) ? 'fa-check-circle' : 'fa-circle'
+                  isShortlisted(candidate) ? 'fa-check-circle text-emerald-600' : 'fa-circle text-slate-300'
                 "
               ></i>
               Shortlist
@@ -346,55 +231,6 @@
         </div>
       </div>
     </ng-container>
-
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
-    <div class="pt-12 bg-transparent"></div>
   </div>
 </div>
 

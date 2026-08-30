@@ -1,212 +1,304 @@
-<div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-  <div class="flex items-center justify-between mb-6">
+<!-- Enterprise Application Stages Workspace -->
+<div class="bg-white/95 backdrop-blur-xl rounded-3xl p-8 border border-slate-200/80 shadow-xl space-y-8">
+
+  <!-- Header & Actions -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-200/80">
     <div>
-      <h3 class="text-lg font-semibold text-slate-900">Application Stages</h3>
-      <p class="text-sm text-slate-600">Define and configure your hiring pipeline stages</p>
+      <div class="flex items-center gap-3 mb-1">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 shadow-xs">
+          <i class="fa-solid fa-layer-group text-lg"></i>
+        </div>
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight">Hiring Pipeline Stages</h3>
+      </div>
+      <p class="text-sm font-medium text-slate-500 ml-13">Configure sequence, automation rules, SLA targets, and stage actions for your recruitment process</p>
     </div>
-    <div class="flex gap-2">
+
+    <div class="flex items-center gap-3">
       <button (click)="initializeDefaultStages()"
-        class="px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
-        <i class="fa-solid fa-rotate mr-2"></i>
-        Reset to Default
+        class="px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200/80 border border-slate-200/80 rounded-xl transition-all flex items-center gap-2 active:scale-95 shadow-xs">
+        <i class="fa-solid fa-rotate text-slate-500"></i>
+        <span>Reset Pipeline</span>
       </button>
+      
       <button (click)="addStage()"
-        class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-        <i class="fa-solid fa-plus mr-2"></i>
-        Add Stage
+        class="px-5 py-2.5 text-xs font-bold text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 rounded-xl transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2 active:scale-95">
+        <i class="fa-solid fa-plus"></i>
+        <span>Add Stage</span>
       </button>
     </div>
   </div>
 
+  <!-- Interactive Pipeline Funnel Visualizer Banner -->
+  <div *ngIf="applicationStages.length > 0" class="bg-slate-900/95 text-white p-6 rounded-2xl shadow-xl relative overflow-hidden">
+    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl"></div>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Live Funnel Workflow Preview</h4>
+      </div>
+      <span class="text-xs font-semibold text-slate-400">{{ getActiveStagesCount() }} Active Stages • {{ getTotalEstimatedTime() }} Days Total SLA</span>
+    </div>
+
+    <!-- Stepper Pipeline Nodes -->
+    <div class="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+      <ng-container *ngFor="let stage of applicationStages; let idx = index">
+        <div *ngIf="!stage.hide_stage" class="flex items-center gap-3 shrink-0">
+          <div (click)="navigateToStage(stage)"
+            class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800/80 border border-slate-700/80 transition-all hover:border-indigo-400 hover:bg-slate-700/90 cursor-pointer shadow-2xs"
+            [class.opacity-50]="!stage.is_active"
+            [title]="'Click to open ' + stage.name + ' stage details'">
+            <span class="w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center bg-indigo-600 text-white">
+              {{ stage.order }}
+            </span>
+            <span class="text-xs font-bold text-slate-200 group-hover:text-white">{{ stage.name }}</span>
+            <span *ngIf="stage.stage_type === 'evaluation'" class="w-2 h-2 rounded-full bg-purple-400" title="Evaluation Stage"></span>
+            <span *ngIf="stage.stage_type === 'approval'" class="w-2 h-2 rounded-full bg-amber-400" title="Approval Stage"></span>
+          </div>
+          <i *ngIf="idx < applicationStages.length - 1" class="fa-solid fa-chevron-right text-xs text-slate-600"></i>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Stage Cards List -->
   <div class="space-y-4">
     <div *ngFor="let stage of applicationStages; let i = index; trackBy: trackByFn"
-      class="group flex items-start gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200 hover:border-slate-300 transition-all"
-      [class.border-blue-200]="stage.is_active && !stage.hide_stage"
-      [class.bg-blue-50]="stage.is_active && !stage.hide_stage"
-      [class.border-red-200]="!stage.is_active && stage.hide_stage"
-      [class.bg-red-50]="!stage.is_active && stage.hide_stage">
-      <!-- Stage Order Controls -->
-      <div class="flex items-center gap-2 ">
-        <div class="flex flex-col gap-1">
-          <button (click)="moveStageUp(i)" [disabled]="i === 0"
-            class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30 rounded border border-slate-300 hover:border-slate-400">
+      class="group flex flex-col lg:flex-row items-start gap-5 p-6 rounded-2xl border transition-all duration-200"
+      [class.bg-white]="stage.is_active && !stage.hide_stage"
+      [class.border-slate-200]="stage.is_active && !stage.hide_stage"
+      [class.shadow-md]="stage.is_active && !stage.hide_stage"
+      [class.bg-slate-100]="!stage.is_active && !stage.hide_stage"
+      [class.border-slate-200]="!stage.is_active && !stage.hide_stage"
+      [class.bg-red-50]="stage.hide_stage"
+      [class.border-red-200]="stage.hide_stage">
+
+      <!-- Left Controls: Reordering & Sequence -->
+      <div class="flex items-center lg:flex-col gap-2 shrink-0">
+        <div class="flex lg:flex-col gap-1">
+          <button (click)="moveStageUp(i)" [disabled]="i === 0 || stage.hide_stage"
+            class="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-30 rounded-lg border border-slate-200 transition-all shadow-2xs">
             <i class="fa-solid fa-chevron-up text-xs"></i>
           </button>
-          <button (click)="moveStageDown(i)" [disabled]="i === applicationStages.length - 1"
-            class="w-6 h-6 flex items-center justify-center text-slate-500 hover:text-slate-700 disabled:opacity-30 rounded border border-slate-300 hover:border-slate-400">
+          <button (click)="moveStageDown(i)" [disabled]="i === applicationStages.length - 1 || stage.hide_stage"
+            class="w-7 h-7 flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 disabled:opacity-30 rounded-lg border border-slate-200 transition-all shadow-2xs">
             <i class="fa-solid fa-chevron-down text-xs"></i>
           </button>
         </div>
 
-        <div
-          class="w-8 h-8 flex items-center justify-center bg-white rounded-lg border border-slate-300 text-sm font-semibold text-slate-700">
+        <div class="w-9 h-9 flex items-center justify-center bg-slate-900 text-white rounded-xl text-xs font-black shadow-sm">
           {{ stage.order }}
         </div>
       </div>
 
-      <!-- Stage Details -->
-      <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <!-- Basic Info -->
-        <div class="space-y-3">
+      <!-- Main Content Grid -->
+      <div class="flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        <!-- Column 1: Stage Info & Details -->
+        <div class="lg:col-span-6 space-y-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
-              Stage Name *
-            </label>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                Stage Name *
+              </label>
+              <span *ngIf="stage.hide_stage" class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 text-red-700">
+                Marked for Deletion
+              </span>
+            </div>
             <input [(ngModel)]="stage.name" (ngModelChange)="onStageChange()"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-              placeholder="e.g., Technical Interview" required disabled />
+              [disabled]="stage?.hide_stage || false"
+              class="w-full px-4 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 bg-white transition-all text-slate-900 shadow-2xs"
+              placeholder="e.g. Technical Interview" required />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
-              Description
+            <label class="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Stage Purpose & Guidelines
             </label>
             <textarea [(ngModel)]="stage.description" (ngModelChange)="onStageChange()" rows="2"
-              class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-              placeholder="Stage description and purpose" [disabled]="stage?.hide_stage || false"></textarea>
+              [disabled]="stage?.hide_stage || false"
+              class="w-full px-4 py-2.5 text-xs font-medium rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100 bg-white transition-all text-slate-700 shadow-2xs"
+              placeholder="Describe what recruiters should evaluate during this stage..."></textarea>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <!-- Type & Email Automation Settings -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">
+              <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">
                 Stage Type
               </label>
               <select [(ngModel)]="stage.stage_type" [disabled]="stage?.hide_stage || false"
                 (ngModelChange)="onStageTypeChange(stage)"
-                class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-sm"
-                [disabled]="stage?.hide_stage || false">
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs">
                 <option *ngFor="let type of stageTypes" [value]="type.value">
                   {{ type.label }}
                 </option>
               </select>
-              <p class="text-xs text-slate-500 mt-1">{{ getStageTypeDescription(stage.stage_type) }}</p>
             </div>
 
-            <div *ngIf="shouldShowAutoAdvance(stage)">
-              <label class="block text-sm font-medium text-slate-700 mb-1">
-                Auto Advance (days)
+            <div>
+              <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">
+                Auto Candidate Notification
               </label>
-              <input type="number" [(ngModel)]="stage.auto_advance_days" (ngModelChange)="onStageChange()" min="1"
-                max="30" [disabled]="stage?.hide_stage || false"
-                class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+              <select [(ngModel)]="stage.email_template_id" [disabled]="stage?.hide_stage || false"
+                (ngModelChange)="onStageChange()"
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs">
+                <option [value]="undefined">None (Manual)</option>
+                <option *ngFor="let tmpl of emailTemplatesList" [value]="tmpl.id">
+                  {{ tmpl.name }}
+                </option>
+              </select>
             </div>
           </div>
         </div>
 
-        <!-- Configuration -->
-        <div class="space-y-3">
-          <div *ngIf="shouldShowApprovals(stage)" class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1">
+        <!-- Column 2: Governance & Automation Settings -->
+        <div class="lg:col-span-6 space-y-4">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div *ngIf="shouldShowAutoAdvance(stage)">
+              <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">
+                SLA Target / Auto-Advance (Days)
+              </label>
+              <div class="relative">
+                <input type="number" [(ngModel)]="stage.auto_advance_days" (ngModelChange)="onStageChange()" min="1" max="60"
+                  [disabled]="stage?.hide_stage || false"
+                  class="w-full px-3 py-2 pr-10 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs" />
+                <span class="absolute right-3 top-2.5 text-[10px] font-bold text-slate-400">Days</span>
+              </div>
+            </div>
+
+            <div *ngIf="shouldShowApprovals(stage)">
+              <label class="block text-[11px] font-extrabold text-slate-600 uppercase tracking-wider mb-1">
                 Required Approvals
               </label>
-              <input type="number" [(ngModel)]="stage.required_approvals" (ngModelChange)="onStageChange()" min="1"
-                max="10" [disabled]="stage?.hide_stage || false"
-                class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-            </div>
-          </div>
-
-          <!-- Toggles -->
-          <div class="flex flex-wrap gap-4 pt-2">
-            <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" [checked]="stage.is_active" (change)="toggleStageActive(stage)"
+              <input type="number" [(ngModel)]="stage.required_approvals" (ngModelChange)="onStageChange()" min="1" max="10"
                 [disabled]="stage?.hide_stage || false"
-                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-              <span class="text-sm text-slate-700">Active</span>
-            </label>
-
-            <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" [checked]="stage.is_skippable" (change)="toggleStageSkippable(stage)"
-                [disabled]="stage?.hide_stage || false"
-                class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500" />
-              <span class="text-sm text-slate-700">Skippable</span>
-            </label>
-          </div>
-
-          <!-- Stage Type Badge -->
-          <div class="flex items-center gap-2 pt-2">
-            <span class="text-xs font-medium px-2 py-1 rounded-full" [ngClass]="{
-                    'bg-blue-100 text-blue-800': stage.stage_type === 'standard',
-                    'bg-purple-100 text-purple-800': stage.stage_type === 'evaluation',
-                    'bg-amber-100 text-amber-800': stage.stage_type === 'approval',
-                    'bg-green-100 text-green-800': stage.stage_type === 'notification'
-                  }">
-              {{ getStageTypeLabel(stage.stage_type) }}
-            </span>
-            <span *ngIf="!stage.is_active" class="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-800">
-              Inactive
-            </span>
-            <span (click)="deleteStage(i)" *ngIf="stage.hide_stage"
-              class="text-xs font-medium px-2 py-1 rounded-full bg-red-100 text-red-800">
-              Deleted
-            </span>
-          </div>
-
-
-          <!-- Metrics Preview -->
-          <div class="bg-white rounded-lg p-3 border border-slate-200 mt-2" *ngIf="stage.metrics">
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-sm font-medium text-slate-700">Current Metrics</span>
-              <span class="text-xs text-slate-500">{{ stage.metrics.candidate_count }} candidates</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2 text-xs">
-              <div class="text-center">
-                <div class="font-semibold text-green-600">{{ stage.metrics.successful_count || 0 }}</div>
-                <div class="text-slate-500">Success</div>
-              </div>
-              <div class="text-center">
-                <div class="font-semibold text-blue-600">{{ stage.metrics.conversion_rate || 0 }}%</div>
-                <div class="text-slate-500">Conversion</div>
-              </div>
-              <div class="text-center">
-                <div class="font-semibold text-purple-600">{{ stage.metrics.average_completion_time_hours || 0 }}h</div>
-                <div class="text-slate-500">Avg Time</div>
-              </div>
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 shadow-2xs" />
             </div>
           </div>
+
+          <!-- Color Badge Theme & Toggles -->
+          <div class="pt-1 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-extrabold text-slate-600 uppercase tracking-wider">Stage Color Theme</span>
+              <div class="flex items-center gap-1.5">
+                <button *ngFor="let col of availableColors" (click)="stage.badge_color = col.value; onStageChange()"
+                  [disabled]="stage?.hide_stage || false"
+                  type="button"
+                  class="w-5 h-5 rounded-full border transition-all"
+                  [class.ring-2]="stage.badge_color === col.value"
+                  [class.ring-indigo-500]="stage.badge_color === col.value"
+                  [ngClass]="{
+                    'bg-indigo-500 border-indigo-600': col.value === 'indigo',
+                    'bg-emerald-500 border-emerald-600': col.value === 'emerald',
+                    'bg-amber-500 border-amber-600': col.value === 'amber',
+                    'bg-purple-500 border-purple-600': col.value === 'purple',
+                    'bg-rose-500 border-rose-600': col.value === 'rose',
+                    'bg-cyan-500 border-cyan-600': col.value === 'cyan'
+                  }"
+                  [title]="col.label"></button>
+              </div>
+            </div>
+
+            <!-- Toggles & Status Badges -->
+            <div class="flex items-center gap-5 pt-1">
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" [checked]="stage.is_active" (change)="toggleStageActive(stage)"
+                  [disabled]="stage?.hide_stage || false"
+                  class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" />
+                <span class="text-xs font-bold text-slate-700">Active Stage</span>
+              </label>
+
+              <label class="flex items-center space-x-2 cursor-pointer">
+                <input type="checkbox" [checked]="stage.is_skippable" (change)="toggleStageSkippable(stage)"
+                  [disabled]="stage?.hide_stage || false"
+                  class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4" />
+                <span class="text-xs font-bold text-slate-700">Skippable</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Real-time Stage Performance Analytics -->
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 mt-2" *ngIf="stage.metrics">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-2">
+              <span class="flex items-center gap-1.5 text-indigo-600">
+                <i class="fa-solid fa-chart-pie text-[11px]"></i>
+                Stage Conversion Metrics
+              </span>
+              <span class="text-slate-500 font-semibold">{{ stage.metrics.candidate_count || 0 }} total applicants</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center text-xs">
+              <div class="p-2 bg-white rounded-lg border border-slate-200/80">
+                <div class="font-black text-emerald-600">{{ stage.metrics.successful_count || 0 }}</div>
+                <div class="text-[10px] font-semibold text-slate-500">Passed</div>
+              </div>
+              <div class="p-2 bg-white rounded-lg border border-slate-200/80">
+                <div class="font-black text-indigo-600">{{ stage.metrics.conversion_rate || 0 }}%</div>
+                <div class="text-[10px] font-semibold text-slate-500">Conversion</div>
+              </div>
+              <div class="p-2 bg-white rounded-lg border border-slate-200/80">
+                <div class="font-black text-purple-600">{{ stage.metrics.average_completion_time_hours || 0 }}h</div>
+                <div class="text-[10px] font-semibold text-slate-500">Avg Time</div>
+              </div>
+            </div>
+          </div>
+
         </div>
+
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-2">
+      <!-- Right Action Bar: Duplicate & Delete -->
+      <div class="flex lg:flex-col items-center gap-2 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-200 pt-3 lg:pt-0 lg:pl-4 w-full lg:w-auto justify-end">
+        <button (click)="duplicateStage(i)" [disabled]="stage.hide_stage"
+          class="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all shadow-2xs"
+          title="Duplicate stage">
+          <i class="fa-solid fa-copy text-sm"></i>
+        </button>
+
         <button (click)="deleteStage(i)"
-          class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors" title="Delete stage">
-          <i *ngIf="!stage.hide_stage" class="fa-solid fa-trash"></i>
-          <i *ngIf="stage.hide_stage" class="fa-solid fa-plus text-green-500 hover-text-green-50 transition-colors"></i>
+          class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all shadow-2xs"
+          [title]="stage.hide_stage ? 'Restore stage' : 'Delete stage'">
+          <i *ngIf="!stage.hide_stage" class="fa-solid fa-trash text-sm"></i>
+          <i *ngIf="stage.hide_stage" class="fa-solid fa-rotate-left text-sm text-emerald-600"></i>
         </button>
       </div>
+
     </div>
 
-    <div *ngIf="applicationStages.length === 0" class="text-center py-8 text-slate-500">
-      <i class="fa-solid fa-list-check text-3xl mb-3 opacity-50"></i>
-      <p>No application stages defined. Add stages to build your hiring pipeline.</p>
+    <!-- Empty State -->
+    <div *ngIf="applicationStages.length === 0" class="text-center py-12 bg-slate-50/50 rounded-2xl border border-dashed border-slate-300">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3">
+        <i class="fa-solid fa-layer-group text-xl"></i>
+      </div>
+      <h4 class="text-base font-bold text-slate-900">No application stages defined</h4>
+      <p class="text-xs text-slate-500 max-w-md mx-auto mt-1 mb-4">Build your customized hiring process sequence to manage candidate transitions across recruitment stages.</p>
+      <button (click)="initializeDefaultStages()"
+        class="px-4 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-all shadow-sm">
+        Load Enterprise Default Pipeline
+      </button>
     </div>
   </div>
 
-  <!-- Pipeline Summary -->
-  <div class="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200" *ngIf="applicationStages.length > 0">
-    <div class="flex items-center justify-between">
+  <!-- Pipeline Overview Footer Card -->
+  <div class="p-6 bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl shadow-xl" *ngIf="applicationStages.length > 0">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div>
-        <h4 class="font-medium text-slate-900">Pipeline Summary</h4>
-        <p class="text-sm text-slate-600">
-          {{ applicationStages.length }} stages configured •
+        <h4 class="text-sm font-black uppercase tracking-wider text-slate-300">Pipeline Governance Summary</h4>
+        <p class="text-xs text-slate-400 mt-0.5">
+          {{ applicationStages.length }} total stages configured •
           {{ getActiveStagesCount() }} active •
           {{ getSkippableStagesCount() }} skippable
         </p>
       </div>
+
       <div class="text-right">
-        <div class="text-sm font-medium text-slate-900">
-          {{ getTotalEstimatedTime() }} days estimated cycle
+        <div class="text-lg font-black text-indigo-300">
+          {{ getTotalEstimatedTime() }} Days SLA
         </div>
-        <div class="text-xs text-slate-600">Based on auto-advance settings</div>
+        <div class="text-[11px] text-slate-400">Total estimated completion window</div>
       </div>
     </div>
-
-    <!-- Stage Type Breakdown -->
-    <div class="mt-3 flex flex-wrap gap-2">
-      <span *ngFor="let type of stageTypes" class="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-700">
-        {{ getStagesByType(type.value).length }} {{ type.label }}
-      </span>
-    </div>
   </div>
+
 </div>

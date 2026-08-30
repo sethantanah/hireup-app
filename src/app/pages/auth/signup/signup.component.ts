@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import {
   AbstractControl,
@@ -14,7 +13,7 @@ import { AuthService } from '../../../services/auth.service';
 import { ERROR_MESSAGES, LoginData, SIGNIN_ERRORS, UserReq } from '../../../models/users.models';
 import { AlertPopupComponent } from '../../components/alert-popup/alert-popup.component';
 import { AlertService } from '../../../services/alert.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
@@ -28,17 +27,19 @@ export class SignupComponent implements OnInit {
   isSubmitted = false;
   logoPreview: string | null = null;
 
+  userRole: 'recruiter' | 'candidate' = 'candidate';
   alert: any = null;
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
+    private route: ActivatedRoute,
     private authService: AuthService,
     private alertService: AlertService
   ) {
     this.signupForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      acceptTerms: [false],
+      acceptTerms: [false, Validators.requiredTrue],
       password: [
         '',
         [
@@ -47,17 +48,61 @@ export class SignupComponent implements OnInit {
           this.passwordStrengthValidator,
         ],
       ],
-      companyName: ['', Validators.required],
-      fullName: ['', Validators.required],
-      positionInCompany: ['', Validators.required],
+      companyName: [''],
+      fullName: [''],
+      positionInCompany: [''],
       logo: [null],
     });
   }
 
   ngOnInit(): void {
+    this.route.url.subscribe(urlSegments => {
+      const path = urlSegments.map(s => s.path).join('/');
+      if (path.includes('recruiter')) {
+        this.userRole = 'recruiter';
+      } else {
+        this.userRole = 'candidate';
+      }
+      this.updateValidators();
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['role'] === 'recruiter') {
+        this.userRole = 'recruiter';
+      } else if (params['role'] === 'candidate') {
+        this.userRole = 'candidate';
+      }
+      this.updateValidators();
+    });
+
     this.alertService.alert$.subscribe((alert) => {
       this.alert = alert;
     });
+  }
+
+  setRole(role: 'recruiter' | 'candidate'): void {
+    this.userRole = role;
+    this.updateValidators();
+  }
+
+  updateValidators(): void {
+    const compControl = this.signupForm.get('companyName');
+    const nameControl = this.signupForm.get('fullName');
+    const posControl = this.signupForm.get('positionInCompany');
+
+    if (this.userRole === 'candidate') {
+      compControl?.clearValidators();
+      nameControl?.clearValidators();
+      posControl?.clearValidators();
+    } else {
+      compControl?.setValidators([Validators.required]);
+      nameControl?.setValidators([Validators.required]);
+      posControl?.setValidators([Validators.required]);
+    }
+
+    compControl?.updateValueAndValidity();
+    nameControl?.updateValueAndValidity();
+    posControl?.updateValueAndValidity();
   }
 
   passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
@@ -84,7 +129,6 @@ export class SignupComponent implements OnInit {
         logo: file,
       });
 
-      // Preview the logo
       const reader = new FileReader();
       reader.onload = () => {
         this.logoPreview = reader.result as string;
@@ -100,30 +144,22 @@ export class SignupComponent implements OnInit {
       return;
     }
 
-    this.isLoading = true;
-
-    // Create form data for file upload
-    // const formData = new FormData();
-    // formData.append('email', this.signupForm.get('email')?.value);
-    // formData.append('password', this.signupForm.get('password')?.value);
-    // formData.append('company_name', this.signupForm.get('companyName')?.value);
-
-    // if (this.signupForm.get('logo')?.value) {
-    //   formData.append('logo', this.signupForm.get('logo')?.value);
-    // }
-
     if (!this.signupForm.get('acceptTerms')?.value) {
       this.alertService.showDanger('You must accept the terms and conditions.');
-      this.isLoading = false;
       return;
     }
 
+    this.isLoading = true;
+
+    const emailVal = this.signupForm.get('email')?.value;
+    const defaultName = emailVal ? emailVal.split('@')[0] : 'Candidate';
+
     const user_data: UserReq = {
-      email: this.signupForm.get('email')?.value,
+      email: emailVal,
       password: this.signupForm.get('password')?.value,
-      company_name: this.signupForm.get('companyName')?.value,
-      full_name: this.signupForm.get('fullName')?.value,
-      position_in_company: this.signupForm.get('positionInCompany')?.value
+      company_name: this.userRole === 'candidate' ? 'Candidate Account' : (this.signupForm.get('companyName')?.value || 'Candidate'),
+      full_name: this.userRole === 'candidate' ? defaultName : (this.signupForm.get('fullName')?.value || defaultName),
+      position_in_company: this.userRole === 'candidate' ? 'Job Seeker' : (this.signupForm.get('positionInCompany')?.value || 'Recruiter')
     };
 
     this.signup(user_data);
@@ -132,7 +168,7 @@ export class SignupComponent implements OnInit {
   signup(user_data: UserReq): void {
     this.authService.signUp(user_data).subscribe({
       next: (res) => {
-        this.alertService.showSuccess('Sign up successfully!');
+        this.alertService.showSuccess('Account created successfully!');
         const login_data: LoginData = {
           email: user_data.email,
           password: user_data.password,
@@ -152,14 +188,19 @@ export class SignupComponent implements OnInit {
   signin(login_data: LoginData): void {
     this.alertService.showAlert({
       type: 'success',
-      message: 'Loggin in...',
+      message: 'Logging in...',
     });
     this.authService.logIn(login_data).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.access_token);
         localStorage.setItem('USER', JSON.stringify(res.user));
-        this.router.navigate(['/jobposts/' + res.user.id]);
         this.isLoading = false;
+
+        if (this.userRole === 'candidate') {
+          this.router.navigate(['/candidate-portal']);
+        } else {
+          this.router.navigate(['/jobposts/' + res.user.id]);
+        }
       },
       error: (err) => {
         console.error(err);
@@ -173,7 +214,11 @@ export class SignupComponent implements OnInit {
   }
 
   navigateToSignin(): void {
-    this.router.navigate(['/auth/signin']);
+    if (this.userRole === 'candidate') {
+      this.router.navigate(['/auth/candidate/login']);
+    } else {
+      this.router.navigate(['/auth/recruiter/login']);
+    }
   }
 
   onAlertClosed(): void {

@@ -3,16 +3,25 @@ import { JobtestApiService } from '../../../services/jobtest-api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JobTest } from '../../../models/test.model';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-list-test',
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './list-test.component.html',
   styleUrl: './list-test.component.scss',
 })
 export class ListTestComponent {
   jobTests: JobTest[] = [];
   loading: boolean = false;
+  searchQuery: string = '';
+  activeTab: string = 'all';
+
+  showShareModal: boolean = false;
+  selectedShareTest: JobTest | null = null;
+  shareUrl: string = '';
+  copiedToast: boolean = false;
+
   constructor(
     private apiService: JobtestApiService,
     private router: Router,
@@ -22,6 +31,30 @@ export class ListTestComponent {
     if (projectId) {
       this.loadJobTest(projectId);
     }
+  }
+
+  get filteredJobTests(): JobTest[] {
+    if (!this.searchQuery.trim()) {
+      return this.jobTests;
+    }
+    const query = this.searchQuery.toLowerCase().trim();
+    return this.jobTests.filter(test =>
+      test.test_data?.testTitle?.toLowerCase().includes(query) ||
+      test.test_data?.description?.toLowerCase().includes(query)
+    );
+  }
+
+  get totalQuestionsCount(): number {
+    return this.jobTests.reduce((acc, test) => {
+      const fieldCount = test.test_data?.formData?.fields?.length || 0;
+      return acc + fieldCount;
+    }, 0);
+  }
+
+  get averageDuration(): number {
+    if (this.jobTests.length === 0) return 0;
+    const totalDuration = this.jobTests.reduce((acc, test) => acc + (test.test_data?.testDuration || 0), 0);
+    return Math.round(totalDuration / this.jobTests.length);
   }
 
   loadJobTest(project_id: string) {
@@ -38,7 +71,6 @@ export class ListTestComponent {
     });
   }
 
-  // Method to create a new test
   createTest() {
     this.apiService.clearTest();
     const projectId = this.route.snapshot.paramMap.get('jobId');
@@ -48,7 +80,6 @@ export class ListTestComponent {
     window.open(url, '_self');
   }
 
-  // Method to edit a test
   editTest(test: JobTest) {
     const projectId = this.route.snapshot.paramMap.get('jobId');
     const url = this.router.serializeUrl(
@@ -61,53 +92,102 @@ export class ListTestComponent {
     window.open(url, '_self');
   }
 
+  showDeleteModal: boolean = false;
+  testToDelete: JobTest | null = null;
+  isDeleting: boolean = false;
 
+  openDeleteModal(test: JobTest) {
+    this.testToDelete = test;
+    this.showDeleteModal = true;
+  }
 
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.testToDelete = null;
+    this.isDeleting = false;
+  }
 
-  // Method to delete a test
+  confirmDeleteTest() {
+    if (!this.testToDelete) return;
+    this.isDeleting = true;
+    const testId = this.testToDelete.id;
+
+    this.apiService.deleteTest(testId).subscribe({
+      next: () => {
+        this.jobTests = this.jobTests.filter(t => t.id !== testId);
+        this.closeDeleteModal();
+      },
+      error: (error) => {
+        console.error('Error deleting test:', error);
+        this.jobTests = this.jobTests.filter(t => t.id !== testId);
+        this.closeDeleteModal();
+      }
+    });
+  }
+
   deleteTest(test: JobTest) {
-    console.log('Delete Test:', test.id);
-    // Add logic to delete the test
+    this.openDeleteModal(test);
   }
 
-  navigateTo(page: string, id: string) {
-    const route = `/jobposts/${page}/`;
-    const url = this.router.serializeUrl(
-      this.router.createUrlTree([route, id])
-    );
-    window.open(url, '_blank');
-  }
+  backToJobDashboard() {
+    let userId = '';
+    const userData = localStorage.getItem('USER');
+    if (userData) {
+      try {
+        const user = JSON.parse(userData);
+        userId = user.id || user.user_id || user.userId || '';
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
 
-  // Method to share a test
-  shareTest(test: JobTest): void {
-    // Extract the base URL of the current site
-    const baseUrl = window.location.origin;
-
-    // Append "/jhjdhj/" to the base URL
-    const shareUrl = `${baseUrl}/jobposts/tests/take-test/${test.id}/`;
-
-    // Use navigator to open the share popup
-    if (navigator.share) {
-      navigator
-        .share({
-          title: test.test_data.testTitle, // Assuming the test has a title
-          text: `Check out this test: ${test.test_data.testTitle}`, // Customize the text
-          url: shareUrl, // The URL to share
-        })
-        .then(() => {
-          console.log('Test shared successfully');
-        })
-        .catch((error) => {
-          console.error('Error sharing test:', error);
-        });
+    if (userId) {
+      this.router.navigate(['/jobposts', userId]);
     } else {
-      console.error('Share API is not supported in this browser');
+      window.history.back();
     }
   }
 
-  // Method to view submissions for a test
+  openShareModal(test: JobTest): void {
+    this.selectedShareTest = test;
+    const baseUrl = window.location.origin;
+    this.shareUrl = `${baseUrl}/jobposts/tests/take-test/${test.id}/`;
+    this.showShareModal = true;
+    this.copiedToast = false;
+  }
+
+  closeShareModal(): void {
+    this.showShareModal = false;
+    this.selectedShareTest = null;
+  }
+
+  copyShareUrl(): void {
+    navigator.clipboard.writeText(this.shareUrl).then(() => {
+      this.copiedToast = true;
+      setTimeout(() => {
+        this.copiedToast = false;
+      }, 3000);
+    });
+  }
+
+  shareTest(test: JobTest): void {
+    const baseUrl = window.location.origin;
+    const shareUrl = `${baseUrl}/jobposts/tests/take-test/${test.id}/`;
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: test.test_data?.testTitle || 'Candidate Assessment',
+          text: `Please complete the assessment: ${test.test_data?.testTitle}`,
+          url: shareUrl,
+        })
+        .catch((error) => console.error('Error sharing test:', error));
+    } else {
+      this.openShareModal(test);
+    }
+  }
+
   viewSubmissions(test: JobTest) {
-    const projectId = this.route.snapshot.paramMap.get('jobId');
     const url = this.router.serializeUrl(
       this.router.createUrlTree([
         '/jobposts/tests/submissions',

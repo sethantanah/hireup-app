@@ -85,4 +85,8 @@ export class FiltersComponent {
   get hasMoreFilters() {
     return this.filterFields.length > this.initialVisibleCount;
   }
+
+  getActiveFilterCount(): number {
+    return Object.values(this.filters).filter(val => val && val.trim() !== '').length;
+  }
 }

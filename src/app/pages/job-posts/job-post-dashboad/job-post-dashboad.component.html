@@ -1,82 +1,66 @@
-<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-  <div class="text-center">
-    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-    <div class="mt-4 text-lg font-medium text-gray-700">Loading ...</div>
-  </div>
-</div>
-<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-  <div class="text-center">
-    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-    <div class="mt-4 text-lg font-medium text-gray-700">Loading ...</div>
-  </div>
-</div>
+<app-loader *ngIf="loading" [loadingText]="'Loading Job Postings...'"></app-loader>
 
-<div class="min-h-screen bg-gray-50/50 flex flex-col lg:flex-row">
-  <!-- Enhanced Sidebar -->
-  <div [class.hidden]="!sidebarOpen"
-    class="flex flex-col justify-between w-full lg:w-80 bg-gradient-to-b from-white to-gray-50/80 shadow-xl lg:flex fixed lg:relative inset-y-0 left-0 z-40 lg:z-auto border-r border-gray-200/60">
+<div class="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col lg:flex-row font-sans">
+  <!-- Enhanced Modern Sidebar -->
+  <div [ngClass]="sidebarOpen ? 'flex' : 'hidden lg:flex'"
+    class="h-screen w-full lg:w-80 bg-white text-slate-800 flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 shadow-xl lg:shadow-none border-r border-slate-200/80 transition-all duration-300">
     <!-- Sidebar Header -->
-    <div class="p-6 border-b border-gray-200/50 flex items-center justify-between bg-white/80 backdrop-blur-sm">
-      <div class="flex items-center">
-        <button class="lg:hidden mr-3 p-2 rounded-lg text-gray-600 hover:bg-gray-100/80 transition-all duration-200"
+    <div class="p-6 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50 backdrop-blur-md flex-shrink-0">
+      <div class="flex items-center space-x-3">
+        <button class="lg:hidden mr-2 p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-all"
           (click)="toggleSidebar()">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
 
-        <div class="flex items-center space-x-3">
-          <div
-            class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <div>
-            <h2 class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-              Hantors
-            </h2>
-            <p class="text-xs text-gray-500 font-medium">Enterprise ATS</p>
-          </div>
+        <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-indigo-500/20 border border-indigo-400/30">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight">Hantors</h2>
+          <span class="text-[10px] font-semibold text-indigo-700 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">Enterprise ATS</span>
         </div>
       </div>
     </div>
 
-    <!-- Job Listings -->
-    <div class="flex-1 overflow-y-auto p-4 min-h-content">
-      <div class="mb-4">
-        <h3 class="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3 px-2">Job Postings</h3>
+    <!-- Job Listings Sidebar List (Independent Scrolling) -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div class="flex items-center justify-between px-2 pt-2">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Job Postings</h3>
+        <span class="text-xs font-bold px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200/80">{{ jobPostings?.length || 0 }}</span>
       </div>
+
       <ul class="space-y-2">
         <li *ngFor="let job of jobPostings"
-          class="group flex items-center justify-between p-4 hover:bg-white rounded-xl cursor-pointer transition-all duration-200 border border-transparent hover:border-gray-200/60 hover:shadow-sm"
-          [class.bg-white]="selectedJobPost?.id === job.id" [class.shadow-sm]="selectedJobPost?.id === job.id"
-          [class.border-blue-200]="selectedJobPost?.id === job.id" (click)="selectProject(job)">
+          class="group flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all duration-200 border"
+          [ngClass]="selectedJobPost?.id === job.id ? 'bg-gradient-to-r from-indigo-50 to-indigo-100/70 border-indigo-200/80 text-indigo-950 font-bold shadow-xs' : 'bg-slate-50/60 border-slate-200/60 text-slate-700 hover:bg-slate-100 hover:text-slate-900'"
+          (click)="selectProject(job)">
 
           <div class="flex items-center space-x-3 flex-1 min-w-0">
             <div class="flex flex-col items-center">
-              <div class="w-3 h-3 rounded-full" [ngClass]="
-                  job.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
-                "></div>
-              <div class="text-xs text-gray-500 mt-1 font-medium">{{ job.recieved_documents || 0 }}</div>
+              <div class="w-2.5 h-2.5 rounded-full" [ngClass]="job.status === 'active' ? 'bg-emerald-500 shadow-xs' : 'bg-slate-400'"></div>
+              <span class="text-[10px] text-slate-400 mt-1 font-semibold">{{ job.recieved_documents || 0 }}</span>
             </div>
             <div class="min-w-0 flex-1">
-              <span class="text-sm font-semibold text-gray-800 truncate block">{{ job.title }}</span>
-              <span class="text-xs text-gray-500 truncate block">{{ job.department || 'General' }}</span>
+              <span class="text-sm font-semibold truncate block group-hover:text-indigo-600 transition-colors">{{ job.title }}</span>
+              <span class="text-xs text-slate-500 truncate block font-normal">{{ job.department || 'General' }}</span>
             </div>
           </div>
 
-          <div class="hidden group-hover:flex items-center space-x-1">
-            <button class="p-2 hover:bg-blue-50 rounded-lg transition-colors text-blue-600"
-              (click)="openEditPopup(job.title, job.id); $event.stopPropagation()">
+          <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
+            <button class="p-1.5 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors"
+              (click)="openEditPopup(job.title, job.id); $event.stopPropagation()" title="Edit Job">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </button>
-            <button class="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600"
-              (click)="openDeletePopup(job); $event.stopPropagation()">
+            <button class="p-1.5 hover:bg-rose-100 rounded-lg text-rose-600 transition-colors"
+              (click)="openDeletePopup(job); $event.stopPropagation()" title="Delete Job">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -87,165 +71,131 @@
       </ul>
     </div>
 
-    <!-- User Profile -->
-    <div class="p-4 mt-auto border-t border-gray-200/50 bg-white/50" *ngIf="userData">
-      <div class="flex items-center space-x-3">
-        <div class="relative">
-          <ng-container *ngIf="userData.logo_url; else initialsTemplate">
-            <img [src]="userData.logo_url" alt="Profile" class="w-10 h-10 rounded-xl object-cover shadow-sm" />
-          </ng-container>
-          <ng-template #initialsTemplate>
-            <div
-              class="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center shadow-sm">
-              <span class="text-sm font-semibold text-white">{{
-                getInitials(userData.full_name)
-                }}</span>
-            </div>
-          </ng-template>
-          <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white shadow-sm">
+    <!-- User Profile Footer -->
+    <div class="p-4 mt-auto border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3 min-w-0">
+          <div class="relative flex-shrink-0">
+            <ng-container *ngIf="userData.logo_url; else initialsTemplate">
+              <img [src]="userData.logo_url" alt="Profile" class="w-10 h-10 rounded-2xl object-cover border border-slate-200 shadow-xs" />
+            </ng-container>
+            <ng-template #initialsTemplate>
+              <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-xs">
+                <span class="text-xs font-bold text-white">{{ getInitials(userData.full_name) }}</span>
+              </div>
+            </ng-template>
+            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-bold text-slate-900 truncate">{{ userData.full_name }}</p>
+            <p class="text-xs text-slate-500 font-medium truncate">{{ userData.position_in_company }}</p>
           </div>
         </div>
-      <div class="min-w-0 flex-1">
-  <p class="text-sm font-semibold text-gray-800 truncate">
-    {{ userData.full_name }}
-  </p>
-  <p class="text-xs text-gray-500 truncate">
-    {{ userData.position_in_company }}
-  </p>
-</div>
 
-<!-- Logout Button -->
-<button
-  (click)="logOut()"
-  class="ml-4 p-2 rounded-full hover:bg-gray-100 transition"
-  title="Logout"
->
-  <!-- Heroicons outline logout icon -->
-  <svg xmlns="http://www.w3.org/2000/svg"
-       fill="none"
-       viewBox="0 0 24 24"
-       stroke-width="2.5"
-       stroke="currentColor"
-       class="w-5 h-5 text-gray-600 hover:text-red-500 transition">
-    <path stroke-linecap="round" stroke-linejoin="round"
-      d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-  </svg>
-</button>
-
+        <button (click)="logOut()"
+          class="p-2.5 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+          title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg>
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Mobile overlay -->
-  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-30 lg:hidden"
-    (click)="toggleSidebar()"></div>
+  <!-- Mobile Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden" (click)="toggleSidebar()"></div>
 
-  <!-- Main Content -->
-  <div class="flex-1 flex flex-col lg:ml-0 min-w-0">
-    <!-- Enhanced Mobile header -->
-    <div class="lg:hidden p-4 border-b border-gray-200/60 bg-white/80 backdrop-blur-sm flex items-center shadow-sm">
-      <button class="p-2 rounded-lg text-gray-600 hover:bg-gray-100/80 transition-colors" (click)="toggleSidebar()">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-      <div class="ml-3">
-        <h1 class="text-lg font-bold text-gray-800">Hantors</h1>
-        <p class="text-xs text-gray-500">Enterprise ATS</p>
-      </div>
-    </div>
-
-    <!-- Enhanced Header Actions -->
-    <div
-      class="flex flex-col lg:flex-row justify-between items-start lg:items-center p-6 bg-white/80 backdrop-blur-sm border-b border-gray-200/60 shadow-sm">
-      <div class="mb-4 lg:mb-0">
-        <h1 class="text-2xl font-bold text-gray-900" *ngIf="selectedJobPost">
-          {{ selectedJobPost.title }}
-        </h1>
-        <p class="text-gray-600 mt-1" *ngIf="selectedJobPost">
-          Manage applications and hiring pipeline
-        </p>
-        <h1 class="text-2xl font-bold text-gray-400" *ngIf="!selectedJobPost">
-          Select a Job Posting
-        </h1>
+  <!-- Main Content Area (Independent Scrolling) -->
+  <div class="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-slate-50/50">
+    <!-- Enhanced Header Bar -->
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center p-6 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-20 shadow-xs">
+      <div class="flex items-center gap-3 mb-4 lg:mb-0">
+        <button class="p-2.5 rounded-2xl text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200"
+          (click)="toggleSidebar()" title="Toggle Sidebar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight" *ngIf="selectedJobPost">
+            {{ selectedJobPost.title }}
+          </h1>
+          <p class="text-sm font-medium text-slate-500 mt-1" *ngIf="selectedJobPost">
+            Manage job details, application pipelines, and candidates
+          </p>
+          <h1 class="text-2xl font-bold text-slate-400" *ngIf="!selectedJobPost">
+            Select a Job Posting
+          </h1>
+        </div>
       </div>
 
       <div class="flex flex-wrap gap-3">
         <button *ngIf="selectedJobPost" (click)="openSharePopover()"
-          class="px-6 py-3 bg-white border border-gray-300 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all duration-200 flex items-center gap-3 shadow-sm hover:shadow-md">
-          <i class="fas fa-share text-gray-600"></i>
-          Share Job
+          class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 flex items-center gap-2.5 shadow-xs text-sm">
+          <i class="fas fa-share text-slate-500"></i>
+          <span>Share Job</span>
         </button>
 
         <button (click)="openAddPopup()"
-          class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-3 shadow-lg">
-          <i class="fas fa-plus"></i>
-          New Job Posting
+          class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold rounded-2xl transition-all duration-300 flex items-center gap-2.5 shadow-lg shadow-indigo-500/20 text-sm transform hover:-translate-y-0.5 border border-indigo-400/20">
+          <i class="fas fa-plus text-xs"></i>
+          <span>New Job Posting</span>
         </button>
 
-        <button
-          class="p-3 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
-          (click)="refresh()" [class.animate-spin]="isRefreshing">
-          <i class="fas fa-sync-alt text-gray-600"></i>
+        <button class="p-2.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 text-slate-600 transition-all duration-200 shadow-xs"
+          (click)="refresh()" [class.animate-spin]="isRefreshing" title="Refresh Dashboard">
+          <i class="fas fa-sync-alt"></i>
         </button>
       </div>
     </div>
 
-    <!-- Application Stages Navigation -->
-    <div class="bg-white border-b border-gray-200/60 shadow-sm" *ngIf="selectedJobPost">
+    <!-- Application Stages Navigation Bar -->
+    <div class="bg-white/80 backdrop-blur-md border-b border-slate-200/80" *ngIf="selectedJobPost">
       <div class="px-6 py-4">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">Hiring Pipeline</h3>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Hiring Pipeline Stages</span>
         </div>
 
-        <div class="flex space-x-1 overflow-x-auto pb-2">
+        <div class="flex space-x-2 overflow-x-auto pb-2">
           <button *ngFor="let stage of applicationStages" (click)="selectStage(stage)"
-            [class.bg-blue-50]="selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)"
-            [class.border-blue-200]="selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)"
-            [class.text-blue-700]="selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)"
-            class="flex items-center space-x-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200 min-w-max flex-1 lg:flex-none"
+            [ngClass]="(selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)) ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 text-white shadow-md shadow-indigo-500/20' : 'bg-slate-100/70 text-slate-700 hover:bg-slate-200/70'"
+            class="flex items-center space-x-3 px-4 py-2.5 rounded-2xl transition-all duration-200 min-w-max flex-1 lg:flex-none border border-transparent"
             [title]="stage.is_active ? 'Active stage' : 'Inactive stage'">
 
-            <div class="flex items-center space-x-2 flex-1">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold"
-                [class.bg-blue-100]="selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)"
-                [class.bg-gray-100]="selectedStage?.id !== stage.id || (stage.name !== 'Application Overview' && selectedStage !== null)"
-                [class.text-blue-600]="selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)"
-                [class.text-gray-600]="selectedStage?.id !== stage.id || (stage.name !== 'Application Overview' && selectedStage !== null)">
+            <div class="flex items-center space-x-2.5">
+              <div class="w-6 h-6 rounded-xl flex items-center justify-center text-xs font-bold"
+                [ngClass]="(selectedStage?.id === stage.id || (stage.name === 'Application Overview' && selectedStage === null)) ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-600'">
                 {{ stage.order }}
               </div>
               <div class="text-left">
-                <div class="font-medium text-sm">{{ stage.name }}</div>
-                <div class="text-xs text-gray-500">{{ getStageMetrics(stage.id) }} candidates</div>
+                <div class="font-semibold text-sm leading-tight">{{ stage.name }}</div>
+                <div class="text-[11px] opacity-80 font-medium">{{ getStageMetrics(stage.id) }} candidates</div>
               </div>
             </div>
 
-            <div class="flex items-center space-x-1">
-              <div class="w-2 h-2 rounded-full" [class.bg-green-500]="stage.is_active"
-                [class.bg-gray-300]="!stage.is_active"></div>
-            </div>
+            <div class="w-2 h-2 rounded-full" [ngClass]="stage.is_active ? 'bg-emerald-400' : 'bg-slate-300'"></div>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Enhanced Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6" *ngIf="selectedJobPost">
+    <!-- Enhanced Stats Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 p-6" *ngIf="selectedJobPost">
       <!-- Total Applications Card -->
-      <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100">
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 shadow-xs hover:shadow-md border border-slate-200/80 transition-all duration-300 group">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Applications</p>
-            <p class="text-3xl font-bold text-gray-800 mt-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Applications</p>
+            <p class="text-3xl font-black text-slate-900 mt-1">
               {{ selectedJobPost?.received_documents || 0 }}
             </p>
-            <p class="text-xs text-green-600 font-medium mt-1">
-              +12% from last week
+            <p class="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+              <i class="fas fa-arrow-up text-[9px]"></i> Active Submissions
             </p>
           </div>
-          <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center">
-            <svg class="w-7 h-7 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
@@ -254,20 +204,19 @@
       </div>
 
       <!-- Shortlisted Card -->
-      <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100">
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 shadow-xs hover:shadow-md border border-slate-200/80 transition-all duration-300 group">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Shortlisted</p>
-            <p class="text-3xl font-bold text-green-600 mt-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Shortlisted</p>
+            <p class="text-3xl font-black text-emerald-600 mt-1">
               {{ getStageMetrics(this.selectedStage?.id || 'application_overview', "successful_count")}}
             </p>
-            <p class="text-xs text-gray-500 mt-1">
-              {{ getShortlistRate(this.selectedStage?.id || 'application_overview')}}% of total
+            <p class="text-[11px] text-slate-500 font-medium mt-1">
+              {{ getShortlistRate(this.selectedStage?.id || 'application_overview')}}% conversion rate
             </p>
           </div>
-          <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center">
-            <svg class="w-7 h-7 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -275,69 +224,59 @@
         </div>
       </div>
 
-
-
-         <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100">
+      <!-- Unshortlisted Card -->
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 shadow-xs hover:shadow-md border border-slate-200/80 transition-all duration-300 group">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">unshortlisted</p>
-            <p class="text-3xl font-bold text-red-600 mt-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Unshortlisted</p>
+            <p class="text-3xl font-black text-rose-600 mt-1">
               {{ getStageMetrics(this.selectedStage?.id || 'application_overview', "unsuccessful_count")}}
             </p>
-            <p class="text-xs text-gray-500 mt-1">
+            <p class="text-[11px] text-slate-500 font-medium mt-1">
               {{ getUnShortlistRate(this.selectedStage?.id || 'application_overview')}}% of total
             </p>
           </div>
-          <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center">
-          <svg class="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-    d="M6 18L18 6M6 6l12 12" />
-</svg>
-
+          <div class="w-12 h-12 bg-rose-50 rounded-2xl flex items-center justify-center border border-rose-100 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </div>
         </div>
       </div>
 
       <!-- In Current Stage Card -->
       <div (click)="currentStageManagerPage(selectedStage)"
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100">
+        class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 shadow-xs hover:shadow-md border border-slate-200/80 transition-all duration-300 group cursor-pointer">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider truncate max-w-[130px]">
               In {{ selectedStage?.name || 'Current Stage' }}
             </p>
-            <p class="text-3xl font-bold text-purple-600 mt-2">
+            <p class="text-3xl font-black text-violet-600 mt-1">
               {{ getStageMetrics(this.selectedStage?.id || 'application_overview', "total_count")}}
             </p>
-            <p class="text-xs text-gray-500 mt-1">
-              Active candidates
-            </p>
+            <p class="text-[11px] text-violet-600 font-medium mt-1">Active candidates</p>
           </div>
-          <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center">
-            <svg class="w-7 h-7 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          <div class="w-12 h-12 bg-violet-50 rounded-2xl flex items-center justify-center border border-violet-100 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           </div>
         </div>
       </div>
 
       <!-- Emails Sent Card -->
-      <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100">
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 shadow-xs hover:shadow-md border border-slate-200/80 transition-all duration-300 group">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm font-medium text-gray-500 uppercase tracking-wide">Emails Sent</p>
-            <p class="text-3xl font-bold text-orange-600 mt-2">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Emails Sent</p>
+            <p class="text-3xl font-black text-amber-600 mt-1">
               {{ getStageMetrics(this.selectedStage?.id || 'application_overview', "sent_mails_count")}}
             </p>
-            <p class="text-xs text-gray-500 mt-1">
-              Communication rate
-            </p>
+            <p class="text-[11px] text-slate-500 font-medium mt-1">Notification count</p>
           </div>
-          <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center">
-            <svg class="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center border border-amber-100 group-hover:scale-110 transition-transform">
+            <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
@@ -346,82 +285,80 @@
       </div>
     </div>
 
-    <!-- Stage-specific Content -->
+    <!-- Stage-specific Content Grid -->
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 p-6" *ngIf="selectedJobPost && selectedStage">
-      <!-- Stage Metrics -->
+      <!-- Stage Details Left Column -->
       <div class="xl:col-span-2 space-y-6">
-        <!-- Stage Overview -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
+        <!-- Stage Overview Card -->
+        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs border border-slate-200/80">
           <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-900">{{ selectedStage.name }} Overview</h3>
-            <div class="flex items-center space-x-2">
-              <span class="text-sm font-medium px-3 py-1 rounded-full" [class.bg-green-100]="selectedStage.is_active"
-                [class.bg-gray-100]="!selectedStage.is_active" [class.text-green-800]="selectedStage.is_active"
-                [class.text-gray-600]="!selectedStage.is_active">
-                {{ selectedStage.is_active ? 'Active' : 'Inactive' }}
-              </span>
-            </div>
+            <h3 class="text-lg font-bold text-slate-900 tracking-tight">{{ selectedStage.name }} Overview</h3>
+            <span class="text-xs font-bold px-3 py-1 rounded-full border" [class.bg-emerald-50]="selectedStage.is_active"
+              [class.border-emerald-200]="selectedStage.is_active" [class.text-emerald-700]="selectedStage.is_active"
+              [class.bg-slate-100]="!selectedStage.is_active" [class.text-slate-600]="!selectedStage.is_active">
+              {{ selectedStage.is_active ? 'Active Stage' : 'Inactive' }}
+            </span>
           </div>
 
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 bg-gray-50 rounded-xl">
-              <div class="text-2xl font-bold text-gray-900">{{ getStageMetrics(selectedStage.id) }}</div>
-              <div class="text-sm text-gray-600 mt-1">Candidates</div>
+            <div class="text-center p-4 bg-slate-50/80 rounded-2xl border border-slate-100">
+              <div class="text-2xl font-black text-slate-900">{{ getStageMetrics(selectedStage.id) }}</div>
+              <div class="text-xs font-semibold text-slate-500 mt-1">Candidates</div>
             </div>
-            <div class="text-center p-4 bg-blue-50 rounded-xl">
-              <div class="text-2xl font-bold text-blue-600">{{ getStageCompletionRate(selectedStage.id) }}%</div>
-              <div class="text-sm text-blue-600 mt-1">Completion</div>
+            <div class="text-center p-4 bg-indigo-50/80 rounded-2xl border border-indigo-100">
+              <div class="text-2xl font-black text-indigo-600">{{ getStageCompletionRate(selectedStage.id) }}%</div>
+              <div class="text-xs font-semibold text-indigo-600 mt-1">Completion</div>
             </div>
-            <div class="text-center p-4 bg-green-50 rounded-xl">
-              <div class="text-2xl font-bold text-green-600">{{ getStageSuccessRate(selectedStage.id) }}%</div>
-              <div class="text-sm text-green-600 mt-1">Success</div>
+            <div class="text-center p-4 bg-emerald-50/80 rounded-2xl border border-emerald-100">
+              <div class="text-2xl font-black text-emerald-600">{{ getStageSuccessRate(selectedStage.id) }}%</div>
+              <div class="text-xs font-semibold text-emerald-600 mt-1">Success Rate</div>
             </div>
-            <div class="text-center p-4 bg-purple-50 rounded-xl">
-              <div class="text-2xl font-bold text-purple-600">{{ getAverageTimeInStage(selectedStage.id) }}</div>
-              <div class="text-sm text-purple-600 mt-1">Avg. Time</div>
+            <div class="text-center p-4 bg-violet-50/80 rounded-2xl border border-violet-100">
+              <div class="text-2xl font-black text-violet-600">{{ getAverageTimeInStage(selectedStage.id) }}</div>
+              <div class="text-xs font-semibold text-violet-600 mt-1">Avg Time</div>
             </div>
           </div>
         </div>
 
         <!-- Stage Actions -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Stage Actions</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs border border-slate-200/80">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 tracking-tight">Stage Actions</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button (click)="navigateTo('/applicants/', selectedJobPost.id)"
-              class="p-4 text-left border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+              class="p-4 text-left border border-slate-200/80 rounded-2xl hover:border-indigo-300 hover:bg-indigo-50/50 transition-all duration-200 group">
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <i class="fas fa-users text-blue-600"></i>
+                <div class="w-10 h-10 bg-indigo-100/80 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i class="fas fa-users text-indigo-600"></i>
                 </div>
                 <div>
-                  <div class="font-semibold text-gray-900">Manage Applicants</div>
-                  <div class="text-sm text-gray-600 mt-1">Manage Applicant Shortlisting</div>
+                  <div class="font-bold text-slate-900 text-sm">Manage Applicants</div>
+                  <div class="text-xs text-slate-500 mt-0.5">Shortlist & evaluate</div>
                 </div>
               </div>
             </button>
 
             <button (click)="sendStageEmails()"
-              class="p-4 text-left border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all duration-200">
+              class="p-4 text-left border border-slate-200/80 rounded-2xl hover:border-emerald-300 hover:bg-emerald-50/50 transition-all duration-200 group">
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <i class="fas fa-envelope text-blue-600"></i>
+                <div class="w-10 h-10 bg-emerald-100/80 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i class="fas fa-envelope text-emerald-600"></i>
                 </div>
                 <div>
-                  <div class="font-semibold text-gray-900">Send Stage Emails</div>
-                  <div class="text-sm text-gray-600 mt-1">Notify candidates in this stage</div>
+                  <div class="font-bold text-slate-900 text-sm">Send Stage Emails</div>
+                  <div class="text-xs text-slate-500 mt-0.5">Notify candidates</div>
                 </div>
               </div>
             </button>
 
             <button (click)="manageStageTemplates()"
-              class="p-4 text-left border border-gray-200 rounded-xl hover:border-purple-300 hover:bg-purple-50 transition-all duration-200">
+              class="p-4 text-left border border-slate-200/80 rounded-2xl hover:border-violet-300 hover:bg-violet-50/50 transition-all duration-200 group">
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <i class="fas fa-file-alt text-purple-600"></i>
+                <div class="w-10 h-10 bg-violet-100/80 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i class="fas fa-file-alt text-violet-600"></i>
                 </div>
                 <div>
-                  <div class="font-semibold text-gray-900">Email Templates</div>
-                  <div class="text-sm text-gray-600 mt-1">Manage stage-specific templates</div>
+                  <div class="font-bold text-slate-900 text-sm">Email Templates</div>
+                  <div class="text-xs text-slate-500 mt-0.5">Customize stage emails</div>
                 </div>
               </div>
             </button>
@@ -429,184 +366,162 @@
         </div>
       </div>
 
-      <!-- Stage Timeline -->
+      <!-- Stage Timeline Right Column -->
       <div class="space-y-6">
-        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Pipeline Progress</h3>
-          <div class="space-y-4">
+        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs border border-slate-200/80">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 tracking-tight">Pipeline Progress</h3>
+          <div class="space-y-3">
             <div *ngFor="let stage of applicationStages"
-              class="flex items-center space-x-3 p-3 rounded-lg border transition-all duration-200"
-              [class.border-blue-200]="selectedStage?.id === stage.id"
-              [class.bg-blue-50]="selectedStage?.id === stage.id"
-              [class.border-gray-200]="selectedStage?.id !== stage.id">
-              <div class="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold"
-                [class.bg-blue-100]="selectedStage?.id === stage.id"
-                [class.bg-gray-100]="selectedStage?.id !== stage.id"
-                [class.text-blue-600]="selectedStage?.id === stage.id"
-                [class.text-gray-600]="selectedStage?.id !== stage.id">
+              class="flex items-center space-x-3 p-3 rounded-2xl border transition-all duration-200"
+              [ngClass]="selectedStage?.id === stage.id ? 'border-indigo-300 bg-indigo-50/60' : 'border-slate-200/70'">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold"
+                [ngClass]="selectedStage?.id === stage.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-600'">
                 {{ stage.order }}
               </div>
-              <div class="flex-1">
-                <div class="font-medium text-sm text-gray-900">{{ stage.name }}</div>
-                <div class="text-xs text-gray-500">{{ getStageMetrics(stage.id) }} candidates</div>
+              <div class="flex-1 min-w-0">
+                <div class="font-semibold text-sm text-slate-900 truncate">{{ stage.name }}</div>
+                <div class="text-xs text-slate-500 font-medium">{{ getStageMetrics(stage.id) }} candidates</div>
               </div>
-              <div class="w-2 h-2 rounded-full" [class.bg-green-500]="stage.is_active"
-                [class.bg-gray-300]="!stage.is_active"></div>
+              <div class="w-2.5 h-2.5 rounded-full" [ngClass]="stage.is_active ? 'bg-emerald-400' : 'bg-slate-300'"></div>
             </div>
           </div>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <!-- Quick Actions Card -->
+        <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs border border-slate-200/80">
+          <h3 class="text-lg font-bold text-slate-900 mb-4 tracking-tight">Quick Actions</h3>
           <div class="space-y-3">
             <button (click)="navigateTo('manager', selectedJobPost.id)"
-              class="w-full px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2">
+              class="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold rounded-2xl hover:from-indigo-500 hover:to-indigo-600 transition-all duration-200 flex items-center justify-center space-x-2 shadow-md shadow-indigo-500/20 text-sm">
               <i class="fas fa-edit"></i>
-              <span>Edit Job Post</span>
+              <span>Edit Job Post & Form</span>
             </button>
             <button (click)="navigateTo('/applicants/', selectedJobPost.id)"
-              class="w-full px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2">
+              class="w-full px-4 py-3 bg-slate-900 text-white font-semibold rounded-2xl hover:bg-slate-800 transition-all duration-200 flex items-center justify-center space-x-2 shadow-md text-sm">
               <i class="fas fa-users"></i>
-              <span>View Applicants</span>
+              <span>View All Applicants</span>
+            </button>
+            <button (click)="navigateTo('tests', selectedJobPost.id)"
+              class="w-full px-4 py-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white font-semibold rounded-2xl hover:from-emerald-500 hover:to-teal-600 transition-all duration-200 flex items-center justify-center space-x-2 shadow-md shadow-emerald-500/20 text-sm">
+              <i class="fas fa-tasks"></i>
+              <span>Assessment Center</span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Default Content when no stage selected -->
+    <!-- Overview Cards when no specific stage tab selected -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 p-6" *ngIf="selectedJobPost && !selectedStage">
       <!-- Manage Job Postings Card -->
-      <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-        <div class="flex flex-col h-full">
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-300 border border-slate-200/80 flex flex-col justify-between group">
+        <div>
           <div class="flex items-center mb-4">
-            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mr-4">
-              <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100 group-hover:scale-105 transition-transform mr-4">
+              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-800">
-              Job Post Management
-            </h3>
+            <h3 class="text-lg font-bold text-slate-900">Job Post Editor</h3>
           </div>
-          <p class="text-gray-600 mb-6 flex-1">
-            Create, edit, and manage job post details. Customize application forms, templates, and hiring workflow
-            stages.
+          <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            Configure application forms, company details, job description, color schemes, and customized templates.
           </p>
-          <div class="mt-auto">
-            <button (click)="navigateTo('manager', selectedJobPost.id)"
-              class="w-full px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center space-x-2 font-semibold">
-              <span>Manage Posting</span>
-              <i class="fas fa-arrow-right"></i>
-            </button>
-          </div>
         </div>
+        <button (click)="navigateTo('manager', selectedJobPost.id)"
+          class="w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-2xl hover:from-indigo-500 hover:to-indigo-600 transition-all font-semibold flex items-center justify-center space-x-2 text-sm shadow-md shadow-indigo-500/20">
+          <span>Manage Posting</span>
+          <i class="fas fa-arrow-right text-xs"></i>
+        </button>
       </div>
 
       <!-- Manage Applicants Card -->
-      <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-        <div class="flex flex-col h-full">
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-300 border border-slate-200/80 flex flex-col justify-between group">
+        <div>
           <div class="flex items-center mb-4">
-            <div class="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center mr-4">
-              <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-violet-50 rounded-2xl flex items-center justify-center border border-violet-100 group-hover:scale-105 transition-transform mr-4">
+              <svg class="w-6 h-6 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-800">
-              Applicant Management
-            </h3>
+            <h3 class="text-lg font-bold text-slate-900">Applicant Pipeline</h3>
           </div>
-          <p class="text-gray-600 mb-6 flex-1">
-            Review applicant profiles, track progress through hiring stages, and manage your complete hiring pipeline
-            with advanced filtering.
+          <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            Evaluate applicant profiles, process candidates through hiring stages, and review AI shortlisting rankings.
           </p>
-          <div class="mt-auto">
-            <button (click)="navigateTo('/applicants/', selectedJobPost.id)"
-              class="w-full px-4 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors flex items-center justify-center space-x-2 font-semibold">
-              <span>View Applicants</span>
-              <i class="fas fa-arrow-right"></i>
-            </button>
-          </div>
         </div>
+        <button (click)="navigateTo('/applicants/', selectedJobPost.id)"
+          class="w-full px-4 py-3 bg-violet-600 text-white rounded-2xl hover:bg-violet-700 transition-all font-semibold flex items-center justify-center space-x-2 text-sm shadow-md shadow-violet-500/20">
+          <span>View Applicants</span>
+          <i class="fas fa-arrow-right text-xs"></i>
+        </button>
       </div>
 
-      <!-- Manage Tests Card -->
-      <div
-        class="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-        <div class="flex flex-col h-full">
+      <!-- Assessment Center Card -->
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs hover:shadow-md transition-all duration-300 border border-slate-200/80 flex flex-col justify-between group">
+        <div>
           <div class="flex items-center mb-4">
-            <div class="w-12 h-12 bg-green-100 rounded-2xl flex items-center justify-center mr-4">
-              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center border border-emerald-100 group-hover:scale-105 transition-transform mr-4">
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-800">Assessment Center</h3>
+            <h3 class="text-lg font-bold text-slate-900">Assessment Center</h3>
           </div>
-          <p class="text-gray-600 mb-6 flex-1">
-            Create and manage assessment tests, review candidate results, and analyze performance metrics with detailed
-            analytics.
+          <p class="text-slate-600 text-sm leading-relaxed mb-6">
+            Create assessment tests, send quizzes, review candidates' submission scores, and track evaluation analytics.
           </p>
-          <div class="mt-auto">
-            <button (click)="navigateTo('tests', selectedJobPost.id)"
-              class="w-full px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors flex items-center justify-center space-x-2 font-semibold">
-              <span>Manage Tests</span>
-              <i class="fas fa-arrow-right"></i>
-            </button>
-          </div>
         </div>
+        <button (click)="navigateTo('tests', selectedJobPost.id)"
+          class="w-full px-4 py-3 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 transition-all font-semibold flex items-center justify-center space-x-2 text-sm shadow-md shadow-emerald-500/20">
+          <span>Manage Tests</span>
+          <i class="fas fa-arrow-right text-xs"></i>
+        </button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Enhanced Modal Designs -->
+<!-- Modern Add / Edit Job Modal -->
 <div *ngIf="showAddPopup || showEditPopup"
-  class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm overflow-y-auto h-full w-full flex items-center justify-center z-50">
-  <div
-    class="relative bg-white rounded-2xl shadow-2xl mx-4 max-w-md w-full p-6 animate-modal-appear border border-gray-200">
+  class="fixed inset-0 bg-slate-950/70 backdrop-blur-md overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+  <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-7 border border-white/20 animate-modal-appear">
     <div class="flex flex-col space-y-6">
-      <!-- Header -->
-      <div class="flex justify-between items-center">
-        <p class="text-xl font-bold text-gray-900">{{ showEditPopup ? 'Edit Job Posting' : 'New Job Posting' }}</p>
+      <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+        <div>
+          <h3 class="text-xl font-bold text-slate-900 tracking-tight">{{ showEditPopup ? 'Edit Job Posting' : 'Create New Job Posting' }}</h3>
+          <p class="text-xs font-medium text-slate-500 mt-0.5">Enter the title for your job position</p>
+        </div>
         <button (click)="closeAddPopup(); closeEditPopup()"
-          class="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          class="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-xl transition-colors">
           <i class="fas fa-times text-lg"></i>
         </button>
       </div>
 
-      <!-- Input Field -->
-      <div class="space-y-3">
-        <label for="jobTitle" class="block text-sm font-semibold text-gray-700">Job Title</label>
+      <div class="space-y-2">
+        <label for="jobTitle" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Job Title</label>
         <input type="text" id="jobTitle" [(ngModel)]="newJobTitle"
-          class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-          placeholder="Enter job title" />
+          class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-indigo-500 transition-all text-sm font-medium"
+          placeholder="e.g. Senior Frontend Engineer" />
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex gap-3 justify-end pt-4">
+      <div class="flex gap-3 justify-end pt-2">
         <button (click)="closeAddPopup(); closeEditPopup()"
-          class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors font-medium">
+          class="px-5 py-2.5 border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-colors text-sm font-semibold">
           Cancel
         </button>
         <button (click)="showEditPopup ? editJobPosting() : addJobPosting()" [disabled]="isCreatingJobpost"
-          class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 font-medium">
-          <span *ngIf="!isCreatingJobpost">
-            {{ showEditPopup ? "Update" : "Create" }}</span>
+          class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 text-white rounded-2xl hover:from-indigo-500 hover:to-indigo-600 transition-all text-sm font-semibold shadow-md shadow-indigo-500/25 disabled:opacity-50 flex items-center gap-2">
+          <span *ngIf="!isCreatingJobpost">{{ showEditPopup ? "Update Posting" : "Create Posting" }}</span>
           <div *ngIf="isCreatingJobpost" class="flex items-center gap-2">
-            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-              viewBox="0 0 24 24">
+            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-              </path>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ showEditPopup ? "Updating ..." : " Creating..." }}
+            <span>Saving...</span>
           </div>
         </button>
       </div>
@@ -614,178 +529,352 @@
   </div>
 </div>
 
-
-
-<!-- Enhanced Modal Designs -->
-
+<!-- Modern Delete Modal -->
 <div *ngIf="showDeletePopup"
-  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-  <div class="relative bg-white rounded-xl shadow-xl mx-4 max-w-md w-full p-6 animate-modal-appear">
-    <!-- Warning Icon -->
-    <div class="flex justify-center mb-6">
-      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-        <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
-      </div>
+  class="fixed inset-0 bg-slate-950/70 backdrop-blur-md overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+  <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-7 border border-white/20 animate-modal-appear text-center">
+    <div class="w-16 h-16 bg-rose-100 rounded-3xl flex items-center justify-center mx-auto mb-5 border border-rose-200">
+      <i class="fas fa-trash-alt text-2xl text-rose-600"></i>
     </div>
 
-    <!-- Content -->
-    <div class="text-center mb-8">
-      <p class="text-lg font-bold text-gray-800 mb-2">Delete Job Posting</p>
-      <p class="text-gray-600">
-        Are you sure you want to delete this job posting? This action cannot be
-        undone.
-      </p>
-    </div>
+    <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Delete Job Posting</h3>
+    <p class="text-slate-600 text-sm leading-relaxed mb-6">
+      Are you sure you want to delete <strong class="text-slate-900">{{ selectedJobPost?.title }}</strong>? All candidate applications and associated data will be removed.
+    </p>
 
-    <!-- Action Buttons -->
-    <div class="flex gap-4 justify-center">
+    <div class="flex gap-3 justify-center">
       <button (click)="closeDeletePopup()"
-        class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors min-w-[120px]">
+        class="px-6 py-2.5 border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-colors text-sm font-semibold min-w-[120px]">
         Cancel
       </button>
       <button (click)="deleteJobPosting()" [disabled]="isDeleting"
-        class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[120px]">
+        class="px-6 py-2.5 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-colors text-sm font-semibold shadow-md shadow-rose-500/25 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[120px]">
         <span *ngIf="!isDeleting">Delete</span>
         <div *ngIf="isDeleting" class="flex items-center gap-2">
-          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
-            viewBox="0 0 24 24">
+          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
-            </path>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          Deleting...
+          <span>Deleting...</span>
         </div>
       </button>
     </div>
   </div>
 </div>
 
-<!-- Popover panel -->
+<!-- Modern Share Popover Panel -->
 <div *ngIf="sharePopover"
-  class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
-  <div class="p-4 space-y-3 bg-white rounded-xl shadow-xl max-w-sm w-full animate-modal-appear">
-    <!-- Header -->
-    <div class="flex justify-end items-end">
-      <button (click)="closeSharePopover()" class="text-gray-500 hover:text-gray-700">
-        <i class="fas fa-times text-md"></i>
+  class="fixed inset-0 bg-slate-950/70 backdrop-blur-md overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
+  <div class="p-6 space-y-4 bg-white rounded-3xl shadow-2xl max-w-sm w-full animate-modal-appear border border-white/20">
+    <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+      <h3 class="text-lg font-bold text-slate-900">Share Job Posting</h3>
+      <button (click)="closeSharePopover()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+        <i class="fas fa-times text-base"></i>
       </button>
     </div>
 
-    <!-- Share Option -->
-    <button (click)="shareJob(selectedJobPost)"
-      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center group transition-colors">
-      <svg class="h-5 w-5 mr-3 text-gray-400 group-hover:text-green-500" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-      </svg>
-      <div>
-        <div class="font-medium">Share Job Post</div>
-        <div class="text-xs text-gray-500">
-          Share across social media platforms
+    <div class="space-y-2">
+      <button (click)="shareJob(selectedJobPost)"
+        class="w-full p-3 text-left bg-slate-50 hover:bg-indigo-50\/70 border border-slate-200/80 hover:border-indigo-200 rounded-2xl flex items-center group transition-all">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center mr-3 flex-shrink-0">
+          <i class="fas fa-share-nodes text-emerald-600 text-sm"></i>
         </div>
+        <div>
+          <div class="font-bold text-sm text-slate-900">Share Job Post</div>
+          <div class="text-xs text-slate-500">Social media platforms</div>
+        </div>
+      </button>
+
+      <button (click)="copyUrl()"
+        class="w-full p-3 text-left bg-slate-50 hover:bg-indigo-50\/70 border border-slate-200/80 hover:border-indigo-200 rounded-2xl flex items-center group transition-all">
+        <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center mr-3 flex-shrink-0">
+          <i class="fas fa-link text-amber-600 text-sm"></i>
+        </div>
+        <div>
+          <div class="font-bold text-sm text-slate-900">Copy Link</div>
+          <div class="text-xs text-slate-500">Copy URL to clipboard</div>
+        </div>
+      </button>
+
+      <button (click)="embedJobForm(selectedJobPost.id)"
+        class="w-full p-3 text-left bg-slate-50 hover:bg-indigo-50\/70 border border-slate-200/80 hover:border-indigo-200 rounded-2xl flex items-center group transition-all">
+        <div class="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center mr-3 flex-shrink-0">
+          <i class="fas fa-code text-violet-600 text-sm"></i>
+        </div>
+        <div>
+          <div class="font-bold text-sm text-slate-900">Embed Job Form</div>
+          <div class="text-xs text-slate-500">Get iframe embed snippet</div>
+        </div>
+      </button>
+
+      <div class="pt-2 border-t border-slate-100">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Request Data Form</p>
+        <button (click)="copyReqFormUrl()"
+          class="w-full p-3 text-left bg-slate-50 hover:bg-indigo-50\/70 border border-slate-200/80 hover:border-indigo-200 rounded-2xl flex items-center group transition-all">
+          <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center mr-3 flex-shrink-0">
+            <i class="fas fa-file-signature text-indigo-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="font-bold text-sm text-slate-900">Copy Form Link</div>
+            <div class="text-xs text-slate-500">Additional data collection URL</div>
+          </div>
+        </button>
       </div>
-    </button>
 
-    <!-- Copy Link Option -->
-    <button (click)="copyUrl()"
-      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center group transition-colors">
-      <svg class="h-5 w-5 mr-3 text-gray-400 group-hover:text-yellow-500" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-      <div>
-        <div class="font-medium">Copy Link</div>
-        <div class="text-xs text-gray-500">Copy job post URL to clipboard</div>
+      <div class="pt-2 border-t border-slate-100">
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Application Tracking</p>
+        <button (click)="copyApplicantionTrackingUrl()"
+          class="w-full p-3 text-left bg-slate-50 hover:bg-indigo-50\/70 border border-slate-200/80 hover:border-indigo-200 rounded-2xl flex items-center group transition-all">
+          <div class="w-9 h-9 rounded-xl bg-sky-100 flex items-center justify-center mr-3 flex-shrink-0">
+            <i class="fas fa-location-crosshairs text-sky-600 text-sm"></i>
+          </div>
+          <div>
+            <div class="font-bold text-sm text-slate-900">Tracking Portal URL</div>
+            <div class="text-xs text-slate-500">Allow candidates to check status</div>
+          </div>
+        </button>
       </div>
-    </button>
-
-    <!-- Embed Option -->
-    <button (click)="embedJobForm(selectedJobPost.id)"
-      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center group transition-colors">
-      <svg class="h-5 w-5 mr-3 text-gray-400 group-hover:text-purple-500" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-      </svg>
-      <div>
-        <div class="font-medium">Embed Job Form</div>
-        <div class="text-xs text-gray-500">Get embed code for your website</div>
-      </div>
-    </button>
-
-
-    <p class="w-full px-4 py-1 text-left text-sm font-bold text-gray-700 ">Request For More Data Form</p>
-
-        <!-- Copy Link Option -->
-    <button (click)="copyReqFormUrl()"
-      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center group transition-colors">
-      <svg class="h-5 w-5 mr-3 text-gray-400 group-hover:text-yellow-500" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-      <div>
-        <div class="font-medium">Copy Form Link</div>
-        <div class="text-xs text-gray-500">Copy Form URL to clipboard</div>
-      </div>
-    </button>
-
-
-
-     <p class="w-full px-4 py-1 text-left text-sm font-bold text-gray-700 ">Application Tracking</p>
-
-        <!-- Copy Link Option -->
-    <button (click)="copyApplicantionTrackingUrl()"
-      class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded-md flex items-center group transition-colors">
-      <svg class="h-5 w-5 mr-3 text-gray-400 group-hover:text-yellow-500" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-      <div>
-        <div class="font-medium">Copy Application Tracking URL</div>
-        <div class="text-xs text-gray-500">Let applicants track their application and status</div>
-      </div>
-    </button>
+    </div>
   </div>
 </div>
 
-<div *ngIf="showAlertPopup" class="fixed top-4 right-4 z-50 animate-slide-in" [ngClass]="{
-    'animate-shake': alertPopupType === 'error'
-  }">
-  <div class="rounded-lg shadow-lg p-4 min-w-[320px]" [ngClass]="{
-      'bg-red-50 border-l-4 border-red-500': alertPopupType === 'error',
-      'bg-green-50 border-l-4 border-green-500': alertPopupType === 'success',
-      'bg-blue-50 border-l-4 border-blue-500': alertPopupType === 'info',
-      'bg-yellow-50 border-l-4 border-yellow-500': alertPopupType === 'warning'
-    }">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <span class="flex-shrink-0" [ngClass]="{
-            'text-red-500': alertPopupType === 'error',
-            'text-green-500': alertPopupType === 'success',
-            'text-blue-500': alertPopupType === 'info',
-            'text-yellow-500': alertPopupType === 'warning'
-          }">
-          <i class="fas" [ngClass]="{
-              'fa-exclamation-circle': alertPopupType === 'error',
-              'fa-check-circle': alertPopupType === 'success',
-              'fa-info-circle': alertPopupType === 'info',
-              'fa-exclamation-triangle': alertPopupType === 'warning'
-            }"></i>
-        </span>
-        <p class="ml-3 text-sm font-medium" [ngClass]="{
-            'text-red-800': alertPopupType === 'error',
-            'text-green-800': alertPopupType === 'success',
-            'text-blue-800': alertPopupType === 'info',
-            'text-yellow-800': alertPopupType === 'warning'
-          }">
-          {{ popupAlertMessage }}
-        </p>
+<!-- Send Stage Email Modal -->
+<div *ngIf="showSendEmailModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+    <!-- Header -->
+    <div class="px-6 py-5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+          <i class="fas fa-paper-plane text-white text-lg"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base">Send Stage Email Notification</h3>
+          <p class="text-xs text-indigo-100 font-medium">Stage: <span class="font-bold underline">{{ selectedStage?.name }}</span></p>
+        </div>
       </div>
+      <button (click)="closeSendEmailModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Body Content -->
+    <div class="p-6 overflow-y-auto space-y-5 flex-1">
+      <!-- Target Candidates Group -->
+      <div>
+        <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Target Candidate Audience</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button (click)="emailAudience = 'shortlisted'" type="button"
+                  [class]="emailAudience === 'shortlisted' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
+                  class="p-2.5 rounded-xl border text-xs font-bold text-center transition-all flex items-center justify-center gap-2">
+            <i class="fas fa-star text-amber-300"></i> Shortlisted Candidates
+          </button>
+          <button (click)="emailAudience = 'all'" type="button"
+                  [class]="emailAudience === 'all' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
+                  class="p-2.5 rounded-xl border text-xs font-bold text-center transition-all flex items-center justify-center gap-2">
+            <i class="fas fa-users"></i> All Stage Applicants
+          </button>
+          <button (click)="emailAudience = 'pending'" type="button"
+                  [class]="emailAudience === 'pending' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'"
+                  class="p-2.5 rounded-xl border text-xs font-bold text-center transition-all flex items-center justify-center gap-2">
+            <i class="fas fa-clock"></i> Under Review Only
+          </button>
+        </div>
+      </div>
+
+      <!-- Template Selector -->
+      <div>
+        <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Select Email Template</label>
+        <select (change)="selectSendingTemplate(availableEmailTemplates[$any($event.target).value])"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500">
+          <option *ngFor="let tmpl of availableEmailTemplates; let i = index" [value]="i">
+            {{ tmpl.name }} ({{ tmpl.type || 'Manual' }})
+          </option>
+        </select>
+      </div>
+
+      <!-- Variables Toolbar -->
+      <div>
+        <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Quick Insert Variables</label>
+        <div class="flex flex-wrap gap-1.5">
+          <button *ngFor="let p of availablePlaceholders" (click)="insertPlaceholderToBody(p)" type="button"
+                  class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 rounded-lg text-[11px] font-mono font-bold transition-all">
+            + {{ p }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Subject & Body Editor -->
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Subject Line</label>
+          <input type="text" [(ngModel)]="emailSubjectText"
+                 class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Email Body Content</label>
+          <textarea [(ngModel)]="emailBodyText" rows="6"
+                    class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-sans text-slate-900 leading-relaxed focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+      </div>
+
+      <!-- Live Sample Preview Card -->
+      <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1.5">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">Live Sample Candidate Preview</span>
+        <p class="text-xs font-bold text-slate-900">Subject: {{ replacePlaceholders(emailSubjectText, 'Alex Taylor', selectedJobPost?.job_title || 'Position', selectedJobPost?.company_name || 'Company', selectedStage?.name || 'Stage') }}</p>
+        <div class="text-xs text-slate-600 whitespace-pre-line font-medium leading-relaxed pt-1 border-t border-slate-200/60">
+          {{ replacePlaceholders(emailBodyText, 'Alex Taylor', selectedJobPost?.job_title || 'Position', selectedJobPost?.company_name || 'Company', selectedStage?.name || 'Stage') }}
+        </div>
+      </div>
+
+      <!-- Dispatch Progress Bar -->
+      <div *ngIf="isDispatchingEmails" class="p-4 bg-indigo-50 rounded-2xl border border-indigo-200 space-y-2">
+        <div class="flex justify-between text-xs font-bold text-indigo-900">
+          <span>Dispatching candidate notifications...</span>
+          <span>{{ dispatchProgress }} / {{ dispatchTotal }} Sent</span>
+        </div>
+        <div class="w-full h-2 bg-indigo-200 rounded-full overflow-hidden">
+          <div class="h-full bg-indigo-600 transition-all duration-300" [style.width.%]="dispatchTotal > 0 ? (dispatchProgress / dispatchTotal * 100) : 50"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between flex-shrink-0">
+      <button (click)="closeSendEmailModal()" [disabled]="isDispatchingEmails" type="button"
+              class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition-all disabled:opacity-50">
+        Cancel
+      </button>
+      <button (click)="dispatchStageEmails()" [disabled]="isDispatchingEmails" type="button"
+              class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-indigo-600/20 flex items-center gap-2 transition-all disabled:opacity-50">
+        <i class="fas fa-paper-plane" [class.fa-spin]="isDispatchingEmails"></i>
+        <span>{{ isDispatchingEmails ? 'Dispatching Notifications...' : 'Send Stage Emails Now' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Email Templates Manager / Customize Stage Emails Modal -->
+<div *ngIf="showEmailTemplatesModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full max-w-4xl overflow-hidden flex flex-col h-[85vh]">
+    <!-- Header -->
+    <div class="px-6 py-5 bg-gradient-to-r from-slate-900 to-indigo-950 text-white flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md">
+          <i class="fas fa-envelope-open-text text-amber-400 text-lg"></i>
+        </div>
+        <div>
+          <h3 class="font-bold text-base">Stage Email Templates & Backend Triggers</h3>
+          <p class="text-xs text-slate-300 font-medium">Configure customized stage emails for {{ selectedJobPost?.job_title || 'Job Post' }}</p>
+        </div>
+      </div>
+      <button (click)="closeEmailTemplatesModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Body Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-12 flex-1 overflow-hidden">
+      <!-- Templates List Sidebar -->
+      <div class="md:col-span-4 p-4 bg-slate-50 border-r border-slate-200 overflow-y-auto space-y-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Templates List</span>
+          <button (click)="createNewStageTemplate()" type="button" class="text-xs font-bold text-indigo-600 hover:text-indigo-700">
+            + Add Template
+          </button>
+        </div>
+
+        <div *ngFor="let tmpl of emailTemplatesList" (click)="selectTemplateForEdit(tmpl)"
+             [class.border-indigo-600]="selectedTemplateForEdit?.id === tmpl.id"
+             [class.bg-indigo-50]="selectedTemplateForEdit?.id === tmpl.id"
+             class="p-3 bg-white border border-slate-200 hover:border-indigo-300 rounded-2xl cursor-pointer transition-all space-y-1">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-900 truncate">{{ tmpl.name }}</span>
+            <span [class]="tmpl.type === 'auto' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'"
+                  class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full">
+              {{ tmpl.type || 'Manual' }}
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 truncate">{{ tmpl.subject }}</p>
+        </div>
+      </div>
+
+      <!-- Template Editor Main Panel -->
+      <div class="md:col-span-8 p-6 overflow-y-auto space-y-5" *ngIf="selectedTemplateForEdit">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h4 class="text-sm font-bold text-slate-900">Editing Template: {{ selectedTemplateForEdit.name }}</h4>
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-bold text-slate-600">Auto-send on Stage Move:</label>
+            <input type="checkbox" [(ngModel)]="selectedTemplateForEdit.type"
+                   [ngModelOptions]="{standalone: true}"
+                   (change)="selectedTemplateForEdit.type = $any($event.target).checked ? 'auto' : 'manual'"
+                   [checked]="selectedTemplateForEdit.type === 'auto'"
+                   class="w-4 h-4 text-indigo-600 rounded" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Template Title</label>
+            <input type="text" [(ngModel)]="selectedTemplateForEdit.name"
+                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Pipeline Stage Trigger</label>
+            <select [(ngModel)]="selectedTemplateForEdit.stageId"
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none">
+              <option *ngFor="let stg of applicationStages" [value]="stg.id">{{ stg.name }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Email Subject</label>
+          <input type="text" [(ngModel)]="selectedTemplateForEdit.subject"
+                 class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">Email Template Body</label>
+            <span class="text-[11px] font-mono text-indigo-600" ngNonBindable>Available: {{candidate_name}}, {{job_title}}, {{company_name}}</span>
+          </div>
+          <textarea [(ngModel)]="selectedTemplateForEdit.body" rows="8"
+                    class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-mono text-slate-900 leading-relaxed focus:outline-none focus:border-indigo-500"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between flex-shrink-0">
+      <button (click)="closeEmailTemplatesModal()" type="button"
+              class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl text-xs font-bold transition-all">
+        Close
+      </button>
+      <button (click)="saveStageTemplateAndSyncBackend()" [disabled]="isSavingTemplates" type="button"
+              class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 transition-all disabled:opacity-50">
+        <i class="fas fa-cloud-arrow-up" [class.fa-spin]="isSavingTemplates"></i>
+        <span>{{ isSavingTemplates ? 'Syncing with Backend...' : 'Save & Sync with Backend' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Alert Popup -->
+<div *ngIf="showAlertPopup" class="fixed top-5 right-5 z-50 animate-slide-in">
+  <div class="rounded-2xl shadow-xl p-4 min-w-[320px] backdrop-blur-xl border border-white/20" [ngClass]="{
+      'bg-rose-500 text-white': alertPopupType === 'error',
+      'bg-emerald-600 text-white': alertPopupType === 'success',
+      'bg-indigo-600 text-white': alertPopupType === 'info',
+      'bg-amber-500 text-white': alertPopupType === 'warning'
+    }">
+    <div class="flex items-center">
+      <i class="fas text-lg mr-3" [ngClass]="{
+          'fa-circle-exclamation': alertPopupType === 'error',
+          'fa-circle-check': alertPopupType === 'success',
+          'fa-circle-info': alertPopupType === 'info',
+          'fa-triangle-exclamation': alertPopupType === 'warning'
+        }"></i>
+      <p class="text-sm font-semibold tracking-wide flex-1">{{ popupAlertMessage }}</p>
     </div>
   </div>
 </div>

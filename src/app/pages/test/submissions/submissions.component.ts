@@ -179,6 +179,15 @@ export class SubmissionsComponent {
     });
   }
 
+  goBack(): void {
+    this.testService.clearTest();
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.close();
+    }
+  }
+
   get searchFilteredApplicants() {
     return this.applicants.filter((applicant) => {
       const searchLower = this.searchTerm.toLowerCase();

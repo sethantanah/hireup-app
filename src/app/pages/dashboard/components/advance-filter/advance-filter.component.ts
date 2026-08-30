@@ -47,6 +47,11 @@ export class AdvanceFilterComponent {
     // Add your form filters opening logic here
   }
 
+  clearField(field: 'search' | 'skills' | 'educationDegree' | 'projects') {
+    this.filters[field] = '';
+    this.onFilterChange();
+  }
+
   clearFilters() {
     this.filters = {
       search: '',

@@ -5,7 +5,7 @@ import { canRefreshGuard } from './can-refresh.guard';
 
 describe('canRefreshGuard', () => {
   const executeGuard: CanDeactivateFn<unknown> = (...guardParameters) => 
-      TestBed.runInInjectionContext(() => canRefreshGuard(...guardParameters));
+      TestBed.runInInjectionContext(() => (canRefreshGuard as any)(...guardParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

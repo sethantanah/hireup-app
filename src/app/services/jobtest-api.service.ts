@@ -86,6 +86,16 @@ export class JobtestApiService {
     return this.http.get(apiUrl, { headers });
   }
 
+  deleteTest(testId: string): Observable<any> {
+    const apiUrl = environment.apiUrl + `/jobtests/delete?test_id=${testId}`;
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.delete(apiUrl, { headers });
+  }
+
   getTest(): TestData | null {
     return this.test;
   }

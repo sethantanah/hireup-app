@@ -13,8 +13,17 @@ export interface Job {
   title: string;
   description: string;
   location?: string;
+  country?: string;
+  targetCountries?: string[];
   type?: string;
+  roleCategory?: string;
+  customRoleCategory?: string;
+  workMode?: 'Remote' | 'Hybrid' | 'On-site' | string;
+  experienceLevel?: string;
+  experienceYears?: string;
   salaryRange?: string;
+  salaryMin?: number;
+  salaryMax?: number;
 }
 
 export interface ApplySection {
@@ -51,6 +60,8 @@ export interface FormField {
   instructions: string;
   placeholder?: string;
   options?: string[]; // For select fields
+  allowMultiSelect?: boolean; // Multi-select support for select fields
+  allowOther?: boolean; // Allow custom 'Other' option for select fields
   acceptedTypes?: string[]; // For file fields
 }
 
@@ -84,9 +95,18 @@ export interface ColorScheme {
   accent?: string;
   background?: string;
   text?: string;
+  borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
 }
 
-
+export interface SectionVisibility {
+  showCompanyDetails?: boolean;
+  showJobDescription?: boolean;
+  showSalaryRange?: boolean;
+  showDeadline?: boolean;
+  showRequirements?: boolean;
+  showBenefits?: boolean;
+  showContactSection?: boolean;
+}
 
 export interface JobPostData {
   applicationData?: {};
@@ -101,10 +121,11 @@ export interface JobPostData {
   colorScheme: ColorScheme;
   id?: string;
   sections: string[];
-  additionalSections?: string[]
+  additionalSections?: string[];
   deadline: string;
   templateId: string;
   lastUpdated?: number;
+  sectionVisibility?: SectionVisibility;
   cardSettings?: string[];
   searchFilterSettings?: string[];
   cardDisplaySettings?: string[];
@@ -113,6 +134,8 @@ export interface JobPostData {
   emailTemplates?: EmailTemplate[];
   applicationStages?: ApplicationStage[];
   version?: string;
+  status?: 'published' | 'draft' | string;
+  publishedAt?: string;
 }
 
 
@@ -282,6 +305,9 @@ export interface ApplicationStage {
   created_at?: string;
   updated_at?: string;
   metrics?: StageMetrics;
+  badge_color?: string;
+  icon?: string;
+  sla_hours?: number;
 }
 
 export interface StageMetrics {

@@ -75,4 +75,26 @@ export class DataService {
   toggleEmailPopUp() {
     this.openEmailPopUp = !this.openEmailPopUp
   }
+
+  saveCandidateRating(candidateId: string, rating: number): void {
+    if (!candidateId) return;
+    const ratings = this.getCandidateRatingsMap();
+    ratings[candidateId] = rating;
+    localStorage.setItem('HIREUP_CANDIDATE_RATINGS', JSON.stringify(ratings));
+  }
+
+  getCandidateRating(candidateId: string): number {
+    if (!candidateId) return 0;
+    const ratings = this.getCandidateRatingsMap();
+    return ratings[candidateId] || 0;
+  }
+
+  private getCandidateRatingsMap(): { [key: string]: number } {
+    try {
+      const stored = localStorage.getItem('HIREUP_CANDIDATE_RATINGS');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  }
 }

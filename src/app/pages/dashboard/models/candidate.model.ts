@@ -2,7 +2,8 @@ export interface Candidate {
   id: string;
   form_data: FormData;
   uploaded_files: any;
-  resume_text?: string,
+  resume_url?: string;
+  resume_text?: string;
   application_stages?: Record<string, any>;
   resume_data: {
     personal_details: {

@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { CandidateRankingComponent } from '../components/candidate-ranking/candidate-ranking.component';
 import { ShortlistedComponent } from '../components/shortlisted/shortlisted.component';
 import { SettingsComponent } from '../components/settings/settings/settings.component';
+import { RecruitingAnalyticsComponent } from '../components/recruiting-analytics/recruiting-analytics.component';
+import { TalentPoolComponent } from '../components/talent-pool/talent-pool.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { JobpostManagerService } from '../../../services/jobpost-manager.service';
 import { JobPostData } from '../../../models/jobpost.model';
@@ -20,6 +22,8 @@ import { DataService } from '../../../services/data.service';
     CandidateRankingComponent,
     ShortlistedComponent,
     SettingsComponent,
+    RecruitingAnalyticsComponent,
+    TalentPoolComponent,
     LoaderComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -36,7 +40,8 @@ export class DashboardComponent implements OnInit {
 
   userData!: UserData;
   applicationStage = "Application Review";
-
+  allJobPosts: any[] = [];
+  currentJobId: string = '';
 
   constructor(
     private router: Router,
@@ -57,6 +62,26 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
+    if (jobpostId) {
+      this.currentJobId = jobpostId;
+    }
+
+    const userId = this.userData?.id || (this.userData as any)?.user_id;
+    if (userId) {
+      this.jobPostService.getJobPosts(userId).subscribe({
+        next: (res: any) => {
+          const rawPosts = Array.isArray(res) ? res : (res?.data || []);
+          this.allJobPosts = rawPosts.map((jp: any) => ({
+            ...jp,
+            id: jp.id,
+            job_title: jp.job_title || jp.title || jp.template_data?.job?.title || 'Job Posting',
+            company_name: jp.company_name || jp.company || jp.template_data?.company?.name || this.userData?.company_name || 'Organization',
+            department: jp.department || jp.template_data?.job?.department || ''
+          }));
+        },
+        error: (err: any) => console.error('Failed to load job posts:', err)
+      });
+    }
 
     if (jobpostId) {
       this.loading = true;
@@ -121,5 +146,12 @@ export class DashboardComponent implements OnInit {
 
   back() {
     this.router.navigate(['/jobposts', this.userData.id])
+  }
+
+  navigateToAssessmentCenter() {
+    const jobId = this.route.snapshot.paramMap.get('jobId');
+    if (jobId) {
+      this.router.navigate(['/jobposts/tests', jobId]);
+    }
   }
 }

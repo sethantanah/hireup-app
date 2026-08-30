@@ -178,7 +178,7 @@
                     <th *ngFor="let col of visibleColumns" [class.sortable]="col.sortable"
                         (click)="col.sortable && sortData(col.key)" class="table-header">
                         <div class="header-content">
-                        <span>{{ col.label | slice:0:20 }}...</span>
+                            <span>{{ col.label.length > 25 ? (col.label | slice:0:22) + '...' : col.label }}</span>
                             <span *ngIf="sortField === col.key" class="sort-indicator">
                                 <i *ngIf="sortDirection === 'asc'" class="fas fa-sort-up"></i>
                                 <i *ngIf="sortDirection === 'desc'" class="fas fa-sort-down"></i>
@@ -203,8 +203,19 @@
                     </td>
 
                     <td class="table-cell">
-                        <div class="cell-content">
-                            {{getCandidateStatus(filteredData[i])}}
+                        <div class="status-badge" [ngClass]="{
+                          'bg-emerald-50 text-emerald-700 border border-emerald-200/80': getCandidateStatus(row) === 'shortlisted' || getCandidateStatus(row) === 'accepted',
+                          'bg-rose-50 text-rose-700 border border-rose-200/80': getCandidateStatus(row) === 'unshortlisted' || getCandidateStatus(row) === 'rejected',
+                          'bg-indigo-50 text-indigo-700 border border-indigo-200/80': getCandidateStatus(row) === 'in review' || getCandidateStatus(row) === 'new' || getCandidateStatus(row) === 'applied',
+                          'bg-slate-100 text-slate-600 border border-slate-200': !getCandidateStatus(row)
+                        }">
+                            <span class="w-1.5 h-1.5 rounded-full" [ngClass]="{
+                              'bg-emerald-500': getCandidateStatus(row) === 'shortlisted' || getCandidateStatus(row) === 'accepted',
+                              'bg-rose-500': getCandidateStatus(row) === 'unshortlisted' || getCandidateStatus(row) === 'rejected',
+                              'bg-indigo-500': getCandidateStatus(row) === 'in review' || getCandidateStatus(row) === 'new' || getCandidateStatus(row) === 'applied',
+                              'bg-slate-400': !getCandidateStatus(row)
+                            }"></span>
+                            {{ getCandidateStatus(row) || 'Pending' }}
                         </div>
                     </td>
 

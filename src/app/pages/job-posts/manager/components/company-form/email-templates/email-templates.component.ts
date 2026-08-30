@@ -3,10 +3,12 @@ import { ApplicationStage, EmailTemplate } from '../../../../../../models/jobpos
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { MessagingService } from '../../../../../../services/messaging.service';
+import { SmtpSettingsComponent } from '../../../../../dashboard/components/settings/smtp-settings/smtp-settings.component';
 
 @Component({
   selector: 'app-email-templates',
-  imports: [CommonModule, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, SmtpSettingsComponent],
   templateUrl: './email-templates.component.html',
   styleUrl: './email-templates.component.scss'
 })
@@ -19,6 +21,13 @@ export class EmailTemplatesComponent {
   isEditing = false;
   viewMode: 'editor' | 'preview' = 'editor';
   previewHtml: SafeHtml = '';
+  previewSubject: string = '';
+  showSmtpModal: boolean = false;
+
+  // Test Email Sending State
+  testRecipientEmail: string = '';
+  isSendingTestEmail: boolean = false;
+  testEmailFeedback: { type: 'success' | 'error'; message: string } | null = null;
 
   // Sample data for preview
   previewData = {
@@ -131,7 +140,10 @@ export class EmailTemplatesComponent {
     }
   ];
 
-  constructor(private sanitizer: DomSanitizer) { }
+  constructor(
+    private sanitizer: DomSanitizer,
+    private messagingService: MessagingService
+  ) { }
 
   ngOnInit() {
     if (!this.emailTemplates || this.emailTemplates.length === 0) {
@@ -191,6 +203,7 @@ export class EmailTemplatesComponent {
     this.selectedTemplate = newTemplate;
     this.isEditing = true;
     this.viewMode = 'editor';
+    this.testEmailFeedback = null;
     this.updatePreview();
   }
 
@@ -198,6 +211,7 @@ export class EmailTemplatesComponent {
     this.selectedTemplate = { ...template };
     this.isEditing = true;
     this.viewMode = 'editor';
+    this.testEmailFeedback = null;
     this.updatePreview();
   }
 
@@ -220,6 +234,7 @@ export class EmailTemplatesComponent {
     this.selectedTemplate = null;
     this.isEditing = false;
     this.viewMode = 'editor';
+    this.testEmailFeedback = null;
   }
 
   deleteTemplate(templateId: string) {
@@ -237,17 +252,69 @@ export class EmailTemplatesComponent {
   updatePreview() {
     if (this.selectedTemplate) {
       let previewContent = this.selectedTemplate.body;
+      let subjectContent = this.selectedTemplate.subject;
 
       // Replace placeholders with sample data
       Object.keys(this.previewData).forEach(key => {
         const placeholder = `{{${key}}}`;
         const value = this.previewData[key as keyof typeof this.previewData];
         previewContent = previewContent.replace(new RegExp(placeholder, 'g'), value);
+        subjectContent = subjectContent.replace(new RegExp(placeholder, 'g'), value);
       });
 
+      // Strip any HTML tags from subject line
+      this.previewSubject = subjectContent.replace(/<[^>]*>?/gm, '');
       // Sanitize the HTML for safe display
       this.previewHtml = this.sanitizer.bypassSecurityTrustHtml(previewContent);
     }
+  }
+
+  sendTestEmail() {
+    if (!this.selectedTemplate) return;
+
+    if (!this.testRecipientEmail || !this.testRecipientEmail.includes('@')) {
+      this.testEmailFeedback = {
+        type: 'error',
+        message: 'Please enter a valid email address to send the test notification.'
+      };
+      return;
+    }
+
+    this.isSendingTestEmail = true;
+    this.testEmailFeedback = null;
+
+    let bodyWithReplacements = this.selectedTemplate.body;
+    let subjectWithReplacements = this.selectedTemplate.subject;
+
+    Object.keys(this.previewData).forEach(key => {
+      const placeholder = `{{${key}}}`;
+      const value = this.previewData[key as keyof typeof this.previewData];
+      bodyWithReplacements = bodyWithReplacements.replace(new RegExp(placeholder, 'g'), value);
+      subjectWithReplacements = subjectWithReplacements.replace(new RegExp(placeholder, 'g'), value);
+    });
+
+    this.messagingService.sendTestEmail({
+      recipient_email: this.testRecipientEmail,
+      subject: subjectWithReplacements || 'Test Stage Email Notification',
+      html_template: bodyWithReplacements,
+      text_content: ''
+    }).subscribe({
+      next: (res) => {
+        this.isSendingTestEmail = false;
+        this.testEmailFeedback = {
+          type: 'success',
+          message: res.message || `Test email successfully sent to ${this.testRecipientEmail}`
+        };
+      },
+      error: (err) => {
+        this.isSendingTestEmail = false;
+        console.error('Test email send error:', err);
+        this.testEmailFeedback = {
+          type: 'error',
+          message: err?.error?.detail || err?.message || 'Failed to send test email. Please check server email setup.'
+        };
+      }
+    });
   }
 
   insertPlaceholder(placeholder: string) {

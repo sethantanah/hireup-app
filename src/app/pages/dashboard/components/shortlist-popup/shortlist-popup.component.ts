@@ -6,6 +6,8 @@ import { ApiService } from '../../../../services/api.service';
 import { JobPostData } from '../../../../models/jobpost.model';
 
 
+import { ActivatedRoute } from '@angular/router';
+
 @Component({
   selector: 'app-shortlist-popup',
   imports: [CommonModule],
@@ -25,7 +27,8 @@ export class ShortlistPopupComponent {
 
   constructor(
     public dataService: DataService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private route: ActivatedRoute
   ) {
     this.selectedFields = this.dataService.selectedCardFields;
   }
@@ -106,7 +109,11 @@ export class ShortlistPopupComponent {
       ids.push(candidate.id);
     });
 
-    this.apiService.shortListCandidates(ids).subscribe({
+    const jobId = this.route.snapshot.paramMap.get('jobId') || localStorage.getItem('jobpostId') || '';
+    const stageId = this.route.snapshot.paramMap.get('stageId') || 'stage_application_review';
+    const stageName = stageId.replace('stage_', '');
+
+    this.apiService.shortListCandidates(ids, jobId, stageName).subscribe({
       next: () => {
         this.showPopupMessage('Candidates shortlisting successful!', 'success');
         this.isLoading = false;

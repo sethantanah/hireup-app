@@ -1,10 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import {
-  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
@@ -26,6 +24,8 @@ export class SigninComponent implements OnInit {
   errorMessage: string | null = null;
   showSuccessMessage = false;
 
+  userRole: 'recruiter' | 'candidate' = 'recruiter';
+
   alert: any = null;
 
   constructor(
@@ -43,9 +43,30 @@ export class SigninComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.route.url.subscribe(urlSegments => {
+      const path = urlSegments.map(s => s.path).join('/');
+      if (path.includes('candidate')) {
+        this.userRole = 'candidate';
+      } else if (path.includes('recruiter')) {
+        this.userRole = 'recruiter';
+      }
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['role'] === 'candidate') {
+        this.userRole = 'candidate';
+      } else if (params['role'] === 'recruiter') {
+        this.userRole = 'recruiter';
+      }
+    });
+
     this.alertService.alert$.subscribe((alert) => {
       this.alert = alert;
     });
+  }
+
+  setRole(role: 'recruiter' | 'candidate'): void {
+    this.userRole = role;
   }
 
   onSubmit(): void {
@@ -69,15 +90,19 @@ export class SigninComponent implements OnInit {
   signin(login_data: LoginData): void {
     this.alertService.showAlert({
       type: 'success',
-      message: 'Loggin in...',
+      message: 'Logging in...',
     });
     this.authService.logIn(login_data).subscribe({
       next: (res) => {
         localStorage.setItem('token', res.access_token);
         localStorage.setItem('USER', JSON.stringify(res.user));
-        this.router.navigate(['/jobposts/' + res.user.id]);
         this.isLoading = false;
-        
+
+        if (this.userRole === 'candidate') {
+          this.router.navigate(['/candidate-portal']);
+        } else {
+          this.router.navigate(['/jobposts/' + res.user.id]);
+        }
       },
       error: (err) => {
         console.error(err);
@@ -95,7 +120,11 @@ export class SigninComponent implements OnInit {
   }
 
   navigateToSignup(): void {
-    this.router.navigate(['/auth/signup']);
+    if (this.userRole === 'candidate') {
+      this.router.navigate(['/auth/candidate/register']);
+    } else {
+      this.router.navigate(['/auth/recruiter/register']);
+    }
   }
 
   navigateToForgotPassword(): void {

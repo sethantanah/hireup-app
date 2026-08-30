@@ -1,138 +1,190 @@
 <app-loader *ngIf="loading" [loadingText]="loadingText"></app-loader>
 
-
 <button (click)="saveChanges()"
-  class="fixed bottom-8 right-8 w-10 h-10 bg-black hover:bg-blue-600 rounded-md shadow-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110">
-  <i class="fas fa-save text-white text-xl"></i>
+  class="fixed bottom-8 right-8 z-50 px-6 py-3 bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold rounded-2xl shadow-xl shadow-indigo-500/25 flex items-center gap-3 transition-all duration-300 transform hover:scale-105 group border border-indigo-400/20">
+  <i class="fas fa-cloud-arrow-up text-base group-hover:scale-110 transition-transform"></i>
+  <span class="text-xs tracking-wide uppercase font-bold">Save Changes</span>
 </button>
 
-<div class="flex h-screen bg-slate-50" *ngIf="applicationData">
-  <!-- Modern Sidebar -->
-  <div class="md:min-w-70 w-70 bg-white shadow-xl p-6 overflow-y-scroll">
-    <div class="flex items-center gap-3 mb-8">
-      <svg class="w-8 h-8 text-indigo-600" viewBox="0 0 24 24" fill="currentColor">
-        <path
-          d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4z" />
-      </svg>
-      <h3 class="text-xl font-bold text-slate-800">Job Editor</h3>
+<div class="flex h-screen w-screen overflow-hidden bg-slate-50 font-sans" *ngIf="applicationData">
+  <!-- Enhanced Modern Sidebar (Independent Scrolling) -->
+  <div class="md:w-72 w-72 h-screen bg-white text-slate-800 shadow-xs p-6 overflow-y-auto border-r border-slate-200/80 flex flex-col justify-between flex-shrink-0">
+    <div>
+      <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-200/80">
+        <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-indigo-500/20 border border-indigo-400/30">
+          <svg class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4z" />
+          </svg>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-slate-900 tracking-tight">Job Form Editor</h3>
+          <span class="text-[10px] font-semibold text-indigo-700 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">Studio</span>
+        </div>
+      </div>
+
+      <nav class="space-y-6">
+        <!-- Job Editor Group -->
+        <div class="space-y-2">
+          <div class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <i class="fa-solid fa-pen-to-square mr-1.5 text-indigo-600"></i>Job Sections
+          </div>
+          <div *ngFor="let section of editorSections" (click)="selectSection(section)"
+            class="flex items-center px-4 py-3 rounded-2xl transition-all cursor-pointer font-medium text-sm border"
+            [ngClass]="selectedSection === section ? 'bg-gradient-to-r from-indigo-50 to-indigo-100/70 border-indigo-200/80 text-indigo-950 font-bold shadow-xs' : 'bg-slate-50/60 border-slate-200/60 text-slate-700 hover:bg-slate-100 hover:text-slate-900'">
+            <i class="fa-solid {{ getSectionIcon(section) }} w-5 h-5" [ngClass]="selectedSection === section ? 'text-indigo-600' : 'text-slate-400'"></i>
+            <span class="ml-3">{{ section }}</span>
+          </div>
+        </div>
+
+        <!-- Templates & Tools Group -->
+        <div class="space-y-2">
+          <div class="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-indigo-600"></i>Templates & Tools
+          </div>
+          <div *ngFor="let section of templateSections" (click)="selectSection(section)"
+            class="flex items-center px-4 py-3 rounded-2xl transition-all cursor-pointer font-medium text-sm border"
+            [ngClass]="[
+              selectedSection === section ? 'bg-gradient-to-r from-indigo-50 to-indigo-100/70 border-indigo-200/80 text-indigo-950 font-bold shadow-xs' : 'bg-slate-50/60 border-slate-200/60 text-slate-700 hover:bg-slate-100 hover:text-slate-900',
+              section === 'Section Visibility Toggles' ? 'ml-4 py-2 text-xs font-semibold' : ''
+            ]">
+            <i *ngIf="section === 'Section Visibility Toggles'" class="fa-solid fa-level-up-alt rotate-90 text-indigo-400 text-[10px] mr-1 shrink-0"></i>
+            <i class="fa-solid {{ getSectionIcon(section) }} w-4 h-4 flex items-center justify-center shrink-0" [ngClass]="selectedSection === section ? 'text-indigo-600' : 'text-slate-400'"></i>
+            <span class="ml-2.5 truncate">{{ section }}</span>
+          </div>
+        </div>
+      </nav>
     </div>
 
-    <nav class="space-y-4">
-      <!-- Job Editor Group -->
-      <div class="space-y-1">
-        <div class="px-4 py-2 text-sm font-semibold text-slate-500">
-          <i class="fa-solid fa-pen-to-square mr-2"></i>Job Editor
-        </div>
-        <div *ngFor="let section of editorSections" (click)="selectSection(section)"
-          class="flex items-center p-4 rounded-lg transition-all cursor-pointer hover:bg-slate-50"
-          [class.bg-indigo-50]="selectedSection === section" [class.text-indigo-600]="selectedSection === section">
-          <i class="fa-solid {{ getSectionIcon(section) }} w-5 h-5"></i>
-          <span class="ml-3 font-medium">{{ section }}</span>
-        </div>
-      </div>
-
-      <!-- Templates & Tools Group -->
-      <div class="space-y-1">
-        <div class="px-4 py-2 text-sm font-semibold text-slate-500">
-          <i class="fa-solid fa-tools mr-2"></i>Templates & Tools
-        </div>
-        <div *ngFor="let section of templateSections" (click)="selectSection(section)"
-          class="flex items-center p-4 rounded-lg transition-all cursor-pointer hover:bg-slate-50"
-          [class.bg-indigo-50]="selectedSection === section" [class.text-indigo-600]="selectedSection === section">
-          <i class="fa-solid {{ getSectionIcon(section) }} w-5 h-5"></i>
-          <span class="ml-3 font-medium">{{ section }}</span>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Preview Controls -->
-    <!-- <div class="mt-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-eye text-slate-600"></i>
-          <span class="text-sm font-medium text-slate-700">Live Preview</span>
-        </div>
-        <label class="toggle-switch">
-          <input type="checkbox" [(ngModel)]="showPreview" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-    </div> -->
+    <div class="pt-6 border-t border-slate-200/80 text-xs text-slate-500 flex items-center justify-between">
+      <span>Auto-save enabled</span>
+      <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+    </div>
   </div>
 
-  <!-- Main Content Area -->
-  <div class="flex-1 flex">
+  <!-- Main Content Area (Independent Scrolling) -->
+  <div class="flex-1 flex h-screen overflow-y-auto">
     <!-- Form Editor -->
     <div class="flex-1 p-8 overflow-y-auto" [ngClass]="{ 'w-1/2': showPreview, hidden: isExpanded }">
       <div class=" mx-auto">
-        <header class="mb-8">
-          <div class="flex items-center gap-3 mb-2">
-            <i class="fa-solid {{
-                getSectionIcon(selectedSection)
-              }} text-indigo-600"></i>
-            <h2 class="text-2xl font-bold text-slate-900">
-              {{ selectedSection }}
-            </h2>
+        <header class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-3 mb-1">
+              <i class="fa-solid {{
+                  getSectionIcon(selectedSection)
+                }} text-indigo-600"></i>
+              <h2 class="text-2xl font-bold text-slate-900">
+                {{ selectedSection }}
+              </h2>
+            </div>
+            <p class="text-slate-600 text-xs font-medium">
+              Configure your job posting settings below
+            </p>
           </div>
-          <p class="text-slate-600">
-            Configure your job posting settings below
-          </p>
+
+          <!-- Publish / Unpublish Status Control Button & Badge -->
+          <div class="flex items-center gap-3">
+            <span [ngClass]="applicationData?.status === 'published' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-amber-50 text-amber-700 border-amber-200'"
+                  class="px-3 py-1.5 rounded-full text-xs font-extrabold border flex items-center gap-1.5 uppercase tracking-wider">
+              <i class="fa-solid" [ngClass]="applicationData?.status === 'published' ? 'fa-circle-check text-emerald-500' : 'fa-clock text-amber-500'"></i>
+              <span>{{ applicationData?.status === 'published' ? 'Published' : 'Draft / Unpublished' }}</span>
+            </span>
+
+            <button (click)="togglePublishStatus()"
+                    [ngClass]="applicationData?.status === 'published' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'"
+                    class="px-4 py-2 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2">
+              <i class="fa-solid" [ngClass]="applicationData?.status === 'published' ? 'fa-eye-slash' : 'fa-paper-plane'"></i>
+              <span>{{ applicationData?.status === 'published' ? 'Unpublish Job' : 'Publish Job' }}</span>
+            </button>
+          </div>
         </header>
+
+        <!-- Publish Feedback Toast -->
+        <div *ngIf="publishToast" [ngClass]="publishToast.type === 'success' ? 'bg-emerald-50 text-emerald-900 border-emerald-200' : 'bg-rose-50 text-rose-900 border-rose-200'"
+             class="mb-6 p-4 rounded-2xl border text-xs font-bold flex items-center gap-3 shadow-xs animate-in fade-in">
+          <i class="fa-solid fa-bell text-indigo-600 text-sm"></i>
+          <span>{{ publishToast.message }}</span>
+        </div>
 
         <!-- Form Elements - Add this inside your main content area -->
         <div class="space-y-8">
-          <!-- Company Section -->
+          <!-- Company Details Section -->
           <div *ngIf="selectedSection === 'Company Details'"
-            class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div class="grid grid-cols-2 gap-6">
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-building mr-2"></i>Company Name
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-building"></i>
+              </div>
+              <div class="flex-1 flex items-center justify-between">
+                <div>
+                  <h3 class="text-base font-black text-slate-900">Company Identity & Branding</h3>
+                  <p class="text-xs text-slate-500 font-medium">Configure your company name, logo badge, and public header navigation links.</p>
+                </div>
+                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  <i class="fa-solid fa-lock mr-1"></i>Mandatory Section
+                </span>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Company Name <span class="text-rose-500">*</span>
                 </label>
-                <input [(ngModel)]="applicationData!.company.name"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter company name" />
+                <input [(ngModel)]="applicationData!.company.name" (ngModelChange)="autoSave()"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  placeholder="e.g. Acme Health Technologies" />
               </div>
 
-              <div class="col-span-2">
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-image mr-2"></i>Logo URL
+              <div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Company Logo
                 </label>
-                <div class="flex gap-4">
-                  <input [(ngModel)]="applicationData!.company.logoUrl"
-                    class="flex-1 px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Enter logo URL" />
-                  <button class="px-4 py-2 bg-slate-100 rounded-lg hover:bg-slate-200">
-                    <i class="fa-solid fa-upload"></i>
-                  </button>
+                <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 flex items-center gap-4">
+                  <!-- Logo Preview Badge -->
+                  <div class="w-16 h-16 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-center overflow-hidden flex-shrink-0">
+                    <img *ngIf="applicationData!.company.logoUrl" [src]="applicationData!.company.logoUrl" alt="Logo" class="max-h-12 max-w-12 object-contain" />
+                    <i *ngIf="!applicationData!.company.logoUrl" class="fa-solid fa-building text-slate-300 text-xl"></i>
+                  </div>
+                  
+                  <div class="flex-1 space-y-2">
+                    <input [(ngModel)]="applicationData!.company.logoUrl" (ngModelChange)="autoSave()"
+                      class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                      placeholder="https://example.com/logo.png" />
+                    <p class="text-[11px] text-slate-400 font-medium">Enter a direct image URL for your company logo badge.</p>
+                  </div>
                 </div>
               </div>
 
-              <div class="col-span-2">
+              <div class="pt-4 border-t border-slate-100">
                 <div class="flex items-center justify-between mb-4">
-                  <label class="text-sm font-medium text-slate-700">
-                    <i class="fa-solid fa-link mr-2"></i>Navigation Links
-                  </label>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Header Navigation Links</h4>
+                    <p class="text-[11px] text-slate-500 font-medium">Add links to your career page, company website, or social handles.</p>
+                  </div>
                   <button (click)="addNavLink()"
-                    class="flex items-center gap-2 px-4 py-2 text-sm bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100">
+                    class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-all border border-indigo-200/80 flex items-center gap-2">
                     <i class="fa-solid fa-plus"></i>
-                    Add Link
+                    <span>Add Link</span>
                   </button>
                 </div>
 
-                <div class="space-y-4">
-                  <div *ngFor="
-                      let link of applicationData.company?.navLinks;
-                      let i = index
-                    " class="flex gap-4 p-4 bg-slate-50 rounded-lg">
-                    <input [(ngModel)]="link.text" placeholder="Link Text"
-                      class="flex-1 px-4 py-2 rounded-lg border border-slate-300" />
-                    <input [(ngModel)]="link.url" placeholder="URL"
-                      class="flex-1 px-4 py-2 rounded-lg border border-slate-300" />
+                <div class="space-y-3">
+                  <div *ngFor="let link of applicationData.company?.navLinks; let i = index"
+                    class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                    <span class="text-slate-400 text-xs px-1"><i class="fa-solid fa-grip-vertical"></i></span>
+                    <input [(ngModel)]="link.text" (ngModelChange)="autoSave()" placeholder="Link Text (e.g. Careers)"
+                      class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+                    <input [(ngModel)]="link.url" (ngModelChange)="autoSave()" placeholder="URL (e.g. https://...)"
+                      class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
                     <button (click)="deleteNavLink(i)"
-                      class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg">
-                      <i class="fa-solid fa-trash"></i>
+                      class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors">
+                      <i class="fa-solid fa-trash-can"></i>
                     </button>
+                  </div>
+
+                  <div *ngIf="!applicationData.company?.navLinks || applicationData.company?.navLinks?.length === 0"
+                    class="text-center py-6 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-400 font-medium">
+                    No custom header links added yet.
                   </div>
                 </div>
               </div>
@@ -141,346 +193,577 @@
 
           <!-- Job Description Section -->
           <div *ngIf="selectedSection === 'Job Description'"
-            class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-briefcase"></i>
+              </div>
+              <div class="flex-1 flex items-center justify-between">
+                <div>
+                  <h3 class="text-base font-black text-slate-900">Job Title & Description</h3>
+                  <p class="text-xs text-slate-500 font-medium">Define the core job requirements, responsibilities, and role title.</p>
+                </div>
+                <span class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                  <i class="fa-solid fa-lock mr-1"></i>Mandatory Section
+                </span>
+              </div>
+            </div>
+
             <div class="space-y-6">
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-briefcase mr-2"></i>Job Title
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Job Role Title <span class="text-rose-500">*</span>
                 </label>
-                <input [(ngModel)]="applicationData!.job.title"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter job title" />
+                <input [(ngModel)]="applicationData!.job.title" (ngModelChange)="autoSave()"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  placeholder="e.g. Senior Full-Stack Engineer" />
               </div>
+
+              <!-- Enhanced Metadata Grid: Role Category (Custom), Work Mode, Target Countries (Multi-select), Experience Level & Years -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-indigo-50/40 rounded-2xl border border-indigo-100">
+                <!-- Role Category (Supports Custom Entry) -->
+                <div>
+                  <app-custom-dropdown
+                    [options]="roleCategories"
+                    [value]="applicationData!.job.roleCategory"
+                    (valueChange)="applicationData!.job.roleCategory = $event; autoSave()"
+                    [allowCustom]="true"
+                    label="Role Type / Category"
+                    icon="fa-user-gear"
+                    placeholder="Select or enter custom category...">
+                  </app-custom-dropdown>
+                </div>
+
+                <!-- Work Mode Options -->
+                <div>
+                  <app-custom-dropdown
+                    [options]="workModes"
+                    [value]="applicationData!.job.workMode"
+                    (valueChange)="applicationData!.job.workMode = $event; autoSave()"
+                    label="Work Mode Options"
+                    icon="fa-laptop-house"
+                    placeholder="Select work mode...">
+                  </app-custom-dropdown>
+                </div>
+
+                <!-- Target Countries (Supports Multi-Select & Search!) -->
+                <div>
+                  <app-custom-dropdown
+                    [options]="countriesList"
+                    [value]="applicationData!.job.targetCountries || (applicationData!.job.country ? [applicationData!.job.country] : [])"
+                    (valueChange)="applicationData!.job.targetCountries = $event; applicationData!.job.country = $event[0] || ''; autoSave()"
+                    [multiple]="true"
+                    [allowCustom]="true"
+                    label="Target Countries / Locations (Multi-Select)"
+                    icon="fa-earth-americas"
+                    placeholder="Select target countries...">
+                  </app-custom-dropdown>
+                </div>
+
+                <!-- Experience Level -->
+                <div>
+                  <app-custom-dropdown
+                    [options]="experienceLevels"
+                    [value]="applicationData!.job.experienceLevel"
+                    (valueChange)="applicationData!.job.experienceLevel = $event; autoSave()"
+                    [allowCustom]="true"
+                    label="Experience Level"
+                    icon="fa-layer-group"
+                    placeholder="e.g. Senior Level, Lead...">
+                  </app-custom-dropdown>
+                </div>
+
+                <!-- Years of Experience Required -->
+                <div>
+                  <app-custom-dropdown
+                    [options]="experienceYearsList"
+                    [value]="applicationData!.job.experienceYears"
+                    (valueChange)="applicationData!.job.experienceYears = $event; autoSave()"
+                    [allowCustom]="true"
+                    label="Years of Experience"
+                    icon="fa-clock-rotate-left"
+                    placeholder="e.g. 3 - 5 years...">
+                  </app-custom-dropdown>
+                </div>
+
+                <!-- Salary Range (Optional) -->
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> Salary Range / Compensation (Optional)
+                  </label>
+                  <input [(ngModel)]="applicationData!.job.salaryRange" (ngModelChange)="autoSave()"
+                    class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 shadow-2xs"
+                    placeholder="e.g. $120,000 - $160,000 / year" />
+                </div>
+              </div>
+
               <div>
                 <div class="flex items-center justify-between mb-2">
-                  <label class="text-sm font-medium text-slate-700">
-                    <i class="fa-solid fa-align-left mr-2"></i>Job Description
+                  <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                    Job Description (Markdown Enabled)
                   </label>
                   <button (click)="showMarkdownGuide = !showMarkdownGuide"
-                    class="text-slate-500 hover:text-slate-700 flex items-center gap-1 text-sm">
+                    class="text-indigo-600 hover:text-indigo-700 text-xs font-bold flex items-center gap-1.5 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
                     <i class="fa-solid fa-circle-info"></i>
-                    Formatting Guide
+                    <span>Formatting Guide</span>
                   </button>
                 </div>
 
-                <textarea [(ngModel)]="applicationData!.job.description" rows="10"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter job description"></textarea>
-
-                <div class="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                  <i class="fa-brands fa-markdown"></i>
-                  <span>Markdown formatting supported</span>
+                <!-- Markdown Formatting Toolbar -->
+                <div class="flex flex-wrap items-center gap-1.5 p-2 bg-slate-100/80 rounded-t-2xl border border-slate-200/80 border-b-0">
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Quick Insert:</span>
+                  <button (click)="insertMarkdown('**bold text**', 'description')" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-2xs">
+                    <b>B</b>
+                  </button>
+                  <button (click)="insertMarkdown('*italic text*', 'description')" type="button" class="px-2.5 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs italic font-bold border border-slate-200 shadow-2xs">
+                    <i>I</i>
+                  </button>
+                  <button (click)="insertMarkdown('\n# Heading 1\n', 'description')" type="button" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-2xs">
+                    H1
+                  </button>
+                  <button (click)="insertMarkdown('\n## Heading 2\n', 'description')" type="button" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-2xs">
+                    H2
+                  </button>
+                  <button (click)="insertMarkdown('\n- Key item point\n', 'description')" type="button" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-2xs">
+                    <i class="fa-solid fa-list-ul"></i>
+                  </button>
+                  <button (click)="insertMarkdown('[Link Title](https://example.com)', 'description')" type="button" class="px-2 py-1 bg-white hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold border border-slate-200 shadow-2xs">
+                    <i class="fa-solid fa-link"></i>
+                  </button>
                 </div>
 
-                <!-- Markdown Guide -->
-                <div *ngIf="showMarkdownGuide" class="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                  <h4 class="font-medium text-slate-700 mb-3">
-                    Markdown Formatting Guide
+                <textarea [(ngModel)]="applicationData!.job.description" (ngModelChange)="autoSave()" rows="12"
+                  class="w-full px-4 py-3 rounded-b-2xl border border-slate-200 bg-white text-xs font-medium text-slate-800 leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-mono"
+                  placeholder="Write full job description using markdown..."></textarea>
+
+                <!-- Markdown Guide Dropdown -->
+                <div *ngIf="showMarkdownGuide" class="mt-4 p-5 bg-slate-900 text-slate-200 rounded-2xl shadow-xl space-y-3">
+                  <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <i class="fa-brands fa-markdown text-indigo-400"></i> Markdown Cheat Sheet
                   </h4>
-                  <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">**bold**</code>
-                      <span class="text-slate-600 ml-2">→ <strong>bold</strong></span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">*italic*</code>
-                      <span class="text-slate-600 ml-2">→ <em>italic</em></span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded"># Heading 1</code>
-                      <span class="text-slate-600 ml-2">→ Large heading</span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">## Heading 2</code>
-                      <span class="text-slate-600 ml-2">→ Medium heading</span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">- List item</code>
-                      <span class="text-slate-600 ml-2">→ Bullet point</span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">[Link](url)</code>
-                      <span class="text-slate-600 ml-2">→ Hyperlink</span>
-                    </div>
+                  <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700"><code class="text-indigo-300">**bold**</code> → <strong>bold</strong></div>
+                    <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700"><code class="text-indigo-300">*italic*</code> → <em>italic</em></div>
+                    <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700"><code class="text-indigo-300"># Title</code> → Main Header</div>
+                    <div class="p-2 bg-slate-800/80 rounded-xl border border-slate-700"><code class="text-indigo-300">- Item</code> → Bullet point</div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <!-- <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-gift mr-2"></i>Benefits Title
-                </label>
-                <input
-                  [(ngModel)]="applicationData!.benefits.title"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter benefits title"
-                />
-              </div> -->
+          <!-- Section Visibility Toggles (UI Templates Governance) -->
+          <div *ngIf="selectedSection === 'Section Visibility Toggles' && applicationData!.sectionVisibility"
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-sliders"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900">UI Template Section Visibility</h3>
+                <p class="text-xs text-slate-500 font-medium">Control section-level visibility to customize what candidates see on public templates.</p>
+              </div>
+            </div>
 
-              <!-- <div>
-                <div class="flex items-center justify-between mb-4">
-                  <label class="text-sm font-medium text-slate-700">
-                    <i class="fa-solid fa-list-check mr-2"></i>Benefits Items
-                  </label>
-                  <button
-                    (click)="addBenefitItem()"
-                    class="flex items-center gap-2 px-4 py-2 text-sm bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100"
-                  >
-                    <i class="fa-solid fa-plus"></i>
-                    Add Benefit
-                  </button>
-                </div>
-
-                <div class="space-y-3">
-                  <div
-                    *ngFor="
-                      let item of applicationData!.benefits.items;
-                      let i = index
-                    "
-                    class="flex gap-4 p-4 bg-slate-50 rounded-lg"
-                  >
-                    <input
-                      [(ngModel)]="applicationData!.benefits.items[i]"
-                      placeholder="Enter benefit"
-                      class="flex-1 px-4 py-2 rounded-lg border border-slate-300"
-                    />
-                    <button
-                      (click)="deleteBenefitItem(i)"
-                      class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg"
-                    >
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
+            <div class="space-y-4">
+              <!-- Toggle 1: Company Details -->
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                    <i class="fa-solid fa-building text-indigo-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Company Identity & Logo Badge</h4>
+                    <p class="text-[11px] text-slate-500">Show company name, logo badge, and navigation links in the candidate job header.</p>
                   </div>
                 </div>
-              </div> -->
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="applicationData!.sectionVisibility!.showCompanyDetails" (ngModelChange)="autoSave()" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+
+              <!-- Toggle 2: Job Description -->
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                    <i class="fa-solid fa-briefcase text-indigo-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Job Role Overview & Description</h4>
+                    <p class="text-[11px] text-slate-500">Mandatory core job role details and markdown instructions.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="applicationData!.sectionVisibility!.showJobDescription" (ngModelChange)="autoSave()" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+
+              <!-- Toggle 3: Salary Range -->
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                    <i class="fa-solid fa-money-bill-wave text-emerald-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Salary & Compensation Range</h4>
+                    <p class="text-[11px] text-slate-500">Display expected compensation package to applicant candidates.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="applicationData!.sectionVisibility!.showSalaryRange" (ngModelChange)="autoSave()" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+
+              <!-- Toggle 4: Application Deadline -->
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                    <i class="fa-solid fa-clock text-amber-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Application Deadline Badge</h4>
+                    <p class="text-[11px] text-slate-500">Display application submission cutoff deadline in the candidate portal view.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="applicationData!.sectionVisibility!.showDeadline" (ngModelChange)="autoSave()" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+
+              <!-- Toggle 5: Benefits -->
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                    <i class="fa-solid fa-gift text-purple-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Perks & Benefits Section</h4>
+                    <p class="text-[11px] text-slate-500">Display list of company benefits, work environment perks, and health packages.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="applicationData!.sectionVisibility!.showBenefits" (ngModelChange)="autoSave()" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
+
+              <!-- Toggle 6: Contact Section -->
+              <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-200/80">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 font-bold text-xs">
+                    <i class="fa-solid fa-address-book text-blue-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">Footer Links & Contact Section</h4>
+                    <p class="text-[11px] text-slate-500">Display privacy policy, sub-footer links, and legal declarations.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" [(ngModel)]="applicationData!.sectionVisibility!.showContactSection" (ngModelChange)="autoSave()" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                </label>
+              </div>
             </div>
           </div>
 
           <!-- Application Section -->
           <div *ngIf="selectedSection === 'Application Section'"
-            class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900">Application Instructions & Rules</h3>
+                <p class="text-xs text-slate-500 font-medium">Set section titles, instructions, application deadline, and legal declarations.</p>
+              </div>
+            </div>
+
             <div class="space-y-6">
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-heading mr-2"></i>Section Title
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Form Heading Title
                 </label>
-                <input [(ngModel)]="applicationData!.applySection.title"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter section title" />
+                <input [(ngModel)]="applicationData!.applySection.title" (ngModelChange)="autoSave()"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
+                  placeholder="e.g. Apply for this position" />
               </div>
 
               <div>
-                <div class="flex items-center justify-between mb-2">
-                  <label class="text-sm font-medium text-slate-700">
-                    <i class="fa-solid fa-list mr-2"></i>Instructions
-                  </label>
-                  <button (click)="showMarkdownGuide = !showMarkdownGuide"
-                    class="text-slate-500 hover:text-slate-700 flex items-center gap-1 text-sm">
-                    <i class="fa-solid fa-circle-info"></i>
-                    Formatting Guide
-                  </button>
-                </div>
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Instructions Text
+                </label>
+                <textarea [(ngModel)]="applicationData!.applySection.instructions" (ngModelChange)="autoSave()" rows="4"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500"
+                  placeholder="Please complete all required fields below..."></textarea>
+              </div>
 
-                <textarea [(ngModel)]="applicationData!.applySection.instructions" rows="6"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter job description"></textarea>
-
-                <div class="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                  <i class="fa-brands fa-markdown"></i>
-                  <span>Markdown formatting supported</span>
-                </div>
-
-                <!-- Markdown Guide -->
-                <div *ngIf="showMarkdownGuide" class="mt-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                  <h4 class="font-medium text-slate-700 mb-3">
-                    Markdown Formatting Guide
-                  </h4>
-                  <div class="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">**bold**</code>
-                      <span class="text-slate-600 ml-2">→ <strong>bold</strong></span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">*italic*</code>
-                      <span class="text-slate-600 ml-2">→ <em>italic</em></span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded"># Heading 1</code>
-                      <span class="text-slate-600 ml-2">→ Large heading</span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">## Heading 2</code>
-                      <span class="text-slate-600 ml-2">→ Medium heading</span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">- List item</code>
-                      <span class="text-slate-600 ml-2">→ Bullet point</span>
-                    </div>
-                    <div>
-                      <code class="bg-white px-2 py-1 rounded">[Link](url)</code>
-                      <span class="text-slate-600 ml-2">→ Hyperlink</span>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                      Application Deadline
+                    </label>
+                    <div class="flex gap-1">
+                      <button (click)="setDeadlineDays(7)" type="button" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-lg border border-indigo-200">+7 Days</button>
+                      <button (click)="setDeadlineDays(14)" type="button" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-bold rounded-lg border border-indigo-200">+14 Days</button>
                     </div>
                   </div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-6">
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fa-solid fa-calendar mr-2"></i>Deadline
-                  </label>
-                  <input type="datetime-local" [(ngModel)]="applicationData!.deadline"
-                    class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
+                  <input type="datetime-local" [(ngModel)]="applicationData!.deadline" (ngModelChange)="autoSave()"
+                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fa-solid fa-button mr-2"></i>Button Text
+                  <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                    Submit Button Text
                   </label>
-                  <input value="Apply Now!" [(ngModel)]="applicationData!.applySection.buttonText"
-                    class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Enter button text" />
+                  <input [(ngModel)]="applicationData!.applySection.buttonText" (ngModelChange)="autoSave()"
+                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
+                    placeholder="Submit Application" />
                 </div>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-file-contract mr-2"></i>Declaration
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Legal Declaration Statement
                 </label>
-                <textarea [(ngModel)]="applicationData!.applySection.declaration" rows="4"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter declaration text"></textarea>
+                <textarea [(ngModel)]="applicationData!.applySection.declaration" (ngModelChange)="autoSave()" rows="3"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500"
+                  placeholder="I confirm that all provided details are true and accurate..."></textarea>
               </div>
             </div>
           </div>
 
           <!-- Color Scheme Section -->
           <div *ngIf="selectedSection === 'Color Scheme' && applicationData.colorScheme"
-            class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div class="grid grid-cols-2 gap-6">
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-palette"></i>
+              </div>
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-palette mr-2"></i>Primary Color
-                </label>
-                <div class="flex items-center gap-4">
-                  <input type="color" [(ngModel)]="applicationData!.colorScheme.primary"
-                    class="w-20 h-20 rounded-lg cursor-pointer" />
-                  <input type="text" [(ngModel)]="applicationData!.colorScheme.primary"
-                    class="flex-1 px-4 py-2 font-mono bg-slate-50 rounded-lg text-slate-600 focus:ring-2 focus:ring-indigo-200"
-                    pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" placeholder="#000000" />
+                <h3 class="text-base font-black text-slate-900">Custom Brand Palette</h3>
+                <p class="text-xs text-slate-500 font-medium">Customize the primary accent and secondary brand colors for your job post pages.</p>
+              </div>
+            </div>
+
+            <!-- Quick Presets -->
+            <div>
+              <span class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">Popular Theme Presets:</span>
+              <div class="flex flex-wrap gap-3">
+                <button (click)="setColorPreset('#282157', '#FF4E04')" type="button"
+                        class="px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 flex items-center gap-2 border border-slate-200 transition-all">
+                  <span class="w-4 h-4 rounded-full bg-[#282157] inline-block border border-white"></span>
+                  <span>Corporate Indigo</span>
+                </button>
+
+                <button (click)="setColorPreset('#4c1d95', '#8b5cf6')" type="button"
+                        class="px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 flex items-center gap-2 border border-slate-200 transition-all">
+                  <span class="w-4 h-4 rounded-full bg-[#4c1d95] inline-block border border-white"></span>
+                  <span>Violet Creative</span>
+                </button>
+
+                <button (click)="setColorPreset('#064e3b', '#10b981')" type="button"
+                        class="px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 flex items-center gap-2 border border-slate-200 transition-all">
+                  <span class="w-4 h-4 rounded-full bg-[#064e3b] inline-block border border-white"></span>
+                  <span>Emerald Executive</span>
+                </button>
+
+                <button (click)="setColorPreset('#0f172a', '#6366f1')" type="button"
+                        class="px-3.5 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-800 flex items-center gap-2 border border-slate-200 transition-all">
+                  <span class="w-4 h-4 rounded-full bg-[#0f172a] inline-block border border-white"></span>
+                  <span>Dark Obsidian</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+              <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">Primary Color</label>
+                <div class="flex items-center gap-3">
+                  <input type="color" [(ngModel)]="applicationData!.colorScheme.primary" (ngModelChange)="autoSave()"
+                    class="w-12 h-12 rounded-xl cursor-pointer border border-slate-300 p-1 bg-white shadow-2xs" />
+                  <input type="text" [(ngModel)]="applicationData!.colorScheme.primary" (ngModelChange)="autoSave()"
+                    class="flex-1 px-4 py-2.5 font-mono text-xs font-bold text-slate-800 bg-white rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500" />
                 </div>
               </div>
 
-              <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-palette mr-2"></i>Secondary Color
-                </label>
-                <div class="flex items-center gap-4">
-                  <input type="color" [(ngModel)]="applicationData!.colorScheme.secondary"
-                    class="w-20 h-20 rounded-lg cursor-pointer" />
-                  <input type="text" [(ngModel)]="applicationData!.colorScheme.secondary"
-                    class="flex-1 px-4 py-2 font-mono bg-slate-50 rounded-lg text-slate-600 focus:ring-2 focus:ring-indigo-200"
-                    pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$" placeholder="#000000" />
+              <div class="p-5 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider">Secondary Accent</label>
+                <div class="flex items-center gap-3">
+                  <input type="color" [(ngModel)]="applicationData!.colorScheme.secondary" (ngModelChange)="autoSave()"
+                    class="w-12 h-12 rounded-xl cursor-pointer border border-slate-300 p-1 bg-white shadow-2xs" />
+                  <input type="text" [(ngModel)]="applicationData!.colorScheme.secondary" (ngModelChange)="autoSave()"
+                    class="flex-1 px-4 py-2.5 font-mono text-xs font-bold text-slate-800 bg-white rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-500" />
                 </div>
+              </div>
+            </div>
+
+            <!-- Corner Style / Roundedness Customization -->
+            <div class="pt-4 border-t border-slate-100">
+              <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-3">
+                Template Corner Radius / Sharpness
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button (click)="applicationData!.colorScheme.borderRadius = 'none'; autoSave()" type="button"
+                        [class.border-indigo-600]="applicationData!.colorScheme.borderRadius === 'none'"
+                        [class.bg-indigo-50]="applicationData!.colorScheme.borderRadius === 'none'"
+                        class="p-3 rounded-none bg-slate-50 hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 text-center transition-all">
+                  <div class="w-6 h-6 border-2 border-slate-700 bg-white mx-auto mb-1 rounded-none"></div>
+                  <span>Sharp (0px Non-rounded)</span>
+                </button>
+                <button (click)="applicationData!.colorScheme.borderRadius = 'md'; autoSave()" type="button"
+                        [class.border-indigo-600]="applicationData!.colorScheme.borderRadius === 'md'"
+                        [class.bg-indigo-50]="applicationData!.colorScheme.borderRadius === 'md'"
+                        class="p-3 rounded-md bg-slate-50 hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 text-center transition-all">
+                  <div class="w-6 h-6 border-2 border-slate-700 bg-white mx-auto mb-1 rounded-md"></div>
+                  <span>Subtle (8px)</span>
+                </button>
+                <button (click)="applicationData!.colorScheme.borderRadius = 'xl'; autoSave()" type="button"
+                        [class.border-indigo-600]="applicationData!.colorScheme.borderRadius === 'xl'"
+                        [class.bg-indigo-50]="applicationData!.colorScheme.borderRadius === 'xl'"
+                        class="p-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 text-center transition-all">
+                  <div class="w-6 h-6 border-2 border-slate-700 bg-white mx-auto mb-1 rounded-xl"></div>
+                  <span>Rounded (16px)</span>
+                </button>
+                <button (click)="applicationData!.colorScheme.borderRadius = '3xl'; autoSave()" type="button"
+                        [class.border-indigo-600]="applicationData!.colorScheme.borderRadius === '3xl'"
+                        [class.bg-indigo-50]="applicationData!.colorScheme.borderRadius === '3xl'"
+                        class="p-3 rounded-3xl bg-slate-50 hover:bg-slate-100 border border-slate-300 text-xs font-bold text-slate-800 text-center transition-all">
+                  <div class="w-6 h-6 border-2 border-slate-700 bg-white mx-auto mb-1 rounded-full"></div>
+                  <span>Pill / Soft (24px)</span>
+                </button>
               </div>
             </div>
           </div>
 
           <!-- Submission Message Section -->
           <div *ngIf="selectedSection === 'Submission Message'"
-            class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-paper-plane"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900">Post-Submission Success Dialog</h3>
+                <p class="text-xs text-slate-500 font-medium">Configure the confirmation pop-up message displayed to candidates after submitting their application.</p>
+              </div>
+            </div>
+
             <div class="space-y-6">
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-check-circle mr-2"></i>Success Title
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Success Dialog Heading
                 </label>
-                <input [(ngModel)]="applicationData!.submissionMessage.title"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter success title" />
+                <input [(ngModel)]="applicationData!.submissionMessage.title" (ngModelChange)="autoSave()"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-bold text-slate-900 focus:outline-none focus:border-indigo-500"
+                  placeholder="Application Received!" />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-comment mr-2"></i>Success Message
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Success Message Body
                 </label>
-                <textarea [(ngModel)]="applicationData!.submissionMessage.message" rows="4"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter success message"></textarea>
+                <textarea [(ngModel)]="applicationData!.submissionMessage.message" (ngModelChange)="autoSave()" rows="4"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-white text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500"
+                  placeholder="Thank you for applying. Our recruitment team will review your application soon."></textarea>
               </div>
 
-              <div class="grid grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fa-solid fa-link mr-2"></i>Action Text
+                  <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                    Action Button Label
                   </label>
-                  <input [(ngModel)]="applicationData!.submissionMessage.actionText"
-                    class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Enter action text" />
+                  <input [(ngModel)]="applicationData!.submissionMessage.actionText" (ngModelChange)="autoSave()"
+                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                    placeholder="Return to Careers Home" />
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-slate-700 mb-2">
-                    <i class="fa-solid fa-link mr-2"></i>Action URL
+                  <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                    Action Redirect URL
                   </label>
-                  <input [(ngModel)]="applicationData!.submissionMessage.actionLink"
-                    class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                    placeholder="Enter action URL" />
+                  <input [(ngModel)]="applicationData!.submissionMessage.actionLink" (ngModelChange)="autoSave()"
+                    class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-semibold text-slate-900 focus:outline-none focus:border-indigo-500"
+                    placeholder="https://company.com/careers" />
                 </div>
+              </div>
+
+              <!-- Live Card Preview -->
+              <div class="p-6 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 space-y-3 text-center">
+                <div class="w-12 h-12 mx-auto rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <h4 class="text-sm font-black text-slate-900">{{ applicationData!.submissionMessage.title || 'Application Received!' }}</h4>
+                <p class="text-xs text-slate-600 font-medium max-w-md mx-auto">{{ applicationData!.submissionMessage.message }}</p>
+                <span class="inline-block px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold shadow-xs">
+                  {{ applicationData!.submissionMessage.actionText || 'Done' }}
+                </span>
               </div>
             </div>
           </div>
 
           <!-- Contact Section -->
           <div *ngIf="selectedSection === 'Contact Section'"
-            class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-6">
+            <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+              <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                <i class="fa-solid fa-address-book"></i>
+              </div>
+              <div>
+                <h3 class="text-base font-black text-slate-900">Footer Links & Contact Info</h3>
+                <p class="text-xs text-slate-500 font-medium">Manage copyright notices and sub-footer links (Privacy Policy, Support, Terms).</p>
+              </div>
+            </div>
+
             <div class="space-y-6">
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-2">
-                  <i class="fa-solid fa-copyright mr-2"></i>Section Description
+                <label class="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
+                  Copyright / Sub-footer Text
                 </label>
-                <input [(ngModel)]="applicationData!.footer.copyrightText"
-                  class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200"
-                  placeholder="Enter copyright text" />
+                <input [(ngModel)]="applicationData!.footer.copyrightText" (ngModelChange)="autoSave()"
+                  class="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50/50 text-xs font-medium text-slate-900 focus:outline-none focus:border-indigo-500"
+                  placeholder="© 2026 Acme Corp. All rights reserved." />
               </div>
 
-              <div>
-                <div>
-                  <div class="flex items-center justify-between mb-4">
-                    <label class="text-sm font-medium text-slate-700">
-                      <i class="fa-solid fa-link mr-2"></i>Footer Links and
-                      Contact
-                    </label>
-                    <button (click)="addFooterLink()"
-                      class="flex items-center gap-2 px-4 py-2 text-sm bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100">
-                      <i class="fa-solid fa-plus"></i>
-                      Add Footer Link
-                    </button>
+              <div class="pt-4 border-t border-slate-100">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Sub-footer Links</h4>
+                    <p class="text-[11px] text-slate-500 font-medium">Add links like Privacy Policy, Terms, Contact Us.</p>
                   </div>
+                  <button (click)="addFooterLink()"
+                    class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-all border border-indigo-200/80 flex items-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Add Footer Link</span>
+                  </button>
+                </div>
 
-                  <div class="space-y-4">
-                    <div *ngFor="
-                        let link of applicationData!.footer.links;
-                        let i = index
-                      " class="flex gap-4 p-4 bg-slate-50 rounded-lg">
-                      <input [(ngModel)]="link.text" placeholder="Link Text"
-                        class="flex-1 px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-                      <input [(ngModel)]="link.url" placeholder="URL"
-                        class="flex-1 px-4 py-2 rounded-lg border border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200" />
-                      <button (click)="deleteFooterLink(i)"
-                        class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg">
-                        <i class="fa-solid fa-trash"></i>
-                      </button>
-                    </div>
+                <div class="space-y-3">
+                  <div *ngFor="let link of applicationData!.footer.links; let i = index"
+                    class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-200/80">
+                    <input [(ngModel)]="link.text" (ngModelChange)="autoSave()" placeholder="Link Title"
+                      class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+                    <input [(ngModel)]="link.url" (ngModelChange)="autoSave()" placeholder="URL (https://...)"
+                      class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+                    <button (click)="deleteFooterLink(i)"
+                      class="p-2 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-xl transition-colors">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <app-dynamic-form *ngIf="selectedSection === 'Application Form'" [formType]="'Application Form'">
+          <app-dynamic-form *ngIf="selectedSection === 'Application Form'" [formType]="'Application Form'" (formChange)="onFormChange($event)">
           </app-dynamic-form>
 
-            <app-dynamic-form *ngIf="selectedSection === 'Request For Additional Data'" [formType]="'Request For Additional Data'">
+          <app-dynamic-form *ngIf="selectedSection === 'Request For Additional Data'" [formType]="'Request For Additional Data'" (formChange)="onFormChange($event)">
           </app-dynamic-form>
 
           <app-application-stages *ngIf="selectedSection === 'Application Stages'"

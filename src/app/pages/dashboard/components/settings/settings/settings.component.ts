@@ -8,11 +8,13 @@ import { JobPostData } from '../../../../../models/jobpost.model';
 import { LoaderComponent } from '../../../../components/loader/loader.component';
 import { SearchFilterSettingsComponent } from '../search-filter-settings/search-filter-settings.component';
 import { CandidateRankingSettingsComponent } from '../candidate-ranking-settings/candidate-ranking-settings.component';
-import e from 'express';
+import { SmtpSettingsComponent } from '../smtp-settings/smtp-settings.component';
+
 export type SettingType =
   | 'card-display'
   | 'search-filter'
   | 'candidate-ranking'
+  | 'smtp-settings'
   | 'notifications'
   | 'preferences'
   | 'integrations';
@@ -23,6 +25,7 @@ export type SettingType =
     CardDisplaySettingsComponent,
     SearchFilterSettingsComponent,
     CandidateRankingSettingsComponent,
+    SmtpSettingsComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -39,9 +42,11 @@ export class SettingsComponent implements OnInit {
       label: 'Candidate Ranking',
       icon: 'fas fa-sort-amount-down',
     },
-    // { id: 'notifications', label: 'Notifications', icon: 'fas fa-bell' },
-    // { id: 'preferences', label: 'Preferences', icon: 'fas fa-cog' },
-    // { id: 'integrations', label: 'Integrations', icon: 'fas fa-plug' },
+    {
+      id: 'smtp-settings',
+      label: 'Organization SMTP Mail',
+      icon: 'fas fa-paper-plane',
+    },
   ];
 
   loading: boolean = false;

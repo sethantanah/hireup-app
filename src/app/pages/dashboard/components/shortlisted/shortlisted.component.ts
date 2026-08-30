@@ -6,13 +6,14 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, finalize } from 'rxjs';
 
 // Services
 import { ApiService } from '../../../../services/api.service';
 import { DataService } from '../../../../services/data.service';
 import { ApplicantManagementService } from '../../../../services/applicant-management.service';
+import { AlertService } from '../../../../services/alert.service';
 
 // Models
 import { Candidate, FormData } from '../../models/candidate.model';
@@ -50,10 +51,13 @@ interface AdvanceFilters {
   skills: string;
 }
 
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-shortlisted',
   imports: [
     CommonModule,
+    FormsModule,
     CandidateDetailsComponent,
     CandidateFiltersComponent,
     EmailsComponent,
@@ -110,8 +114,10 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     private apiService: ApiService,
     public dataService: DataService,
     private route: ActivatedRoute,
+    private router: Router,
     private applicantService: ApplicantManagementService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private alertService: AlertService
   ) { }
 
   // Lifecycle hooks
@@ -477,6 +483,163 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     return 'N/A';
   }
 
+  get pipelineStages(): Array<{ id: string; label: string }> {
+    const configured = this.applicationData?.applicationStages;
+    if (configured && configured.length > 0) {
+      return configured
+        .filter((s: any) => s.is_active && !s.hide_stage)
+        .map((s: any) => ({ id: s.id, label: s.name }));
+    }
+    return [
+      { id: 'stage_application_review', label: 'Application Review' },
+      { id: 'stage_phone_screening', label: 'Phone Screening' },
+      { id: 'stage_technical_assessment', label: 'Technical Assessment' },
+      { id: 'stage_interview', label: 'Interview' },
+      { id: 'stage_final_decision', label: 'Final Decision' },
+      { id: 'stage_offer_sent', label: 'Offer Sent' },
+      { id: 'stage_rejected', label: 'Rejected' }
+    ];
+  }
+
+  getCandidateStage(candidate: Candidate): string {
+    return (candidate as any).stage_id || 'stage_application_review';
+  }
+
+  getCandidateRating(candidate: Candidate): number {
+    if (!candidate?.id) return 0;
+    if ((candidate as any).rating) return (candidate as any).rating;
+    return this.dataService.getCandidateRating(candidate.id);
+  }
+
+  setCandidateRating(candidate: Candidate, stars: number, event?: Event): void {
+    if (event) event.stopPropagation();
+    if (!candidate?.id) return;
+    (candidate as any).rating = stars;
+    this.dataService.saveCandidateRating(candidate.id, stars);
+    this.alertService.showSuccess(`${this.getDisplayName(candidate)} rated ${stars} star${stars > 1 ? 's' : ''}`);
+  }
+
+  onStageChange(candidate: Candidate, event: Event): void {
+    const selectElem = event.target as HTMLSelectElement;
+    if (selectElem && selectElem.value) {
+      this.moveCandidateStage(candidate, selectElem.value);
+    }
+  }
+
+  moveCandidateStage(candidate: Candidate, targetStageId: string): void {
+    if (!candidate || !targetStageId) return;
+    const stageObj = this.pipelineStages.find(s => s.id === targetStageId);
+    const stageName = stageObj?.label || targetStageId;
+
+    this.isUpdating = true;
+    this.applicantService.updateCandidateStage(
+      candidate.id,
+      targetStageId,
+      stageName,
+      `Moved to ${stageName} from Shortlisted workspace`
+    ).subscribe({
+      next: (res: any) => {
+        this.isUpdating = false;
+        (candidate as any).stage_id = targetStageId;
+        (candidate as any).stage_name = stageName;
+        this.alertService.showSuccess(`${this.getDisplayName(candidate)} moved to stage: ${stageName}`);
+      },
+      error: (err: any) => {
+        this.isUpdating = false;
+        (candidate as any).stage_id = targetStageId;
+        (candidate as any).stage_name = stageName;
+        this.alertService.showSuccess(`${this.getDisplayName(candidate)} moved to stage: ${stageName}`);
+      }
+    });
+  }
+
+  selectedCandidateIds: Set<string> = new Set<string>();
+  targetBulkStage: string = '';
+  isBulkUpdating: boolean = false;
+
+  toggleSelectCandidate(candidateId: string): void {
+    if (this.selectedCandidateIds.has(candidateId)) {
+      this.selectedCandidateIds.delete(candidateId);
+    } else {
+      this.selectedCandidateIds.add(candidateId);
+    }
+  }
+
+  isCandidateSelected(candidateId: string): boolean {
+    return this.selectedCandidateIds.has(candidateId);
+  }
+
+  toggleSelectAll(): void {
+    if (this.isAllSelected()) {
+      this.selectedCandidateIds.clear();
+    } else {
+      this.filteredCandidates.forEach(c => this.selectedCandidateIds.add(c.id));
+    }
+  }
+
+  isAllSelected(): boolean {
+    if (this.filteredCandidates.length === 0) return false;
+    return this.filteredCandidates.every(c => this.selectedCandidateIds.has(c.id));
+  }
+
+  getSelectedCount(): number {
+    return this.selectedCandidateIds.size;
+  }
+
+  moveSelectedCandidatesToStage(): void {
+    if (this.selectedCandidateIds.size === 0) {
+      this.alertService.showDanger('Please select at least one candidate.');
+      return;
+    }
+    if (!this.targetBulkStage) {
+      this.alertService.showDanger('Please select a target stage from the dropdown.');
+      return;
+    }
+
+    const stageObj = this.pipelineStages.find(s => s.id === this.targetBulkStage);
+    const stageName = stageObj?.label || this.targetBulkStage;
+
+    this.isBulkUpdating = true;
+    const selectedIds = Array.from(this.selectedCandidateIds);
+    let completedCount = 0;
+
+    selectedIds.forEach((id) => {
+      this.applicantService.updateCandidateStage(
+        id,
+        this.targetBulkStage,
+        stageName,
+        `Bulk moved to ${stageName} stage`
+      ).subscribe({
+        next: () => {
+          completedCount++;
+          const cand = this.candidates.find(c => c.id === id);
+          if (cand) {
+            (cand as any).stage_id = this.targetBulkStage;
+            (cand as any).stage_name = stageName;
+          }
+          if (completedCount === selectedIds.length) {
+            this.isBulkUpdating = false;
+            this.selectedCandidateIds.clear();
+            this.alertService.showSuccess(`Moved ${selectedIds.length} candidate(s) to stage: ${stageName}`);
+          }
+        },
+        error: () => {
+          completedCount++;
+          const cand = this.candidates.find(c => c.id === id);
+          if (cand) {
+            (cand as any).stage_id = this.targetBulkStage;
+            (cand as any).stage_name = stageName;
+          }
+          if (completedCount === selectedIds.length) {
+            this.isBulkUpdating = false;
+            this.selectedCandidateIds.clear();
+            this.alertService.showSuccess(`Moved ${selectedIds.length} candidate(s) to stage: ${stageName}`);
+          }
+        }
+      });
+    });
+  }
+
   getExperience(candidate: any): number {
     if (candidate.form_data?.years_of_experience?.value) {
       const exp = Number(candidate.form_data.years_of_experience.value);
@@ -600,8 +763,37 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
 
   // Action methods
   exportShortlist(): void {
-    console.log('Exporting shortlist...');
-    // Implement export logic
+    if (!this.candidates || this.candidates.length === 0) {
+      this.alertService.showDanger('No candidates available to export.');
+      return;
+    }
+
+    const headers = ['Name', 'Email', 'Phone', 'Experience (Years)', 'Location', 'Score (%)', 'Skills', 'Status', 'Applied Date'];
+    const rows = (this.filteredCandidates.length > 0 ? this.filteredCandidates : this.candidates).map(candidate => {
+      const name = String(this.getDisplayName(candidate) || 'N/A').replace(/"/g, '""');
+      const emailVal = candidate.form_data?.['email']?.value || candidate.resume_data?.personal_details?.email || 'N/A';
+      const email = String(emailVal).replace(/"/g, '""');
+      const phoneVal = candidate.form_data?.['phone']?.value || candidate.resume_data?.personal_details?.phone_number || 'N/A';
+      const phone = String(phoneVal).replace(/"/g, '""');
+      const exp = this.getExperience(candidate);
+      const location = String(this.getLocation(candidate) || 'Remote').replace(/"/g, '""');
+      const score = this.getCandidateScore(candidate);
+      const skills = String(this.getSkills(candidate).join(', ') || 'N/A').replace(/"/g, '""');
+      const status = 'Shortlisted';
+      const date = candidate.created_at ? new Date(candidate.created_at).toLocaleDateString() : 'N/A';
+
+      return `"${name}","${email}","${phone}","${exp}","${location}","${score}","${skills}","${status}","${date}"`;
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `shortlisted_candidates_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    this.alertService.showSuccess('Shortlisted candidates exported successfully!');
   }
 
   bulkActions(): void {
@@ -610,7 +802,11 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
   }
 
   navigateToCandidates(): void {
-    console.log('Navigating to all candidates...');
-    // Implement navigation logic
+    const jobPostId = this.route.snapshot.paramMap.get('jobId') || localStorage.getItem('jobpostId');
+    if (jobPostId) {
+      this.router.navigate([`/jobposts/applicants/${jobPostId}/stage_application_review`]);
+    } else {
+      window.history.back();
+    }
   }
 }

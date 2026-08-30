@@ -25,85 +25,125 @@
                     </a>
                 </div>
 
-                <!-- Auth Buttons -->
-                <div class="flex items-center space-x-4">
-                    <button 
-                        routerLink="/auth/login" 
-                        class="px-6 py-2.5 text-indigo-600 font-semibold rounded-lg hover:bg-indigo-50 transition-colors"
+                <!-- Auth Buttons for Recruiters & Candidates -->
+                <div class="flex items-center space-x-3">
+                    <!-- Candidate Hub Link -->
+                    <a 
+                        routerLink="/candidate-portal" 
+                        class="px-4 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-200/60 flex items-center gap-1.5 shadow-2xs"
                     >
-                        Sign In
-                    </button>
-                    <button 
-                        routerLink="/dashboard" 
-                        class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+                        <i class="fa-solid fa-sparkles text-indigo-500"></i>
+                        <span>Candidate Portal & AI Match</span>
+                    </a>
+
+                    <!-- Recruiter Sign In -->
+                    <a 
+                        routerLink="/auth/recruiter/login" 
+                        class="px-4 py-2 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition-all"
                     >
-                        Get Started
-                    </button>
+                        Recruiter Sign In
+                    </a>
+
+                    <!-- Recruiter Get Started -->
+                    <a 
+                        routerLink="/auth/recruiter/register" 
+                        class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/20 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2"
+                    >
+                        <i class="fa-solid fa-building flex text-[11px]"></i>
+                        <span>Recruiter Workspace</span>
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="pt-20 pb-32 px-4 sm:px-6 lg:px-8">
+    <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center">
+            <div class="text-center space-y-6">
                 <!-- Badge -->
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-full text-indigo-700 font-semibold text-sm mb-8">
-                    <i class="fas fa-star text-amber-500"></i>
-                    Trusted by 500+ companies worldwide
+                <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-100 rounded-full text-indigo-800 font-extrabold text-xs tracking-wide uppercase border border-indigo-200/50 shadow-xs">
+                    <i class="fas fa-sparkles text-amber-500"></i>
+                    AI Vector Matching & Enterprise ATS Platform
                 </div>
 
                 <!-- Main Headline -->
-                <h1 class="text-5xl md:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-                    Streamline Your
-                    <span class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                        Hiring Process
+                <h1 class="text-4xl sm:text-6xl md:text-7xl font-black text-slate-900 leading-tight tracking-tight">
+                    Smart Hiring for
+                    <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 bg-clip-text text-transparent">
+                        Recruiters & Candidates
                     </span>
                 </h1>
 
                 <!-- Subheadline -->
-                <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-                    Enterprise-grade Applicant Tracking System designed to simplify recruitment, 
-                    automate workflows, and help you find the perfect candidates faster.
+                <p class="text-base sm:text-xl text-slate-600 max-w-3xl mx-auto font-medium leading-relaxed">
+                    Connecting top talent with high-performing recruitment teams through automated AI resume parsing, vector match scoring, and seamless pipeline management.
                 </p>
 
-                <!-- CTA Buttons -->
-                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-                    <button 
-                        routerLink="/auth/register"
-                        class="group px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 flex items-center justify-center gap-3"
-                    >
-                        <span>Start Free Trial</span>
-                        <i class="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                    </button>
-                    
-                    <button 
-                        (click)="scrollToFeatures()"
-                        class="px-8 py-4 bg-white text-gray-800 font-semibold rounded-xl shadow-lg hover:shadow-xl border border-gray-200 hover:border-gray-300 transform hover:-translate-y-1 transition-all duration-200"
-                    >
-                        <i class="fas fa-play-circle mr-2 text-indigo-600"></i>
-                        Watch Demo
-                    </button>
+                <!-- Dual Audience Entry Cards (Recruiter vs Candidate) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto pt-6 text-left">
+                    <!-- Recruiter Card -->
+                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-slate-800 space-y-5 relative overflow-hidden group">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-xl font-bold">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-black text-white">For Recruiters & Hiring Managers</h3>
+                            <p class="text-xs text-slate-300 font-medium leading-relaxed">
+                                Post jobs, build custom assessment tests, run AI talent pool searches, and manage candidate pipelines with real-time velocity analytics.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 pt-2">
+                            <a routerLink="/auth/recruiter/login" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2">
+                                <span>Recruiter Sign In</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                            <a routerLink="/auth/recruiter/register" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all border border-white/10">
+                                Register Org
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Candidate Card -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-8 text-slate-900 shadow-xl border border-indigo-100 space-y-5 relative overflow-hidden group hover:border-indigo-300 transition-all">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-xl font-bold">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xl font-black text-slate-900">For Candidates & Job Seekers</h3>
+                            <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                                Upload your resume for automated AI parsing & vector DB indexing. View instant job match percentages and apply with 1-click.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 pt-2">
+                            <a routerLink="/candidate-portal" class="px-5 py-2.5 bg-slate-900 hover:bg-indigo-900 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2">
+                                <span>Candidate Portal & AI Match</span>
+                                <i class="fa-solid fa-sparkles text-indigo-400 text-[10px]"></i>
+                            </a>
+                            <a routerLink="/auth/candidate/login" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200">
+                                Candidate Login
+                            </a>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto pt-10 border-t border-slate-200/60 mt-10">
                     <div class="text-center">
                         <div class="text-3xl font-bold text-gray-900 mb-2">10K+</div>
-                        <div class="text-gray-600">Candidates Hired</div>
+                        <div class="text-gray-600 text-xs font-semibold">Candidates Sourced</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-gray-900 mb-2">500+</div>
-                        <div class="text-gray-600">Companies</div>
+                        <div class="text-gray-600 text-xs font-semibold">Active Organizations</div>
                     </div>
                     <div class="text-center">
                         <div class="text-3xl font-bold text-gray-900 mb-2">99.9%</div>
-                        <div class="text-gray-600">Uptime</div>
+                        <div class="text-gray-600 text-xs font-semibold">Uptime</div>
                     </div>
                     <div class="text-center">
-                        <div class="text-3xl font-bold text-gray-900 mb-2">24/7</div>
-                        <div class="text-gray-600">Support</div>
+                        <div class="text-3xl font-bold text-gray-900 mb-2">AI 1536d</div>
+                        <div class="text-gray-600 text-xs font-semibold">Vector Embedding Engine</div>
                     </div>
                 </div>
             </div>

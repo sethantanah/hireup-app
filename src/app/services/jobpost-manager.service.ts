@@ -574,6 +574,17 @@ createDefaultMetrics(stageId: string, jobId?: string): StageMetrics {
   }
 
   /**
+   * Get all job posts for a user
+   */
+  getJobPosts(userId: string): Observable<any> {
+    const apiUrl = `${environment.apiUrl}/jobposts?user_id=${userId}`;
+    const headers = this.createHeaders();
+    return this.http.get<any>(apiUrl, { headers }).pipe(
+      catchError(this.handleApiError.bind(this))
+    );
+  }
+
+  /**
    * Create or update job post data via API
    */
   createUpdateJobPostData(

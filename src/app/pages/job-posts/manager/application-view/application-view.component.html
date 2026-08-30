@@ -1,4 +1,4 @@
-<app-loader *ngIf="loading"></app-loader>
+<app-loader *ngIf="loading" [loadingText]="'Loading Application Form...'"></app-loader>
 
 <app-templates-manager
   *ngIf="applicationData && formType"

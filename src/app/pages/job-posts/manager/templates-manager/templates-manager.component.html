@@ -1,6 +1,6 @@
 <!-- Template 1: Classic (Redesigned) -->
 <div *ngIf="templateId === '1' && jobAppData">
-  <div class="max-w-4xl mx-auto p-3 sm:p-6 bg-white rounded-lg shadow-sm" [ngStyle]="{
+  <div [ngClass]="getCornerRadiusClass('rounded-lg')" class="max-w-4xl mx-auto mt-8 sm:mt-12 p-3 sm:p-6 bg-white shadow-sm" [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
       '--secondary-color': jobAppData?.colorScheme?.secondary,
       '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
@@ -111,31 +111,72 @@
           <input *ngIf="
               ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
             " [type]="field.type" [id]="field.key" [minlength]="field.min_length || null"
-            [maxlength]="field.max_length || null" [formControlName]="field.key"
+            [maxlength]="field.max_length || null" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
 
           <!-- Textarea -->
-          <textarea *ngIf="field.type === 'textarea'" [id]="field.key" [formControlName]="field.key"
+          <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
             [minlength]="field.min_length || null" [maxlength]="field.max_length || null" rows="4"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"></textarea>
 
-          <!-- Select -->
-          <select *ngIf="field.type === 'select'" [id]="field.key" [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
-            <option value="">Select an option</option>
-            <option *ngFor="let option of field.options" [value]="option">
-              {{ option }}
-            </option>
-          </select>
+          <!-- Checkbox Field -->
+          <div *ngIf="field.type === 'checkbox'" class="mt-2 flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+              class="h-5 w-5 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)] mt-0.5" />
+            <label [for]="field.key" class="text-sm font-medium text-gray-700 cursor-pointer">
+              {{ field.label }}
+              <span *ngIf="field.required" class="text-red-500">*</span>
+            </label>
+          </div>
+
+          <!-- Select Field (Multi-select) -->
+          <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="mt-2 space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+              <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+              <label [for]="field.key + '_' + option" class="text-sm text-gray-700 cursor-pointer">{{ option }}</label>
+            </div>
+            <div *ngIf="field.allowOther" class="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+              <div class="flex items-center space-x-2">
+                <input type="checkbox" [id]="field.key + '_other_check'" [checked]="isOptionSelected(field.key, 'Other')" (change)="toggleMultiSelectOption(field.key, 'Other'); validateField(field)"
+                  class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+                <label [for]="field.key + '_other_check'" class="text-sm text-gray-700 font-medium cursor-pointer">Other (Please specify)</label>
+              </div>
+              <input *ngIf="isOptionSelected(field.key, 'Other')" type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                placeholder="Specify other option..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
+            </div>
+          </div>
+
+          <!-- Select Field (Single Select) -->
+          <div *ngIf="field.type === 'select' && !field.allowMultiSelect" class="mt-1 space-y-2">
+            <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
+              <option value="">Select an option</option>
+              <option *ngFor="let option of field.options" [value]="option">
+                {{ option }}
+              </option>
+              <option *ngIf="field.allowOther" value="Other">Other</option>
+            </select>
+            <div *ngIf="field.allowOther && formValues[field.key] === 'Other'" class="mt-2">
+              <input type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                placeholder="Please specify other option..."
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
+            </div>
+          </div>
 
           <!-- File Input -->
-          <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [formControlName]="field.key"
+          <input *ngIf="field.type === 'file'" type="file" [id]="field.key"
             [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
             class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]" />
 
-          <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
+          <p *ngIf="field.type === 'file'" class="text-xs text-gray-500 mt-1">
             Accepted formats: {{ field.acceptedTypes }}
             <span *ngIf="field.max_length">, Max size: {{ field.max_length }}MB</span>
+          </p>
+
+          <p *ngIf="errors[field.key]" class="text-xs text-red-500 mt-1 font-medium">
+            {{ errors[field.key] }}
           </p>
         </div>
 
@@ -206,7 +247,7 @@
 
 <!-- Template 2: Modern Card (New Design) -->
 <div *ngIf="templateId === '2' && jobAppData">
-  <div class="max-w-4xl mx-auto p-3 sm:p-6" [ngStyle]="{
+  <div class="max-w-4xl mx-auto mt-8 sm:mt-12 p-3 sm:p-6" [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
       '--secondary-color': jobAppData?.colorScheme?.secondary,
       '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
@@ -268,6 +309,12 @@
         </div>
       </div>
 
+      <!-- Deadline Check -->
+      <div *ngIf="deadlinePassed" class="lg:col-span-2 text-center py-6 bg-red-50 rounded-xl border border-red-200 p-6 shadow-sm">
+        <h3 class="text-xl font-bold text-red-600">Deadline Ended</h3>
+        <p class="text-gray-600 mt-1">The application deadline has passed.</p>
+      </div>
+
       <!-- Application Form -->
       <div class="lg:col-span-2" *ngIf="!deadlinePassed">
         <div class="bg-white rounded-xl shadow-md p-6">
@@ -321,31 +368,72 @@
               <input *ngIf="
                   ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
                 " [type]="field.type" [id]="field.key" [minlength]="field.min_length || null"
-                [maxlength]="field.max_length || null" [formControlName]="field.key"
+                [maxlength]="field.max_length || null" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
 
               <!-- Textarea -->
-              <textarea *ngIf="field.type === 'textarea'" [id]="field.key" [formControlName]="field.key"
+              <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
                 [minlength]="field.min_length || null" [maxlength]="field.max_length || null" rows="4"
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"></textarea>
 
-              <!-- Select -->
-              <select *ngIf="field.type === 'select'" [id]="field.key" [formControlName]="field.key"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
-                <option value="">Select an option</option>
-                <option *ngFor="let option of field.options" [value]="option">
-                  {{ option }}
-                </option>
-              </select>
+              <!-- Checkbox Field -->
+              <div *ngIf="field.type === 'checkbox'" class="mt-2 flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                  class="h-5 w-5 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)] mt-0.5" />
+                <label [for]="field.key" class="text-sm font-medium text-gray-700 cursor-pointer">
+                  {{ field.label }}
+                  <span *ngIf="field.required" class="text-red-500">*</span>
+                </label>
+              </div>
+
+              <!-- Select Field (Multi-select) -->
+              <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="mt-2 space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+                  <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                    class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+                  <label [for]="field.key + '_' + option" class="text-sm text-gray-700 cursor-pointer">{{ option }}</label>
+                </div>
+                <div *ngIf="field.allowOther" class="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+                  <div class="flex items-center space-x-2">
+                    <input type="checkbox" [id]="field.key + '_other_check'" [checked]="isOptionSelected(field.key, 'Other')" (change)="toggleMultiSelectOption(field.key, 'Other'); validateField(field)"
+                      class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+                    <label [for]="field.key + '_other_check'" class="text-sm text-gray-700 font-medium cursor-pointer">Other (Please specify)</label>
+                  </div>
+                  <input *ngIf="isOptionSelected(field.key, 'Other')" type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                    placeholder="Specify other option..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
+                </div>
+              </div>
+
+              <!-- Select Field (Single Select) -->
+              <div *ngIf="field.type === 'select' && !field.allowMultiSelect" class="mt-1 space-y-2">
+                <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
+                  <option value="">Select an option</option>
+                  <option *ngFor="let option of field.options" [value]="option">
+                    {{ option }}
+                  </option>
+                  <option *ngIf="field.allowOther" value="Other">Other</option>
+                </select>
+                <div *ngIf="field.allowOther && formValues[field.key] === 'Other'" class="mt-2">
+                  <input type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                    placeholder="Please specify other option..."
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm text-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
+                </div>
+              </div>
 
               <!-- File Input -->
-              <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [formControlName]="field.key"
+              <input *ngIf="field.type === 'file'" type="file" [id]="field.key"
                 [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
                 class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]" />
 
-              <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
+              <p *ngIf="field.type === 'file'" class="text-xs text-gray-500 mt-1">
                 Accepted formats: {{ field.acceptedTypes }}
                 <span *ngIf="field.max_length">, Max size: {{ field.max_length }}MB</span>
+              </p>
+
+              <p *ngIf="errors[field.key]" class="text-xs text-red-500 mt-1 font-medium">
+                {{ errors[field.key] }}
               </p>
             </div>
 
@@ -426,7 +514,7 @@
 
 <!-- Template 3: Minimalist (New Design) -->
 <div *ngIf="templateId === '3' && jobAppData">
-  <div class="max-w-3xl mx-auto p-3 sm:p-6" [ngStyle]="{
+  <div class="max-w-3xl mx-auto mt-8 sm:mt-12 p-3 sm:p-6" [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
       '--secondary-color': jobAppData?.colorScheme?.secondary,
       '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
@@ -487,31 +575,72 @@
           <input *ngIf="
               ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
             " [type]="field.type" [id]="field.key" [minlength]="field.min_length || null"
-            [maxlength]="field.max_length || null" [formControlName]="field.key"
+            [maxlength]="field.max_length || null" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]" />
 
           <!-- Textarea -->
-          <textarea *ngIf="field.type === 'textarea'" [id]="field.key" [formControlName]="field.key"
+          <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
             [minlength]="field.min_length || null" [maxlength]="field.max_length || null" rows="4"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]"></textarea>
 
-          <!-- Select -->
-          <select *ngIf="field.type === 'select'" [id]="field.key" [formControlName]="field.key"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]">
-            <option value="">Select an option</option>
-            <option *ngFor="let option of field.options" [value]="option">
-              {{ option }}
-            </option>
-          </select>
+          <!-- Checkbox Field -->
+          <div *ngIf="field.type === 'checkbox'" class="mt-2 flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+              class="h-5 w-5 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)] mt-0.5" />
+            <label [for]="field.key" class="text-sm font-medium text-gray-700 cursor-pointer">
+              {{ field.label }}
+              <span *ngIf="field.required" class="text-red-500">*</span>
+            </label>
+          </div>
+
+          <!-- Select Field (Multi-select) -->
+          <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="mt-2 space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+            <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+              <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+              <label [for]="field.key + '_' + option" class="text-sm text-gray-700 cursor-pointer">{{ option }}</label>
+            </div>
+            <div *ngIf="field.allowOther" class="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+              <div class="flex items-center space-x-2">
+                <input type="checkbox" [id]="field.key + '_other_check'" [checked]="isOptionSelected(field.key, 'Other')" (change)="toggleMultiSelectOption(field.key, 'Other'); validateField(field)"
+                  class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+                <label [for]="field.key + '_other_check'" class="text-sm text-gray-700 font-medium cursor-pointer">Other (Please specify)</label>
+              </div>
+              <input *ngIf="isOptionSelected(field.key, 'Other')" type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                placeholder="Specify other option..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[var(--primary-color)]" />
+            </div>
+          </div>
+
+          <!-- Select Field (Single Select) -->
+          <div *ngIf="field.type === 'select' && !field.allowMultiSelect" class="mt-1 space-y-2">
+            <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+              class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-[var(--primary-color)]">
+              <option value="">Select an option</option>
+              <option *ngFor="let option of field.options" [value]="option">
+                {{ option }}
+              </option>
+              <option *ngIf="field.allowOther" value="Other">Other</option>
+            </select>
+            <div *ngIf="field.allowOther && formValues[field.key] === 'Other'" class="mt-2">
+              <input type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                placeholder="Please specify other option..."
+                class="block w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-[var(--primary-color)]" />
+            </div>
+          </div>
 
           <!-- File Input -->
-          <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [formControlName]="field.key"
+          <input *ngIf="field.type === 'file'" type="file" [id]="field.key"
             [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
             class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]" />
 
-          <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
+          <p *ngIf="field.type === 'file'" class="text-xs text-gray-500 mt-1">
             Accepted formats: {{ field.acceptedTypes }}
             <span *ngIf="field.max_length">, Max size: {{ field.max_length }}MB</span>
+          </p>
+
+          <p *ngIf="errors[field.key]" class="text-xs text-red-500 mt-1 font-medium">
+            {{ errors[field.key] }}
           </p>
         </div>
 
@@ -581,7 +710,7 @@
 
 <!-- Template 4: Sidebar Layout (New Design) -->
 <div *ngIf="templateId === '4' && jobAppData">
-  <div class="min-h-screen bg-gray-50" [ngStyle]="{
+  <div class="min-h-screen bg-gray-50 pt-8 sm:pt-12" [ngStyle]="{
       '--primary-color': jobAppData?.colorScheme?.primary,
       '--secondary-color': jobAppData?.colorScheme?.secondary,
       '--accent-color': jobAppData?.colorScheme?.accent || jobAppData.colorScheme?.primary
@@ -679,31 +808,78 @@
                   <input *ngIf="
                       ['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')
                     " [type]="field.type" [id]="field.key" [minlength]="field.min_length || null"
-                    [maxlength]="field.max_length || null" [formControlName]="field.key"
+                    [maxlength]="field.max_length || null" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
 
                   <!-- Textarea -->
-                  <textarea *ngIf="field.type === 'textarea'" [id]="field.key" [formControlName]="field.key"
+                  <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
                     [minlength]="field.min_length || null" [maxlength]="field.max_length || null" rows="4"
                     class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]"></textarea>
 
-                  <!-- Select -->
-                  <select *ngIf="field.type === 'select'" [id]="field.key" [formControlName]="field.key"
-                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
-                    <option value="">Select an option</option>
-                    <option *ngFor="let option of field.options" [value]="option">
-                      {{ option }}
-                    </option>
-                  </select>
+                  <!-- Checkbox Field -->
+                  <div *ngIf="field.type === 'checkbox'" class="mt-2 flex items-start space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                      class="h-5 w-5 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)] mt-0.5" />
+                    <label [for]="field.key" class="text-sm font-medium text-gray-700 cursor-pointer">
+                      {{ field.label }}
+                      <span *ngIf="field.required" class="text-red-500">*</span>
+                    </label>
+                  </div>
+
+                  <!-- Select Field (Multi-select) -->
+                  <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="mt-2 space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+                      <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                        class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+                      <label [for]="field.key + '_' + option" class="text-sm text-gray-700 cursor-pointer">{{ option }}</label>
+                    </div>
+                    <div *ngIf="field.allowOther" class="flex flex-col space-y-2 pt-2 border-t border-gray-200">
+                      <div class="flex items-center space-x-2">
+                        <input type="checkbox" [id]="field.key + '_other_check'" [checked]="isOptionSelected(field.key, 'Other')" (change)="toggleMultiSelectOption(field.key, 'Other'); validateField(field)"
+                          class="h-4 w-4 text-[var(--primary-color)] border-gray-300 rounded focus:ring-[var(--primary-color)]" />
+                        <label [for]="field.key + '_other_check'" class="text-sm text-gray-700 font-medium cursor-pointer">Other (Please specify)</label>
+                      </div>
+                      <input *ngIf="isOptionSelected(field.key, 'Other')" type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                        placeholder="Specify other option..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
+                    </div>
+                  </div>
+
+                  <!-- Select Field (Single Select) -->
+                  <div *ngIf="field.type === 'select' && !field.allowMultiSelect" class="mt-1 space-y-2">
+                    <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]">
+                      <option value="">Select an option</option>
+                      <option *ngFor="let option of field.options" [value]="option">
+                        {{ option }}
+                      </option>
+                      <option *ngIf="field.allowOther" value="Other">Other</option>
+                    </select>
+                    <div *ngIf="field.allowOther && formValues[field.key] === 'Other'" class="mt-2">
+                      <input type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                        placeholder="Please specify other option..."
+                        class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-[var(--primary-color)] focus:border-[var(--primary-color)]" />
+                    </div>
+                  </div>
 
                   <!-- File Input -->
-                  <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [formControlName]="field.key"
+                  <input *ngIf="field.type === 'file'" type="file" [id]="field.key"
                     [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
                     class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[var(--primary-color)] file:text-white hover:file:bg-[var(--secondary-color)]" />
 
-                  <p *ngIf="field.type === 'file'" class="text-xs text-gray-500">
+                  <div *ngIf="field.type === 'file' && preloadedCvAttached[field.key] && !uploadedFiles[field.key]" class="flex items-center gap-2 p-2.5 bg-emerald-50 text-emerald-800 rounded-lg border border-emerald-200 text-xs font-semibold mt-1">
+                    <svg class="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>Resume pre-attached from your candidate profile</span>
+                    <button type="button" (click)="clearPreloadedCv(field.key)" class="ml-auto text-emerald-700 hover:text-emerald-900 underline text-xs">Change file</button>
+                  </div>
+
+                  <p *ngIf="field.type === 'file'" class="text-xs text-gray-500 mt-1">
                     Accepted formats: {{ field.acceptedTypes }}
                     <span *ngIf="field.max_length">, Max size: {{ field.max_length }}MB</span>
+                  </p>
+
+                  <p *ngIf="errors[field.key]" class="text-xs text-red-500 mt-1 font-medium">
+                    {{ errors[field.key] }}
                   </p>
                 </div>
 
@@ -780,10 +956,407 @@
     </footer>
   </div>
 </div>
-<!-- End Template 4 -->
+<!-- Template 5: Creative Split Hero -->
+<div *ngIf="templateId === '5' && jobAppData">
+  <div class="max-w-5xl mx-auto mt-8 sm:mt-12 p-4 sm:p-8" [ngStyle]="{
+      '--primary-color': jobAppData?.colorScheme?.primary,
+      '--secondary-color': jobAppData?.colorScheme?.secondary,
+      '--accent-color': jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
+    }">
+    
+    <!-- Hero Branding Banner -->
+    <div class="bg-gradient-to-br from-[var(--primary-color)] via-indigo-900 to-[var(--secondary-color)] rounded-3xl p-8 text-white shadow-xl mb-8 relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+      
+      <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-3">
+          <div class="flex items-center gap-4" *ngIf="formOnly === false">
+            <img *ngIf="jobAppData.company.logoUrl" [src]="jobAppData.company.logoUrl" alt="Logo" class="h-12 w-auto bg-white/90 p-2 rounded-2xl shadow-sm" />
+            <span class="text-sm font-bold tracking-widest uppercase bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-white/90">
+              {{ jobAppData.company.name }}
+            </span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight" *ngIf="formOnly === false">
+            {{ jobAppData.job.title }}
+          </h1>
+          <p class="text-xs text-white/80 max-w-xl font-medium" *ngIf="formOnly === false">
+            {{ jobAppData.applySection.instructions }}
+          </p>
+        </div>
 
-<!-- Keep your existing popup components as they are -->
-<!-- Submission Popover -->
+        <div *ngIf="jobAppData.sections.length > 1" class="bg-white/10 backdrop-blur-xl p-3 rounded-2xl border border-white/20 flex flex-wrap gap-2">
+          <button *ngFor="let sec of jobAppData.sections" (click)="setCurrentSection(sec)"
+                  [class]="sec === activeSection ? 'bg-white text-[var(--primary-color)] font-bold shadow-md' : 'text-white/80 hover:text-white hover:bg-white/10'"
+                  class="px-4 py-2 rounded-xl text-xs transition-all">
+            {{ sec }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deadline Check -->
+    <div *ngIf="deadlinePassed" class="bg-red-50/90 backdrop-blur-xl rounded-3xl p-8 border border-red-200 shadow-lg text-center space-y-2 mb-8">
+      <h3 class="text-2xl font-black text-red-600">Deadline Ended</h3>
+      <p class="text-xs text-red-500 font-semibold">The application deadline has passed.</p>
+    </div>
+
+    <!-- Application Form Card -->
+    <div *ngIf="!deadlinePassed" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-10 border border-slate-200/80 shadow-lg space-y-6">
+      <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div *ngFor="let field of jobAppData.formData.fields" [hidden]="field.section !== activeSection" class="space-y-2">
+          <label [for]="field.key" class="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+            {{ field.label }}
+            <span *ngIf="field.required" class="text-rose-500">*</span>
+          </label>
+          <p *ngIf="field.instructions" class="text-xs text-slate-500" [innerHTML]="formattingService.parseMarkdown(field.instructions)"></p>
+
+          <!-- Text Inputs -->
+          <input *ngIf="['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')"
+                 [type]="field.type" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
+
+          <!-- Textarea -->
+          <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)" rows="4"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></textarea>
+
+          <!-- Checkbox -->
+          <div *ngIf="field.type === 'checkbox'" class="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)" class="w-5 h-5 text-indigo-600 rounded" />
+            <label [for]="field.key" class="text-xs font-bold text-slate-700 cursor-pointer">{{ field.label }}</label>
+          </div>
+
+          <!-- Select Multi-select -->
+          <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="space-y-2 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+            <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+              <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                     class="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" />
+              <label [for]="field.key + '_' + option" class="text-xs font-semibold text-slate-700 cursor-pointer">{{ option }}</label>
+            </div>
+            <div *ngIf="field.allowOther" class="flex flex-col space-y-2 pt-2 border-t border-slate-200">
+              <div class="flex items-center space-x-2">
+                <input type="checkbox" [id]="field.key + '_other_check'" [checked]="isOptionSelected(field.key, 'Other')" (change)="toggleMultiSelectOption(field.key, 'Other'); validateField(field)"
+                       class="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" />
+                <label [for]="field.key + '_other_check'" class="text-xs font-bold text-slate-700 cursor-pointer">Other (Please specify)</label>
+              </div>
+              <input *ngIf="isOptionSelected(field.key, 'Other')" type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                     placeholder="Specify other option..."
+                     class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+
+          <!-- Select Single-select -->
+          <div *ngIf="field.type === 'select' && !field.allowMultiSelect" class="space-y-2">
+            <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800">
+              <option value="">Select Option</option>
+              <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              <option *ngIf="field.allowOther" value="Other">Other</option>
+            </select>
+            <div *ngIf="field.allowOther && formValues[field.key] === 'Other'" class="mt-2">
+              <input type="text" [(ngModel)]="formValues[field.key + '_other']" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                     placeholder="Specify other option..."
+                     class="w-full px-4 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+
+          <!-- File Input -->
+          <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
+                 class="w-full text-xs text-slate-600 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors" />
+
+          <p *ngIf="errors[field.key]" class="text-xs text-rose-500 font-bold mt-1">{{ errors[field.key] }}</p>
+        </div>
+
+        <!-- Declaration Checkbox -->
+        <div *ngIf="jobAppData.applySection.declaration && jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" class="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
+          <label class="flex items-start space-x-3 cursor-pointer">
+            <input key="agreeToDeclaration" type="checkbox" formControlName="agreeToDeclaration" id="acceptDeclaration"
+                   class="mt-0.5 h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500" />
+            <span class="text-xs font-medium text-slate-700 leading-relaxed">{{ jobAppData.applySection.declaration }}</span>
+          </label>
+        </div>
+
+        <div class="flex justify-between items-center pt-6 border-t border-slate-100">
+          <button *ngIf="jobAppData.sections.length > 1" type="button" (click)="goToPreviousSection()" [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+                  class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all disabled:opacity-40">
+            Previous Section
+          </button>
+          <button *ngIf="jobAppData.sections.indexOf(activeSection) < jobAppData.sections.length - 1" type="button" (click)="goToNextSection()"
+                  class="px-6 py-2.5 bg-[var(--primary-color)] text-white rounded-2xl text-xs font-bold transition-all shadow-md ml-auto">
+            Next Section →
+          </button>
+          <button *ngIf="jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" type="submit" [disabled]="form.invalid || isSubmitting"
+                  class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-2xl text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all ml-auto">
+            <span *ngIf="!isSubmitting">Submit Application</span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Submitting...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Template 5 -->
+
+<!-- Template 6: Compact Embedded Portal -->
+<div *ngIf="templateId === '6' && jobAppData">
+  <div [ngClass]="getCornerRadiusClass('rounded-3xl')"
+       class="max-w-2xl mx-auto mt-8 sm:mt-12 p-4 sm:p-6 bg-slate-900 text-slate-100 shadow-2xl border border-slate-800" [ngStyle]="{
+      '--primary-color': jobAppData?.colorScheme?.primary || '#4f46e5',
+      '--secondary-color': jobAppData?.colorScheme?.secondary || '#6366f1'
+    }">
+    <div class="p-4 border-b border-slate-800 flex items-center justify-between gap-4 mb-4" *ngIf="formOnly === false">
+      <div class="flex items-center gap-3">
+        <img *ngIf="jobAppData?.company?.logoUrl" [src]="jobAppData?.company?.logoUrl" alt="Logo" class="h-8 w-auto" />
+        <div>
+          <h2 class="text-sm font-bold text-white">{{ jobAppData?.job?.title || 'Position Title' }}</h2>
+          <p class="text-[11px] text-slate-400">{{ jobAppData?.company?.name || 'Company Name' }}</p>
+        </div>
+      </div>
+      <span class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+        Quick Portal
+      </span>
+    </div>
+
+    <!-- Position Summary -->
+    <div class="mb-4 p-4 bg-slate-800/80 rounded-2xl border border-slate-700/80" *ngIf="formOnly === false && jobAppData?.job?.description">
+      <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5">Position Summary</h3>
+      <div class="text-xs text-slate-400 leading-relaxed" [innerHTML]="formattingService.parseMarkdown(jobAppData?.job?.description || '')"></div>
+    </div>
+
+    <!-- Deadline Check -->
+    <div *ngIf="deadlinePassed" class="p-6 bg-red-950/60 rounded-2xl border border-red-800/80 text-center space-y-1 mb-6">
+      <h3 class="text-sm font-bold text-red-400">Deadline Ended</h3>
+      <p class="text-[11px] text-red-300">The application deadline has passed.</p>
+    </div>
+
+    <div *ngIf="!deadlinePassed" class="space-y-6">
+      <!-- Section Tabs -->
+      <div *ngIf="jobAppData?.sections && jobAppData.sections.length > 1" class="flex flex-wrap gap-1.5 mb-4 p-2 bg-slate-800/60 rounded-2xl border border-slate-700/60">
+        <button *ngFor="let sec of jobAppData.sections" (click)="setCurrentSection(sec)"
+                [class]="sec === activeSection ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white font-medium'"
+                class="px-3.5 py-1.5 text-xs rounded-xl transition-all">
+          {{ sec }}
+        </button>
+      </div>
+
+      <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+        <div *ngFor="let field of jobAppData?.formData?.fields" [hidden]="field.section !== activeSection" class="space-y-1.5">
+          <label [for]="field.key" class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider">
+            {{ field.label }} <span *ngIf="field.required" class="text-rose-400">*</span>
+          </label>
+          <p *ngIf="field.instructions" class="text-[11px] text-slate-400" [innerHTML]="formattingService.parseMarkdown(field.instructions)"></p>
+
+          <input *ngIf="['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')"
+                 [type]="field.type" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                 [ngClass]="getCornerRadiusClass('rounded-xl')"
+                 class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500" />
+
+          <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)" rows="3"
+                    [ngClass]="getCornerRadiusClass('rounded-xl')"
+                    class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 text-xs text-white focus:outline-none focus:border-indigo-500"></textarea>
+
+          <div *ngIf="field.type === 'checkbox'" class="flex items-center gap-3 p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+            <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)" class="w-4 h-4 text-indigo-500 rounded bg-slate-700 border-slate-600" />
+            <label [for]="field.key" class="text-xs font-bold text-slate-200 cursor-pointer">{{ field.label }}</label>
+          </div>
+
+          <!-- Select Multi-select -->
+          <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="space-y-2 p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+            <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+              <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                     class="h-4 w-4 text-indigo-500 border-slate-600 rounded focus:ring-indigo-500" />
+              <label [for]="field.key + '_' + option" class="text-xs text-slate-300 cursor-pointer">{{ option }}</label>
+            </div>
+          </div>
+
+          <!-- Select Single-select -->
+          <div *ngIf="field.type === 'select' && !field.allowMultiSelect">
+            <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                    [ngClass]="getCornerRadiusClass('rounded-xl')"
+                    class="w-full px-3.5 py-2 bg-slate-800/80 border border-slate-700 text-xs text-white">
+              <option value="">Choose Option</option>
+              <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              <option *ngIf="field.allowOther" value="Other">Other</option>
+            </select>
+          </div>
+
+          <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
+                 class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white" />
+
+          <p *ngIf="errors[field.key]" class="text-[11px] text-rose-400 font-semibold">{{ errors[field.key] }}</p>
+        </div>
+
+        <!-- Declaration Checkbox -->
+        <div *ngIf="jobAppData?.applySection?.declaration && jobAppData?.sections && jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" class="mt-4 p-3 bg-slate-800/80 rounded-xl border border-slate-700">
+          <label class="flex items-start space-x-2 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="formValues['agreeToDeclaration']" [ngModelOptions]="{standalone: true}" id="acceptDeclaration"
+                   class="mt-0.5 h-4 w-4 text-indigo-500 border-slate-600 rounded focus:ring-indigo-500" />
+            <span class="text-xs text-slate-300">{{ jobAppData.applySection.declaration }}</span>
+          </label>
+        </div>
+
+        <div class="flex justify-between items-center pt-4 border-t border-slate-800">
+          <button *ngIf="jobAppData?.sections && jobAppData.sections.length > 1" type="button" (click)="goToPreviousSection()" [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+                  class="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all disabled:opacity-40">
+            Previous
+          </button>
+          <button *ngIf="jobAppData?.sections && jobAppData.sections.indexOf(activeSection) < jobAppData.sections.length - 1" type="button" (click)="goToNextSection()"
+                  class="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all ml-auto">
+            Next Section →
+          </button>
+          <button *ngIf="jobAppData?.sections && jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" type="submit" [disabled]="form.invalid || isSubmitting"
+                  class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md ml-auto">
+            <span *ngIf="!isSubmitting">Submit Application</span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Submitting...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Template 6 -->
+
+<!-- Template 7: Executive Dark Mode -->
+<div *ngIf="templateId === '7' && jobAppData">
+  <div [ngClass]="getCornerRadiusClass('rounded-3xl')"
+       class="max-w-4xl mx-auto mt-8 sm:mt-12 p-4 sm:p-8 bg-slate-950 text-slate-100 shadow-2xl border border-slate-800/80" [ngStyle]="{
+      '--primary-color': jobAppData?.colorScheme?.primary || '#6366f1',
+      '--secondary-color': jobAppData?.colorScheme?.secondary || '#8b5cf6'
+    }">
+    
+    <!-- Executive Header -->
+    <div class="p-6 border-b border-slate-800/80 flex items-center justify-between gap-4 mb-6" *ngIf="formOnly === false">
+      <div class="flex items-center gap-4">
+        <img *ngIf="jobAppData?.company?.logoUrl" [src]="jobAppData?.company?.logoUrl" alt="Logo" class="h-10 w-auto p-1 bg-white/10 rounded-xl" />
+        <div>
+          <h1 class="text-xl font-black text-white tracking-tight">{{ jobAppData?.company?.name || 'Company Name' }}</h1>
+          <p class="text-xs text-indigo-400 font-semibold">{{ jobAppData?.job?.title || 'Position Title' }}</p>
+        </div>
+      </div>
+      <span class="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-300 border border-slate-700">
+        Executive Desk
+      </span>
+    </div>
+
+    <!-- Position Summary -->
+    <div class="mb-6 p-6 bg-slate-900/90 rounded-2xl border border-slate-800" *ngIf="formOnly === false && jobAppData?.job?.description">
+      <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Position Summary</h3>
+      <div class="text-xs text-slate-400 leading-relaxed" [innerHTML]="formattingService.parseMarkdown(jobAppData?.job?.description || '')"></div>
+    </div>
+
+    <!-- Deadline Check -->
+    <div *ngIf="deadlinePassed" class="p-8 bg-red-950/50 rounded-3xl border border-red-900/60 text-center space-y-2 mb-8">
+      <h3 class="text-xl font-black text-rose-400">Deadline Ended</h3>
+      <p class="text-xs text-rose-300 font-medium">The application deadline has passed.</p>
+    </div>
+
+    <!-- Application Form -->
+    <div *ngIf="!deadlinePassed" class="space-y-6">
+      <!-- Section Tabs -->
+      <div *ngIf="jobAppData?.sections && jobAppData.sections.length > 1" class="flex flex-wrap gap-2 mb-6 p-2 bg-slate-900 rounded-2xl border border-slate-800">
+        <button *ngFor="let sec of jobAppData.sections" (click)="setCurrentSection(sec)"
+                [class]="sec === activeSection ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white font-medium'"
+                class="px-4 py-2 text-xs rounded-xl transition-all">
+          {{ sec }}
+        </button>
+      </div>
+
+      <form *ngIf="form" [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div *ngFor="let field of jobAppData?.formData?.fields" [hidden]="field.section !== activeSection" class="space-y-2">
+          <label [for]="field.key" class="block text-xs font-bold text-slate-300 uppercase tracking-wider">
+            {{ field.label }} <span *ngIf="field.required" class="text-rose-400">*</span>
+          </label>
+          <p *ngIf="field.instructions" class="text-xs text-slate-400" [innerHTML]="formattingService.parseMarkdown(field.instructions)"></p>
+
+          <input *ngIf="['text', 'email', 'tel', 'number', 'date'].includes(field.type || 'text')"
+                 [type]="field.type" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)"
+                 [ngClass]="getCornerRadiusClass('rounded-2xl')"
+                 class="w-full px-4 py-3 bg-slate-900/90 border border-slate-800 text-xs font-medium text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all" />
+
+          <textarea *ngIf="field.type === 'textarea' || field.type === 'text-area'" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (blur)="validateField(field)" rows="4"
+                    [ngClass]="getCornerRadiusClass('rounded-2xl')"
+                    class="w-full px-4 py-3 bg-slate-900/90 border border-slate-800 text-xs font-medium text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all"></textarea>
+
+          <div *ngIf="field.type === 'checkbox'" class="flex items-center gap-3 p-4 bg-slate-900 rounded-2xl border border-slate-800">
+            <input type="checkbox" [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)" class="w-5 h-5 text-indigo-500 rounded bg-slate-800 border-slate-700" />
+            <label [for]="field.key" class="text-xs font-bold text-slate-300 cursor-pointer">{{ field.label }}</label>
+          </div>
+
+          <!-- Select Multi-select -->
+          <div *ngIf="field.type === 'select' && field.allowMultiSelect" class="space-y-2 p-4 bg-slate-900 rounded-2xl border border-slate-800">
+            <div *ngFor="let option of field.options" class="flex items-center space-x-2">
+              <input type="checkbox" [id]="field.key + '_' + option" [checked]="isOptionSelected(field.key, option)" (change)="toggleMultiSelectOption(field.key, option); validateField(field)"
+                     class="h-4 w-4 text-indigo-500 border-slate-700 rounded focus:ring-indigo-500" />
+              <label [for]="field.key + '_' + option" class="text-xs font-semibold text-slate-300 cursor-pointer">{{ option }}</label>
+            </div>
+          </div>
+
+          <!-- Select Single-select -->
+          <div *ngIf="field.type === 'select' && !field.allowMultiSelect" class="space-y-2">
+            <select [id]="field.key" [(ngModel)]="formValues[field.key]" [ngModelOptions]="{standalone: true}" (change)="validateField(field)"
+                    [ngClass]="getCornerRadiusClass('rounded-2xl')"
+                    class="w-full px-4 py-3 bg-slate-900 border border-slate-800 text-xs font-semibold text-slate-200">
+              <option value="">Select Option</option>
+              <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              <option *ngIf="field.allowOther" value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- File Input -->
+          <input *ngIf="field.type === 'file'" type="file" [id]="field.key" [accept]="field.acceptedTypes" (change)="onFileChange($event, field.key)"
+                 class="w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 transition-colors" />
+
+          <p *ngIf="errors[field.key]" class="text-xs text-rose-400 font-bold mt-1">{{ errors[field.key] }}</p>
+        </div>
+
+        <!-- Declaration Checkbox -->
+        <div *ngIf="jobAppData?.applySection?.declaration && jobAppData?.sections && jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" class="mt-4 p-4 bg-slate-900 rounded-2xl border border-slate-800">
+          <label class="flex items-start space-x-3 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="formValues['agreeToDeclaration']" [ngModelOptions]="{standalone: true}" id="acceptDeclaration"
+                   class="mt-0.5 h-4 w-4 text-indigo-500 border-slate-700 rounded focus:ring-indigo-500" />
+            <span class="text-xs font-medium text-slate-300 leading-relaxed">{{ jobAppData.applySection.declaration }}</span>
+          </label>
+        </div>
+
+        <div class="pt-6 border-t border-slate-800/80 flex justify-between items-center">
+          <button *ngIf="jobAppData?.sections && jobAppData.sections.length > 1" type="button" (click)="goToPreviousSection()" [disabled]="jobAppData.sections.indexOf(activeSection) === 0"
+                  class="px-6 py-3 bg-slate-900 hover:bg-slate-800 text-slate-300 rounded-2xl text-xs font-bold border border-slate-800 transition-all disabled:opacity-40">
+            Previous
+          </button>
+          <button *ngIf="jobAppData?.sections && jobAppData.sections.indexOf(activeSection) < jobAppData.sections.length - 1" type="button" (click)="goToNextSection()"
+                  class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-2xl text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all ml-auto">
+            Next Section →
+          </button>
+          <button *ngIf="jobAppData?.sections && jobAppData.sections.indexOf(activeSection) >= jobAppData.sections.length - 1" type="submit" [disabled]="form.invalid || isSubmitting"
+                  class="px-8 py-3 bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-400 hover:to-violet-500 text-white rounded-2xl text-xs font-bold shadow-lg shadow-indigo-500/20 transition-all ml-auto">
+            <span *ngIf="!isSubmitting">Submit Application</span>
+            <span *ngIf="isSubmitting" class="flex items-center justify-center">
+              <svg class="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" />
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Submitting...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- End Template 7 -->
+
+<!-- Submission Popover Modal -->
 <div *ngIf="showSubmissionMessage" class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fadeIn">
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
@@ -811,15 +1384,15 @@
       <!-- Content -->
       <div class="text-center space-y-3">
         <h3 class="text-2xl font-bold text-[var(--primary-color)]">
-          {{ jobAppData?.submissionMessage?.title }}
+          {{ jobAppData?.submissionMessage?.title || 'Application Submitted!' }}
         </h3>
         <p class="text-gray-600">
-          {{ jobAppData?.submissionMessage?.message }}
+          {{ jobAppData?.submissionMessage?.message || 'Thank you for submitting your application.' }}
         </p>
       </div>
 
       <!-- Actions -->
-      <div class="mt-8 flex flex-col gap-3">
+      <div class="mt-8 flex flex-col gap-3" *ngIf="jobAppData?.submissionMessage?.actionText">
         <a [href]="jobAppData?.submissionMessage?.actionLink" target="_blank" rel="noopener noreferrer">
           <button class="w-full px-6 py-3 bg-[var(--primary-color)] text-white rounded-lg font-medium
            hover:bg-[var(--secondary-color)] transform hover:scale-[1.02]
@@ -827,7 +1400,6 @@
             {{ jobAppData?.submissionMessage?.actionText }}
           </button>
         </a>
-
       </div>
     </div>
   </div>

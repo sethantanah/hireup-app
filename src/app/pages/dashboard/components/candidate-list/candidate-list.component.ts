@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   OnInit,
   OnDestroy,
   ChangeDetectorRef,
@@ -8,7 +10,7 @@ import {
   ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, finalize } from 'rxjs';
 
 // Services
@@ -27,6 +29,7 @@ import { CandidateFiltersComponent } from '../candidate-filters/candidate-filter
 import { BulkDocumentUploadsComponent } from '../../../job-posts/manager/components/data-uploads/bulk-document-uploads/bulk-document-uploads.component';
 import { TableColumn, TableConfig, TableViewComponent } from '../table-view/table-view.component';
 import { EmailsComponent } from '../notifications/emails/emails.component';
+import { LoaderComponent } from '../../../components/loader/loader.component';
 
 // Constants - Use explicit typing to avoid inference issues
 export const COMMON_FORM_FIELDS: readonly string[] = ['full_name', 'email'] as const;
@@ -72,6 +75,7 @@ interface FormField {
     BulkDocumentUploadsComponent,
     TableViewComponent,
     EmailsComponent,
+    LoaderComponent,
   ],
   templateUrl: './candidate-list.component.html',
   styleUrl: './candidate-list.component.scss',
@@ -79,6 +83,7 @@ interface FormField {
 export class CandidateListComponent implements OnInit, OnDestroy {
   // Component state
   @Input() applicationData: JobPostData | undefined;
+  @Output() navigateSection = new EventEmitter<string>();
 
   candidates: Candidate[] = [];
   filteredCandidates: Candidate[] = [];
@@ -173,9 +178,16 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     private applicantService: ApplicantManagementService,
     public dataService: DataService,
     private route: ActivatedRoute,
+    private router: Router,
     private apiService: ApiService,
     private cdr: ChangeDetectorRef
   ) { }
+
+  navigateToAssessmentCenter(): void {
+    if (this.jobPostId) {
+      this.router.navigate(['/jobposts/tests', this.jobPostId]);
+    }
+  }
 
   // Getters
   get tableData(): any[] {
@@ -253,7 +265,7 @@ export class CandidateListComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (data) => {
-          this.candidates = data as Candidate[];
+          this.candidates = (data as Candidate[]) || [];
           this.filteredCandidates = [...this.candidates];
           this.updateTableColumns();
           this.dataService.totalCandidates = this.candidates.length;
@@ -278,7 +290,10 @@ export class CandidateListComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (data) => {
-          this.candidates = [...this.candidates, ...(data as Candidate[])];
+          const unshortlisted = (data as Candidate[]) || [];
+          const existingIds = new Set(this.candidates.map(c => c.id));
+          const uniqueUnshortlisted = unshortlisted.filter(c => c.id && !existingIds.has(c.id));
+          this.candidates = [...this.candidates, ...uniqueUnshortlisted];
           this.filteredCandidates = [...this.candidates];
           this.updateTableColumns();
           this.dataService.totalCandidates = this.candidates.length;
@@ -353,17 +368,17 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     const initaillyRejectedIds = this.dataService.shortlistedCandidates.filter(candidate => this.getCandidateStatusRaw(candidate) === "unshortlisted").map(candidate => candidate.id);
     const shortListIds = this.dataService.shortlistedCandidates.filter(candidate => this.getCandidateStatusRaw(candidate) === "pending").map(candidate => candidate.id);
 
-    const shortListData = { shortlisted: shortListIds, was_rejected: initaillyRejectedIds }
+    const shortListData = { shortlisted: shortListIds, was_rejected: initaillyRejectedIds };
 
     if (ids.length === 0 || !this.jobPostId) {
       this.showPopupMessage('No candidates selected for shortlisting', 'error');
       return;
     }
 
-    console.log(shortListData)
+    const stageId = this.route.snapshot.paramMap.get('stageId') || 'stage_application_review';
+    const stageName = stageId.replace('stage_', '');
 
-
-    this.apiService.shortListCandidates(shortListData, this.jobPostId)
+    this.apiService.shortListCandidates(shortListData, this.jobPostId, stageName)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -400,8 +415,10 @@ export class CandidateListComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const stageId = this.route.snapshot.paramMap.get('stageId') || 'stage_application_review';
+    const stageName = stageId.replace('stage_', '');
 
-    this.apiService.rejectCandidates(ids, this.jobPostId)
+    this.apiService.rejectCandidates(ids, this.jobPostId, stageName)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -604,19 +621,28 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     }
 
     if (candidate.form_data) {
-      const nameFields = ['full_name', 'first_name', 'last_name', 'name'];
+      const nameFields = ['full_name', 'first_name', 'last_name', 'name', 'candidate_name', 'applicant_name'];
       for (const field of nameFields) {
-        if (candidate.form_data[field]?.value) {
-          return candidate.form_data[field].value;
-        }
+        const val = candidate.form_data[field];
+        if (val?.value) return val.value;
+        if (typeof val === 'string' && val.trim()) return val.trim();
       }
     }
 
-    return 'N/A';
+    return candidate.full_name || candidate.name || candidate.applicant_name || candidate.candidate_name || 'N/A';
   }
 
   getCandidateEmail(candidate: any): string {
-    return candidate.email || candidate.form_data?.email?.value || 'N/A';
+    if (candidate.email) return candidate.email;
+    if (candidate.form_data) {
+      const emailFields = ['email', 'email_address', 'candidate_email', 'applicant_email'];
+      for (const field of emailFields) {
+        const val = candidate.form_data[field];
+        if (val?.value) return val.value;
+        if (typeof val === 'string' && val.trim()) return val.trim();
+      }
+    }
+    return candidate.candidate_email || candidate.applicant_email || 'N/A';
   }
 
   getSkills(candidate: any): string[] {
@@ -627,16 +653,19 @@ export class CandidateListComponent implements OnInit, OnDestroy {
       ];
     }
 
-    if (candidate.form_data?.skills?.value) {
-      return candidate.form_data.skills.value.split(',').map((s: string) => s.trim());
+    if (candidate.form_data) {
+      const val = candidate.form_data.skills?.value || candidate.form_data.skills || candidate.form_data.technical_skills;
+      if (Array.isArray(val)) return val;
+      if (typeof val === 'string' && val.trim()) return val.split(',').map((s: string) => s.trim());
     }
 
     return [];
   }
 
   getExperience(candidate: any): string {
-    if (candidate.form_data?.years_of_experience?.value) {
-      return candidate.form_data.years_of_experience.value;
+    if (candidate.form_data) {
+      const val = candidate.form_data.years_of_experience?.value || candidate.form_data.years_of_experience || candidate.form_data.experience;
+      if (val !== undefined && val !== null) return String(val);
     }
     return '';
   }
@@ -783,6 +812,10 @@ export class CandidateListComponent implements OnInit, OnDestroy {
 
   openDataUpload(): void {
     this.dataService.openDocumentsUpload = true;
+  }
+
+  openTalentPool(): void {
+    this.navigateSection.emit('talent-pool');
   }
 
   viewDetails(candidate: Candidate): void {

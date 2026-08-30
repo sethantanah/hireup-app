@@ -1,146 +1,310 @@
-<div
-  *ngIf="loading"
-  class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm"
->
-  <div class="text-center">
-    <div
-      class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"
-    ></div>
-    <div class="mt-4 text-lg font-medium text-gray-700">Loading ...</div>
+<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 backdrop-blur-md">
+  <div class="bg-white/95 rounded-3xl p-8 shadow-2xl flex flex-col items-center gap-4 border border-slate-100 max-w-sm w-full mx-4">
+    <div class="relative w-14 h-14 flex items-center justify-center">
+      <div class="absolute inset-0 rounded-2xl bg-indigo-600/20 animate-ping"></div>
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-lg">
+        <i class="fas fa-tasks text-xl animate-bounce"></i>
+      </div>
+    </div>
+    <div class="text-center">
+      <h4 class="text-base font-bold text-slate-900">Loading Assessment Center</h4>
+      <p class="text-xs text-slate-500 mt-1">Retrieving job tests and scoring metrics...</p>
+    </div>
   </div>
 </div>
 
-<div class="min-h-screen bg-gray-100">
-  <!-- Header Section -->
-  <header
-    class="bg-gradient-to-r from-white to-blue-50 border-b border-gray-200"
-  >
-    <div class="max-w-7xl mx-auto px-8 py-5">
-      <div class="flex justify-between items-center">
-        <div class="flex items-center space-x-8">
+<div class="min-h-screen bg-slate-50/70 pb-16">
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        
+        <!-- Left Title & Navigation -->
+        <div class="flex items-center gap-4">
+          <button (click)="backToJobDashboard()"
+                  class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 flex items-center justify-center transition-all duration-200 border border-slate-200/80 shadow-xs group">
+            <i class="fas fa-arrow-left text-sm group-hover:-translate-x-0.5 transition-transform"></i>
+          </button>
           <div>
-            <h1
-              class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-900 bg-clip-text text-transparent"
-            >
-              Assessment Hub
-            </h1>
-            <div class="flex items-center mt-1 text-gray-600 text-sm">
-              <i class="fas fa-clipboard-list mr-2"></i>
-              <span>{{ jobTests.length }} Total Tests</span>
+            <div class="flex items-center gap-2">
+              <h1 class="text-2xl font-black text-slate-900 tracking-tight">Assessment Center</h1>
+              <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100/80 text-indigo-700 border border-indigo-200/80">
+                Enterprise Suite
+              </span>
             </div>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">
+              Design evaluations, monitor candidate performance, and manage skill verification tests.
+            </p>
           </div>
         </div>
 
-        <button
-          class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700 transition-all"
-          (click)="createTest()"
-        >
-          <i class="fas fa-plus mr-2"></i>
-          Create Test
-        </button>
+        <!-- Right Action Button -->
+        <div class="flex items-center gap-3">
+          <button (click)="createTest()"
+                  class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-2xl font-bold text-xs shadow-md shadow-indigo-500/20 hover:shadow-lg transition-all duration-200 flex items-center gap-2">
+            <i class="fas fa-plus"></i>
+            <span>Create New Assessment</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Dashboard Content -->
-  <div class="max-w-7xl mx-auto px-8 py-8">
-    <!-- Tests Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div
-        *ngFor="let test of jobTests"
-        class="bg-white rounded-lg border border-gray-200 hover:border-blue-500 transition-all duration-200"
-      >
-        <!-- Card Header -->
-        <div class="p-6 border-b border-gray-100">
-          <div class="flex justify-between items-start">
-            <div>
-              <h2 class="text-xl font-semibold text-gray-900">
-                {{ test.test_data.testTitle }}
-              </h2>
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-2"
-              >
-                Active Test
-              </span>
-            </div>
-            <div class="flex space-x-2">
-              <button
-                class="p-2 text-gray-400 hover:text-blue-600 rounded-lg"
-                (click)="shareTest(test)"
-              >
-                <i class="fas fa-share"></i>
-              </button>
-              <button
-                class="p-2 text-gray-400 hover:text-red-600 rounded-lg"
-                (click)="deleteTest(test)"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- KPI Analytics Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <!-- Total Tests Card -->
+      <div class="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
+          <i class="fas fa-clipboard-list text-lg"></i>
         </div>
-
-        <!-- Test Details -->
-        <div class="p-6 space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div class="flex items-center space-x-3">
-              <div class="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div>
-                <div class="text-sm text-gray-500">Duration</div>
-                <div class="font-medium">
-                  {{ test.test_data.testDuration }} min
-                </div>
-              </div>
-            </div>
-            <div class="flex items-center space-x-3">
-              <div class="p-2 bg-green-50 text-green-600 rounded-lg">
-                <i class="fas fa-trophy"></i>
-              </div>
-              <div>
-                <div class="text-sm text-gray-500">Pass Mark</div>
-                <div class="font-medium">
-                  {{ test.test_data.sections[0].scoring.passmark }}%
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-lg"
-          >
-            <div>
-              <div class="text-sm text-gray-500">Scoring</div>
-              <div class="text-sm font-medium">
-                +{{ test.test_data.sections[0].scoring.correct }} correct /
-                {{ test.test_data.sections[0].scoring.wrong }} wrong
-              </div>
-            </div>
-            <i class="fas fa-chart-line text-gray-400"></i>
-          </div>
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Tests</span>
+          <h3 class="text-2xl font-black text-slate-900 mt-0.5">{{ jobTests.length }}</h3>
         </div>
+      </div>
 
-        <!-- Card Footer -->
-        <div class="p-6 border-t border-gray-100">
-          <div class="flex space-x-3">
-            <button
-              class="flex-1 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-              (click)="viewSubmissions(test)"
-            >
-              <i class="fas fa-eye mr-2"></i>
-              View Submissions
-            </button>
-            <button
-              class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              (click)="editTest(test)"
-            >
-              <i class="fas fa-edit mr-2"></i>
-              Edit Test
-            </button>
-          </div>
+      <!-- Avg Duration Card -->
+      <div class="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center text-violet-600 flex-shrink-0">
+          <i class="fas fa-clock text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Avg. Duration</span>
+          <h3 class="text-2xl font-black text-slate-900 mt-0.5">{{ averageDuration }} <span class="text-xs font-semibold text-slate-500">mins</span></h3>
+        </div>
+      </div>
+
+      <!-- Questions Pool Card -->
+      <div class="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+          <i class="fas fa-question-circle text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Questions Pool</span>
+          <h3 class="text-2xl font-black text-slate-900 mt-0.5">{{ totalQuestionsCount }}</h3>
+        </div>
+      </div>
+
+      <!-- Status Card -->
+      <div class="bg-white/90 backdrop-blur-xl p-5 rounded-3xl border border-slate-200/80 shadow-xs flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+          <i class="fas fa-shield-alt text-lg"></i>
+        </div>
+        <div>
+          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Guard</span>
+          <h3 class="text-2xl font-black text-emerald-600 mt-0.5">Anti-Tamper <span class="text-xs font-semibold text-slate-500">On</span></h3>
         </div>
       </div>
     </div>
+
+    <!-- Search & Filter Controls -->
+    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 shadow-xs">
+      <div class="relative w-full sm:w-80">
+        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text"
+               [(ngModel)]="searchQuery"
+               placeholder="Search assessments..."
+               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+      </div>
+
+      <div class="flex items-center gap-2 text-xs font-bold text-slate-500 self-end sm:self-center">
+        <span>Showing {{ filteredJobTests.length }} of {{ jobTests.length }} tests</span>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="filteredJobTests.length === 0 && !loading" class="bg-white/90 backdrop-blur-xl rounded-3xl p-12 text-center border border-slate-200/80 shadow-xs max-w-2xl mx-auto">
+      <div class="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-indigo-600 shadow-inner">
+        <i class="fas fa-file-signature text-3xl"></i>
+      </div>
+      <h3 class="text-xl font-black text-slate-900 mb-2">No Assessments Found</h3>
+      <p class="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+        Create custom skill tests, multiple choice quizzes, and interactive puzzles to screen candidate aptitude efficiently.
+      </p>
+      <button (click)="createTest()"
+              class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-indigo-500/20 transition-all inline-flex items-center gap-2">
+        <i class="fas fa-plus"></i>
+        <span>Create Assessment Now</span>
+      </button>
+    </div>
+
+    <!-- Tests Grid -->
+    <div *ngIf="filteredJobTests.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div *ngFor="let test of filteredJobTests"
+           class="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 hover:border-indigo-300 shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+        
+        <div>
+          <!-- Card Top Bar -->
+          <div class="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white">
+            <div class="flex justify-between items-start gap-3">
+              <div>
+                <h3 class="text-lg font-black text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                  {{ test.test_data?.testTitle || 'Untitled Assessment' }}
+                </h3>
+                <div class="flex items-center gap-2 mt-2">
+                  <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                    <i class="fas fa-check-circle text-[10px] mr-1"></i> Active
+                  </span>
+                  <span class="text-xs font-semibold text-slate-400">
+                    {{ test.test_data?.formData?.fields?.length || 0 }} Questions
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quick Share & Delete -->
+              <div class="flex items-center gap-1">
+                <button (click)="openShareModal(test)"
+                        title="Share Test Link"
+                        class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 flex items-center justify-center transition-colors">
+                  <i class="fas fa-share-alt text-xs"></i>
+                </button>
+                <button (click)="deleteTest(test)"
+                        title="Delete Test"
+                        class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 flex items-center justify-center transition-colors">
+                  <i class="fas fa-trash-alt text-xs"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Body Details -->
+          <div class="p-6 space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-slate-50/80 rounded-2xl border border-slate-100">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Duration</span>
+                <span class="text-sm font-black text-slate-800 flex items-center gap-1 mt-0.5">
+                  <i class="fas fa-clock text-indigo-500 text-xs"></i>
+                  {{ test.test_data?.testDuration }} mins
+                </span>
+              </div>
+              <div class="p-3 bg-slate-50/80 rounded-2xl border border-slate-100">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pass Threshold</span>
+                <span class="text-sm font-black text-emerald-600 flex items-center gap-1 mt-0.5">
+                  <i class="fas fa-trophy text-emerald-500 text-xs"></i>
+                  {{ test.test_data?.sections?.[0]?.scoring?.passmark || 70 }}%
+                </span>
+              </div>
+            </div>
+
+            <div class="p-3 bg-slate-50/80 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+              <span class="font-medium text-slate-600">Scoring Weight</span>
+              <span class="font-bold text-slate-900">
+                +{{ test.test_data?.sections?.[0]?.scoring?.correct || 1 }} Correct / 
+                <span class="text-rose-500">-{{ test.test_data?.sections?.[0]?.scoring?.wrong || 0 }} Wrong</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Footer Actions -->
+        <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex items-center gap-3">
+          <button (click)="viewSubmissions(test)"
+                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-200">
+            <i class="fas fa-chart-bar text-indigo-600"></i>
+            <span>Submissions</span>
+          </button>
+
+          <button (click)="editTest(test)"
+                  class="flex-1 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm">
+            <i class="fas fa-edit text-indigo-400"></i>
+            <span>Edit Test</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Share Link Modal -->
+<div *ngIf="showShareModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-lg w-full p-6 sm:p-8 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+          <i class="fas fa-share-alt"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-slate-900">Share Assessment Link</h3>
+          <p class="text-xs text-slate-500 font-medium line-clamp-1">{{ selectedShareTest?.test_data?.testTitle }}</p>
+        </div>
+      </div>
+      <button (click)="closeShareModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+
+    <div class="py-6 space-y-4">
+      <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider">Candidate Direct Assessment Link</label>
+      <div class="flex items-center gap-2 p-2 bg-slate-50 rounded-2xl border border-slate-200">
+        <input type="text"
+               [value]="shareUrl"
+               readonly
+               class="flex-1 bg-transparent px-3 py-1 text-xs font-mono text-slate-800 border-none focus:outline-none truncate">
+        <button (click)="copyShareUrl()"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 flex-shrink-0">
+          <i class="fas" [ngClass]="copiedToast ? 'fa-check' : 'fa-copy'"></i>
+          <span>{{ copiedToast ? 'Copied!' : 'Copy Link' }}</span>
+        </button>
+      </div>
+
+      <div *ngIf="copiedToast" class="p-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-2xl text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+        <i class="fas fa-check-circle text-emerald-500"></i>
+        <span>Link copied to clipboard successfully!</span>
+      </div>
+
+      <p class="text-xs text-slate-500 font-medium">
+        Candidates accessing this URL will be prompted to enter their credentials and complete the timed assessment.
+      </p>
+    </div>
+
+    <div class="pt-4 border-t border-slate-100 flex justify-end">
+      <button (click)="closeShareModal()"
+              class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all">
+        Close
+      </button>
+    </div>
   </div>
 </div>
+
+<!-- Modal: Confirm Delete Assessment -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-md w-full p-6 sm:p-8 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center gap-4 pb-4 border-b border-slate-100">
+      <div class="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+        <i class="fas fa-trash-alt text-lg"></i>
+      </div>
+      <div>
+        <h3 class="text-lg font-black text-slate-900">Delete Assessment</h3>
+        <p class="text-xs text-slate-500 font-medium mt-0.5">This action cannot be undone.</p>
+      </div>
+    </div>
+
+    <div class="py-6 space-y-3">
+      <p class="text-sm text-slate-600">
+        Are you sure you want to permanently delete <strong class="text-slate-900 font-bold">"{{ testToDelete?.test_data?.testTitle || 'Untitled Assessment' }}"</strong>?
+      </p>
+      <div class="p-3.5 bg-rose-50/80 border border-rose-100 rounded-2xl text-xs text-rose-700 font-medium flex items-center gap-2">
+        <i class="fas fa-exclamation-triangle text-rose-500 text-sm flex-shrink-0"></i>
+        <span>Deleting this assessment will permanently remove it from the database.</span>
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+      <button (click)="closeDeleteModal()"
+              [disabled]="isDeleting"
+              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all">
+        Cancel
+      </button>
+
+      <button (click)="confirmDeleteTest()"
+              [disabled]="isDeleting"
+              class="px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-2xl text-xs font-bold shadow-md shadow-rose-500/20 transition-all flex items-center gap-2">
+        <i class="fas" [ngClass]="isDeleting ? 'fa-spinner fa-spin' : 'fa-trash-alt'"></i>
+        <span>{{ isDeleting ? 'Deleting...' : 'Delete Assessment' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,624 +1,517 @@
-<div class="flex h-screen bg-gray-100" *ngIf="test">
-  <div class="w-80 bg-white border-r border-gray-200 flex flex-col">
-    <!-- Header -->
-    <div class="p-8 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-      <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-        Test Builder
-      </h2>
-      <p class="text-sm text-gray-600 mt-2">
-        Create and organize your assessment questions
-      </p>
-
-      <!-- Button to open the parse dialog (add this where you want in your main UI) -->
-      <button (click)="openParseDialog()" class="bulk-add-btn">
-        <i class="fas fa-file-import"></i> Bulk Add Questions
-      </button>
-
-      <div class="mt-4 flex items-center text-sm text-gray-500">
-        <span class="flex items-center">
-          <i class="fas fa-questions mr-2"></i>
-          {{ test.formData.fields.length || 0 }} Questions
-        </span>
-        <span class="mx-2">•</span>
-        <span class="flex items-center">
-          <i class="fas fa-clock mr-2"></i>
-          {{ test!.sections[0].duration || 0 }} Minutes
-        </span>
-      </div>
-    </div>
-
-    <!-- Search and Filter -->
-    <!-- <div class="p-4 border-b border-gray-200">
-          <div class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input type="text" 
-                   placeholder="Search questions..."
-                   class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"/>
+<div class="min-h-screen bg-slate-50 flex flex-col" *ngIf="test">
+  
+  <!-- Top Navigation / Header -->
+  <header class="bg-white/90 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <button (click)="goBack()"
+                title="Back to Assessment Center"
+                class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200/80 text-slate-700 flex items-center justify-center transition-all border border-slate-200/80 shadow-xs">
+          <i class="fas fa-arrow-left text-sm"></i>
+        </button>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl font-black text-slate-900 tracking-tight">Test Builder Workspace</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+              {{ test.formData?.fields?.length || 0 }} Questions
+            </span>
           </div>
-        </div> -->
-
-    <!-- Questions List -->
-    <div class="flex-1 overflow-y-auto">
-      <div class="p-4">
-        <ul class="space-y-3">
-          <li *ngFor="let field of test?.formData?.fields; let i = index"
-            class="group bg-white rounded-xl border border-gray-200 p-4 hover:border-blue-500 hover:shadow-md transition-all duration-200">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center space-x-3">
-                <span
-                  class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 text-white rounded-lg flex items-center justify-center font-semibold shadow-sm">
-                  {{ i + 1 }}
-                </span>
-                <div class="flex flex-col">
-                  <span class="text-gray-800 font-medium line-clamp-1">{{
-                    field.question
-                    }}</span>
-                  <span class="text-xs text-gray-500">{{
-                    field.type | titlecase
-                    }}</span>
-                </div>
-              </div>
-              <div class="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button class="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  (click)="openQuestionPopup(field.type, field.question)">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  (click)="deleteQuestion(field)">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Action Buttons -->
-    <div class="p-4 border-t border-gray-200 space-y-3" *ngIf="this.test.sections.length === 1">
-      <!-- <button
-        class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
-        (click)="openQuestionPopup('multiple-choice')"
-      >
-        <i class="fas fa-plus"></i>
-        <span>Add New Question</span>
-      </button> -->
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div class="flex-1 overflow-y-auto" *ngIf="test">
-
-    <div class="max-w-4xl mx-auto py-8 px-6">
-      <!-- Test Details Card -->
-      <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">
-          Test Configuration
-        </h2>
-
-
-
-
-
-        <div class="grid grid-cols-2 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Test Title</label>
-            <input type="text"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              [(ngModel)]="test!.testTitle" />
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
-            <input type="number"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              [(ngModel)]="test.testDuration" />
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Test Instructions</label>
-          <textarea
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            rows="4" [(ngModel)]="test.description"></textarea>
-        </div>
-
-        <div [innerHTML]="formattingService.parseMarkdown(test?.description || '')"></div>
-      </div>
-    </div>
-
-
-
-    <div class="max-w-4xl mx-auto py-8 px-6" *ngFor="let section of test.sections; let i = index">
-      <!-- Test Details Card -->
-      <div class="bg-white rounded-2xl shadow-sm p-6 mb-8">
-        <h2 class="text-2xl font-bold text-gray-900 mb-6">
-          Test Section {{ section.sectionId }} Configuration
-        </h2>
-
-       
-        <div class="grid grid-cols-2 gap-6">
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-              <input type="text"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                [(ngModel)]="section!.title" />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
-              <input type="number"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                [(ngModel)]="section!.duration" />
-            </div>
-          </div>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Scoring Settings</label>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="text-sm text-gray-600">Correct Answer</label>
-                  <input type="number"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    [(ngModel)]="section!.scoring.correct" />
-                </div>
-                <div>
-                  <label class="text-sm text-gray-600">Wrong Answer</label>
-                  <input type="number"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    [(ngModel)]="section!.scoring.wrong" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Pass Mark (%)</label>
-              <input type="number"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                [(ngModel)]="section!.scoring.passmark" />
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6">
-          <label class="block text-sm font-medium text-gray-700 mb-1">Instructions</label>
-          <textarea
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            rows="4" [(ngModel)]="section!.instructions"></textarea>
-        </div>
-
-        <div [innerHTML]="formattingService.parseMarkdown(section!.instructions)"></div>
-      </div>
-
-
-
-      <!-- Preview Section -->
-      <div *ngIf="test" class="bg-white rounded-2xl shadow-sm">
-        <div class="p-6 border-b border-gray-200" *ngIf="i === 0">
-          <h2 class="text-2xl font-bold text-gray-900">Test Preview</h2>
-          <p class="text-sm text-gray-500 mt-1">
-            Questions as they will appear to test takers
+          <p class="text-xs text-slate-500 font-medium line-clamp-1">
+            {{ test.testTitle || 'Untitled Assessment' }} • Total Duration: {{ test.testDuration || 0 }} Mins
           </p>
         </div>
+      </div>
 
-        <div class="p-6">
-          <div *ngFor="let field of test.formData.fields; let i = index" class="mb-8 last:mb-0">
+      <!-- Quick Actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button (click)="openParseDialog()"
+                class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 rounded-2xl font-bold text-xs transition-all flex items-center gap-2 border border-slate-200 shadow-xs">
+          <i class="fas fa-file-import text-indigo-600"></i>
+          <span class="hidden sm:inline">Bulk Add Questions</span>
+        </button>
 
-            <div *ngFor="let subsection of section.subsection; let x = index">
-              <div class="bg-white  p-6 mb-8 mt-5" *ngIf="i === 60">
-                <div class="mt-6">
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Sub Section #{{section.sectionId}}
-                    Instructions</label>
-                  <textarea
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows="4" [(ngModel)]="subsection!.instructions"></textarea>
-                </div>
+        <button (click)="handleSave()"
+                class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-2xl font-bold text-xs shadow-md shadow-indigo-500/20 transition-all flex items-center gap-2">
+          <i class="fas fa-save"></i>
+          <span>Save Assessment</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-                <div class="mt-5" [innerHTML]="formattingService.parseMarkdown(subsection!.instructions)"></div>
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+    
+    <!-- Sidebar: Questions Index -->
+    <aside class="w-full md:w-80 bg-white border-r border-slate-200/80 flex flex-col flex-shrink-0">
+      
+      <!-- Questions List Header -->
+      <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Question Outline</h2>
+          <p class="text-xs text-slate-500">Manage structure & order</p>
+        </div>
+        <button (click)="setQuestionSection(selectedSection); openQuestionPopup('multiple-choice')"
+                class="w-8 h-8 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-600 flex items-center justify-center transition-colors shadow-xs">
+          <i class="fas fa-plus text-xs"></i>
+        </button>
+      </div>
+
+      <!-- Scrollable Question Items -->
+      <div class="flex-1 overflow-y-auto p-4 space-y-2.5">
+        <div *ngIf="!test?.formData?.fields || test.formData.fields.length === 0" 
+             class="p-8 text-center border-2 border-dashed border-slate-200 rounded-3xl">
+          <i class="fas fa-clipboard-question text-slate-300 text-3xl mb-3"></i>
+          <p class="text-xs text-slate-500 font-medium">No questions added yet.</p>
+          <button (click)="openQuestionPopup('multiple-choice')"
+                  class="mt-3 px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-xl text-xs font-bold hover:bg-indigo-100 transition-colors">
+            + Add First Question
+          </button>
+        </div>
+
+        <div *ngFor="let field of test?.formData?.fields; let i = index"
+             class="group bg-white rounded-2xl border border-slate-200/80 p-3.5 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="w-7 h-7 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-xs font-black shadow-xs flex-shrink-0">
+              {{ i + 1 }}
+            </span>
+            <div class="truncate">
+              <h4 class="text-xs font-bold text-slate-800 truncate">{{ field.question || 'Untitled Question' }}</h4>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full uppercase">
+                  {{ field.type | titlecase }}
+                </span>
+                <span class="text-[10px] font-semibold text-slate-400">
+                  Sec {{ field.section || 1 }}
+                </span>
               </div>
             </div>
+          </div>
 
-
-            <div class="flex items-start space-x-4" *ngIf="
-                field.section === section.sectionId ||
-                (section.sectionId == 1 && field.section === undefined)
-              ">
-              <!-- Question Number -->
-              <div
-                class="flex-shrink-0 w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-bold">
-                {{ i + 1 }}
-              </div>
-
-              <!-- Question Content -->
-              <div class="flex-1">
-                <div class="flex justify-between items-start mb-4">
-                  <h3 class="text-lg font-medium text-gray-900">
-                    {{ field.question }}
-                  </h3>
-
-                  <div class="flex space-x-2 ml-4">
-                    <button *ngIf="field.type !== 'crossword'"
-                      class="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
-                      (click)="openQuestionPopup(field.type, field.question)">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button *ngIf="field.type === 'crossword'"
-                      class="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
-                      (click)="editPuzzleBuilder(field)">
-                      <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="p-2 text-gray-400 hover:text-red-600 rounded-lg transition-colors"
-                      (click)="deleteQuestion(field)">
-                      <i class="fas fa-trash"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Multiple Choice Options -->
-                <div *ngIf="field.type !== 'user-input'" class="space-y-3 mt-4">
-                  <div *ngFor="let option of field.options; let j = index"
-                    class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
-                    <input type="radio" [name]="'question_' + i" [id]="'option_' + i + '_' + j"
-                      [checked]="option === field.answer" class="w-4 h-4 text-blue-600 focus:ring-blue-500" />
-                    <label [for]="'option_' + i + '_' + j"
-                      class="ml-3 text-gray-700 font-medium cursor-pointer select-none flex-1">
-                      {{ option }}
-                    </label>
-                    <div *ngIf="option === field.answer" class="ml-2 text-green-600">
-                      <i class="fas fa-check"></i>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Text Input -->
-                <div *ngIf="field.type === 'user-input'" class="mt-4">
-                  <input type="text"
-                    class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter your answer here" />
-                  <div class="mt-2 text-sm text-gray-500 flex items-center">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <span>Correct answer: {{ field.answer }}</span>
-                  </div>
-                </div>
-
-                <!-- Add crossword display in preview -->
-                <div *ngIf="field.type === 'crossword' && field.puzzleData" class="mt-4">
-                  <div>
-                    <div [innerHTML]="formattingService.parseMarkdown(field!.puzzleData!.description)"></div>
-                  </div>
-                  <app-crossword-builder [grid]="field!.puzzleData!.grid" [clues]="field!.puzzleData!.clues"
-                    [previewOnly]="true" [instructions]="field!.puzzleData!.description"
-                    (puzzleSubmitted)="onCrosswordCompleted(field, $event)"></app-crossword-builder>
-                </div>
-              </div>
-            </div>
+          <div class="flex items-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+            <button (click)="openQuestionPopup(field.type, field.question)"
+                    class="w-7 h-7 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 flex items-center justify-center transition-colors">
+              <i class="fas fa-edit text-xs"></i>
+            </button>
+            <button (click)="deleteQuestion(field)"
+                    class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center transition-colors">
+              <i class="fas fa-trash-alt text-xs"></i>
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-row gap-5  mt-5">
-        <button
-          class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
-          (click)="
-          setQuestionSection(section.sectionId);
-          openQuestionPopup('multiple-choice')
-        ">
-          <i class="fas fa-plus"></i>
-          <span>Add New Question</span>
-        </button>
-
-
-        <button
-          class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm"
-          (click)="
-          setQuestionSection(section.sectionId);
-          openPuzzleBuilder();
-        ">
-          <i class="fas fa-plus"></i>
-          <span>Add Puzzle</span>
-        </button>
-
-
-        <button
-          class="w-full flex items-center justify-center  space-x-2 px-4 py-3 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg hover:from-green-700 hover:to-indigo-700 transition-all shadow-sm"
-          (click)="createSubSection(section)">
-          <i class="fas fa-plus"></i>
-          <span>Create SubSection</span>
-        </button>
-
-      </div>
-      <div
-        class="p-4 pl-0 pr-0 mt-10 border-t border-gray-200 space-y-3">
-        <button
-          class="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg hover:from-green-700 hover:to-indigo-700 transition-all shadow-sm"
-          (click)="createSection(i + 1)">
-          <i class="fas fa-plus"></i>
-          <span>Add New Section</span>
+      <!-- Quick Add Puzzle/Crossword -->
+      <div class="p-4 border-t border-slate-100 bg-slate-50/50 space-y-2">
+        <button (click)="openPuzzleBuilder()"
+                class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+          <i class="fas fa-puzzle-piece text-indigo-600"></i>
+          <span>Add Crossword Puzzle</span>
         </button>
       </div>
-    </div>
-  </div>
+    </aside>
 
-  <!-- Action Buttons -->
-  <div class="fixed bottom-8 right-8 flex flex-col space-y-4">
-    <button
-      class="w-12 h-12 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 hover:scale-105 transition-all flex items-center justify-center"
-      (click)="handleUpload()">
-      <i class="fas fa-cloud-upload-alt text-xl"></i>
-    </button>
+    <!-- Main Builder Content -->
+    <main class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-8 bg-slate-50/50">
+      
+      <!-- Section 1: General Test Settings Card -->
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-black text-slate-900">1. Test General Configuration</h2>
+            <p class="text-xs text-slate-500">Define the assessment title, duration limit, and overall instructions.</p>
+          </div>
+          <span class="px-3 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-xs font-bold">
+            General Specs
+          </span>
+        </div>
 
-    <button
-      class="w-12 h-12 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-700 hover:scale-105 transition-all flex items-center justify-center"
-      (click)="handleSave()">
-      <i class="fas fa-save text-xl"></i>
-    </button>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Test Title</label>
+            <input type="text"
+                   [(ngModel)]="test.testTitle"
+                   placeholder="e.g., Senior Full Stack Engineer Technical Screening"
+                   class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+          </div>
+
+          <div class="space-y-2">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Total Duration (Minutes)</label>
+            <div class="relative">
+              <input type="number"
+                     [(ngModel)]="test.testDuration"
+                     min="1"
+                     class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">MINS</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Candidate Instructions (Markdown Supported)</label>
+          <textarea rows="4"
+                    [(ngModel)]="test.description"
+                    placeholder="Provide clear rules, prerequisites, and instructions for candidates..."
+                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"></textarea>
+        </div>
+
+        <!-- Markdown Preview Box -->
+        <div *ngIf="test.description" class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+          <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">Live Description Preview</span>
+          <div [innerHTML]="formattingService.parseMarkdown(test.description)" class="prose prose-sm max-w-none text-slate-700"></div>
+        </div>
+      </div>
+
+      <!-- Section 2: Sections & Scoring Setup -->
+      <div *ngFor="let section of test.sections; let i = index" 
+           class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+        
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-black text-slate-900">2. Section {{ section.sectionId }} Configuration</h2>
+            <p class="text-xs text-slate-500">Configure parameters, pass mark, and scoring rules for Section {{ section.sectionId }}.</p>
+          </div>
+          <button (click)="deleteSection(section)"
+                  title="Delete Section"
+                  class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-bold transition-colors">
+            <i class="fas fa-trash-alt mr-1"></i> Delete Section
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Section Title</label>
+              <input type="text"
+                     [(ngModel)]="section.title"
+                     placeholder="e.g., Section 1: Core Aptitude & Logic"
+                     class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Section Time Limit (Minutes)</label>
+              <input type="number"
+                     [(ngModel)]="section.duration"
+                     class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all">
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Scoring Weightings</label>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <span class="text-[11px] font-semibold text-emerald-600">+ Score / Correct</span>
+                  <input type="number"
+                         [(ngModel)]="section.scoring.correct"
+                         class="w-full px-3 py-2 bg-emerald-50/50 border border-emerald-200 rounded-xl text-xs font-bold text-emerald-800">
+                </div>
+                <div class="space-y-1">
+                  <span class="text-[11px] font-semibold text-rose-600">- Deduction / Wrong</span>
+                  <input type="number"
+                         [(ngModel)]="section.scoring.wrong"
+                         class="w-full px-3 py-2 bg-rose-50/50 border border-rose-200 rounded-xl text-xs font-bold text-rose-800">
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Pass Mark Percentage (%)</label>
+              <input type="number"
+                     min="1" max="100"
+                     [(ngModel)]="section.scoring.passmark"
+                     class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-900">
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Section Instructions</label>
+          <textarea rows="3"
+                    [(ngModel)]="section.instructions"
+                    placeholder="Instructions specific to this section..."
+                    class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800"></textarea>
+        </div>
+
+        <!-- Section Add Questions Bar -->
+        <div class="pt-4 border-t border-slate-100 flex flex-wrap gap-3">
+          <button (click)="setQuestionSection(section.sectionId); openQuestionPopup('multiple-choice')"
+                  class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm">
+            <i class="fas fa-plus-circle"></i>
+            <span>Add Multiple Choice</span>
+          </button>
+          
+          <button (click)="setQuestionSection(section.sectionId); openQuestionPopup('user-input')"
+                  class="px-4 py-2.5 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm">
+            <i class="fas fa-i-cursor"></i>
+            <span>Add Open Text Question</span>
+          </button>
+
+          <button (click)="setQuestionSection(section.sectionId); openPuzzleBuilder()"
+                  class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs transition-all flex items-center gap-2 shadow-sm">
+            <i class="fas fa-puzzle-piece"></i>
+            <span>Add Crossword Puzzle</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Add New Section CTA -->
+      <div class="text-center py-4">
+        <button (click)="createSection()"
+                class="px-6 py-3 bg-white hover:bg-slate-100 text-slate-800 rounded-2xl font-bold text-xs border border-slate-200 shadow-xs transition-all inline-flex items-center gap-2">
+          <i class="fas fa-layer-group text-indigo-600"></i>
+          <span>Add Another Test Section</span>
+        </button>
+      </div>
+
+    </main>
   </div>
 </div>
 
+<!-- Modal: Add / Edit Question -->
 <div *ngIf="showQuestionPopup"
-  class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm flex justify-center items-center z-50"
-  (click)="closeQuestionPopup()">
-  <div class="bg-white rounded-2xl shadow-xl w-[40rem] max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
+     (click)="closeQuestionPopup()">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200"
+       (click)="$event.stopPropagation()">
+    
     <!-- Header -->
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-2xl font-bold text-gray-900">
-        {{ isEditingQuestion ? "Edit Question" : "Add New Question" }}
-      </h2>
+    <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+          <i class="fas" [ngClass]="isEditingQuestion ? 'fa-edit' : 'fa-plus'"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900">
+            {{ isEditingQuestion ? "Edit Question" : "Add New Question" }}
+          </h3>
+          <p class="text-xs text-slate-500 font-medium">Configure prompt, question format, and correct solution.</p>
+        </div>
+      </div>
+      <button (click)="closeQuestionPopup()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <i class="fas fa-times text-xs"></i>
+      </button>
     </div>
 
-    <!-- Scrollable Content -->
-    <div class="flex-1 overflow-y-auto scrollbar-hide p-6 space-y-6">
-      <!-- Error Message -->
-      <div *ngIf="errorMessage" class="flex items-center p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
-        <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
-        <p class="text-red-700">{{ errorMessage }}</p>
+    <!-- Body -->
+    <div class="p-6 overflow-y-auto space-y-5 flex-1">
+      <div *ngIf="errorMessage" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-xs font-bold flex items-center gap-2">
+        <i class="fas fa-exclamation-circle text-rose-500"></i>
+        <span>{{ errorMessage }}</span>
       </div>
 
-      <!-- Question Type -->
       <div class="space-y-2">
-        <label class="text-sm font-medium text-gray-700">Question Type</label>
-        <select
-          class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [(ngModel)]="newQuestion.type">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Question Type</label>
+        <select [(ngModel)]="newQuestion.type"
+                class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800">
           <option value="multiple-choice">Multiple Choice</option>
-          <option value="user-input">User Input</option>
+          <option value="user-input">User Input (Open Text)</option>
         </select>
       </div>
 
-      <!-- Question Text -->
       <div class="space-y-2">
-        <label class="text-sm font-medium text-gray-700">Question Text</label>
-        <textarea type="text" rows="1"
-          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [(ngModel)]="newQuestion.question" placeholder="Enter your question here">
-        </textarea>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Question Prompt</label>
+        <textarea rows="3"
+                  [(ngModel)]="newQuestion.question"
+                  placeholder="Enter the question text or problem statement..."
+                  class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800"></textarea>
       </div>
 
       <!-- Multiple Choice Options -->
-      <div *ngIf="newQuestion.type !== 'user-input'" class="space-y-4">
-        <label class="text-sm font-medium text-gray-700">Answer Options</label>
-
-        <!-- Add Option Input -->
-        <div class="flex gap-3">
+      <div *ngIf="newQuestion.type !== 'user-input'" class="space-y-3">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Answer Options</label>
+        
+        <div class="flex gap-2">
           <input type="text"
-            class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            [(ngModel)]="optionInput" placeholder="Enter an option" />
-          <button class="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            (click)="handleOption()">
+                 [(ngModel)]="optionInput"
+                 placeholder="Type an option..."
+                 (keydown.enter)="handleOption()"
+                 class="flex-1 px-4 py-2 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-800">
+          <button (click)="handleOption()"
+                  class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold transition-all">
             {{ isEditingOption ? "Update" : "Add" }}
           </button>
         </div>
 
-        <!-- Options List -->
-        <div class="space-y-2">
-          <div *ngFor="let option of newQuestion.options; let i = index"
-            class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg group">
-            <span class="flex-1">{{ option }}</span>
-            <div class="flex gap-2 transition-opacity">
-              <button class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" (click)="editOption(i)">
-                <i class="fas fa-edit"></i>
+        <div class="space-y-2 pt-2">
+          <div *ngFor="let option of newQuestion.options; let idx = index"
+               class="p-3 rounded-2xl border flex items-center justify-between gap-3 text-xs font-medium transition-all"
+               [ngClass]="selectedOptionIndex === idx ? 'bg-emerald-50/80 border-emerald-300 text-emerald-950 font-bold' : 'bg-slate-50/60 border-slate-200 text-slate-700'">
+            <div class="flex items-center gap-3">
+              <span class="w-6 h-6 rounded-lg bg-slate-200/60 text-slate-600 flex items-center justify-center text-[10px] font-bold">
+                {{ getOptionLetter(idx) }}
+              </span>
+              <span>{{ option }}</span>
+            </div>
+            
+            <div class="flex items-center gap-1">
+              <button (click)="selectCorrectOption(idx)"
+                      class="px-2.5 py-1 rounded-xl text-[11px] font-bold transition-colors"
+                      [ngClass]="selectedOptionIndex === idx ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600 hover:bg-emerald-100 hover:text-emerald-700'">
+                <i class="fas fa-check text-[10px] mr-1"></i> Correct
               </button>
-              <button class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" (click)="deleteOption(i)">
-                <i class="fas fa-trash"></i>
-              </button>
-              <button class="p-2 rounded-lg transition-colors" [class]="
-                  selectedOptionIndex === i
-                    ? 'text-green-600 bg-green-50'
-                    : 'text-gray-400 hover:bg-gray-100'
-                " (click)="selectCorrectOption(i)">
-                <i class="fas fa-check"></i>
+              <button (click)="deleteOption(idx)"
+                      class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 flex items-center justify-center">
+                <i class="fas fa-trash-alt text-xs"></i>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Text Input Answer -->
+      <!-- Open Text Answer -->
       <div *ngIf="newQuestion.type === 'user-input'" class="space-y-2">
-        <label class="text-sm font-medium text-gray-700">Correct Answer</label>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Correct Model Answer</label>
         <input type="text"
-          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          [(ngModel)]="newQuestion.answer" placeholder="Enter the correct answer" />
+               [(ngModel)]="newQuestion.answer"
+               placeholder="Expected answer key for automatic grading..."
+               class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-800">
       </div>
     </div>
 
-    <!-- Footer (Always Visible) -->
-    <div class="px-6 py-4 border-t rounded-2xl shadow-xl border-gray-200 flex justify-end gap-3 bg-white">
-      <button class="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-        (click)="closeQuestionPopup()">
+    <!-- Footer -->
+    <div class="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+      <button (click)="closeQuestionPopup()"
+              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all">
         Cancel
       </button>
-      <button class="px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
-        (click)="saveQuestion()">
-        {{ isEditingQuestion ? "Update Question" : "Add Question" }}
+      <button (click)="saveQuestion()"
+              class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold shadow-md shadow-indigo-500/20 transition-all">
+        {{ isEditingQuestion ? "Update Question" : "Save Question" }}
       </button>
     </div>
   </div>
 </div>
 
-
-<!-- Crossword Builder Modal -->
+<!-- Modal: Crossword Builder -->
 <div *ngIf="showCrosswordBuilder"
-  class="fixed inset-0 bg-gray-900/75 backdrop-blur-sm flex justify-center items-center z-50">
-  <div class="bg-white rounded-2xl shadow-xl w-[90vw] h-[90vh] flex flex-col">
-    <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-      <h2 class="text-2xl font-bold text-gray-900">Create Crossword Puzzle</h2>
-      <button class="p-2 text-gray-500 hover:text-gray-700" (click)="showCrosswordBuilder = false">
-        <i class="fas fa-times"></i>
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
+    <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <i class="fas fa-puzzle-piece"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900">Interactive Crossword Builder</h3>
+          <p class="text-xs text-slate-500">Design grid words, clues, and difficulty settings.</p>
+        </div>
+      </div>
+      <button (click)="showCrosswordBuilder = false" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <i class="fas fa-times text-xs"></i>
       </button>
     </div>
 
     <div class="flex-1 overflow-auto p-6">
-      <app-crossword-builder [grid]="crosswordField!.puzzleData!.grid" [clues]="crosswordField!.puzzleData!.clues"
-        [instructions]="crosswordField!.puzzleData!.description"
-        (puzzleUpdated)="onCrosswordSave($event)"></app-crossword-builder>
+      <app-crossword-builder [grid]="crosswordField!.puzzleData!.grid"
+                             [clues]="crosswordField!.puzzleData!.clues"
+                             [instructions]="crosswordField!.puzzleData!.description"
+                             (puzzleUpdated)="onCrosswordSave($event)"></app-crossword-builder>
     </div>
 
-    <div class="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-      <button class="px-6 py-2.5 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
-        (click)="showCrosswordBuilder = false">
+    <div class="p-6 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+      <button (click)="showCrosswordBuilder = false"
+              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all">
         Cancel
       </button>
-      <button class="px-6 py-2.5 text-white bg-blue-600 rounded-lg hover:bg-blue-700" (click)="saveCrosswordPuzzle()">
-        Save
+      <button (click)="saveCrosswordPuzzle()"
+              class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold shadow-md shadow-indigo-500/20 transition-all">
+        Save Crossword Puzzle
       </button>
     </div>
   </div>
 </div>
 
-
-
-
-
-<!-- Parse Questions Dialog -->
-<div *ngIf="showParseDialog" class="parse-dialog-overlay" (click)="closeParseDialog()">
-  <div class="parse-dialog" (click)="$event.stopPropagation()">
-    <!-- Dialog Header -->
-    <div class="dialog-header">
-      <h2>Bulk Add Questions</h2>
-      <button class="close-btn" (click)="closeParseDialog()">&times;</button>
+<!-- Modal: Bulk Questions Parser -->
+<div *ngIf="showParseDialog" 
+     class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md"
+     (click)="closeParseDialog()">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200"
+       (click)="$event.stopPropagation()">
+    
+    <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <i class="fas fa-file-import"></i>
+        </div>
+        <div>
+          <h3 class="text-base font-black text-slate-900">Bulk Import Questions</h3>
+          <p class="text-xs text-slate-500">Paste text format or structured JSON questions.</p>
+        </div>
+      </div>
+      <button (click)="closeParseDialog()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <i class="fas fa-times text-xs"></i>
+      </button>
     </div>
 
-    <!-- Dialog Content -->
-    <div class="dialog-content">
-      <!-- Toggle between text and JSON input -->
-      <div class="input-toggle">
+    <div class="p-6 overflow-y-auto space-y-6 flex-1">
+      <!-- Input Mode Toggle -->
+      <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/60 max-w-xs">
         <button (click)="useJsonInput = false; showParsePreview = false; errorMessage = null"
-          [class.active]="!useJsonInput">
-          Paste Text
+                [class.bg-white]="!useJsonInput"
+                [class.shadow-xs]="!useJsonInput"
+                [class.font-bold]="!useJsonInput"
+                class="flex-1 py-2 text-xs rounded-xl transition-all text-slate-700">
+          Paste Raw Text
         </button>
         <button (click)="useJsonInput = true; showParsePreview = false; errorMessage = null"
-          [class.active]="useJsonInput">
+                [class.bg-white]="useJsonInput"
+                [class.shadow-xs]="useJsonInput"
+                [class.font-bold]="useJsonInput"
+                class="flex-1 py-2 text-xs rounded-xl transition-all text-slate-700">
           Paste JSON
         </button>
       </div>
 
-      <!-- Text input for raw questions -->
-      <div *ngIf="!useJsonInput" class="input-section">
-        <h3>Paste Questions Text</h3>
-        <textarea [(ngModel)]="rawQuestionsText" placeholder="Paste your questions here...
-Example:
-57. Which systemic failure contributed to the third worker's injury? 
-A. Inadequate lighting 
-B. Faulty PPE 
-C. Poor housekeeping 
-Correct Answer: C 
-58. What was the organizational response following the incident? 
-A. Disciplinary action against workers 
-B. Shutdown of the entire facility 
-C. Safety compliance audit 
-Correct Answer: C" rows="8" class="question-textarea" (keydown.control.enter)="parseQuestionsFromText()">
-        </textarea>
-
-        <div class="button-group">
-          <button (click)="parseQuestionsFromText()" [disabled]="!rawQuestionsText || isParsing" class="parse-btn">
-            {{ isParsing ? 'Parsing...' : 'Parse Questions' }}
-          </button>
-          <button (click)="closeParseDialog()" class="cancel-btn">
-            Cancel
-          </button>
-        </div>
+      <!-- Text Input Mode -->
+      <div *ngIf="!useJsonInput" class="space-y-3">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Raw Text Format</label>
+        <textarea [(ngModel)]="rawQuestionsText"
+                  rows="8"
+                  placeholder="Paste questions here...&#10;Example:&#10;1. Which safety measure is mandatory on site?&#10;A. Hard hat&#10;B. Sandals&#10;C. None&#10;Correct Answer: A"
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"></textarea>
+        <button (click)="parseQuestionsFromText()"
+                [disabled]="!rawQuestionsText || isParsing"
+                class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm">
+          {{ isParsing ? 'Parsing...' : 'Parse Questions' }}
+        </button>
       </div>
 
-      <!-- JSON input -->
-      <div *ngIf="useJsonInput" class="input-section">
-        <h3>Paste Questions JSON</h3>
-        <textarea [(ngModel)]="questionsJson" placeholder='Paste your questions JSON here...
-Example:
-[
-  {
-    "type": "multiple-choice",
-    "question": "Which systemic failure contributed to the injury?",
-    "options": ["Inadequate lighting", "Faulty PPE", "Poor housekeeping"],
-    "answer": "Poor housekeeping",
-    "section": "Safety",
-    "subsection": "Incident Analysis"
-  }
-]' rows="8" class="json-textarea">
-        </textarea>
-
-        <div class="button-group">
-          <button (click)="loadQuestionsFromJson()" [disabled]="!questionsJson" class="json-btn">
-            Load Questions from JSON
-          </button>
-          <button (click)="closeParseDialog()" class="cancel-btn">
-            Cancel
-          </button>
-        </div>
+      <!-- JSON Input Mode -->
+      <div *ngIf="useJsonInput" class="space-y-3">
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Structured JSON Format</label>
+        <textarea [(ngModel)]="questionsJson"
+                  rows="8"
+                  placeholder='Paste questions JSON array here...&#10;[&#10;  {&#10;    "type": "multiple-choice",&#10;    "question": "What is the standard procedure?",&#10;    "options": ["Procedure A", "Procedure B"],&#10;    "answer": "Procedure A"&#10;  }&#10;]'
+                  class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"></textarea>
+        <button (click)="loadQuestionsFromJson()"
+                [disabled]="!questionsJson"
+                class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold transition-all shadow-sm">
+          Load from JSON
+        </button>
       </div>
 
-      <!-- Error message -->
-      <div *ngIf="errorMessage" class="error-message">
+      <!-- Errors -->
+      <div *ngIf="errorMessage" class="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-xs font-bold">
         {{ errorMessage }}
       </div>
 
-      <!-- Preview of parsed questions -->
-      <div *ngIf="showParsePreview && parsedQuestions.length > 0" class="preview-container">
-        <h3>Preview ({{ parsedQuestions.length }} questions parsed)</h3>
-
-        <div class="preview-list">
-          <div *ngFor="let question of parsedQuestions; let i = index" class="question-preview">
-            <div class="preview-header">
-              <span class="question-number">Q{{ i + 1 }}</span>
-              <span class="question-type">{{ question.type }}</span>
-              <div class="preview-actions">
-                <button (click)="editParsedQuestion(i)" class="edit-btn">Edit</button>
-                <button (click)="removeParsedQuestion(i)" class="remove-btn">Remove</button>
-              </div>
-            </div>
-
-            <p class="preview-question">{{ question.question }}</p>
-
-            <div *ngIf="question.type === 'multiple-choice'" class="preview-options">
-              <div *ngFor="let option of question.options; let j = index" [class.correct]="question.answer === option"
-                class="preview-option">
-                <span class="option-letter">{{ getOptionLetter(j) }}.</span>
-                {{ option }}
-                <span *ngIf="question.answer === option" class="correct-badge">✓ Correct</span>
-              </div>
-            </div>
-
-            <div *ngIf="question.type === 'user-input'" class="preview-answer">
-              <strong>Answer:</strong> {{ question.answer }}
-            </div>
-
-            <div class="preview-meta">
-              <span>Section: {{ question.section || 'Not set' }}</span>
-              <span>Subsection: {{ question.subsection || 'Not set' }}</span>
-            </div>
-          </div>
+      <!-- Parsed Preview -->
+      <div *ngIf="showParsePreview && parsedQuestions.length > 0" class="space-y-3 pt-4 border-t border-slate-100">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Parsed Preview ({{ parsedQuestions.length }} Questions)</h4>
+          <button (click)="saveParsedQuestions()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">
+            Import All
+          </button>
         </div>
 
-        <!-- Actions for parsed questions -->
-        <div class="preview-actions-footer">
-          <button (click)="saveParsedQuestions()" class="save-all-btn">
-            Save All {{ parsedQuestions.length }} Questions
-          </button>
-          <button (click)="parsedQuestions = []; showParsePreview = false" class="cancel-btn">
-            Start Over
-          </button>
+        <div class="space-y-2 max-h-60 overflow-y-auto p-2 bg-slate-50 rounded-2xl border border-slate-200/80">
+          <div *ngFor="let q of parsedQuestions; let idx = index" class="p-3 bg-white rounded-xl border border-slate-200 text-xs space-y-1">
+            <div class="flex justify-between font-bold text-slate-800">
+              <span>Q{{ idx + 1 }}. {{ q.question }}</span>
+              <span class="text-indigo-600 uppercase text-[10px]">{{ q.type }}</span>
+            </div>
+            <p *ngIf="q.answer" class="text-emerald-600 text-[11px] font-semibold">Answer: {{ q.answer }}</p>
+          </div>
         </div>
       </div>
     </div>

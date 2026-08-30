@@ -1,80 +1,85 @@
 <!-- Enterprise Loading Indicator -->
-<div *ngIf="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-  <div class="text-center">
-    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
-    <div class="mt-4 text-lg font-semibold text-gray-700">Loading Candidate Data...</div>
-    <p class="text-sm text-gray-500 mt-2">Processing applications and resumes</p>
-  </div>
-</div>
+<app-loader *ngIf="isLoading" [loadingText]="'Loading Candidate Data...'"></app-loader>
 
-<div class="p-4 md:p-6 lg:p-8">
+<div class="p-4 md:p-6 lg:p-8 font-sans">
   <!-- Enterprise Header with Stats -->
   <div class="mb-6 md:mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Candidate Management</h1>
-        <p class="text-gray-600 mt-2">Review, filter, and manage applicant pipeline</p>
+        <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Candidate Management</h1>
+        <p class="text-slate-500 font-medium mt-1">Review, filter, and manage applicant pipeline</p>
       </div>
 
       <!-- Quick Stats -->
       <div class="flex flex-wrap gap-3">
-        <!-- <div class="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
-          <div class="text-sm font-medium text-gray-600">Total</div>
-          <div class="text-xl font-bold text-gray-900">{{ candidates.length }}</div>
-        </div>
-        <div class="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm">
-          <div class="text-sm font-medium text-gray-600">Shortlisted</div>
-          <div class="text-xl font-bold text-green-600">{{ dataService.shortlistedCandidates.length }}</div>
-        </div> -->
-        <div class="bg-white border border-gray-200 rounded-xl px-4 py-3 shadow-sm flex gap-3">
-          <div class="text-sm font-medium text-gray-600 my-auto">New Today</div>
-          <div class="text-xl font-bold text-blue-600 my-auto">{{ getNewTodayCount() }}</div>
+        <div class="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl px-5 py-3 shadow-xs flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+            <i class="fas fa-calendar-day text-xs"></i>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">New Today</div>
+            <div class="text-lg font-black text-indigo-600 leading-tight">{{ getNewTodayCount() }}</div>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- Action Bar -->
     <div
-      class="flex flex-col lg:flex-row lg:items-start justify-between gap-4 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+      class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-200/80 shadow-xs">
       <div class="flex flex-wrap items-center gap-3">
         <!-- View Toggle -->
-        <div class="flex bg-gray-100 rounded-lg p-1">
+        <div class="flex bg-slate-100/80 rounded-xl p-1 border border-slate-200/60">
           <button (click)="toggleView()" [class.bg-white]="viewMode === 'table'"
-            [class.text-gray-900]="viewMode === 'table'" [class.text-gray-600]="viewMode !== 'table'"
-            class="px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2">
-            <i class="fas fa-table"></i>
+            [class.text-indigo-950]="viewMode === 'table'" [class.shadow-xs]="viewMode === 'table'" [class.font-bold]="viewMode === 'table'" [class.text-slate-600]="viewMode !== 'table'"
+            class="px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2">
+            <i class="fas fa-table text-indigo-600"></i>
             Table View
           </button>
           <button (click)="toggleView()" [class.bg-white]="viewMode === 'cards'"
-            [class.text-gray-900]="viewMode === 'cards'" [class.text-gray-600]="viewMode !== 'cards'"
-            class="px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2">
-            <i class="fas fa-th-large"></i>
+            [class.text-indigo-950]="viewMode === 'cards'" [class.shadow-xs]="viewMode === 'cards'" [class.font-bold]="viewMode === 'cards'" [class.text-slate-600]="viewMode !== 'cards'"
+            class="px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2">
+            <i class="fas fa-th-large text-indigo-600"></i>
             Cards View
           </button>
         </div>
 
         <!-- Quick Actions -->
-        <div class="relative group inline-block" tooltip>
+        <div class="relative group inline-block">
           <button (click)="toggleEmailingPopup()"
-            class="px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 text-sm font-medium"
+            class="px-4 py-2.5 bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 border border-emerald-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs"
             *ngIf="!isLoading && candidates.length > 0">
-            <i class="fas fa-envelope"></i>
+            <i class="fas fa-paper-plane text-emerald-600"></i>
             Notify Candidates
           </button>
 
           <!-- Tooltip -->
           <span
-            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-50">
-            Send messages to candidates.
+            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap z-50">
+            Send messages to candidates
           </span>
         </div>
 
+        <!-- Assessment Center Quick Link -->
+        <div class="relative group inline-block">
+          <button (click)="navigateToAssessmentCenter()"
+            class="px-4 py-2.5 bg-indigo-50/80 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs">
+            <i class="fas fa-tasks text-indigo-600"></i>
+            Assessment Center
+          </button>
+
+          <!-- Tooltip -->
+          <span
+            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap z-50">
+            Create & manage tests and quizzes
+          </span>
+        </div>
 
         <button (click)="saveUnShortListingDB()"
-          class="px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-2 text-sm font-medium"
+          class="px-4 py-2.5 bg-rose-50/80 hover:bg-rose-100/80 text-rose-700 border border-rose-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs"
           *ngIf="!isLoading && candidates.length > 0">
-          <i class="fas fa-list-check"></i>
-          Unshortlist / Reject Remaining Candidates ({{ unshotlistedCount }})
+          <i class="fas fa-user-xmark text-rose-600"></i>
+          Reject Remaining Candidates ({{ unshotlistedCount }})
         </button>
       </div>
 
@@ -83,7 +88,6 @@
         [popupView]="candidates[0]?.resume_data ? true : false"
         [showResumeFilters]="candidates[0]?.resume_data ? true : false"
         *ngIf="!isLoading && candidates.length > 0"></app-candidate-filters>
-
     </div>
   </div>
 
@@ -98,27 +102,33 @@
 
   <!-- No Candidates State -->
   <div *ngIf="!isLoading && candidates.length === 0"
-    class="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
-    <div class="w-24 h-24 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
-      <i class="fas fa-user-friends text-3xl text-blue-500"></i>
+    class="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+    <div class="w-20 h-20 bg-indigo-50 rounded-3xl flex items-center justify-center mb-5 border border-indigo-100/80">
+      <i class="fas fa-user-friends text-3xl text-indigo-600"></i>
     </div>
 
-    <h3 class="text-2xl font-bold text-gray-900 mb-3">No Candidates Found</h3>
-    <p class="text-gray-600 text-center max-w-md mb-8">
-      Start building your candidate pipeline by uploading applications or waiting for new submissions.
+    <h3 class="text-xl font-black text-slate-900 mb-2">No Candidates Found</h3>
+    <p class="text-slate-500 text-xs font-medium text-center max-w-md mb-6">
+      No candidates in this pipeline stage yet. Search and source candidates from the Talent Pool or import applicant documents.
     </p>
 
-    <div class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <button (click)="openTalentPool()"
+        class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-md shadow-indigo-500/20">
+        <i class="fas fa-users-viewfinder text-xs"></i>
+        <span>Search Candidates from Talent Pool</span>
+      </button>
+
       <button (click)="refreshData()"
-        class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2 font-medium">
-        <i class="fas fa-sync-alt"></i>
-        Refresh Data
+        class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-200/80">
+        <i class="fas fa-sync-alt text-xs"></i>
+        <span>Refresh Data</span>
       </button>
 
       <button (click)="openDataUpload()"
-        class="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors flex items-center gap-2 font-medium">
-        <i class="fas fa-upload"></i>
-        Import Documents
+        class="px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-200/80">
+        <i class="fas fa-upload text-xs"></i>
+        <span>Import Documents</span>
       </button>
     </div>
   </div>
@@ -128,7 +138,7 @@
     <!-- Cards View -->
     <div *ngIf="viewMode === 'cards'" class="space-y-6">
       <!-- Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         <div *ngFor="let candidate of candidatesPaginated"
           class="group bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 overflow-hidden">
           <!-- Candidate Header -->

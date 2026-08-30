@@ -8,6 +8,7 @@ import {
   ShortlistPopupComponent,
 } from '../shortlist-popup/shortlist-popup.component';
 import { CandidateDetailsComponent } from '../candidate-details/candidate-details.component';
+import { CandidateRankingSettingsComponent } from '../settings/candidate-ranking-settings/candidate-ranking-settings.component';
 import { JobPostData } from '../../../../models/jobpost.model';
 import { ActivatedRoute } from '@angular/router';
 import { AlertPopupComponent } from '../../../components/alert-popup/alert-popup.component';
@@ -22,6 +23,7 @@ import { COMMON_FORM_FIELDS } from '../candidate-list/candidate-list.component';
     AlertPopupComponent,
     ShortlistPopupComponent,
     CandidateDetailsComponent,
+    CandidateRankingSettingsComponent,
   ],
   templateUrl: './candidate-ranking.component.html',
   styleUrl: './candidate-ranking.component.scss',
@@ -152,6 +154,15 @@ export class CandidateRankingComponent implements OnInit {
 
   toggleOptions() {
     this.showOptions = !this.showOptions;
+  }
+
+  onSettingsSaved(updatedApplicationData: any): void {
+    if (updatedApplicationData) {
+      this.applicationData = updatedApplicationData;
+      this.evaluationData = updatedApplicationData.rankingSettings || {};
+      this.selectedCategories = Object.keys(this.evaluationData);
+      this.alertService.showSuccess('Evaluation settings saved successfully.');
+    }
   }
 
   onFileUpload(event: any) {

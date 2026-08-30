@@ -144,10 +144,13 @@ export class ApiService {
     return this.http.post(apiUrl, formData, { headers });
   }
 
-  shortListCandidates(resumes_ids: string[] | Record<string, any>, jobId?: string): Observable<any> {
-    const apiUrl =
+  shortListCandidates(resumes_ids: string[] | Record<string, any>, jobId?: string, stageName?: string): Observable<any> {
+    let apiUrl =
       environment.apiUrl +
       `/shortlisting/shortlist/${jobId || this.jobpost_id}`;
+    if (stageName) {
+      apiUrl += `?stage_name=${encodeURIComponent(stageName)}`;
+    }
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -157,10 +160,13 @@ export class ApiService {
   }
 
 
-  rejectCandidates(resumes_ids: string[], jobId?: string): Observable<any> {
-    const apiUrl =
+  rejectCandidates(resumes_ids: string[], jobId?: string, stageName?: string): Observable<any> {
+    let apiUrl =
       environment.apiUrl +
       `/shortlisting/reject/${jobId || this.jobpost_id}`;
+    if (stageName) {
+      apiUrl += `?stage_name=${encodeURIComponent(stageName)}`;
+    }
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -171,10 +177,14 @@ export class ApiService {
 
   removeListCandidates(
     resumes_ids: string[],
-    jobpost_id: string
+    jobpost_id: string,
+    stageName?: string
   ): Observable<any> {
-    const apiUrl =
+    let apiUrl =
       environment.apiUrl + `/shortlisting/remove-shortlist/${jobpost_id}`;
+    if (stageName) {
+      apiUrl += `?stage_name=${encodeURIComponent(stageName)}`;
+    }
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,

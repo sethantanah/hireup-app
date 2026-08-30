@@ -31,81 +31,113 @@
   
     <!-- Filters Section -->
     <div 
-      class="bg-white p-4 rounded-lg shadow-sm transition-all duration-300"
+      class="bg-white/90 backdrop-blur-xl p-4 rounded-2xl border border-slate-200/80 shadow-xs transition-all duration-300"
       [class.hidden]="!isFiltersOpen"
       [class.block]="isFiltersOpen"
       [class.md:block]="true"
     >
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- General Search -->
-        <div class="flex flex-col space-y-2">
-          <label for="search-term" class="text-sm font-medium text-gray-700">
-            General Search
+        <div class="flex flex-col space-y-1.5 transition-all duration-300 ease-out focus-within:col-span-1 md:focus-within:col-span-2 lg:focus-within:col-span-2 focus-within:z-20">
+          <label for="search-term" class="text-xs font-bold text-slate-600 capitalize tracking-wide flex items-center justify-between">
+            <span>General Search</span>
+            <span *ngIf="filters.search" class="text-[10px] text-indigo-600 font-semibold">Active</span>
           </label>
           <div class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input 
               type="text" 
               id="search-term" 
               placeholder="Enter any search term" 
               [(ngModel)]="filters.search" 
               (input)="onFilterChange()"
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              class="w-full pl-9 pr-8 py-2 bg-slate-50/80 border border-slate-200/80 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-xs font-medium text-slate-800 transition-all duration-300 ease-in-out placeholder:text-slate-400 outline-none focus:shadow-lg focus:shadow-indigo-500/10"
             />
+            <button 
+              *ngIf="filters.search"
+              (click)="clearField('search')"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition-colors"
+            >
+              <i class="fas fa-times-circle text-xs"></i>
+            </button>
           </div>
         </div>
   
         <!-- Skills Search -->
-        <div class="flex flex-col space-y-2">
-          <label for="skills" class="text-sm font-medium text-gray-700">
-            Search by Skills
+        <div class="flex flex-col space-y-1.5 transition-all duration-300 ease-out focus-within:col-span-1 md:focus-within:col-span-2 lg:focus-within:col-span-2 focus-within:z-20">
+          <label for="skills" class="text-xs font-bold text-slate-600 capitalize tracking-wide flex items-center justify-between">
+            <span>Search by Skills</span>
+            <span *ngIf="filters.skills" class="text-[10px] text-indigo-600 font-semibold">Active</span>
           </label>
           <div class="relative">
-            <i class="fas fa-code absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i class="fas fa-code absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input 
               type="text" 
               id="skills" 
-              placeholder="Enter skills" 
+              placeholder="Enter skills (e.g. Angular, Python)" 
               [(ngModel)]="filters.skills" 
               (input)="onFilterChange()"
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              class="w-full pl-9 pr-8 py-2 bg-slate-50/80 border border-slate-200/80 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-xs font-medium text-slate-800 transition-all duration-300 ease-in-out placeholder:text-slate-400 outline-none focus:shadow-lg focus:shadow-indigo-500/10"
             />
+            <button 
+              *ngIf="filters.skills"
+              (click)="clearField('skills')"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition-colors"
+            >
+              <i class="fas fa-times-circle text-xs"></i>
+            </button>
           </div>
         </div>
   
         <!-- Education Filter -->
-        <div class="flex flex-col space-y-2">
-          <label for="education" class="text-sm font-medium text-gray-700">
-            Education
+        <div class="flex flex-col space-y-1.5 transition-all duration-300 ease-out focus-within:col-span-1 md:focus-within:col-span-2 lg:focus-within:col-span-2 focus-within:z-20">
+          <label for="education" class="text-xs font-bold text-slate-600 capitalize tracking-wide flex items-center justify-between">
+            <span>Education</span>
+            <span *ngIf="filters.educationDegree" class="text-[10px] text-indigo-600 font-semibold">Active</span>
           </label>
           <div class="relative">
-            <i class="fas fa-graduation-cap absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i class="fas fa-graduation-cap absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input 
               type="text" 
               id="education" 
-              placeholder="Filter by degree" 
+              placeholder="Filter by degree (e.g. Bachelor, Master)" 
               [(ngModel)]="filters.educationDegree" 
               (input)="onFilterChange()"
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              class="w-full pl-9 pr-8 py-2 bg-slate-50/80 border border-slate-200/80 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-xs font-medium text-slate-800 transition-all duration-300 ease-in-out placeholder:text-slate-400 outline-none focus:shadow-lg focus:shadow-indigo-500/10"
             />
+            <button 
+              *ngIf="filters.educationDegree"
+              (click)="clearField('educationDegree')"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition-colors"
+            >
+              <i class="fas fa-times-circle text-xs"></i>
+            </button>
           </div>
         </div>
   
         <!-- Projects Filter -->
-        <div class="flex flex-col space-y-2">
-          <label for="projects" class="text-sm font-medium text-gray-700">
-            Projects
+        <div class="flex flex-col space-y-1.5 transition-all duration-300 ease-out focus-within:col-span-1 md:focus-within:col-span-2 lg:focus-within:col-span-2 focus-within:z-20">
+          <label for="projects" class="text-xs font-bold text-slate-600 capitalize tracking-wide flex items-center justify-between">
+            <span>Projects</span>
+            <span *ngIf="filters.projects" class="text-[10px] text-indigo-600 font-semibold">Active</span>
           </label>
           <div class="relative">
-            <i class="fas fa-project-diagram absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i class="fas fa-project-diagram absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
             <input 
               type="text" 
               id="projects" 
-              placeholder="Search projects" 
+              placeholder="Search project titles & experience" 
               [(ngModel)]="filters.projects" 
               (input)="onFilterChange()"
-              class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+              class="w-full pl-9 pr-8 py-2 bg-slate-50/80 border border-slate-200/80 rounded-xl focus:bg-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-xs font-medium text-slate-800 transition-all duration-300 ease-in-out placeholder:text-slate-400 outline-none focus:shadow-lg focus:shadow-indigo-500/10"
             />
+            <button 
+              *ngIf="filters.projects"
+              (click)="clearField('projects')"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 transition-colors"
+            >
+              <i class="fas fa-times-circle text-xs"></i>
+            </button>
           </div>
         </div>
       </div>

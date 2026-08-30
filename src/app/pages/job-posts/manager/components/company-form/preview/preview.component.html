@@ -1,99 +1,174 @@
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div *ngFor="let template of templates" 
-         class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
-      
-      <!-- Content -->
-      <div class="p-6">
-        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ template.title }}</h3>
-        <p class="text-gray-600 mb-4">{{ template.description }}</p>
-        
+<div class="space-y-8">
   
-        
-        <!-- Actions -->
-        <div class="flex space-x-3">
-          <button 
-            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center"
-            (click)="selectTemplate(template)"
-          >
-            <i class="fas fa-check mr-2"></i> Select
-          </button>
-          <button 
-            class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg transition-colors duration-300 flex items-center justify-center"
-            (click)="previewTemplate(template)"
-          >
-            <i class="fas fa-eye mr-2"></i> Preview
-          </button>
+  <!-- Header Bar -->
+  <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+          Template Hub
+        </span>
+        <span class="text-xs text-slate-400 font-semibold">{{ templates.length }} Themes Available</span>
+      </div>
+      <h2 class="text-2xl font-black text-slate-900 tracking-tight mt-2">Job Application Page Templates</h2>
+      <p class="text-xs text-slate-500 font-medium mt-1">
+        Select a branded layout for your job post landing page and application form.
+      </p>
+    </div>
+
+    <!-- Active Template & Corner Style -->
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white flex items-center justify-center text-xs font-black shadow-xs">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Active Template</span>
+          <h4 class="text-xs font-black text-slate-900">
+            {{ getActiveTemplateTitle() }}
+          </h4>
         </div>
       </div>
-    </div>
-</div>
 
-
-
-
-  <div *ngIf="showPreview" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-    <!-- Top Bar -->
-    <div class="fixed top-0 left-0 right-0 bg-white/10 backdrop-blur-md p-4 flex justify-between items-center">
-      <div class="flex items-center space-x-4">
-        <h2 class="text-xl font-bold text-white">{{ template.title }}</h2>
-        <span class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm">Preview Mode</span>
-
-              <!-- Form Only Toggle -->
-              <div class="flex items-center mb-6 mt-auto mb-auto">
-                <label class="flex items-center cursor-pointer ">
-                  <input 
-                    type="checkbox" 
-                    [(ngModel)]="template.formOnly"
-                    class="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-                  >
-                  <span class="ml-2 text-sm text-white">Form Only</span>
-                </label>
-              </div>
-      </div>
-      
-      <div class="flex items-center space-x-4">
-        <button 
-          class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-all duration-300 flex items-center"
-          (click)="openExternalPreview(template)"
-        >
-          <i class="fas fa-external-link-alt mr-2"></i>
-          Open in New Tab
-        </button>
-        
-        <button 
-          class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-all duration-300 flex items-center"
-          (click)="selectTemplate(template)"
-        >
-          <i class="fas fa-check mr-2"></i>
-          Select Template
-        </button>
-        
-        <button 
-          class="text-white hover:text-gray-300 p-2 rounded-lg transition-colors"
-          (click)="closePreview()"
-        >
-          <i class="fas fa-times text-xl"></i>
-        </button>
-      </div>
-    </div>
-  
-    <!-- Preview Content -->
-    <div class="w-full h-full pt-20 pb-8 px-8 overflow-auto">
-      <div class="bg-white rounded-xl shadow-2xl max-w-6xl mx-auto">
-        <!-- Template Content Here -->
-        <div class="p-8">
-          <!-- <h1 class="text-3xl font-bold mb-6">{{ template.title }}</h1>
-          <p class="text-gray-600">{{ template.description }}</p> -->
-          <div>
-            <app-templates-manager
-            [templateId]="template.id"
-            [jobAppData]="applicationData"
-            [formOnly]="template.formOnly!"
-          ></app-templates-manager>
-        </div>
+      <!-- Quick Corner Radius Selector -->
+      <div class="p-3 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Corner Radius Style</span>
+        <div class="flex items-center gap-1.5">
+          <button (click)="setCornerRadius('none')" type="button"
+                  [class]="applicationData?.colorScheme?.borderRadius === 'none' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'"
+                  class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-all flex items-center gap-1">
+            <div class="w-2.5 h-2.5 border border-current bg-transparent rounded-none"></div>
+            <span>Sharp (0px)</span>
+          </button>
+          <button (click)="setCornerRadius('3xl')" type="button"
+                  [class]="applicationData?.colorScheme?.borderRadius !== 'none' ? 'bg-indigo-600 text-white' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100'"
+                  class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-all flex items-center gap-1">
+            <div class="w-2.5 h-2.5 border border-current bg-transparent rounded-full"></div>
+            <span>Rounded</span>
+          </button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Templates Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div *ngFor="let tmpl of templates"
+         class="bg-white/90 backdrop-blur-xl rounded-3xl border border-slate-200/80 hover:border-indigo-300 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
+      
+      <!-- Top Card Body -->
+      <div class="p-6 space-y-4">
+        <div class="flex items-center justify-between gap-2">
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 uppercase tracking-wider border border-indigo-100">
+            {{ tmpl.category || 'Standard' }}
+          </span>
+
+          <span *ngIf="tmpl.badge"
+                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
+            {{ tmpl.badge }}
+          </span>
+        </div>
+
+        <div>
+          <h3 class="text-base font-black text-slate-900 tracking-tight group-hover:text-indigo-600 transition-colors">
+            {{ tmpl.title }}
+          </h3>
+          <p class="text-xs text-slate-500 font-medium mt-1 leading-relaxed">
+            {{ tmpl.description }}
+          </p>
+        </div>
+
+        <!-- Status Indicator -->
+        <div *ngIf="applicationData?.templateId === tmpl.id"
+             class="p-3 bg-emerald-50/80 border border-emerald-200/80 text-emerald-800 rounded-2xl text-xs font-bold flex items-center gap-2">
+          <i class="fas fa-check-circle text-emerald-600"></i>
+          <span>Currently Active Layout</span>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="p-6 border-t border-slate-100 bg-slate-50/40 flex items-center gap-3">
+        <button (click)="selectTemplate(tmpl)"
+                [ngClass]="applicationData?.templateId === tmpl.id ? 'bg-emerald-600 text-white' : 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white'"
+                class="flex-1 py-2.5 rounded-2xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-2">
+          <i class="fas" [ngClass]="applicationData?.templateId === tmpl.id ? 'fa-check' : 'fa-hand-pointer'"></i>
+          <span>{{ applicationData?.templateId === tmpl.id ? 'Active' : 'Apply Layout' }}</span>
+        </button>
+
+        <button (click)="previewTemplate(tmpl)"
+                class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-700 rounded-2xl text-xs font-bold border border-slate-200 transition-all flex items-center justify-center gap-1.5">
+          <i class="fas fa-eye text-indigo-600"></i>
+          <span>Preview</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen Preview Modal -->
+<div *ngIf="showPreview" class="fixed inset-0 z-50 flex flex-col bg-slate-950/90 backdrop-blur-md animate-in fade-in duration-200">
   
-  
+  <!-- Modal Topbar -->
+  <div class="bg-slate-900/90 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 font-bold">
+        <i class="fas fa-eye"></i>
+      </div>
+      <div>
+        <h3 class="text-sm font-black text-white">{{ template.title }}</h3>
+        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Interactive Preview</span>
+      </div>
+    </div>
+
+    <!-- Toggle Controls -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <!-- Quick Corner Radius Toggle -->
+      <div class="flex items-center gap-1 bg-slate-800/90 p-1 rounded-xl border border-slate-700">
+        <span class="text-[11px] font-bold text-slate-400 px-2 uppercase tracking-wider">Corners:</span>
+        <button (click)="setCornerRadius('none')" type="button"
+                [class]="applicationData?.colorScheme?.borderRadius === 'none' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-300 hover:text-white font-medium'"
+                class="px-3 py-1 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 border border-current bg-transparent rounded-none"></div>
+          <span>Sharp (0px)</span>
+        </button>
+        <button (click)="setCornerRadius('3xl')" type="button"
+                [class]="applicationData?.colorScheme?.borderRadius !== 'none' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-300 hover:text-white font-medium'"
+                class="px-3 py-1 rounded-lg text-xs transition-all flex items-center gap-1.5">
+          <div class="w-2.5 h-2.5 border border-current bg-transparent rounded-full"></div>
+          <span>Rounded</span>
+        </button>
+      </div>
+
+      <label class="flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
+        <input type="checkbox" [(ngModel)]="template.formOnly" class="rounded text-indigo-600" />
+        <span>Form Only View</span>
+      </label>
+
+      <button (click)="openExternalPreview(template)"
+              class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold border border-slate-700 transition-all flex items-center gap-2">
+        <i class="fas fa-external-link-alt text-indigo-400"></i>
+        <span>New Tab</span>
+      </button>
+
+      <button (click)="selectTemplate(template)"
+              class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2">
+        <i class="fas fa-check"></i>
+        <span>Use This Template</span>
+      </button>
+
+      <button (click)="closePreview()" class="w-9 h-9 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Preview Canvas Container -->
+  <div class="flex-1 overflow-y-auto p-6 sm:p-10 flex justify-center bg-slate-900/50">
+    <div class="bg-slate-950 rounded-3xl shadow-2xl border border-slate-800/80 w-full max-w-6xl overflow-hidden min-h-[600px]">
+      <app-templates-manager
+        [templateId]="template.id"
+        [jobAppData]="applicationData"
+        [formOnly]="template.formOnly!"
+      ></app-templates-manager>
+    </div>
+  </div>
+</div>

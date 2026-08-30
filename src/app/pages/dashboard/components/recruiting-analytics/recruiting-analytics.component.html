@@ -1,0 +1,148 @@
+<div class="p-6 space-y-8 bg-slate-50/50 min-h-screen">
+  <!-- Analytics Banner -->
+  <div class="p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800">
+    <div class="space-y-2">
+      <div class="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-widest">
+        <i class="fas fa-chart-line"></i>
+        <span>Recruiter Performance Intelligence</span>
+      </div>
+      <h2 class="text-2xl font-black tracking-tight">Hiring Funnel & Velocity Analytics</h2>
+      <p class="text-xs text-slate-300 max-w-xl leading-relaxed">
+        Live pipeline analytics computed from real candidate submissions, stage transitions, and recruiter evaluation scorecards.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="px-5 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-center">
+        <span class="block text-[10px] font-bold uppercase text-slate-400">Time-to-Hire</span>
+        <span class="text-xl font-black text-emerald-400">{{ timeToHireDays > 0 ? timeToHireDays + ' Days' : 'N/A' }}</span>
+      </div>
+      <div class="px-5 py-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 text-center">
+        <span class="block text-[10px] font-bold uppercase text-slate-400">Offer Accept</span>
+        <span class="text-xl font-black text-indigo-300">{{ offerAcceptanceRate > 0 ? offerAcceptanceRate + '%' : '0%' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Metric Cards Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Applicant Pool</span>
+        <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <i class="fas fa-users text-sm"></i>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-2xl font-black text-slate-900">{{ totalApplicants }}</h3>
+        <p class="text-[11px] text-indigo-600 font-bold mt-1 flex items-center gap-1">
+          <span>{{ totalShortlisted }} Shortlisted Candidates</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Screening Conversion</span>
+        <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <i class="fas fa-filter text-sm"></i>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-2xl font-black text-slate-900">{{ screeningConversionRate }}%</h3>
+        <p class="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
+          <i class="fas fa-chart-line"></i>
+          <span>Real-time conversion rate</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Assessment Completion</span>
+        <div class="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+          <i class="fas fa-tasks text-sm"></i>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-2xl font-black text-slate-900">{{ assessmentCompletionRate }}%</h3>
+        <p class="text-[11px] text-slate-500 font-medium mt-1">Live candidate assessment rate</p>
+      </div>
+    </div>
+
+    <div class="p-5 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Scorecard Average</span>
+        <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+          <i class="fas fa-star text-sm"></i>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-2xl font-black text-slate-900">
+          {{ avgCandidateRating > 0 ? (avgCandidateRating + ' / 5.0') : 'No Ratings' }}
+        </h3>
+        <p class="text-[11px] text-amber-600 font-bold mt-1">
+          {{ totalRatedCandidatesCount }} candidate rating(s) saved
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Funnel Waterfall & Sourcing Channels Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Left Column: Pipeline Waterfall -->
+    <div class="lg:col-span-2 p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Recruitment Pipeline Funnel</h3>
+          <p class="text-xs text-slate-500">Stage-by-stage candidate progression and retention analysis</p>
+        </div>
+        <span class="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-bold">Live Posting Stages</span>
+      </div>
+
+      <div class="space-y-4" *ngIf="funnelStages && funnelStages.length > 0">
+        <div *ngFor="let stage of funnelStages" class="space-y-1.5">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-extrabold text-slate-800">{{ stage.name }}</span>
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-slate-600">{{ stage.count }} candidates</span>
+              <span class="px-2 py-0.5 bg-slate-100 text-slate-800 font-black rounded-md text-[11px]">{{ stage.percentage }}%</span>
+            </div>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5">
+            <div [class]="stage.color" class="h-2 rounded-full transition-all duration-500 shadow-xs" [style.width.%]="stage.percentage"></div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!funnelStages || funnelStages.length === 0" class="text-center py-8 text-xs text-slate-400 font-medium">
+        No active pipeline stages configured.
+      </div>
+    </div>
+
+    <!-- Right Column: Channel Sourcing Efficiency -->
+    <div class="p-6 bg-white rounded-2xl border border-slate-200/80 shadow-xs space-y-6">
+      <div class="pb-4 border-b border-slate-100">
+        <h3 class="text-base font-extrabold text-slate-900">Channel Sourcing Efficiency</h3>
+        <p class="text-xs text-slate-500">Candidate quality score per acquisition channel</p>
+      </div>
+
+      <div class="space-y-4">
+        <div *ngFor="let source of sourcingChannels" class="p-4 bg-slate-50/80 border border-slate-200/60 rounded-xl space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-800 flex items-center gap-2">
+              <i [class]="source.icon" class="text-indigo-600"></i>
+              <span>{{ source.channel }}</span>
+            </span>
+            <span class="text-xs font-black text-emerald-600">{{ source.qualityScore }} / 5.0</span>
+          </div>
+          <div class="flex justify-between items-center text-[11px] text-slate-500 font-medium">
+            <span>{{ source.applicants }} Applicants</span>
+            <span class="font-bold text-slate-700">{{ source.shortlisted }} Shortlisted</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

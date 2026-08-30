@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import {
   FormArrayName,
   FormBuilder,
@@ -10,6 +10,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ApiService } from '../../../../services/api.service';
+import { CandidateService } from '../../../../services/candidate.service';
 import { ColorScheme, FormField, JobPostData } from '../../../../models/jobpost.model';
 import { FormattingService } from '../../../../services/formatting.service';
 import { animate, style, transition, trigger } from '@angular/animations';
@@ -37,12 +38,12 @@ interface ColorsScheme {
     ]),
   ],
 })
-export class TemplatesManagerComponent implements OnInit {
+export class TemplatesManagerComponent implements OnInit, OnChanges {
   @Input() jobPostId: string | undefined;
   @Input() jobAppData: JobPostData | undefined;
   @Input() templateId: string = '1';
   @Input() mode: string = 'testing';
-  @Input() formType: string = "Application Form"
+  @Input() formType: string = "Application Form";
   @Input() formOnly: boolean = false;
   form: FormGroup | undefined; // FormGroup for the user-facing form
 
@@ -74,6 +75,11 @@ export class TemplatesManagerComponent implements OnInit {
   deadlinePassed: boolean = false;
   deadline: any;
 
+  candidateId: string | null = null;
+  candidateEmail: string | null = null;
+  candidateProfile: any = null;
+  preloadedCvAttached: { [key: string]: boolean } = {};
+
 
   get errorMessages(): string[] {
     return Object.values(this.errors || {});
@@ -84,19 +90,43 @@ export class TemplatesManagerComponent implements OnInit {
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private apiService: ApiService,
+    private candidateService: CandidateService,
     public formattingService: FormattingService
   ) {
     this.form = this.fb.group({});
   }
 
   ngOnInit(): void {
+    this.initComponent();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['jobAppData'] || changes['formType'] || changes['templateId']) {
+      this.initComponent();
+    }
+  }
+
+  private initComponent(): void {
     this.formType = this.route.snapshot.paramMap.get('applicationType') || this.route.snapshot.paramMap.get('formOnly') || this.formType;
-    this.activeSection = this.jobAppData?.sections[0] || 'General';
+
+    // Support Additional Data / Request For Additional Data forms
+    if (this.formType === 'Request For Additional Data' || this.formType === 'Additional Data') {
+      if (this.jobAppData && this.jobAppData.requestForDataForm && this.jobAppData.requestForDataForm.fields && this.jobAppData.requestForDataForm.fields.length > 0) {
+        this.jobAppData.formData = this.jobAppData.requestForDataForm;
+        if (this.jobAppData.additionalSections && this.jobAppData.additionalSections.length > 0) {
+          this.jobAppData.sections = this.jobAppData.additionalSections;
+        }
+      }
+    }
+
+    this.activeSection = this.jobAppData?.sections?.[0] || 'General';
 
     // Check deadline
     if (this.jobAppData?.deadline) {
       this.deadline = new Date(this.jobAppData.deadline);
       this.deadlinePassed = this.deadline < new Date();
+    } else {
+      this.deadlinePassed = false;
     }
 
     if (this.jobAppData?.colorScheme) {
@@ -110,18 +140,79 @@ export class TemplatesManagerComponent implements OnInit {
       );
     }
 
-    // Initialize form values
-    this.jobAppData?.formData.fields.forEach((field: any) => {
+    // Initialize form controls
+    this.form = this.fb.group({});
+    this.formValues = {};
+
+    this.jobAppData?.formData?.fields?.forEach((field: any) => {
       const validators = field.required ? [Validators.required] : [];
-      this.form?.addControl(field.key, this.fb.control('', validators));
+      if (field.type === 'checkbox') {
+        this.formValues[field.key] = false;
+      } else if (field.type === 'select' && field.allowMultiSelect) {
+        this.formValues[field.key] = [];
+      } else {
+        this.formValues[field.key] = '';
+      }
+      this.form?.addControl(field.key, this.fb.control(this.formValues[field.key], validators));
     });
 
-    if (this.jobAppData?.applySection.declaration) {
-      this.form?.addControl('agreeToDeclaration', this.fb.control('', [Validators.required]));
-    }
-
-    // Initialize checkbox value
+    // Always ensure declaration control is present to prevent reactive form template binding errors
+    this.form?.addControl('agreeToDeclaration', this.fb.control(false));
     this.formValues['agreeToDeclaration'] = false;
+
+    this.candidateId = this.route.snapshot.queryParamMap.get('candidateId') || this.route.snapshot.queryParamMap.get('candidate_id');
+    this.candidateEmail = this.route.snapshot.queryParamMap.get('email') || this.route.snapshot.queryParamMap.get('candidateEmail');
+
+    if (this.candidateId || this.candidateEmail || (typeof localStorage !== 'undefined' && localStorage.getItem('token'))) {
+      this.loadCandidateProfile();
+    }
+  }
+
+  loadCandidateProfile(): void {
+    this.candidateService.getProfile().subscribe({
+      next: (res: any) => {
+        const profile = res?.data || res;
+        if (!profile) return;
+        this.candidateProfile = profile;
+        if (!this.candidateEmail && profile.user_email) this.candidateEmail = profile.user_email;
+        if (!this.candidateId && profile.id) this.candidateId = profile.id;
+
+        this.jobAppData?.formData?.fields?.forEach((field: any) => {
+          const keyLower = (field.key || '').toLowerCase();
+          const labelLower = (field.label || '').toLowerCase();
+
+          if (field.type !== 'file') {
+            let fillVal: string | null = null;
+            if (keyLower.includes('email') || labelLower.includes('email')) {
+              fillVal = profile.user_email || profile.email;
+            } else if (keyLower.includes('name') || labelLower.includes('name')) {
+              fillVal = profile.full_name;
+            } else if (keyLower.includes('phone') || labelLower.includes('phone') || keyLower.includes('contact')) {
+              fillVal = profile.phone;
+            } else if (keyLower.includes('location') || labelLower.includes('location') || keyLower.includes('address')) {
+              fillVal = profile.location;
+            }
+
+            if (fillVal && (!this.formValues[field.key] || this.formValues[field.key] === '')) {
+              this.formValues[field.key] = fillVal;
+              if (this.form?.controls[field.key]) {
+                this.form.controls[field.key].setValue(fillVal);
+              }
+            }
+          } else {
+            if (profile.resume_url || profile.uploaded_files?.resume) {
+              this.preloadedCvAttached[field.key] = true;
+              delete this.errors[field.key];
+            }
+          }
+        });
+      },
+      error: () => {}
+    });
+  }
+
+  clearPreloadedCv(key: string): void {
+    this.preloadedCvAttached[key] = false;
   }
 
   // Build the user-facing form based on the formFields array
@@ -218,6 +309,29 @@ export class TemplatesManagerComponent implements OnInit {
     }
   }
 
+  toggleMultiSelectOption(fieldKey: string, option: string): void {
+    if (!Array.isArray(this.formValues[fieldKey])) {
+      this.formValues[fieldKey] = [];
+    }
+    const index = this.formValues[fieldKey].indexOf(option);
+    if (index > -1) {
+      this.formValues[fieldKey].splice(index, 1);
+    } else {
+      this.formValues[fieldKey].push(option);
+    }
+    if (this.form?.controls[fieldKey]) {
+      this.form.controls[fieldKey].setValue(this.formValues[fieldKey]);
+    }
+  }
+
+  isOptionSelected(fieldKey: string, option: string): boolean {
+    const val = this.formValues[fieldKey];
+    if (Array.isArray(val)) {
+      return val.includes(option);
+    }
+    return val === option;
+  }
+
   validateField(field: any) {
     let value = this.formValues[field.key];
     if (field.type === 'file') {
@@ -228,12 +342,43 @@ export class TemplatesManagerComponent implements OnInit {
     delete this.errors[field.key];
 
     // Check if the field is required and empty
-    if (field.required && !value) {
-      this.errors[field.key] = `${field.label} is required.`;
+    if (field.type === 'checkbox') {
+      if (field.required && !value) {
+        this.errors[field.key] = `${field.label} is required.`;
+      }
       return;
     }
 
-    if (field.type === 'checkbox' && !value) {
+    if (field.type === 'select') {
+      if (field.allowMultiSelect) {
+        if (field.required && (!Array.isArray(value) || value.length === 0)) {
+          this.errors[field.key] = `Please select at least one option for ${field.label}.`;
+          return;
+        }
+        if (field.allowOther && Array.isArray(value) && value.includes('Other')) {
+          const otherVal = this.formValues[field.key + '_other'];
+          if (field.required && (!otherVal || !otherVal.trim())) {
+            this.errors[field.key] = `Please specify the custom value for 'Other' in ${field.label}.`;
+            return;
+          }
+        }
+      } else {
+        if (field.required && (!value || !value.trim())) {
+          this.errors[field.key] = `${field.label} is required.`;
+          return;
+        }
+        if (field.allowOther && value === 'Other') {
+          const otherVal = this.formValues[field.key + '_other'];
+          if (field.required && (!otherVal || !otherVal.trim())) {
+            this.errors[field.key] = `Please specify the custom value for 'Other' in ${field.label}.`;
+            return;
+          }
+        }
+      }
+      return;
+    }
+
+    if (field.required && !value) {
       this.errors[field.key] = `${field.label} is required.`;
       return;
     }
@@ -252,26 +397,15 @@ export class TemplatesManagerComponent implements OnInit {
         }
         break;
 
-      // case 'date':
-      //   if (!this.isValidDate(value)) {
-      //     this.errors[field.key] = 'Please enter a valid date.';
-      //   }
-      //   break;
-
       case 'text-area':
-        if (field.required && !value.trim()) {
-          this.errors[field.key] = `${field.label} is required.`;
-        }
-        break;
-
-      case 'select':
-        if (field.required && !value) {
+      case 'textarea':
+        if (field.required && (!value || !value.trim())) {
           this.errors[field.key] = `${field.label} is required.`;
         }
         break;
 
       case 'file':
-        if (field.required && !this.uploadedFiles[field.key]) {
+        if (field.required && !this.uploadedFiles[field.key] && !this.preloadedCvAttached[field.key]) {
           this.errors[field.key] = `${field.label} is required.`;
         }
         break;
@@ -377,6 +511,15 @@ export class TemplatesManagerComponent implements OnInit {
 
     if (this.jobPostId) {
       formData.append('jobPostId', this.jobPostId);
+      if (this.candidateId) {
+        formData.append('candidate_id', this.candidateId);
+      }
+      if (this.candidateEmail) {
+        formData.append('candidate_email', this.candidateEmail);
+      }
+      if (this.candidateProfile?.user_email) {
+        formData.append('email', this.candidateProfile.user_email);
+      }
       // Proceed with form submission
       this.isLoading = true;
       this.isSubmitting = true;
@@ -509,16 +652,32 @@ export class TemplatesManagerComponent implements OnInit {
   }
 
   formatData(
-    data: { [key: string]: string },
+    data: { [key: string]: any },
     fields: any[]
-  ): { [key: string]: { value: string; label: string } } {
-    const formattedData: { [key: string]: { value: string; label: string } } =
-      {};
+  ): { [key: string]: { value: any; label: string } } {
+    const formattedData: { [key: string]: { value: any; label: string } } = {};
 
     fields.forEach((field) => {
       const key = field.key; // Key from the fields array
       const label = field.label.toLowerCase().replace(/ /g, '_'); // Convert label to lowercase with underscores
-      const value = data[key] || ''; // Get value from data or default to empty string
+      let value = this.formValues[key] !== undefined ? this.formValues[key] : (data[key] || '');
+
+      if (field.type === 'checkbox') {
+        value = value ? 'Yes' : 'No';
+      } else if (field.type === 'select') {
+        if (field.allowMultiSelect && Array.isArray(value)) {
+          value = value.map(opt => {
+            if (opt === 'Other') {
+              const customVal = this.formValues[key + '_other'];
+              return customVal ? `Other (${customVal})` : 'Other';
+            }
+            return opt;
+          }).join(', ');
+        } else if (value === 'Other') {
+          const customVal = this.formValues[key + '_other'];
+          value = customVal ? `Other (${customVal})` : 'Other';
+        }
+      }
 
       formattedData[label] = {
         value,
@@ -575,5 +734,17 @@ export class TemplatesManagerComponent implements OnInit {
     }
 
     return transformedObject;
+  }
+
+  getCornerRadiusClass(fallback: string = ''): string {
+    const radius = this.jobAppData?.colorScheme?.borderRadius;
+    switch (radius) {
+      case 'none': return '!rounded-none';
+      case 'sm': return '!rounded-md';
+      case 'md': return '!rounded-lg';
+      case 'xl': return '!rounded-2xl';
+      case '3xl': return '!rounded-3xl';
+      default: return fallback;
+    }
   }
 }

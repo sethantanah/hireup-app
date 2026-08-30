@@ -1,0 +1,1005 @@
+<div class="min-h-screen bg-slate-50/60 p-4 sm:p-8 space-y-8 max-w-7xl mx-auto">
+  
+  <!-- AUTH GATE WARNING IF NOT LOGGED IN -->
+  <div *ngIf="!isLoggedIn" class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl border border-slate-800 text-center space-y-6 max-w-3xl mx-auto my-12">
+    <div class="w-16 h-16 rounded-3xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-400 text-3xl font-bold flex items-center justify-center mx-auto shadow-inner">
+      <i class="fa-solid fa-lock"></i>
+    </div>
+    
+    <div class="space-y-2">
+      <h2 class="text-2xl sm:text-3xl font-black text-white">Candidate Authentication Required</h2>
+      <p class="text-sm text-slate-300 font-medium max-w-lg mx-auto leading-relaxed">
+        Please sign in or create an account to access your Candidate Portal, upload your resume, manage your employment status, and view your AI vector matched job opportunities.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+      <button (click)="redirectToLogin()" class="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Sign In to Candidate Account</span>
+      </button>
+      <button (click)="redirectToRegister()" class="px-8 py-3.5 bg-white/10 hover:bg-white/20 text-slate-200 rounded-2xl text-xs font-bold transition-all border border-white/10 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Register New Account</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CANDIDATE PORTAL CONTENT (LOGGED IN) -->
+  <div *ngIf="isLoggedIn" class="space-y-8">
+    <!-- Top Hero Header -->
+    <div class="bg-gradient-to-r from-indigo-900 via-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/20 rounded-full border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+              <i class="fa-solid fa-sparkles"></i> Candidate Portal & Job Match Hub
+            </div>
+
+            <!-- Tied Account Email Badge & Auth Actions -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <span *ngIf="userEmail" class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 rounded-full border border-emerald-400/30 text-emerald-300 text-xs font-bold">
+                <i class="fa-solid fa-user-check text-[10px]"></i>
+                Tied to: {{ userEmail }}
+              </span>
+
+              <!-- Switch Account Button -->
+              <button (click)="switchAccount()" title="Switch Account" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-slate-200 rounded-full text-xs font-bold transition-all border border-white/10 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-arrows-rotate text-[10px]"></i>
+                <span>Switch Account</span>
+              </button>
+
+              <!-- Sign Out Button -->
+              <button (click)="signOut()" title="Sign Out" class="px-3 py-1 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded-full text-xs font-bold transition-all border border-rose-400/30 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+
+          <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
+            Welcome, {{ profile.full_name || 'Candidate' }}
+          </h1>
+
+          <!-- Employment Status Badge -->
+          <div class="flex items-center gap-2 pt-1">
+            <span class="text-xs font-bold text-slate-400">Current Status:</span>
+            <span class="px-3 py-1 bg-white/10 backdrop-blur-md rounded-xl text-xs font-bold border border-white/10 text-indigo-200 flex items-center gap-1.5">
+              <span>{{ profile.employment_status || 'Actively Looking' }}</span>
+            </span>
+          </div>
+
+          <p class="text-xs sm:text-sm text-slate-300 font-medium max-w-2xl">
+            Upload your resume for instant parsing and opportunity matching. Explore matched job opportunities and manage your profile in real-time.
+          </p>
+        </div>
+
+        <!-- Quick Resume Uploader -->
+        <div class="shrink-0 bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 space-y-3">
+          <span class="text-xs font-bold text-slate-200 block flex items-center gap-2">
+            <i class="fa-solid fa-cloud-arrow-up text-indigo-400"></i>
+            Resume Auto-Parse
+          </span>
+          <label class="cursor-pointer px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2">
+            <i class="fa-solid" [ngClass]="isUploading ? 'fa-spinner fa-spin' : 'fa-file-pdf'"></i>
+            <span>{{ isUploading ? 'Extracting Resume...' : 'Upload CV / Resume' }}</span>
+            <input type="file" (change)="onFileSelected($event)" accept=".pdf,.docx,.doc" class="hidden" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-3 border-b border-slate-200/80 pb-2 overflow-x-auto">
+      <button (click)="activeTab = 'matches'"
+              [class.text-indigo-600]="activeTab === 'matches'"
+              [class.border-indigo-600]="activeTab === 'matches'"
+              [class.text-slate-500]="activeTab !== 'matches'"
+              class="px-4 py-2.5 text-sm font-extrabold border-b-2 border-transparent transition-all flex items-center gap-2 relative whitespace-nowrap">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>Matched Opportunities</span>
+        <span *ngIf="displayMatchedJobs.length > 0" class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[11px] font-bold">
+          {{ displayMatchedJobs.length }}
+        </span>
+      </button>
+
+      <button (click)="activeTab = 'applications'"
+              [class.text-indigo-600]="activeTab === 'applications'"
+              [class.border-indigo-600]="activeTab === 'applications'"
+              [class.text-slate-500]="activeTab !== 'applications'"
+              class="px-4 py-2.5 text-sm font-extrabold border-b-2 border-transparent transition-all flex items-center gap-2 relative whitespace-nowrap">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>My Applications & Submissions</span>
+        <span *ngIf="myApplications.length > 0" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+          {{ myApplications.length }}
+        </span>
+      </button>
+
+      <button (click)="activeTab = 'profile'"
+              [class.text-indigo-600]="activeTab === 'profile'"
+              [class.border-indigo-600]="activeTab === 'profile'"
+              [class.text-slate-500]="activeTab !== 'profile'"
+              class="px-4 py-2.5 text-sm font-extrabold border-b-2 border-transparent transition-all flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-user-gear"></i>
+        <span>Candidate Profile</span>
+      </button>
+
+      <button (click)="activeTab = 'resume'"
+              [class.text-indigo-600]="activeTab === 'resume'"
+              [class.border-indigo-600]="activeTab === 'resume'"
+              [class.text-slate-500]="activeTab !== 'resume'"
+              class="px-4 py-2.5 text-sm font-extrabold border-b-2 border-transparent transition-all flex items-center gap-2 whitespace-nowrap">
+        <i class="fa-solid fa-file-invoice"></i>
+        <span>Structured Resume Profile</span>
+      </button>
+    </div>
+
+    <!-- Global Feedback Banner -->
+    <div *ngIf="feedback"
+         [class.bg-emerald-50]="feedback.type === 'success'"
+         [class.text-emerald-800]="feedback.type === 'success'"
+         [class.border-emerald-200]="feedback.type === 'success'"
+         [class.bg-rose-50]="feedback.type === 'error'"
+         [class.text-rose-800]="feedback.type === 'error'"
+         [class.border-rose-200]="feedback.type === 'error'"
+         class="p-4 rounded-2xl border text-xs font-bold flex items-center gap-3 shadow-xs">
+      <i class="fa-solid" [ngClass]="feedback.type === 'success' ? 'fa-circle-check text-emerald-600 text-base' : 'fa-circle-xmark text-rose-600 text-base'"></i>
+      <span>{{ feedback.message }}</span>
+    </div>
+
+    <!-- TAB 1: Profile Editor -->
+    <div *ngIf="activeTab === 'profile'" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-6">
+      <div class="border-b border-slate-100 pb-4 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-slate-800">Personal & Employment Status</h3>
+          <p class="text-xs font-medium text-slate-500">Keep your details and availability status updated for recruiters.</p>
+        </div>
+        <span *ngIf="userEmail" class="text-xs font-bold text-slate-400 flex items-center gap-1">
+          <i class="fa-solid fa-lock text-emerald-500"></i> Account: {{ userEmail }}
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Full Name *</label>
+          <input [(ngModel)]="profile.full_name" type="text" placeholder="e.g. Alex Johnson" class="w-full px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Phone Number</label>
+          <input [(ngModel)]="profile.phone" type="text" placeholder="+1 (555) 000-0000" class="w-full px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">Professional Headline</label>
+          <input [(ngModel)]="profile.headline" type="text" placeholder="e.g. Senior Frontend Engineer | React & Angular Specialist" class="w-full px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1.5">City / Location</label>
+          <input [(ngModel)]="profile.location" type="text" placeholder="e.g. San Francisco, CA / Remote" class="w-full px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500" />
+        </div>
+
+        <div>
+          <app-custom-dropdown
+            [options]="countriesList"
+            [value]="profile.country"
+            (valueChange)="profile.country = $event"
+            [allowCustom]="true"
+            label="Country of Residence"
+            icon="fa-earth-americas"
+            placeholder="Select or type country...">
+          </app-custom-dropdown>
+        </div>
+
+        <!-- NEW FIELD: Current Employment Status -->
+        <div class="md:col-span-2">
+          <app-custom-dropdown
+            [options]="employmentStatusOptions"
+            [value]="profile.employment_status"
+            (valueChange)="profile.employment_status = $event"
+            label="Current Employment Status & Availability *"
+            icon="fa-briefcase"
+            placeholder="Select availability status...">
+          </app-custom-dropdown>
+          <span class="text-[11px] text-slate-400 font-medium mt-1 block">Recruiters and AI matching engines use your status to prioritize candidates actively seeking jobs.</span>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1.5">Professional Bio & Executive Summary</label>
+        <textarea [(ngModel)]="profile.bio" rows="4" placeholder="Brief overview of your experience, key achievements, and career goals..." class="w-full px-4 py-2.5 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500"></textarea>
+      </div>
+
+      <!-- Skills Tagging Section -->
+      <div class="space-y-3">
+        <label class="block text-xs font-bold text-slate-700">Skills & Competencies</label>
+        
+        <div class="flex gap-2">
+          <input [(ngModel)]="newSkill" (keyup.enter)="addSkill()" type="text" placeholder="Add skill (e.g. Python, Docker, FastAPI)..." class="flex-1 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500" />
+          <button (click)="addSkill()" class="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition-all">Add</button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 pt-2">
+          <span *ngFor="let skill of profile.skills_list" class="px-3 py-1 bg-indigo-50 border border-indigo-100 text-indigo-700 rounded-xl text-xs font-bold flex items-center gap-2">
+            <span>{{ skill }}</span>
+            <button (click)="removeSkill(skill)" class="hover:text-rose-600 transition-colors">
+              <i class="fa-solid fa-xmark text-[10px]"></i>
+            </button>
+          </span>
+        </div>
+      </div>
+
+      <!-- Save Button Bar -->
+      <div class="flex items-center justify-end pt-4 border-t border-slate-100">
+        <button (click)="saveProfile()" [disabled]="isSaving" class="px-7 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2">
+          <i class="fa-solid" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
+          <span>{{ isSaving ? 'Updating Profile...' : 'Save Candidate Profile' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- TAB 2: Matched Jobs -->
+    <div *ngIf="activeTab === 'matches'" class="space-y-5">
+
+      <!-- Top Header & Email Alert Preferences Banner -->
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 border border-slate-200/80 shadow-xs flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-bullseye"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Matched Opportunities</h3>
+            <p class="text-xs text-slate-500 font-medium">Real-time Vector AI profile match calculations against active job openings.</p>
+          </div>
+        </div>
+
+        <button (click)="openNotificationSettingsModal()"
+                class="px-4 py-2 bg-gradient-to-r from-indigo-50 to-blue-50 hover:from-indigo-100 hover:to-blue-100 border border-indigo-200/80 text-indigo-800 rounded-2xl text-xs font-black transition-all flex items-center gap-2 shadow-2xs">
+          <i class="fa-solid fa-bell text-amber-500 animate-bounce"></i>
+          <span>Email Alert Preferences</span>
+          <span *ngIf="profile.email_notifications_enabled" class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-extrabold rounded-md">
+            Active
+          </span>
+          <span *ngIf="!profile.email_notifications_enabled" class="px-2 py-0.5 bg-slate-200 text-slate-600 text-[10px] font-extrabold rounded-md">
+            Disabled
+          </span>
+        </button>
+      </div>
+
+      <!-- Advanced Filters Bar -->
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-5 border border-slate-200/80 shadow-xs space-y-4 relative z-30">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-filter text-indigo-600 text-xs"></i>
+            <span class="text-xs font-black text-slate-800">Filter Matched Opportunities</span>
+          </div>
+
+          <button (click)="resetMatchFilters()" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-colors flex items-center gap-1">
+            <i class="fa-solid fa-rotate-left text-[10px]"></i>
+            <span>Reset Filters</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-center">
+          <!-- Keyword Search -->
+          <div class="relative w-full">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+            <input [(ngModel)]="filterSearchQuery" (ngModelChange)="onMatchFiltersChange()" type="text" placeholder="Search title, skills..." class="w-full h-[42px] min-h-[42px] pl-9 pr-3.5 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:bg-white focus:outline-none focus:border-indigo-500 shadow-2xs hover:border-slate-300 transition-all" />
+          </div>
+
+          <!-- Experience Level Filter -->
+          <div>
+            <app-custom-dropdown
+              [options]="experienceLevels"
+              [value]="filterExperienceLevel"
+              (valueChange)="filterExperienceLevel = $event; onMatchFiltersChange()"
+              placeholder="All Experience Levels"
+              icon="fa-layer-group">
+            </app-custom-dropdown>
+          </div>
+
+          <!-- Job Type / Work Mode Filter -->
+          <div>
+            <app-custom-dropdown
+              [options]="jobTypes"
+              [value]="filterJobType"
+              (valueChange)="filterJobType = $event; onMatchFiltersChange()"
+              placeholder="All Work Modes & Types"
+              icon="fa-laptop-code">
+            </app-custom-dropdown>
+          </div>
+
+          <!-- Minimum Match Percentage Filter -->
+          <div>
+            <app-custom-dropdown
+              [options]="matchScoreFilterOptions"
+              [value]="selectedMatchScoreFilterLabel"
+              (valueChange)="onMatchScoreFilterChange($event)"
+              placeholder="All AI Matches (0%+)"
+              icon="fa-bolt">
+            </app-custom-dropdown>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Skeleton Indicator for Matched Jobs -->
+      <div *ngIf="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div *ngFor="let i of [1,2,3,4,5,6]" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/80 shadow-xs animate-pulse space-y-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-2 w-2/3">
+              <div class="h-3 bg-slate-200 rounded-md w-1/2"></div>
+              <div class="h-5 bg-slate-200 rounded-lg w-full"></div>
+            </div>
+            <div class="h-6 bg-emerald-100/70 rounded-full w-20"></div>
+          </div>
+          <div class="h-12 bg-slate-100/70 rounded-2xl"></div>
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="h-8 bg-slate-200 rounded-xl w-24"></div>
+            <div class="h-8 bg-slate-200 rounded-xl w-28"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- No Matches Empty State -->
+      <div *ngIf="!isLoading && displayMatchedJobs.length === 0" class="p-12 text-center bg-white rounded-3xl border border-slate-200 space-y-3">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto text-lg">
+          <i class="fa-solid fa-briefcase"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800">No Open Matched Opportunities</h3>
+        <p class="text-xs text-slate-500 font-medium max-w-md mx-auto">
+          Jobs you have already applied to or submitted forms for are tracked under "My Applications & Submissions".
+        </p>
+        <button (click)="resetMatchFilters()" class="px-4 py-2 bg-indigo-50 text-indigo-700 font-bold rounded-xl text-xs hover:bg-indigo-100 transition-colors">
+          Clear Active Filters
+        </button>
+      </div>
+
+      <div *ngIf="!isLoading && displayMatchedJobs.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div *ngFor="let job of displayMatchedJobs" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-all space-y-4 flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block mb-0.5">{{ job.company_name }} • {{ job.department }}</span>
+                <h4 class="text-base font-extrabold text-slate-900 leading-snug">{{ job.job_title }}</h4>
+              </div>
+              
+              <!-- AI Match Percentage Badge -->
+              <div class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black shrink-0 flex items-center gap-1.5">
+                <i class="fa-solid fa-bolt text-emerald-500"></i>
+                <span>{{ job.match_score }}% Match</span>
+              </div>
+            </div>
+
+            <!-- Badges for Application Status & Form Requirement -->
+            <div class="flex flex-wrap items-center gap-2 pt-1">
+              <span *ngIf="job.has_form" class="px-2.5 py-0.5 bg-amber-50 border border-amber-200 text-amber-700 rounded-full text-[10px] font-bold flex items-center gap-1">
+                <i class="fa-solid fa-file-signature text-amber-600"></i>
+                Form Required
+              </span>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-xs font-semibold text-slate-500 pt-1">
+              <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-slate-400"></i> {{ job.location }}</span>
+              <span class="flex items-center gap-1"><i class="fa-solid fa-briefcase text-slate-400"></i> {{ job.employment_type }}</span>
+            </div>
+
+            <!-- Matched Skill Pills -->
+            <div *ngIf="job.matched_skills && job.matched_skills.length > 0" class="pt-2">
+              <span class="text-[11px] font-bold text-slate-400 block mb-1">Key Skill Overlap:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span *ngFor="let sk of job.matched_skills" class="px-2.5 py-0.5 bg-slate-100 text-slate-700 rounded-lg text-[10px] font-bold">
+                  {{ sk }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Apply Feedback Banner -->
+          <div *ngIf="applyFeedback[job.job_id]"
+               [class.bg-emerald-50]="applyFeedback[job.job_id].type === 'success'"
+               [class.text-emerald-800]="applyFeedback[job.job_id].type === 'success'"
+               [class.bg-rose-50]="applyFeedback[job.job_id].type === 'error'"
+               [class.text-rose-800]="applyFeedback[job.job_id].type === 'error'"
+               class="p-2.5 rounded-xl text-xs font-bold">
+            {{ applyFeedback[job.job_id].message }}
+          </div>
+
+          <!-- Apply Action -->
+          <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+            <button (click)="openJobDetailsModal(job)" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+              <i class="fa-solid fa-eye text-indigo-600"></i>
+              <span>View Details</span>
+            </button>
+
+            <!-- Apply Buttons -->
+            <div class="flex items-center gap-2">
+              <button (click)="openApplicationForm(job)"
+                      class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"
+                      [title]="job.has_form ? 'Open full application form in new tab' : 'Open job application page in new tab'">
+                <i class="fa-solid" [ngClass]="job.has_form ? 'fa-file-signature' : 'fa-arrow-up-right-from-square'"></i>
+                <span>{{ job.has_form ? 'Apply (Fill Form)' : 'Apply' }}</span>
+              </button>
+
+              <button (click)="oneClickApply(job)"
+                      [disabled]="applyingJobId === job.job_id || applyFeedback[job.job_id]?.type === 'success'"
+                      class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5">
+                <i class="fa-solid" [ngClass]="applyingJobId === job.job_id ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+                <span>{{ applyingJobId === job.job_id ? 'Processing...' : '1-Click Apply' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Details Modal Overlay for Candidate -->
+    <div *ngIf="selectedJobDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div class="bg-white rounded-3xl p-6 sm:p-10 max-w-4xl w-full shadow-2xl border border-slate-200 space-y-6 max-h-[92vh] overflow-y-auto">
+        
+        <!-- Modal Header -->
+        <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+          <div class="space-y-2 flex-1">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-lg text-[10px] font-extrabold uppercase tracking-wider">
+                {{ selectedJobDetailsModal.department }}
+              </span>
+              <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-extrabold flex items-center gap-1">
+                <i class="fa-solid fa-bolt"></i> {{ selectedJobDetailsModal.match_score }}% Match
+              </span>
+              <!-- Application Deadline Badge -->
+              <span *ngIf="selectedJobDetailsModal.application_deadline && selectedJobDetailsModal.section_visibility?.showDeadline !== false"
+                    class="px-2.5 py-0.5 bg-amber-50 text-amber-700 border border-amber-200/80 rounded-lg text-[10px] font-extrabold flex items-center gap-1">
+                <i class="fa-solid fa-clock"></i> Deadline: {{ selectedJobDetailsModal.application_deadline | date:'mediumDate' }}
+              </span>
+              <!-- Has Form Badge -->
+              <span *ngIf="selectedJobDetailsModal.has_form" class="px-2.5 py-0.5 bg-amber-100 text-amber-800 rounded-lg text-[10px] font-extrabold flex items-center gap-1">
+                <i class="fa-solid fa-file-signature"></i> Application Form Required
+              </span>
+            </div>
+
+            <div class="flex items-center gap-4 pt-1">
+              <img *ngIf="selectedJobDetailsModal.company_logo && selectedJobDetailsModal.section_visibility?.showCompanyDetails !== false"
+                   [src]="selectedJobDetailsModal.company_logo" alt="Logo" class="w-12 h-12 rounded-2xl object-contain border border-slate-200 bg-slate-50 p-1.5 shadow-2xs" />
+              <div>
+                <h3 class="text-2xl font-black text-slate-900">{{ selectedJobDetailsModal.job_title }}</h3>
+                <p *ngIf="selectedJobDetailsModal.section_visibility?.showCompanyDetails !== false" class="text-xs text-slate-500 font-bold flex flex-wrap items-center gap-4 pt-1">
+                  <span><i class="fa-solid fa-building text-indigo-500"></i> {{ selectedJobDetailsModal.company_name || 'Hiring Organization' }}</span>
+                  <span><i class="fa-solid fa-location-dot text-slate-400"></i> {{ selectedJobDetailsModal.location }}</span>
+                  <span><i class="fa-solid fa-briefcase text-slate-400"></i> {{ selectedJobDetailsModal.employment_type }}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button (click)="closeJobDetailsModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all shrink-0">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+
+        <!-- Salary & Key Overlap -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80">
+          <div *ngIf="selectedJobDetailsModal.section_visibility?.showSalaryRange !== false">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Compensation Package</span>
+            <span class="text-sm font-black text-emerald-700">{{ selectedJobDetailsModal.salary_range || 'Competitive' }}</span>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Matching Competencies</span>
+            <div class="flex flex-wrap gap-1.5">
+              <span *ngFor="let sk of selectedJobDetailsModal.matched_skills" class="px-2.5 py-1 bg-indigo-100/80 border border-indigo-200/60 text-indigo-800 rounded-lg text-[10px] font-extrabold">
+                {{ sk }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job Description with Rich Markdown Parsing -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-align-left text-indigo-600"></i> Job Description & Role Breakdown
+          </h4>
+          <div class="bg-slate-50/60 p-5 rounded-2xl border border-slate-200/70 text-xs font-medium leading-relaxed text-slate-700 overflow-x-auto space-y-2"
+               [innerHTML]="formattingService.parseMarkdown(selectedJobDetailsModal.description || '' + (selectedJobDetailsModal.job_title || 'this role') + ' position. Detailed job expectations will be discussed during initial screening.')">
+          </div>
+        </div>
+
+        <!-- Qualifications / Requirements -->
+        <div *ngIf="selectedJobDetailsModal.requirements && selectedJobDetailsModal.requirements.length > 0 && selectedJobDetailsModal.section_visibility?.showRequirements !== false" class="space-y-3">
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-indigo-600"></i> Qualifications & Requirements
+          </h4>
+          <ul class="list-disc list-inside text-xs text-slate-600 font-medium space-y-1">
+            <li *ngFor="let req of selectedJobDetailsModal.requirements">{{ req }}</li>
+          </ul>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <button (click)="closeJobDetailsModal()" class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+            Close
+          </button>
+
+          <div class="flex items-center gap-3">
+            <div *ngIf="!selectedJobDetailsModal.has_applied" class="flex items-center gap-2">
+              <!-- Open Application Form in New Tab -->
+              <button (click)="openApplicationForm(selectedJobDetailsModal)"
+                      class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2"
+                      [title]="selectedJobDetailsModal.has_form ? 'Open full application form in new tab' : 'Open job application page in new tab'">
+                <i class="fa-solid" [ngClass]="selectedJobDetailsModal.has_form ? 'fa-file-signature' : 'fa-arrow-up-right-from-square'"></i>
+                <span>{{ selectedJobDetailsModal.has_form ? 'Apply (Fill Form)' : 'Apply' }}</span>
+              </button>
+
+              <!-- Direct 1-Click Apply Option -->
+              <button (click)="oneClickApply(selectedJobDetailsModal); closeJobDetailsModal()"
+                      [disabled]="applyingJobId === selectedJobDetailsModal.job_id || applyFeedback[selectedJobDetailsModal.job_id]?.type === 'success'"
+                      class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2">
+                <i class="fa-solid" [ngClass]="applyingJobId === selectedJobDetailsModal.job_id ? 'fa-spinner fa-spin' : (applyFeedback[selectedJobDetailsModal.job_id]?.type === 'success' ? 'fa-check' : 'fa-paper-plane')"></i>
+                <span>{{ applyingJobId === selectedJobDetailsModal.job_id ? 'Processing...' : '1-Click Apply' }}</span>
+              </button>
+            </div>
+
+            <span *ngIf="selectedJobDetailsModal.has_applied" class="px-4 py-2 bg-emerald-50 text-emerald-700 font-extrabold rounded-xl text-xs flex items-center gap-1 border border-emerald-200">
+              <i class="fa-solid fa-check-circle"></i> Application Submitted
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: My Applications & Submissions -->
+    <div *ngIf="activeTab === 'applications'" class="space-y-6 animate-in fade-in duration-200">
+      <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-xl shadow-2xs">
+            <i class="fa-solid fa-paper-plane"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">Submitted Applications & Tracked Forms</h3>
+            <p class="text-xs font-semibold text-slate-500">Track jobs you have 1-Click applied to or completed candidate application forms for.</p>
+          </div>
+        </div>
+
+        <button (click)="loadMyApplications()" [disabled]="isLoadingApplications" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+          <i class="fa-solid" [ngClass]="isLoadingApplications ? 'fa-spinner fa-spin text-indigo-600' : 'fa-rotate'"></i>
+          <span>Refresh Status</span>
+        </button>
+      </div>
+
+      <!-- Loading Skeleton Indicator for Applications -->
+      <div *ngIf="isLoadingApplications" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div *ngFor="let i of [1,2,3,4]" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/80 shadow-xs animate-pulse space-y-4">
+          <div class="flex items-start justify-between gap-3">
+            <div class="space-y-2 w-2/3">
+              <div class="h-3 bg-slate-200 rounded-md w-1/3"></div>
+              <div class="h-5 bg-slate-200 rounded-lg w-3/4"></div>
+            </div>
+            <div class="h-6 bg-emerald-100/70 rounded-full w-24"></div>
+          </div>
+          <div class="h-10 bg-slate-100/70 rounded-2xl"></div>
+          <div class="flex justify-between items-center pt-2">
+            <div class="h-4 bg-slate-200 rounded-md w-1/3"></div>
+            <div class="h-8 bg-slate-200 rounded-xl w-28"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoadingApplications && myApplications.length === 0" class="p-12 text-center bg-white rounded-3xl border border-slate-200/80 space-y-3 shadow-xs">
+        <div class="w-14 h-14 rounded-3xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl">
+          <i class="fa-solid fa-folder-open"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-800">No Job Applications Yet</h3>
+        <p class="text-xs text-slate-500 font-medium max-w-md mx-auto">Explore your AI matched job opportunities in the "Matched Opportunities" tab and submit your application with 1-click or fill out the candidate application form.</p>
+        <button (click)="activeTab = 'matches'" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-500/20 transition-all">
+          Browse Matched Jobs
+        </button>
+      </div>
+
+      <!-- Applications Cards List -->
+      <div *ngIf="!isLoadingApplications && myApplications.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div *ngFor="let app of myApplications" class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4 hover:shadow-md transition-all flex flex-col justify-between">
+          <div class="space-y-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <span class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider block mb-1">{{ app.company_name }}</span>
+                <h4 class="text-base font-black text-slate-900">{{ app.job_title }}</h4>
+              </div>
+
+              <!-- Application Stage Badge -->
+              <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black shrink-0 flex items-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]"></i>
+                <span>{{ app.stage || 'Submitted' }}</span>
+              </span>
+            </div>
+
+            <div class="flex flex-wrap gap-4 text-xs font-semibold text-slate-500 border-t border-b border-slate-100 py-2.5">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-slate-400"></i> {{ app.location }}</span>
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-calendar-day text-slate-400"></i> {{ app.applied_at | date:'mediumDate' }}</span>
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-tag text-indigo-500"></i> {{ app.application_type }}</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 pt-2">
+            <span class="text-[11px] font-bold text-slate-400 flex items-center gap-1 opacity-60 cursor-not-allowed select-none">
+              <i class="fa-solid fa-shield-halved text-slate-400"></i> Tracked in Recruiter Queue
+            </span>
+
+            <div class="flex items-center gap-2">
+              <button (click)="openJobDetailsModal(app)"
+                      class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-eye text-indigo-600"></i>
+                <span>View Details</span>
+              </button>
+
+              <!-- Withdraw Application Button -->
+              <button *ngIf="app.can_withdraw"
+                      (click)="withdrawApplication(app)"
+                      [disabled]="withdrawingAppId === app.application_id"
+                      class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 rounded-xl text-xs font-bold border border-rose-200/80 transition-all flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid" [ngClass]="withdrawingAppId === app.application_id ? 'fa-spinner fa-spin text-rose-600' : 'fa-arrow-rotate-left'"></i>
+                <span>{{ withdrawingAppId === app.application_id ? 'Withdrawing...' : 'Withdraw Application' }}</span>
+              </button>
+
+              <span *ngIf="!app.can_withdraw" class="px-3 py-1 bg-slate-100 text-slate-500 rounded-xl text-[11px] font-bold border border-slate-200 flex items-center gap-1" title="Application has progressed into the hiring pipeline and cannot be withdrawn online.">
+                <i class="fa-solid fa-lock text-slate-400"></i> In Pipeline
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Track Your Application Status & Pipeline Stepper Section -->
+      <div class="pt-6 border-t border-slate-200/80 space-y-6">
+        
+        <!-- Track Status Banner Card -->
+        <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-slate-800 relative overflow-hidden space-y-6">
+          <div class="absolute -right-12 -bottom-12 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="space-y-2">
+              <div class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/20 rounded-full border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+                <i class="fa-solid fa-route"></i> Live Hiring Pipeline Tracker
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-white">Track Your Application Status</h2>
+              <p class="text-xs sm:text-sm text-slate-300 font-medium max-w-xl leading-relaxed">
+                Live recruitment pipeline stage and progress tracking for candidate account <span class="text-indigo-300 font-bold underline">{{ trackingEmail || userEmail }}</span>.
+              </p>
+            </div>
+
+            <!-- Logged-in Candidate Account Badge & Refresh -->
+            <div class="shrink-0 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div class="px-4 py-2.5 bg-white/10 border border-white/20 rounded-2xl text-xs font-bold text-white flex items-center gap-2 backdrop-blur-md">
+                <i class="fa-solid fa-user-check text-indigo-400"></i>
+                <span>{{ userEmail || trackingEmail }}</span>
+              </div>
+              <button (click)="trackApplicationsByEmail()"
+                      [disabled]="isTrackLoading"
+                      class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-2xl text-xs font-bold transition-all shadow-md shadow-indigo-600/30 flex items-center justify-center gap-2 shrink-0 cursor-pointer">
+                <i class="fa-solid" [ngClass]="isTrackLoading ? 'fa-spinner fa-spin' : 'fa-rotate'"></i>
+                <span>{{ isTrackLoading ? 'Refreshing...' : 'Refresh Status' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error / Empty Notification -->
+        <div *ngIf="trackErrorMessage" class="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs font-bold flex items-center gap-3">
+          <i class="fa-solid fa-circle-exclamation text-rose-600 text-base"></i>
+          <span>{{ trackErrorMessage }}</span>
+        </div>
+
+        <!-- Tracked Results Stepper Timeline List -->
+        <div *ngIf="trackedApplications && trackedApplications.length > 0" class="space-y-6">
+          <h3 class="text-sm font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-indigo-600"></i>
+            Live Hiring Stages ({{ trackedApplications.length }})
+          </h3>
+
+          <div *ngFor="let app of trackedApplications" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-6 hover:shadow-md transition-all">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+              <div>
+                <span class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider block mb-0.5">{{ app.company_name }}</span>
+                <h4 class="text-lg font-black text-slate-900">{{ app.job_title }}</h4>
+                <p class="text-xs text-slate-500 font-semibold flex items-center gap-3 pt-1">
+                  <span><i class="fa-solid fa-location-dot text-slate-400"></i> {{ app.location }}</span>
+                  <span><i class="fa-solid fa-calendar-day text-slate-400"></i> Applied {{ app.applied_at | date:'mediumDate' }}</span>
+                  <span><i class="fa-solid fa-tag text-indigo-500"></i> {{ app.application_type }}</span>
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span [ngClass]="getStageProgress(app.stage).status === 'completed' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : (getStageProgress(app.stage).status === 'rejected' ? 'bg-rose-50 text-rose-800 border-rose-200' : 'bg-indigo-50 text-indigo-800 border-indigo-200')"
+                      class="px-4 py-1.5 rounded-full border text-xs font-black flex items-center gap-1.5 shadow-2xs">
+                  <i class="fa-solid" [ngClass]="getStageProgress(app.stage).status === 'completed' ? 'fa-circle-check text-emerald-600' : (getStageProgress(app.stage).status === 'rejected' ? 'fa-circle-xmark text-rose-600' : 'fa-circle-notch fa-spin text-indigo-600')"></i>
+                  <span>{{ app.stage }}</span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Interactive Hiring Stage Timeline / Stepper -->
+            <div class="space-y-3">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Recruitment Progress Stage</span>
+              
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <!-- Stage 1 -->
+                <div [ngClass]="getStageProgress(app.stage).step >= 1 ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'"
+                     class="p-3.5 rounded-2xl border text-xs font-bold space-y-1 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-black tracking-wider">Step 1</span>
+                    <i class="fa-solid" [ngClass]="getStageProgress(app.stage).step >= 1 ? 'fa-circle-check text-emerald-600' : 'fa-circle text-slate-300'"></i>
+                  </div>
+                  <div class="font-black text-sm">Submitted</div>
+                  <div class="text-[11px] font-medium text-slate-500">Application Received</div>
+                </div>
+
+                <!-- Stage 2 -->
+                <div [ngClass]="getStageProgress(app.stage).step >= 2 ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : (getStageProgress(app.stage).status === 'rejected' ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-slate-400')"
+                     class="p-3.5 rounded-2xl border text-xs font-bold space-y-1 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-black tracking-wider">Step 2</span>
+                    <i class="fa-solid" [ngClass]="getStageProgress(app.stage).step >= 2 ? 'fa-circle-check text-emerald-600' : (getStageProgress(app.stage).status === 'rejected' ? 'fa-circle-xmark text-rose-600' : 'fa-circle text-slate-300')"></i>
+                  </div>
+                  <div class="font-black text-sm">Review</div>
+                  <div class="text-[11px] font-medium text-slate-500">Recruiter Screening</div>
+                </div>
+
+                <!-- Stage 3 -->
+                <div [ngClass]="getStageProgress(app.stage).step >= 3 ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'"
+                     class="p-3.5 rounded-2xl border text-xs font-bold space-y-1 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-black tracking-wider">Step 3</span>
+                    <i class="fa-solid" [ngClass]="getStageProgress(app.stage).step >= 3 ? 'fa-circle-check text-emerald-600' : 'fa-circle text-slate-300'"></i>
+                  </div>
+                  <div class="font-black text-sm">Interview</div>
+                  <div class="text-[11px] font-medium text-slate-500">Evaluation & Testing</div>
+                </div>
+
+                <!-- Stage 4 -->
+                <div [ngClass]="getStageProgress(app.stage).step >= 4 ? 'bg-emerald-50 border-emerald-300 text-emerald-900' : 'bg-slate-50 border-slate-200 text-slate-400'"
+                     class="p-3.5 rounded-2xl border text-xs font-bold space-y-1 transition-all">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-black tracking-wider">Step 4</span>
+                    <i class="fa-solid" [ngClass]="getStageProgress(app.stage).step >= 4 ? 'fa-circle-check text-emerald-600' : 'fa-circle text-slate-300'"></i>
+                  </div>
+                  <div class="font-black text-sm">Decision</div>
+                  <div class="text-[11px] font-medium text-slate-500">Final Offer Status</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Structured Resume Profile Editor -->
+    <div *ngIf="activeTab === 'resume'" class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-xs space-y-8">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+        <div>
+          <h3 class="text-lg font-black text-slate-900">Structured Resume Profile Editor</h3>
+          <p class="text-xs font-medium text-slate-500">Edit, refine, or add custom entries to your structured resume sections below.</p>
+        </div>
+        <button (click)="saveProfile()" [disabled]="isSaving" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2 shrink-0">
+          <i class="fa-solid" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
+          <span>Save Profile</span>
+        </button>
+      </div>
+
+      <!-- Section 1: Work Experience -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-briefcase text-indigo-600"></i> Work Experience
+          </h4>
+          <button (click)="addWorkExperience()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Experience
+          </button>
+        </div>
+
+        <div *ngIf="!profile.structured_resume?.work_experience?.length" class="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-center text-xs text-slate-400 font-medium">
+          No work experience entries yet. Click "Add Experience" to create one.
+        </div>
+
+        <div *ngFor="let exp of profile.structured_resume?.work_experience; let i = index" class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3 relative group">
+          <button (click)="removeWorkExperience(i)" class="absolute top-3 right-3 text-slate-400 hover:text-rose-600 text-xs transition-colors p-1" title="Remove Entry">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-6">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Job Title</label>
+              <input [(ngModel)]="exp.job_title" type="text" placeholder="Senior Software Engineer" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Company Name</label>
+              <input [(ngModel)]="exp.company" type="text" placeholder="Acme Tech Inc." class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Start Date</label>
+              <input [(ngModel)]="exp.start_date" type="text" placeholder="Jan 2021" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">End Date</label>
+              <input [(ngModel)]="exp.end_date" type="text" placeholder="Present" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description / Key Achievements</label>
+            <textarea [(ngModel)]="exp.description" rows="5" placeholder="Responsibilities, achievements, key metrics, and projects..." class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 min-h-[110px] resize-y"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Education -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-graduation-cap text-indigo-600"></i> Education History
+          </h4>
+          <button (click)="addEducation()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Education
+          </button>
+        </div>
+
+        <div *ngIf="!profile.structured_resume?.education?.length" class="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-center text-xs text-slate-400 font-medium">
+          No education entries yet. Click "Add Education" to create one.
+        </div>
+
+        <div *ngFor="let edu of profile.structured_resume?.education; let i = index" class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3 relative group">
+          <button (click)="removeEducation(i)" class="absolute top-3 right-3 text-slate-400 hover:text-rose-600 text-xs transition-colors p-1" title="Remove Entry">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-6">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Degree / Qualification</label>
+              <input [(ngModel)]="edu.degree" type="text" placeholder="B.S." class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Field of Study</label>
+              <input [(ngModel)]="edu.field_of_study" type="text" placeholder="Computer Science" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Institution / University</label>
+              <input [(ngModel)]="edu.institution" type="text" placeholder="Stanford University" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Graduation Year / Dates</label>
+              <input [(ngModel)]="edu.end_date" type="text" placeholder="2020" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Featured Projects -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h4 class="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-code text-indigo-600"></i> Featured Projects
+          </h4>
+          <button (click)="addProject()" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Project
+          </button>
+        </div>
+
+        <div *ngIf="!profile.structured_resume?.projects?.length" class="p-4 bg-slate-50 rounded-2xl border border-dashed border-slate-300 text-center text-xs text-slate-400 font-medium">
+          No projects listed yet. Click "Add Project" to add one.
+        </div>
+
+        <div *ngFor="let proj of profile.structured_resume?.projects; let i = index" class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3 relative group">
+          <button (click)="removeProject(i)" class="absolute top-3 right-3 text-slate-400 hover:text-rose-600 text-xs transition-colors p-1" title="Remove Entry">
+            <i class="fa-solid fa-trash-can"></i>
+          </button>
+
+          <div class="space-y-2 pr-6">
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Project Name</label>
+              <input [(ngModel)]="proj.name" type="text" placeholder="E-Commerce AI Recommendation Engine" class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Description / Technologies Used</label>
+              <textarea [(ngModel)]="proj.description" rows="4" placeholder="Built using Python, FastAPI, and Angular. Integrated vector search..." class="w-full px-3 py-2 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 min-h-[90px] resize-y"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Save Footer Bar -->
+      <div class="flex items-center justify-end pt-4 border-t border-slate-100">
+        <button (click)="saveProfile()" [disabled]="isSaving" class="px-7 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2">
+          <i class="fa-solid" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
+          <span>{{ isSaving ? 'Saving Profile...' : 'Save Profile' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Notification Preferences Modal -->
+  <div *ngIf="showNotificationSettingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 space-y-6 max-h-[92vh] overflow-y-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between border-b border-slate-100 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center text-lg">
+            <i class="fa-solid fa-bell"></i>
+          </div>
+          <div>
+            <h3 class="text-lg font-black text-slate-900">Job Alert Email Preferences</h3>
+            <p class="text-xs text-slate-500 font-medium">Receive instant email notifications when new job postings match your profile.</p>
+          </div>
+        </div>
+
+        <button (click)="closeNotificationSettingsModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Main Toggle Switch -->
+      <div class="p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-black text-slate-800 block">Instant Email Notifications</span>
+          <span class="text-[11px] text-slate-500 font-medium">Get notified automatically when a matching job goes live.</span>
+        </div>
+
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" [(ngModel)]="profile.email_notifications_enabled" class="sr-only peer">
+          <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+        </label>
+      </div>
+
+      <div *ngIf="profile.email_notifications_enabled" class="space-y-5 animate-in fade-in duration-200">
+        <!-- Filter by Target Experience Levels (Optional - Pill Buttons) -->
+        <div class="space-y-2">
+          <label class="block text-xs font-black text-slate-700">Filter by Target Experience Levels (Optional)</label>
+          <div class="flex flex-wrap gap-2">
+            <button *ngFor="let level of ['Entry Level', 'Intermediate', 'Senior', 'Executive']"
+                    (click)="togglePrefExpLevel(level)"
+                    [ngClass]="isPrefExpLevelSelected(level) ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-xs' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 font-semibold'"
+                    class="px-3.5 py-2 rounded-xl text-xs border transition-all flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid" [ngClass]="isPrefExpLevelSelected(level) ? 'fa-check text-white' : 'fa-plus text-slate-400'"></i>
+              <span>{{ level }}</span>
+            </button>
+          </div>
+          <span class="text-[11px] text-slate-400 font-medium block">If unselected, notifications will trigger for all experience levels.</span>
+        </div>
+
+        <!-- Filter by Preferred Work Mode & Job Types (Optional - Pill Buttons) -->
+        <div class="space-y-2">
+          <label class="block text-xs font-black text-slate-700">Filter by Preferred Work Mode & Job Types (Optional)</label>
+          <div class="flex flex-wrap gap-2">
+            <button *ngFor="let type of ['Remote', 'Hybrid', 'On-site', 'Full-Time', 'Part-Time', 'Contract']"
+                    (click)="togglePrefJobType(type)"
+                    [ngClass]="isPrefJobTypeSelected(type) ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-xs' : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 font-semibold'"
+                    class="px-3.5 py-2 rounded-xl text-xs border transition-all flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid" [ngClass]="isPrefJobTypeSelected(type) ? 'fa-check text-white' : 'fa-plus text-slate-400'"></i>
+              <span>{{ type }}</span>
+            </button>
+          </div>
+          <span class="text-[11px] text-slate-400 font-medium block">If unselected, notifications will trigger for all work modes.</span>
+        </div>
+      </div>
+
+      <!-- Modal Footer Bar -->
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+        <button (click)="closeNotificationSettingsModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+          Cancel
+        </button>
+
+        <button (click)="saveProfile(); closeNotificationSettingsModal()" [disabled]="isSaving" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2">
+          <i class="fa-solid" [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-check'"></i>
+          <span>Save Preferences</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

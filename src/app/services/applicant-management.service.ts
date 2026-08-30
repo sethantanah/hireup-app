@@ -158,6 +158,48 @@ getApplicantStatus(
     );
 }
 
+  /**
+   * Move candidate to a new stage in the hiring pipeline
+   */
+  updateCandidateStage(
+    resume_id: string,
+    new_stage_id: string,
+    new_stage_name?: string,
+    recruiter_notes?: string
+  ): Observable<any> {
+    if (!resume_id || !new_stage_id) {
+      return throwError(() => new Error('Resume ID and stage ID are required'));
+    }
+    const headers = this.createHeaders();
+    const body = {
+      resume_id,
+      new_stage_id,
+      new_stage_name,
+      recruiter_notes
+    };
+    return this.http.post<any>(`${this.baseUrl}/move-stage`, body, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Send direct email communication to a candidate
+   */
+  sendCandidateEmail(payload: {
+    candidate_email: string;
+    candidate_name?: string;
+    subject: string;
+    body: string;
+    template_id?: string;
+    jobpost_id?: string;
+  }): Observable<any> {
+    if (!payload.candidate_email || !payload.subject) {
+      return throwError(() => new Error('Recipient email and subject are required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${this.baseUrl}/send-direct-email`, payload, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
 
   /**
    * Create headers with authorization token

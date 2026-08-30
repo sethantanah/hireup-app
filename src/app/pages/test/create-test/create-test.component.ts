@@ -6,9 +6,9 @@ import {
   FormSubSection,
   TestData,
 } from '../../../models/test.model';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormattingService } from '../../../services/formatting.service';
 import { CrosswordBuilderComponent } from '../compenents/crossword-builder/crossword-builder.component';
 import { CrosswordCell, CrosswordField, CrosswordPuzzle, CrosswordPuzzleComponent } from '../compenents/crossword-puzzel/crossword-puzzle.component';
@@ -123,6 +123,8 @@ export class CreateTestComponent implements OnInit {
   constructor(
     public testService: JobtestApiService,
     private route: ActivatedRoute,
+    private router: Router,
+    private location: Location,
     public formattingService: FormattingService
   ) {
     const testId = this.route.snapshot.paramMap.get('testId');
@@ -425,6 +427,15 @@ export class CreateTestComponent implements OnInit {
         console.error('Error saving test:', error);
       },
     });
+  }
+
+  goBack(): void {
+    const jobId = this.route.snapshot.paramMap.get('jobId');
+    if (jobId) {
+      this.router.navigate(['/jobposts/tests', jobId]);
+    } else {
+      this.location.back();
+    }
   }
 
 
