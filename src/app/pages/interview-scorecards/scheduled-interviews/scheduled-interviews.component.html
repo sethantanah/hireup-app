@@ -1,0 +1,359 @@
+<div class="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col lg:flex-row font-sans">
+  <!-- Sidebar - HireUp Workspace (aligned with job-post-dashboard) -->
+  <div [ngClass]="sidebarOpen ? 'flex' : 'hidden lg:flex'"
+    class="h-screen w-full lg:w-64 bg-card text-foreground flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 border-r border-border transition-all duration-300">
+    <!-- Sidebar Header -->
+    <div class="p-4 border-b border-border flex flex-col gap-3 flex-shrink-0 bg-muted/20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <button class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:bg-muted transition-all" (click)="toggleSidebar()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+          <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center shadow-sm">
+            <svg class="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-foreground leading-none">HireUp</h2>
+            <span class="text-[10px] font-medium text-muted-foreground">Workspace</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Postings moved to header dropdown -->
+
+    <!-- Interview Quick Actions (moved from header to declutter) -->
+    <div class="px-3 py-3 border-t border-border bg-card flex-shrink-0 space-y-2">
+      <p class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Interview Actions</p>
+      <button (click)="openCreateInterviewModal()" class="w-full h-9 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 text-xs cursor-pointer">
+        <i class="fa-solid fa-plus text-xs"></i>
+        <span>Schedule Interview</span>
+      </button>
+      <a routerLink="/interview-scorecards" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : (selectedJobId !== 'all' ? { jobId: selectedJobId } : null)"
+        class="w-full h-8 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium rounded-lg transition-all flex items-center justify-center gap-2 text-[11px] border border-border">
+        <i class="fas fa-clipboard-check text-indigo-500"></i>
+        <span>Scorecards & Evaluation</span>
+      </a>
+      <p class="text-[9px] text-slate-400 px-1 leading-tight" title="Track interview timelines, manage expired slots, reschedule candidates, and navigate to evaluation scorecards.">Manage expired slots &amp; reschedule from filters below.</p>
+    </div>
+
+    <div class="flex-1 min-h-0"></div>
+
+    <!-- Collapsible Workspace Tools & Settings -->
+    <div class="px-3 py-2 border-t border-slate-200/80 flex-shrink-0 bg-slate-50/50">
+      <button (click)="showToolsMenu = !showToolsMenu"
+        class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-all border border-slate-200/60 shadow-2xs">
+        <div class="flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span>Workspace Tools & Settings</span>
+        </div>
+        <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="showToolsMenu" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div *ngIf="showToolsMenu" class="mt-2 space-y-2 max-h-48 overflow-y-auto pr-1 transition-all">
+        <div class="space-y-0.5">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Interviews</span>
+          <a routerLink="/scheduled-interviews" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all bg-indigo-600 text-white">
+            <i class="fas fa-calendar-alt text-white text-xs w-4"></i>
+            <span>Scheduled Interviews</span>
+          </a>
+          <a routerLink="/interview-scorecards" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+            <i class="fas fa-clipboard-check text-indigo-500 text-xs w-4"></i>
+            <span>Scorecards & Evaluation</span>
+          </a>
+        </div>
+        <div class="space-y-0.5 pt-1 border-t border-slate-200/50">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Talent Ops</span>
+          <a routerLink="/offer-studio" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-emerald-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Offer Studio</span>
+          </a>
+          <a routerLink="/onboarding" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-violet-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            <span>Onboarding Hub</span>
+          </a>
+          <a routerLink="/organization-settings" [queryParams]="{ tab: 'api_connections' }"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-sky-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>API Connections</span>
+          </a>
+        </div>
+        <div class="space-y-0.5 pt-1 border-t border-slate-200/50">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Governance</span>
+          <a routerLink="/organization-settings"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <span>Org & Email Settings</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="p-3 border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="relative flex-shrink-0">
+            <ng-container *ngIf="userData.logo_url; else initialsTpl">
+              <img [src]="userData.logo_url" alt="Profile" class="w-8 h-8 rounded-xl object-cover border border-slate-200 shadow-2xs" />
+            </ng-container>
+            <ng-template #initialsTpl>
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-2xs">
+                <span class="text-[11px] font-bold text-white">{{ getInitials(userData.full_name || userData.name || '') }}</span>
+              </div>
+            </ng-template>
+            <div class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-white"></div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-slate-900 truncate">{{ userData.full_name || userData.name }}</p>
+            <p class="text-[10px] text-slate-500 font-medium truncate">{{ userData.position_in_company || userData.email }}</p>
+          </div>
+        </div>
+        <button (click)="logOut()" class="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden" (click)="toggleSidebar()"></div>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-slate-50/50">
+    <!-- Header (HireUp Workspace style) -->
+    <header class="sticky top-0 z-30 w-full border-b border-border bg-card shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 min-h-14">
+      <div class="flex items-center gap-3 mb-4 lg:mb-0">
+        <button class="lg:hidden p-2 rounded-md border border-border bg-muted/50 text-foreground" (click)="toggleSidebar()" title="Toggle sidebar">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+        <div>
+          <h1 class="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2">
+            <i class="fa-solid fa-calendar-days text-emerald-600"></i>
+            <span>Scheduled Interviews</span>
+          </h1>
+          <p class="text-[11px] font-medium text-muted-foreground truncate max-w-[320px] sm:max-w-[380px] lg:max-w-[420px]" title="Track interview timelines, manage expired slots, reschedule candidates, and navigate to evaluation scorecards.">Track interview timelines &amp; manage slots</p>
+        </div>
+        <div class="hidden sm:block border-l border-border pl-3 ml-2 w-64">
+          <app-custom-dropdown
+            [options]="headerJobOptions"
+            labelKey="label"
+            valueKey="id"
+            [value]="selectedJobId"
+            (valueChange)="onJobChange($event)"
+            placeholder="Select Job Posting">
+          </app-custom-dropdown>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button (click)="goBack()" class="h-8 px-3 bg-muted/50 border border-border text-foreground font-medium rounded-md hover:bg-muted transition-all flex items-center gap-2 text-[11px]">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          <span>Back</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Scheduled</p>
+            <p class="text-2xl font-bold text-slate-900 mt-1">{{ totalScheduledCount }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-amber-500">Slot Passed (Needs Action)</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">{{ expiredSlotsCount }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-emerald-500">Completed</p>
+            <p class="text-2xl font-bold text-emerald-600 mt-1">{{ completedCount }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-semibold uppercase tracking-wider text-purple-500">Rescheduled</p>
+            <p class="text-2xl font-bold text-purple-600 mt-1">{{ rescheduledCount }}</p>
+          </div>
+          <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Bar -->
+      <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-start justify-start gap-4">
+        <div class="flex flex-wrap items-center gap-4 flex-1">
+          <div class="relative min-w-[240px] flex-1">
+            <svg class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="applyFilters()" placeholder="Search by candidate name, email, or position..." class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" />
+          </div>
+          <div class="w-56">
+            <app-custom-dropdown [options]="availableJobPosts" labelKey="label" valueKey="id" [value]="selectedJobId" (valueChange)="onJobChange($event)" placeholder="Select Job Post"></app-custom-dropdown>
+          </div>
+          <div class="w-56">
+            <app-custom-dropdown [options]="statusOptions" labelKey="label" valueKey="id" [value]="selectedStatus" (valueChange)="onStatusChange($event)" placeholder="Filter Status"></app-custom-dropdown>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button *ngIf="expiredSlotsCount > 0" (click)="rescheduleAllExpired()" class="px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-extrabold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-xs cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span>Reschedule Expired ({{ expiredSlotsCount }})</span>
+          </button>
+          <button (click)="rescheduleSelected()" [disabled]="selectedInterviewIds.size === 0" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold rounded-xl shadow-md transition-all flex items-center gap-2 text-xs cursor-pointer">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <span>Reschedule Selected ({{ selectedInterviewIds.size }})</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content Area -->
+      <div>
+        <div *ngIf="loading" class="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+          <p class="text-slate-500 mt-3 font-medium text-sm">Loading scheduled interviews...</p>
+        </div>
+        <div *ngIf="!loading && filteredInterviews.length === 0" class="bg-white rounded-2xl p-12 text-center border border-slate-200 shadow-sm">
+          <div class="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto text-slate-400 mb-4">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          </div>
+          <h3 class="text-lg font-bold text-slate-800">No Scheduled Interviews Found</h3>
+          <p class="text-slate-500 text-sm mt-1">There are no candidate interviews matching your current filter criteria.</p>
+        </div>
+        <div *ngIf="!loading && filteredInterviews.length > 0" class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th class="py-4 px-4 w-10 text-center"><input type="checkbox" [checked]="isSelectAll" (change)="toggleSelectAll()" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4" /></th>
+                  <th class="py-4 px-4">Candidate</th>
+                  <th class="py-4 px-4">Job & Interview Stage</th>
+                  <th class="py-4 px-4">Scheduled Date & Slot</th>
+                  <th class="py-4 px-4">Status</th>
+                  <th class="py-4 px-4">Meeting / Link</th>
+                  <th class="py-4 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-sm">
+                <tr *ngFor="let interview of filteredInterviews" class="hover:bg-slate-50/80 transition-colors group">
+                  <td class="py-4 px-4 text-center"><input type="checkbox" [checked]="selectedInterviewIds.has(interview.id)" (change)="toggleSelectInterview(interview.id)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4" /></td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-sm shadow-inner">{{ interview.candidate_name ? interview.candidate_name.charAt(0).toUpperCase() : 'C' }}</div>
+                      <div>
+                        <button (click)="viewCandidateDetails(interview)" class="font-semibold text-slate-900 hover:text-indigo-600 transition-colors text-left block">{{ interview.candidate_name || 'Candidate' }}</button>
+                        <p class="text-xs text-slate-500 font-mono mt-0.5">{{ interview.candidate_email }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4">
+                    <p class="font-semibold text-slate-800">{{ interview.job_title || 'General Position' }}</p>
+                    <span class="inline-block mt-1 px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-md text-xs font-medium border border-slate-200">{{ interview.interview_type || 'Interview Stage' }}</span>
+                  </td>
+                  <td class="py-4 px-4">
+                    <div class="flex items-center gap-2 text-slate-800 font-medium">
+                      <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                      <span>{{ interview.interview_date }}</span>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      <span>{{ interview.interview_time }} ({{ interview.duration_minutes || 45 }} mins)</span>
+                    </div>
+                  </td>
+                  <td class="py-4 px-4"><span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border shadow-xs" [ngClass]="getStatusBadgeClass(interview)"><span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current"></span>{{ getStatusDisplayLabel(interview) }}</span></td>
+                  <td class="py-4 px-4">
+                    <a *ngIf="interview.meeting_link" [href]="interview.meeting_link" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800 hover:underline bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100 transition-colors">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>Join Call</a>
+                    <span *ngIf="!interview.meeting_link" class="text-xs text-slate-400 italic">No link</span>
+                  </td>
+                  <td class="py-4 px-4 text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <button (click)="navigateToScorecard(interview)" title="Fill Evaluation / Scorecard" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-semibold rounded-lg text-xs transition-all flex items-center gap-1 border border-indigo-100 shadow-2xs">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Evaluate</button>
+                      <button (click)="viewCandidateDetails(interview)" title="View Candidate Details" class="p-1.5 text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                      </button>
+                      <button (click)="openRescheduleModal([interview])" title="Reschedule Interview" class="p-1.5 text-amber-600 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      </button>
+                      <button *ngIf="interview.status !== 'completed'" (click)="markAsCompleted(interview)" title="Mark as Completed" class="p-1.5 text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors border border-emerald-100">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div *ngIf="showRescheduleModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+  <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in duration-200">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+      <div>
+        <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-amber-600"></i><span>Reschedule Interview</span></h3>
+        <p class="text-xs text-slate-500 mt-0.5">Rescheduling {{ targetInterviewsForReschedule.length }} candidate interview slot(s).</p>
+      </div>
+      <button (click)="closeRescheduleModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="space-y-4 py-4">
+      <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-3 text-xs text-indigo-900 flex items-center gap-2">
+        <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="truncate"><strong>Target:</strong> {{ targetCandidateNamesSummary }}</span>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">New Date *</label><input type="date" [(ngModel)]="newRescheduleDate" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white" /></div>
+        <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">New Time Slot *</label><input type="time" [(ngModel)]="newRescheduleTime" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white" /></div>
+      </div>
+      <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Meeting Link</label><input type="url" [(ngModel)]="newMeetingLink" placeholder="https://meet.google.com/xyz-abc" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white" /></div>
+      <div><label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Notes for Candidate</label><textarea [(ngModel)]="rescheduleNotes" rows="2" placeholder="Reason for reschedule or extra instructions..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:bg-white"></textarea></div>
+      <div class="flex items-center gap-2 pt-2"><input type="checkbox" id="sendNotification" [(ngModel)]="sendNotification" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4" /><label for="sendNotification" class="text-sm font-semibold text-slate-700 cursor-pointer">Send email notification to candidate(s)</label></div>
+    </div>
+    <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+      <button (click)="closeRescheduleModal()" class="px-4 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-sm transition-colors">Cancel</button>
+      <button (click)="submitReschedule()" [disabled]="isSavingReschedule" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-sm shadow-md transition-all flex items-center gap-2"><svg *ngIf="isSavingReschedule" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Confirm & Save Reschedule</button>
+    </div>
+  </div>
+</div>
+
+<!-- Automated Batch Schedule Candidate Interview Modal Component -->
+<app-schedule-interview-modal [isOpen]="showBatchScheduleModal" [selectedJobPost]="selectedJobPostObj" [availableJobPosts]="availableJobPostsForModal" (close)="closeBatchScheduleModal()" (scheduled)="onBatchScheduled($event)"></app-schedule-interview-modal>
+<app-candidate-details *ngIf="dataService.openCandidateDetails"></app-candidate-details>
+
+<!-- Scorecard Evaluation Pop-Up Modal -->
+<div *ngIf="showScorecardModal" class="fixed inset-0 z-50 flex items-center justify-center p-3 md:p-6 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+  <div class="bg-white rounded-3xl max-w-6xl w-full h-[92vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden">
+    <div class="px-6 py-4 bg-gradient-to-r from-indigo-700 to-violet-700 text-white flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center"><i class="fas fa-clipboard-check text-lg"></i></div>
+        <div><h3 class="font-bold text-lg">Candidate Interview Evaluation</h3><p class="text-xs text-indigo-200">Evaluating {{ scorecardCandidateName }} &bull; {{ scorecardCandidateEmail }}</p></div>
+      </div>
+      <button (click)="closeScorecardModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-all"><i class="fas fa-times text-sm"></i></button>
+    </div>
+    <div class="flex-1 overflow-y-auto bg-slate-50">
+      <app-scorecard-manager [jobpostId]="scorecardJobId" [candidateId]="scorecardCandidateId" [candidateName]="scorecardCandidateName" [candidateEmail]="scorecardCandidateEmail" [mode]="scorecardMode" (close)="closeScorecardModal()"></app-scorecard-manager>
+    </div>
+  </div>
+</div>

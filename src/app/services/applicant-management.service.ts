@@ -165,7 +165,8 @@ getApplicantStatus(
     resume_id: string,
     new_stage_id: string,
     new_stage_name?: string,
-    recruiter_notes?: string
+    recruiter_notes?: string,
+    current_stage_id?: string
   ): Observable<any> {
     if (!resume_id || !new_stage_id) {
       return throwError(() => new Error('Resume ID and stage ID are required'));
@@ -175,7 +176,8 @@ getApplicantStatus(
       resume_id,
       new_stage_id,
       new_stage_name,
-      recruiter_notes
+      recruiter_notes,
+      current_stage_id
     };
     return this.http.post<any>(`${this.baseUrl}/move-stage`, body, { headers })
       .pipe(catchError(this.handleError.bind(this)));
@@ -199,6 +201,146 @@ getApplicantStatus(
     return this.http.post<any>(`${this.baseUrl}/send-direct-email`, payload, { headers })
       .pipe(catchError(this.handleError.bind(this)));
   }
+
+  /**
+   * Get candidate's additional data submissions and recruiter attachments
+   */
+  getCandidateAdditionalData(candidateId: string): Observable<any> {
+    if (!candidateId) {
+      return throwError(() => new Error('Candidate ID is required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.get<any>(`${environment.apiUrl}/candidates/${candidateId}/additional-data`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Upload and attach a file to a candidate profile
+   */
+  uploadCandidateAttachment(
+    candidateId: string,
+    file: File,
+    fileCategory: string = 'Other',
+    description: string = ''
+  ): Observable<any> {
+    if (!candidateId || !file) {
+      return throwError(() => new Error('Candidate ID and file are required'));
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('file_category', fileCategory);
+    formData.append('description', description);
+    formData.append('uploaded_by', 'Recruiter');
+
+    const token = this.getToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    return this.http.post<any>(`${environment.apiUrl}/candidates/${candidateId}/attachments`, formData, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Delete a recruiter attachment file from candidate profile
+   */
+  deleteCandidateAttachment(candidateId: string, attachmentId: string): Observable<any> {
+    if (!candidateId || !attachmentId) {
+      return throwError(() => new Error('Candidate ID and attachment ID are required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.delete<any>(`${environment.apiUrl}/candidates/${candidateId}/attachments/${attachmentId}`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Submit additional data response for a candidate
+   */
+  submitCandidateAdditionalData(candidateId: string, payload: {
+    jobpost_id?: string;
+    form_title?: string;
+    submitted_by?: string;
+    data: Record<string, any>;
+    files?: any[];
+  }): Observable<any> {
+    if (!candidateId) {
+      return throwError(() => new Error('Candidate ID is required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${environment.apiUrl}/candidates/${candidateId}/additional-submissions`, payload, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Send request for additional data invitation email to candidate
+   */
+  requestAdditionalData(candidateId: string, payload: {
+    jobpost_id?: string;
+    candidate_email?: string;
+    candidate_name?: string;
+    custom_message?: string;
+  }): Observable<any> {
+    if (!candidateId) {
+      return throwError(() => new Error('Candidate ID is required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${environment.apiUrl}/candidates/${candidateId}/request-additional-data`, payload, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * GDPR Article 17 - Trigger Right to be Forgotten / Anonymize Candidate
+   */
+  anonymizeCandidateGdpr(candidateId: string, reason: string = 'Data Subject Access Request (DSAR)'): Observable<any> {
+    if (!candidateId) {
+      return throwError(() => new Error('Candidate ID is required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${environment.apiUrl}/candidates/${candidateId}/gdpr/anonymize`, {
+      reason,
+      confirmed_by_recruiter: true
+    }, { headers }).pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * GDPR Article 15 & 20 - Download DSAR Compliance Export Package
+   */
+  exportCandidateGdprDsar(candidateId: string): Observable<any> {
+    if (!candidateId) {
+      return throwError(() => new Error('Candidate ID is required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.get<any>(`${environment.apiUrl}/candidates/${candidateId}/gdpr/export`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * GDPR Article 7 - Update Candidate Processing Consent Preferences
+   */
+  updateCandidateGdprConsent(candidateId: string, consentData: {
+    data_retention_consent?: boolean;
+    ai_profiling_consent?: boolean;
+    marketing_consent?: boolean;
+    notes?: string;
+  }): Observable<any> {
+    if (!candidateId) {
+      return throwError(() => new Error('Candidate ID is required'));
+    }
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${environment.apiUrl}/candidates/${candidateId}/gdpr/consent`, consentData, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
+  /**
+   * Enterprise Data Protection Audit Log & Compliance Summary
+   */
+  getGdprComplianceOverview(): Observable<any> {
+    const headers = this.createHeaders();
+    return this.http.get<any>(`${environment.apiUrl}/candidates/gdpr/compliance-overview`, { headers })
+      .pipe(catchError(this.handleError.bind(this)));
+  }
+
 
 
   /**

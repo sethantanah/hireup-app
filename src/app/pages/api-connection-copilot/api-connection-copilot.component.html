@@ -1,0 +1,781 @@
+<div class="h-screen w-full overflow-hidden bg-slate-50 flex flex-col font-sans text-slate-800">
+  <!-- Top Navigation Header -->
+  <header class="h-14 px-4 md:px-6 bg-white border-b border-slate-200 shadow-2xs flex items-center justify-between flex-shrink-0 z-30">
+    <!-- Left Logo & Title -->
+    <div class="flex items-center space-x-3">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-8 h-8 rounded-lg bg-emerald-600 p-0.5 shadow-xs flex items-center justify-center">
+          <i class="fas fa-wand-magic-sparkles text-amber-300 text-sm animate-pulse"></i>
+        </div>
+        <div>
+          <h1 class="text-sm font-semibold text-slate-900 leading-none flex items-center gap-2">
+            HireUp AI Talent Copilot
+         
+          </h1>
+          <span class="text-[10px] text-slate-500 font-medium">Workspace: {{ selectedConnectionName }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center/Right Controls: API Connection Switcher, Match Filter, Web Search, New Chat & Return -->
+    <div class="flex items-center space-x-2 md:space-x-2.5">
+      <!-- API Connection Pool Selector Custom Dropdown -->
+      <div class="w-48 md:w-64">
+        <app-custom-dropdown
+          [options]="connectionDropdownOptions"
+          labelKey="label"
+          valueKey="id"
+          [multiple]="true"
+          [value]="sourceConnectionIds"
+          (valueChange)="onSourcePoolsChange($event)"
+        
+          placeholder="Select source pools..."
+          icon="fas fa-database"
+          size="sm">
+        </app-custom-dropdown>
+      </div>
+
+      <button (click)="selectAllPools()" [disabled]="!ready" class="hidden text-xs font-bold text-emerald-700">Select all</button>
+      <button (click)="openRequirements()" [disabled]="!ready" class="h-8 px-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-all text-xs font-bold flex items-center gap-1.5 border border-indigo-200 shadow-2xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-file-lines text-xs text-indigo-600"></i><span>Pool requirements</span></button>
+      <!-- Match Score Filter Control Pill -->
+      <div class="h-8 px-2.5 rounded-lg bg-slate-100 border border-slate-200 text-xs font-semibold flex items-center gap-2 shadow-2xs" title="Filter Candidate Match Score threshold">
+        <i class="fas fa-bullseye text-emerald-600 text-xs"></i>
+        <span class="hidden lg:inline text-slate-600 font-bold">Min Match:</span>
+        <span class="font-black text-emerald-700 text-xs">{{ minMatchScore }}%</span>
+        <input type="range" min="0" max="100" [(ngModel)]="minMatchScore" class="w-14 md:w-20 accent-emerald-600 cursor-pointer h-1" />
+      </div>
+
+      <!-- Web Search Toggle Button -->
+      <button 
+        (click)="enableWebSearch = !enableWebSearch" 
+        [class]="enableWebSearch ? 'bg-sky-50 text-sky-700 border-sky-300 ring-2 ring-sky-200' : 'bg-slate-100 text-slate-600 border-slate-200'"
+        class="hidden h-8 px-2.5 rounded-lg border transition-all text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer" 
+        title="Toggle Web Search for candidate background citations">
+        <i class="fas fa-globe text-xs" [class.text-sky-600]="enableWebSearch"></i>
+        <span class="hidden md:inline">Web Search</span>
+        <span *ngIf="enableWebSearch" class="w-2 h-2 rounded-full bg-sky-500 animate-ping"></span>
+      </button>
+
+      <!-- New Chat Button -->
+      <button (click)="createNewSession()" class="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-all text-xs font-bold flex items-center gap-1.5 shadow-2xs cursor-pointer" title="Start New Chat Session">
+        <i class="fas fa-plus text-xs"></i>
+        <span class="hidden sm:inline">New Chat</span>
+      </button>
+
+      <!-- Clear Session Button -->
+      <button (click)="clearChat()" class="h-8 w-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all text-xs font-bold border border-slate-200 flex items-center justify-center cursor-pointer" title="Reset Current Chat">
+        <i class="fas fa-rotate-left"></i>
+      </button>
+
+      <!-- Return to Connection Portal -->
+      <button (click)="returnToPortal()" class="h-8 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all text-xs font-semibold flex items-center gap-1.5 border border-slate-200 cursor-pointer" title="Return to Connection Portal">
+        <i class="fas fa-arrow-left text-xs"></i>
+        <span class="hidden sm:inline">API Portal</span>
+      </button>
+
+      <!-- Sidebar Toggle Mobile -->
+      <button (click)="sidebarOpen = !sidebarOpen" class="h-8 w-8 rounded-lg bg-slate-100 text-slate-700 lg:hidden flex items-center justify-center">
+        <i class="fas fa-sliders"></i>
+      </button>
+    </div>
+  </header>
+
+  <div *ngIf="workspaceError" role="alert" class="px-4 py-3 bg-amber-50 text-amber-900 text-sm">{{ workspaceError }}</div>
+  <div *ngIf="!ready && !workspaceError" class="p-4 text-sm">Loading API pool workspace...</div>
+  <!-- Main Body Content Grid -->
+  <div class="flex-1 flex min-h-0 overflow-hidden relative">
+    <!-- Sleek Tabbed Sidebar -->
+    <aside 
+      [ngClass]="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
+      class="w-72 lg:w-80 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 transition-transform duration-300 absolute lg:static inset-y-0 left-0 z-20 shadow-xs">
+      
+      <!-- Top Sidebar Tab Headers -->
+      <div class="p-2 border-b border-slate-200 bg-slate-100/70">
+        <div class="flex bg-slate-200/80 p-0.5 rounded-xl gap-1">
+          <button 
+            (click)="activeSidebarTab = 'templates'"
+            [class]="activeSidebarTab === 'templates' ? 'bg-white text-emerald-900 font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+            class="flex-1 py-1.5 px-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1 cursor-pointer">
+            <i class="fas fa-bolt text-amber-500 text-xs"></i>
+            <span>Templates</span>
+          </button>
+
+          <button 
+            (click)="activeSidebarTab = 'pools'"
+            [class]="activeSidebarTab === 'pools' ? 'bg-white text-emerald-900 font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+            class="flex-1 py-1.5 px-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1 cursor-pointer">
+            <i class="fas fa-database text-emerald-600 text-xs"></i>
+            <span>Pools</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-extrabold">{{ allConnections.length }}</span>
+          </button>
+
+          <button 
+            (click)="activeSidebarTab = 'chats'"
+            [class]="activeSidebarTab === 'chats' ? 'bg-white text-emerald-900 font-extrabold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold'"
+            class="flex-1 py-1.5 px-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1 cursor-pointer">
+            <i class="fas fa-comments text-emerald-600 text-xs"></i>
+            <span>Chats</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 text-slate-700 font-extrabold">{{ chatSessions.length }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="flex-1 min-h-0 overflow-y-auto p-3">
+        <!-- TAB 1: PROMPT TEMPLATES -->
+        <div *ngIf="activeSidebarTab === 'templates'" class="space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <i class="fas fa-layer-group text-emerald-600"></i> API Pool Shortcuts
+            </span>
+            <button 
+              (click)="openCreateTemplateModal()" 
+              class="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all flex items-center gap-1 cursor-pointer">
+              <i class="fas fa-plus text-[9px]"></i> Add Custom
+            </button>
+          </div>
+
+          <!-- Prompt Cards List -->
+          <div class="space-y-2">
+            <div 
+              *ngFor="let p of allPrompts" 
+              (click)="loadPromptToInput(p.prompt)"
+              class="group p-3 rounded-xl bg-slate-50 hover:bg-emerald-50/70 border border-slate-200/80 hover:border-emerald-300 cursor-pointer transition-all duration-200 relative">
+              
+              <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center space-x-2 truncate">
+                  <div class="w-6 h-6 rounded-md bg-white flex items-center justify-center border border-slate-200 text-emerald-600 shrink-0">
+                    <i class="fas {{ p.icon }} text-xs"></i>
+                  </div>
+                  <span class="text-xs font-bold text-slate-800 group-hover:text-emerald-800 transition-colors truncate">{{ p.title }}</span>
+                </div>
+                
+                <button 
+                  *ngIf="p.isCustom" 
+                  (click)="deleteCustomTemplate(p.id, $event)"
+                  class="text-slate-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0"
+                  title="Delete Custom Template">
+                  <i class="fas fa-trash-can text-[11px]"></i>
+                </button>
+              </div>
+
+              <p class="text-[11px] text-slate-500 leading-snug line-clamp-2">{{ p.prompt }}</p>
+              
+              <div class="mt-1.5 flex items-center justify-between text-[10px] text-emerald-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                <span>Click to load into input</span>
+                <i class="fas fa-arrow-down-left"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: CONNECTED API DATA POOLS -->
+        <div *ngIf="activeSidebarTab === 'pools'" class="space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <i class="fas fa-database text-emerald-600"></i> Active API Pools ({{ allConnections.length }})
+            </span>
+          </div>
+
+          <p class="text-xs text-slate-500">Open a pool workspace to view its chats and requirements. Use the top dropdown to change data access for this conversation.</p>
+          <!-- Individual Pools List Cards -->
+          <div class="space-y-2">
+            <div 
+              *ngFor="let conn of allConnections"
+              (click)="onConnectionPoolChange(conn.id)"
+              [class]="selectedConnectionId === conn.id ? 'bg-emerald-50 border-emerald-300 ring-1 ring-emerald-200' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'"
+              class="p-3 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between group">
+              <div class="flex items-center gap-2.5 truncate">
+                <div class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
+                  <i class="fas fa-plug text-xs"></i>
+                </div>
+                <div class="truncate">
+                  <h4 class="font-bold text-slate-900 text-xs truncate group-hover:text-emerald-700 transition-colors">{{ conn.name }}</h4>
+                  <div class="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium mt-0.5">
+                    <span class="px-1.5 py-0.2 rounded bg-slate-200 text-slate-700 font-bold uppercase">{{ conn.provider_type || 'Sync' }}</span>
+                    <span>&bull; Active Pool</span>
+                  </div>
+                </div>
+              </div>
+              <i *ngIf="selectedConnectionId === conn.id" class="fas fa-circle-check text-emerald-600 text-sm shrink-0"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: CHAT HISTORY -->
+        <div *ngIf="activeSidebarTab === 'chats'" class="space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+              <i class="fas fa-history text-emerald-600"></i> Saved Sessions
+            </span>
+            <button 
+              (click)="createNewSession()" 
+              class="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-all flex items-center gap-1 cursor-pointer">
+              <i class="fas fa-plus text-[9px]"></i> New Chat
+            </button>
+          </div>
+
+          <div class="space-y-1.5">
+            <div 
+              *ngFor="let s of chatSessions"
+              (click)="switchSession(s.id)"
+              [class]="s.id === activeSessionId ? 'bg-emerald-50 text-emerald-900 border-emerald-300 font-bold shadow-2xs' : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'"
+              class="group p-3 rounded-xl border text-xs flex items-center justify-between cursor-pointer transition-all duration-200">
+              <div class="flex items-center space-x-2.5 truncate">
+                <div class="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" [class.bg-emerald-600]="s.id === activeSessionId" [class.text-white]="s.id === activeSessionId" [class.bg-slate-200]="s.id !== activeSessionId" [class.text-slate-600]="s.id !== activeSessionId">
+                  <i class="fas fa-message text-[10px]"></i>
+                </div>
+                <div class="truncate">
+                  <span class="truncate block font-bold leading-tight">{{ s.title }}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">{{ s.createdAt | date:'shortDate' }}</span>
+                </div>
+              </div>
+              <button 
+                (click)="deleteSession(s.id, $event)"
+                class="text-slate-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 shrink-0"
+                title="Delete session">
+                <i class="fas fa-trash-can text-xs"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-t border-slate-200 bg-slate-50 text-[11px] text-slate-500 font-medium flex items-center justify-between">
+        <span class="flex items-center gap-1.5 truncate">
+          <div class="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse"></div>
+          <span class="truncate font-bold text-slate-700">{{ selectedConnectionName }}</span>
+        </span>
+        <span class="text-[10px] font-bold text-slate-400 shrink-0">API Vector v2.5</span>
+      </div>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <main class="flex-1 flex flex-col min-w-0 bg-slate-50 relative">
+      <!-- Chat Scrollable Message Container -->
+      <div id="apiCopilotScrollContainer" class="flex-1 min-h-0 overflow-y-auto p-4 md:p-6 space-y-6">
+        
+        <!-- Render Messages -->
+        <ng-container *ngFor="let msg of messages">
+          <!-- 1. USER MESSAGE -->
+          <div *ngIf="msg.role === 'user'" class="flex items-start justify-end gap-2.5 max-w-2xl ml-auto w-full">
+            <div class="bg-slate-800 text-white rounded-2xl rounded-tr-none px-4 py-3 shadow-xs border border-slate-700/80 font-medium">
+              <div class="text-xs md:text-sm leading-relaxed text-slate-100 font-normal" [innerHTML]="renderMarkdown(msg.content)"></div>
+            </div>
+            <div class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs border border-slate-700">
+              <i class="fas fa-user text-xs"></i>
+            </div>
+          </div>
+
+          <!-- 2. ASSISTANT MESSAGE -->
+          <div *ngIf="msg.role === 'assistant'" class="flex items-start gap-3 max-w-4xl mr-auto justify-start w-full">
+            <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold shrink-0 shadow-xs border border-emerald-500">
+              <i class="fas fa-robot text-amber-300 text-xs"></i>
+            </div>
+
+            <div class="bg-white border border-slate-200/90 text-slate-800 rounded-2xl rounded-tl-none p-5 shadow-xs flex-1 min-w-0">
+              <!-- Message Header info -->
+              <div class="flex items-center justify-between mb-2 pb-1 border-b border-slate-100 text-[10px] text-slate-400 font-semibold">
+                <span class="text-emerald-700 font-bold flex items-center gap-1">
+                  <i class="fas fa-database text-amber-500"></i> API Data Pool AI Assistant
+                </span>
+                <span>{{ msg.timestamp | date:'shortTime' }}</span>
+              </div>
+
+              <!-- AI Tool Invocation Badge -->
+              <div *ngIf="msg.toolInvoked" class="mb-2.5 px-2.5 py-1 rounded-lg bg-sky-50 border border-sky-200 text-sky-800 text-[11px] font-bold flex items-center gap-1.5 w-fit">
+                <i class="fas fa-bolt text-sky-600 animate-pulse"></i>
+                <span>API Tool Executed: {{ msg.toolInvoked }}</span>
+              </div>
+
+              <!-- Message Text -->
+              <div class="text-xs md:text-sm leading-relaxed text-slate-800 font-normal space-y-2" (click)="onChatContentClick($event)" [innerHTML]="renderMarkdown(msg.content, msg.candidates)">
+              </div>
+
+              <div *ngIf="msg.webResults?.length" class="mt-3 space-y-1">
+                <a *ngFor="let source of msg.webResults" [href]="source.url || source.link" target="_blank" rel="noopener noreferrer" class="block text-xs text-sky-700 underline">{{ source.title || source.url }}</a>
+              </div>
+              <!-- Embedded Candidate Cards Grid -->
+              <div *ngIf="msg.candidates && msg.candidates.length > 0" class="mt-5 space-y-4 pt-4 border-t border-slate-100">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                    <i class="fas fa-users-viewfinder text-emerald-600"></i> Recommended Candidates from API Pools ({{ msg.candidates.length }})
+                  </span>
+                  <span class="text-[11px] font-bold text-emerald-700">Pool requirements matching</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <ng-container *ngFor="let cand of msg.candidates">
+                    <ng-container *ngIf="(cand.match_score ?? 0) >= minMatchScore">
+                      <div class="bg-white border border-slate-200 hover:border-emerald-400 rounded-2xl p-4 transition-all duration-300 shadow-xs hover:shadow-md group">
+                      
+                      <!-- Card Header -->
+                      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-3">
+                          <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-700 flex items-center justify-center font-bold text-white text-sm shadow-xs group-hover:scale-105 transition-transform shrink-0">
+                            {{ getInitials(cand.full_name || cand.name) }}
+                          </div>
+
+                          <div class="min-w-0">
+                            <h4 class="text-sm font-bold text-slate-900 group-hover:text-emerald-700 transition-colors flex items-center gap-2 truncate">
+                              {{ cand.full_name || cand.name }}
+                            </h4>
+                            <p class="text-xs text-emerald-600">Source: {{ cand.connection_name }}</p>
+                            <p class="text-xs text-slate-500 truncate font-medium">{{ cand.email || cand.user_email || 'API Candidate Record' }}</p>
+                          </div>
+                        </div>
+
+                        <!-- Match Score Pill Badge -->
+                        <div class="flex items-center space-x-2 shrink-0">
+                          <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5 shadow-2xs">
+                            <i class="fas fa-bullseye text-[10px]"></i> {{ cand.match_score ?? 0 }}% Match
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Summary & Skills section -->
+                      <div class="py-3 space-y-2">
+                        <div class="text-xs text-slate-700 leading-relaxed font-medium bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex items-start gap-2">
+                          <i class="fas fa-quote-left text-emerald-600 mt-0.5 text-[10px] shrink-0"></i>
+                          <div class="flex-1" [innerHTML]="renderMarkdown(cand.match_reason || cand.summary || 'Qualified candidate from ingested API data pool.')"></div>
+                        </div>
+
+                        <!-- Skill Tags -->
+                        <div class="flex flex-wrap gap-1.5 pt-1" *ngIf="cand.skills && cand.skills.length > 0">
+                          <span *ngFor="let s of cand.skills" class="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold border border-slate-200">
+                            {{ s }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <!-- Action Bar Buttons -->
+                      <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 justify-between">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <button 
+                            (click)="viewCandidateDetails(cand)"
+                            class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer">
+                            <i class="fas fa-id-card text-xs"></i>
+                            <span>View Profile</span>
+                          </button>
+
+                          <button 
+                            (click)="emailCandidate(cand)"
+                            class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold border border-slate-200 transition-all flex items-center gap-1.5 cursor-pointer">
+                            <i class="fas fa-envelope text-slate-500"></i>
+                            <span>Email</span>
+                          </button>
+
+                          <button 
+                            (click)="openImportModal(cand, 'alert')"
+                            class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200 transition-all flex items-center gap-1.5 cursor-pointer">
+                            <i class="fas fa-bell text-amber-600"></i>
+                            <span>{{ isCandidateNotified(cand) ? 'Resend Alert' : 'Alert Form' }}</span>
+                          </button>
+                        </div>
+
+                        <button 
+                          (click)="openImportModal(cand, 'direct')"
+                          class="px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200 transition-all flex items-center gap-1.5 cursor-pointer">
+                          <i class="fas fa-user-plus text-emerald-600"></i>
+                          <span>Add to Pipeline</span>
+                        </button>
+                      </div>
+                    </div>
+                  </ng-container>
+                </ng-container>
+                </div>
+              </div>
+
+              <!-- Embedded Web Background Citations -->
+              <div *ngIf="msg.webResults && msg.webResults.length > 0" class="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                <span class="text-[11px] font-bold text-sky-700 flex items-center gap-1.5 uppercase tracking-wider">
+                  <i class="fas fa-globe text-xs"></i> Web Background Search Citations
+                </span>
+                <div *ngFor="let w of msg.webResults" class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs">
+                  <a [href]="w.link" target="_blank" class="font-bold text-emerald-700 hover:underline block truncate">{{ w.title }}</a>
+                  <p class="text-slate-600 text-[11px] mt-0.5 leading-tight">{{ w.snippet }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Typing Loading Indicator -->
+        <div *ngIf="isLoading" class="flex items-center space-x-3 max-w-4xl mx-auto">
+          <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-xs font-bold animate-bounce shadow-xs">
+            <i class="fas fa-robot text-amber-300"></i>
+          </div>
+          <div class="p-4 rounded-2xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold flex items-center gap-3 shadow-xs">
+            <i class="fas fa-spinner fa-spin text-emerald-600 text-sm"></i>
+            <span>Querying active API Connection Data Pools and calculating vector matches...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Prompt Input Bar -->
+      <div class="p-4 bg-white border-t border-slate-200 shadow-sm">
+        <div class="max-w-4xl mx-auto flex items-center gap-2">
+          <input 
+            id="apiCopilotInput"
+            type="text" 
+            [(ngModel)]="userInput"
+            (keyup.enter)="sendPrompt(userInput)"
+            [disabled]="isLoading || !ready"
+            placeholder="Ask AI Copilot to search active API Data Pools, evaluate skills, or audit candidates..."
+            class="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 focus:border-emerald-500 rounded-xl text-xs md:text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all font-medium" />
+
+          <button 
+            (click)="sendPrompt(userInput)"
+            [disabled]="isLoading || !ready || !sourceConnectionIds.length || !userInput.trim()"
+            class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs md:text-sm transition-all flex items-center gap-2 shadow-xs disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+            <span>Send</span>
+            <i class="fas fa-paper-plane text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Create Custom Prompt Template Modal -->
+  <div *ngIf="showCreateTemplateModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+    <div class="bg-white border border-slate-200 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+          <i class="fas fa-bolt text-emerald-600"></i> Create Custom API Pool Prompt Template
+        </h3>
+        <button (click)="closeCreateTemplateModal()" class="text-slate-400 hover:text-slate-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-slate-700 mb-1 block">Template Title:</label>
+          <input 
+            type="text" 
+            [(ngModel)]="newTemplateTitle"
+            placeholder="e.g., Senior DevOps in Greenhouse Pool"
+            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-emerald-500 focus:outline-none font-medium" />
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700 mb-1 block">Prompt Text:</label>
+          <textarea 
+            [(ngModel)]="newTemplatePrompt"
+            rows="3"
+            placeholder="e.g., Search API pools for candidates with Kubernetes and Terraform experience and rank them."
+            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:border-emerald-500 focus:outline-none font-medium"></textarea>
+        </div>
+
+        <div>
+          <label class="text-xs font-semibold text-slate-700 mb-1 block">Category Icon:</label>
+          <app-custom-dropdown
+            [options]="iconOptions"
+            labelKey="label"
+            valueKey="value"
+            [(value)]="newTemplateIcon"
+            placeholder="Select Category Icon..."
+            icon="fa-icons">
+          </app-custom-dropdown>
+        </div>
+      </div>
+
+      <div class="flex gap-2 justify-end pt-2 border-t border-slate-100">
+        <button (click)="closeCreateTemplateModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100">
+          Cancel
+        </button>
+        <button (click)="createCustomTemplate()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs">
+          <i class="fas fa-check text-xs"></i>
+          <span>Save Template</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Candidate to Job Modal Overlay -->
+  <div *ngIf="selectedCandidateForImport" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-5xl w-full shadow-2xl border border-slate-200 flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 font-bold">
+            <i class="fas" [ngClass]="importMode === 'alert' ? 'fa-bell text-amber-600' : 'fa-user-plus text-emerald-600'"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900">
+              {{ importMode === 'alert' ? 'Alert Candidate to Fill Form' : 'Direct Add to Pipeline' }}
+            </h3>
+            <p class="text-xs text-slate-500 font-medium">
+              {{ importMode === 'alert' ? 'Send invitation email with application form link to ' + (selectedCandidateForImport.full_name || selectedCandidateForImport.name) : 'Directly add candidate to active job pipeline.' }}
+            </p>
+          </div>
+        </div>
+        <button (click)="closeImportModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all cursor-pointer">
+          <i class="fas fa-times text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div class="flex bg-slate-100 p-1 rounded-2xl border border-slate-200/80 shrink-0 my-4">
+        <button (click)="importMode = 'alert'; updateAlertEmailTemplate()" [ngClass]="importMode === 'alert' ? 'bg-white text-emerald-800 shadow-xs font-black' : 'text-slate-600 font-bold hover:text-slate-900'" class="flex-1 py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fas fa-paper-plane text-amber-600"></i>
+          <span>Alert & Invite to Fill Form</span>
+        </button>
+        <button (click)="importMode = 'direct'" [ngClass]="importMode === 'direct' ? 'bg-white text-emerald-800 shadow-xs font-black' : 'text-slate-600 font-bold hover:text-slate-900'" class="flex-1 py-2.5 rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer">
+          <i class="fas fa-user-check text-emerald-600"></i>
+          <span>Directly Add to Pipeline</span>
+        </button>
+      </div>
+
+      <!-- Modal Main Scrollable Content Area -->
+      <div class="flex-1 overflow-y-auto pr-1 space-y-6">
+        
+        <!-- Tab Content 1: Alert & Invite Mode (2 Columns on Large Screens) -->
+        <div *ngIf="importMode === 'alert'" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          
+          <!-- Left Column: Target Job & Email Composition Editor -->
+          <div class="space-y-4">
+            <!-- Target Job Position Selector -->
+            <div>
+              <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-1.5 flex items-center justify-between">
+                <span>Target Job Position *</span>
+                <span *ngIf="getSelectedJobCompanyName()" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                  {{ getSelectedJobCompanyName() }}
+                </span>
+              </label>
+              <app-custom-dropdown
+                [options]="jobPostings"
+                labelKey="job_title"
+                valueKey="id"
+                [(value)]="importJobId"
+                (valueChange)="updateAlertEmailTemplate()"
+                placeholder="Select Target Job..."
+                icon="fas fa-briefcase">
+              </app-custom-dropdown>
+            </div>
+
+            <!-- Previously Notified Alert Notice Banner -->
+            <div *ngIf="isCandidateNotified(selectedCandidateForImport)" class="p-3.5 bg-amber-50/90 border border-amber-200/90 rounded-2xl text-xs font-bold text-amber-900 flex items-center gap-3 shadow-2xs">
+              <i class="fas fa-bell text-amber-600 text-base shrink-0"></i>
+              <span>This candidate has already been notified to fill out the form. You can re-send the alert email if needed.</span>
+            </div>
+          </div>
+
+          <!-- Right Column: Email Customization & Live Styled HTML Email Preview Card -->
+          <div class="space-y-4 lg:sticky lg:top-0 mb-3">
+            <!-- Email Editor Box -->
+            <div class="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-4 shadow-2xs">
+              <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                <span class="flex items-center gap-2 text-xs font-black text-slate-900">
+                  <i class="fas fa-pen-to-square text-emerald-600"></i>
+                  <span>Customize Alert Email Message</span>
+                </span>
+                <span class="px-2.5 py-1 bg-white border border-slate-200 text-slate-600 rounded-lg text-[11px] font-bold shadow-2xs">
+                  To: {{ selectedCandidateForImport.user_email || selectedCandidateForImport.email || 'Candidate' }}
+                </span>
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Subject</label>
+                <input [(ngModel)]="emailSubject" type="text" class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all" />
+              </div>
+
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Message Body</label>
+                <textarea [(ngModel)]="emailBody" rows="6" class="w-full px-3.5 py-2.5 bg-white rounded-xl border border-slate-200 text-xs font-medium text-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/10 transition-all resize-y"></textarea>
+              </div>
+            </div>
+
+            <!-- Live Preview Card -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between px-1">
+                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <i class="fas fa-eye text-emerald-600"></i>
+                  <span>Live Candidate Email Preview</span>
+                </span>
+                <span class="text-[10px] font-bold text-slate-400">Updates live as you type</span>
+              </div>
+
+              <div class="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 p-4 text-center text-white">
+                  <h4 class="text-base font-black tracking-tight">{{ getSelectedJobCompanyName() }}</h4>
+                  <p class="text-[10px] font-semibold uppercase tracking-wider text-emerald-100 mt-0.5">Candidate Application Invitation</p>
+                </div>
+                <div class="p-5 bg-white space-y-4 text-xs text-slate-700 leading-relaxed min-h-[180px]">
+                  <div class="font-bold text-slate-900 pb-2 border-b border-slate-100 flex items-center justify-between">
+                    <span>Subject: {{ emailSubject }}</span>
+                  </div>
+                  <p class="whitespace-pre-line font-medium text-slate-800 leading-relaxed">{{ emailBody }}</p>
+                  <div class="pt-3 pb-1 text-center">
+                    <span class="inline-block px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-extrabold rounded-xl text-xs shadow-md cursor-pointer uppercase tracking-wider hover:opacity-95 transition-opacity">
+                      Complete Application Form &rarr;
+                    </span>
+                  </div>
+                </div>
+                <div class="p-3.5 bg-slate-50 text-center text-[10px] text-slate-500 border-t border-slate-200/80 font-medium flex items-center justify-center gap-1.5">
+                  <i class="fas fa-circle-check text-emerald-500 text-xs"></i>
+                  <span>Sent via {{ getSelectedJobCompanyName() }} Recruitment Platform &bull; Branded Candidate Portal Invitation</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tab Content 2: Direct Add Mode (2 Columns on Large Screens) -->
+        <div *ngIf="importMode === 'direct'" class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Left Column: Selection Controls -->
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Target Job Position *</label>
+              <app-custom-dropdown
+                [options]="jobPostings"
+                labelKey="job_title"
+                valueKey="id"
+                [(value)]="importJobId"
+                placeholder="Select Target Job..."
+                icon="fas fa-briefcase">
+              </app-custom-dropdown>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Initial Pipeline Stage *</label>
+              <app-custom-dropdown
+                [options]="stages"
+                [(value)]="importStage"
+                placeholder="Select hiring stage..."
+                icon="fas fa-layer-group">
+              </app-custom-dropdown>
+            </div>
+          </div>
+
+          <!-- Right Column: Direct Import Summary Card -->
+          <div class="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-4 shadow-2xs">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0">
+                {{ ((selectedCandidateForImport.full_name || selectedCandidateForImport.name) || 'C').charAt(0).toUpperCase() }}
+              </div>
+              <div class="min-w-0 flex-1">
+                <h4 class="text-sm font-black text-slate-900 truncate">{{ selectedCandidateForImport.full_name || selectedCandidateForImport.name }}</h4>
+                <p class="text-xs text-slate-500 truncate">{{ selectedCandidateForImport.user_email || selectedCandidateForImport.email || 'No email provided' }}</p>
+              </div>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200/60 space-y-2 text-xs">
+              <div class="flex justify-between items-center text-slate-600">
+                <span>Selected Stage:</span>
+                <span class="font-bold text-emerald-700 capitalize">{{ importStage || 'Applied' }}</span>
+              </div>
+            </div>
+
+            <div class="p-3 bg-emerald-50/60 border border-emerald-100 rounded-xl text-[11px] text-emerald-900 font-medium flex items-center gap-2">
+              <i class="fas fa-circle-info text-emerald-500 shrink-0"></i>
+              <span>The candidate will be moved directly into this stage without sending an invite form email.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Feedback Banner -->
+      <div *ngIf="importFeedback"
+           [class.bg-emerald-50]="importFeedback.type === 'success'"
+           [class.text-emerald-800]="importFeedback.type === 'success'"
+           [class.bg-rose-50]="importFeedback.type === 'error'"
+           [class.text-rose-800]="importFeedback.type === 'error'"
+           class="p-3.5 rounded-xl border text-xs font-bold flex items-center gap-2 shrink-0 pt-4">
+        <i class="fas" [ngClass]="importFeedback.type === 'success' ? 'fa-circle-check text-emerald-600' : 'fa-triangle-exclamation text-rose-600'"></i>
+        <span>{{ importFeedback.message }}</span>
+      </div>
+
+      <!-- Modal Action Buttons Footer -->
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 shrink-0">
+        <button (click)="closeImportModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer">Cancel</button>
+        <button (click)="executeAddCandidateToJob()" [disabled]="isImporting" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2 cursor-pointer">
+          <i class="fas" [ngClass]="isImporting ? 'fa-spinner fa-spin' : (importMode === 'alert' ? 'fa-paper-plane' : 'fa-check')"></i>
+          <span>{{ isImporting ? 'Processing...' : (importMode === 'alert' ? 'Send Alert & Add Candidate' : 'Directly Add Candidate') }}</span>
+        </button>
+    </div>
+  </div>
+
+  <div *ngIf="showRequirements" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <section role="dialog" aria-modal="true" aria-labelledby="poolRequirementsTitle" class="bg-white rounded-2xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+      <!-- Modal Header -->
+    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold">
+          <i class="fas fa-layer-group text-lg"></i>
+        </div>
+        <div>
+          <h2 id="poolRequirementsTitle" class="text-base font-bold text-slate-900">Pool requirements — {{ selectedConnectionName }}</h2>
+          <p class="text-xs text-slate-500 font-medium">These criteria belong to this workspace and apply to every source pool selected for analysis.</p>
+        </div>
+      </div>
+      <button (click)="showRequirements = false" class="text-slate-400 hover:text-slate-600 transition-colors p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer">
+        <i class="fas fa-xmark text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="space-y-4 py-4">
+      <!-- Requirements Text Area -->
+      <div>
+        <label for="poolRequirementsText" class="block text-xs font-bold text-slate-700 mb-1.5">Requirements</label>
+        <textarea 
+          id="poolRequirementsText" 
+          [(ngModel)]="requirementsText" 
+          rows="8" 
+          placeholder="Describe the skills, qualifications, or evaluation criteria..."
+          class="w-full p-3 rounded-xl border border-slate-200 text-xs font-medium focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-slate-800 bg-white shadow-inner resize-y">
+        </textarea>
+      </div>
+
+      <!-- Document Upload -->
+      <div>
+        <label for="poolRequirementsFile" class="block text-xs font-bold text-slate-700 mb-1.5">Add a document (PDF, DOCX, TXT; up to 10 MB)</label>
+        <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl p-4 text-center transition-all bg-slate-50/50">
+          <input 
+            id="poolRequirementsFile" 
+            type="file" 
+            accept=".pdf,.docx,.txt" 
+            (change)="onRequirementsFileSelected($event)" 
+            class="hidden" 
+            #fileInput />
+          <button 
+            type="button" 
+            (click)="fileInput.click()" 
+            class="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-100 transition-all shadow-2xs inline-flex items-center gap-2 cursor-pointer">
+            <i class="fas fa-cloud-arrow-up text-indigo-600"></i>
+            <span>Choose Document File</span>
+          </button>
+          <p *ngIf="!requirementsDocument?.filename" class="text-[11px] text-slate-400 font-medium mt-2">PDF, DOCX, or TXT format (max 10MB)</p>
+          <p *ngIf="requirementsDocument?.filename" class="text-xs text-slate-500 mt-2">Saved document: {{ requirementsDocument.filename }}</p>
+        </div>
+      </div>
+
+      <!-- Feedback -->
+      <p *ngIf="requirementsFeedback" role="status" class="text-sm">{{ requirementsFeedback }}</p>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+      <button (click)="showRequirements = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer">
+        Close
+      </button>
+      <button 
+        (click)="saveRequirements()" 
+        [disabled]="isSavingRequirements" 
+        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-indigo-500/20 flex items-center gap-2 cursor-pointer">
+        <i class="fas" [ngClass]="isSavingRequirements ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+        <span>{{ isSavingRequirements ? 'Saving...' : 'Save to pool' }}</span>
+      </button>
+    </div>
+  </section>
+</div>
+
+  <!-- Global Modals Integration -->
+  <app-candidate-details *ngIf="dataService.openCandidateDetails"></app-candidate-details>
+  <app-emails></app-emails>
+</div>

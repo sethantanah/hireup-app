@@ -6,11 +6,13 @@ import { CandidateService, CandidateProfile } from '../../../../services/candida
 import { ApplicantManagementService } from '../../../../services/applicant-management.service';
 import { JobpostManagerService } from '../../../../services/jobpost-manager.service';
 import { CustomDropdownComponent } from '../../../../components/custom-dropdown/custom-dropdown.component';
+import { DataService } from '../../../../services/data.service';
+import { EmailsComponent } from '../notifications/emails/emails.component';
 
 @Component({
   selector: 'app-talent-pool',
   standalone: true,
-  imports: [CommonModule, FormsModule, CustomDropdownComponent],
+  imports: [CommonModule, FormsModule, CustomDropdownComponent, EmailsComponent],
   templateUrl: './talent-pool.component.html',
   styleUrl: './talent-pool.component.scss'
 })
@@ -23,6 +25,26 @@ export class TalentPoolComponent implements OnInit, OnChanges {
   searchQuery: string = '';
   selectedSkill: string = '';
   poolSource: 'global' | 'org' | 'applied' | 'notified' = 'global';
+
+  minMatchScore: number = 70;
+  selectedMatchLevelLabel: string = '70%';
+
+  matchLevelOptions: string[] = [
+    '50%',
+    '60%',
+    '70%',
+    '80%',
+    '85%',
+    '90%',
+    '95%'
+  ];
+
+  onMatchLevelChange(val: string): void {
+    this.selectedMatchLevelLabel = val;
+    const parsed = parseInt((val || '').replace(/[^0-9]/g, ''), 10);
+    this.minMatchScore = isNaN(parsed) ? 70 : parsed;
+    this.onFilterChange();
+  }
 
   notifiedCandidateIds: Set<string> = new Set<string>();
   addedPipelineCandidateIds: Set<string> = new Set<string>();
@@ -46,38 +68,79 @@ export class TalentPoolComponent implements OnInit, OnChanges {
     this.selectedCandidateForDetails = null;
   }
 
-  isCandidateNotified(candidate: CandidateProfile | null): boolean {
+  isCandidateNotified(candidate: CandidateProfile | null, targetJobId?: string): boolean {
     if (!candidate) return false;
-    if (candidate.id && this.notifiedCandidateIds.has(candidate.id)) return true;
-    if (candidate.user_email && this.notifiedCandidateIds.has(candidate.user_email)) return true;
+    const activeJobId = targetJobId || this.importJobId || this.selectedJobId;
+    if (!activeJobId) return false;
+
+    const candId = candidate.id;
+    const candEmail = candidate.user_email || (candidate as any).email;
+    if (candId && this.notifiedCandidateIds.has(`${candId}_${activeJobId}`)) return true;
+    if (candEmail && this.notifiedCandidateIds.has(`${candEmail}_${activeJobId}`)) return true;
+
     const candAny = candidate as any;
-    if (candAny.notified || candAny.application_stage === 'Form Requested' || candAny.stage === 'Form Requested') return true;
+    const notifiedJobs: string[] = candAny.notified_jobpost_ids || [];
+    if (Array.isArray(notifiedJobs) && notifiedJobs.includes(activeJobId)) return true;
+
+    if (candAny.jobpost_id && String(candAny.jobpost_id) === String(activeJobId)) {
+      if (candAny.notified || candAny.application_stage === 'Form Requested' || candAny.stage === 'Form Requested') {
+        return true;
+      }
+    }
+
+    if (candAny.notified && candAny.jobpost_id === activeJobId) {
+      return true;
+    }
+
     return false;
   }
 
   getSelectedJobTitle(): string {
     const activeJobId = this.importJobId || this.selectedJobId;
     const job = this.availableJobPosts.find(j => j.id === activeJobId);
-    return job ? (job.job_title || job.title) : '';
+    return job ? ((job as any).job_title || job.title) : '';
   }
 
   feedback: { type: 'success' | 'error'; message: string } | null = null;
 
-  stages = [
-    'Application Review',
-    'Phone Screening',
-    'Technical Assessment',
-    'Interview',
-    'Final Decision',
-    'Offer Sent'
-  ];
+  get stages(): string[] {
+    const activeJobId = this.importJobId || this.selectedJobId;
+    if (activeJobId && this.availableJobPosts && this.availableJobPosts.length > 0) {
+      const job = this.availableJobPosts.find(j => j.id === activeJobId);
+      const configured = job?.template_data?.applicationStages || job?.application_stages;
+      if (Array.isArray(configured) && configured.length > 0) {
+        return configured
+          .filter((s: any) => s.is_active && !s.hide_stage)
+          .map((s: any) => s.name);
+      }
+    }
+    return this.jobPostService.defaultStages
+      .filter(s => s.is_active && !s.hide_stage)
+      .map(s => s.name);
+  }
 
   constructor(
     private candidateService: CandidateService,
     private applicantService: ApplicantManagementService,
     private jobPostService: JobpostManagerService,
+    private dataService: DataService,
     private route: ActivatedRoute
   ) {}
+
+  public emailCandidate(candidate: CandidateProfile | any): void {
+    if (candidate) {
+      this.openImportModal(candidate, 'alert');
+    }
+  }
+
+  public getInitials(name?: string | null | any): string {
+    if (!name || typeof name !== 'string') return 'TP';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].substring(0, 2).toUpperCase();
+  }
 
   ngOnInit(): void {
     this.initActiveJobSelection();
@@ -161,14 +224,25 @@ export class TalentPoolComponent implements OnInit, OnChanges {
     this.candidateService.browseTalentPool({
       query: this.searchQuery,
       skill: this.selectedSkill,
-      jobpost_id: this.selectedJobId,
+      jobpost_id: this.poolSource === 'org' ? this.selectedJobId : undefined,
       jobpost_ids: jobpostIdsParam,
-      source: this.poolSource
+      source: this.poolSource,
+      min_match_score: this.minMatchScore
     }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
         if (res.success && res.candidates) {
           let list: CandidateProfile[] = res.candidates;
+
+          if (this.minMatchScore > 0) {
+            list = list.filter(c => {
+              const score = (c as any).match_score !== undefined ? (c as any).match_score : (c as any).vector_score;
+              if (score !== undefined && score !== null) {
+                return score >= this.minMatchScore;
+              }
+              return true;
+            });
+          }
 
           for (const c of list) {
             const candAny = c as any;
@@ -232,15 +306,26 @@ export class TalentPoolComponent implements OnInit, OnChanges {
       query: this.searchQuery,
       skill: this.selectedSkill,
       jobpost_id: this.selectedJobId,
-      source: this.poolSource
+      source: this.poolSource,
+      min_match_score: this.minMatchScore
     }).subscribe({
       next: (res: any) => {
         this.isLoading = false;
         if (res.success && res.candidates) {
-          this.candidates = res.candidates;
+          let list: CandidateProfile[] = res.candidates;
+          if (this.minMatchScore > 0) {
+            list = list.filter(c => {
+              const score = (c as any).match_score !== undefined ? (c as any).match_score : (c as any).vector_score;
+              if (score !== undefined && score !== null) {
+                return score >= this.minMatchScore;
+              }
+              return true;
+            });
+          }
+          this.candidates = list;
           this.feedback = {
             type: 'success',
-            message: `Candidate Matching Completed! Ranked ${this.candidates.length} candidates for selected job post.`
+            message: `Candidate Matching Completed! Ranked ${this.candidates.length} candidates with ${this.minMatchScore}%+ match for selected job post.`
           };
         }
       },
@@ -329,7 +414,7 @@ export class TalentPoolComponent implements OnInit, OnChanges {
     if (!this.selectedCandidateForImport) return;
     const candidateName = this.selectedCandidateForImport.full_name || 'Candidate';
     const selectedJob = this.availableJobPosts.find(j => j.id === this.importJobId);
-    const jobTitle = selectedJob ? (selectedJob.job_title || selectedJob.title) : 'Position';
+    const jobTitle = selectedJob ? ((selectedJob as any).job_title || selectedJob.title) : 'Position';
     const companyName = this.getSelectedJobCompanyName();
     const companySlug = encodeURIComponent(companyName !== 'Organization' ? companyName : 'company');
     const applyUrl = `${window.location.origin}/apply/${companySlug}/${this.importJobId}/`;
@@ -367,8 +452,8 @@ export class TalentPoolComponent implements OnInit, OnChanges {
         if (candEmail) this.addedPipelineCandidateIds.add(candEmail);
 
         if (this.importMode === 'alert') {
-          if (candId) this.notifiedCandidateIds.add(candId);
-          if (candEmail) this.notifiedCandidateIds.add(candEmail);
+          if (candId && this.importJobId) this.notifiedCandidateIds.add(`${candId}_${this.importJobId}`);
+          if (candEmail && this.importJobId) this.notifiedCandidateIds.add(`${candEmail}_${this.importJobId}`);
 
           if (this.selectedCandidateForImport) {
             const notifiedCandObj: CandidateProfile = {

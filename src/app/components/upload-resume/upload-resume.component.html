@@ -87,8 +87,8 @@
               <p *ngFor="let line of field.info">{{ line }}</p>
             </div>
   
-            <!-- Text, Email, Tel, Date Fields -->
-            <div *ngIf="field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'date'">
+            <!-- Text, Number, Email, Tel, Date Fields -->
+            <div *ngIf="field.type === 'text' || field.type === 'number' || field.type === 'email' || field.type === 'tel' || field.type === 'date'">
               <input
                 [type]="field.type"
                 [(ngModel)]="formValues[field.key]"

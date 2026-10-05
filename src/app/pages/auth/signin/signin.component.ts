@@ -25,6 +25,7 @@ export class SigninComponent implements OnInit {
   showSuccessMessage = false;
 
   userRole: 'recruiter' | 'candidate' = 'recruiter';
+  returnUrl = '';
 
   alert: any = null;
 
@@ -57,6 +58,9 @@ export class SigninComponent implements OnInit {
         this.userRole = 'candidate';
       } else if (params['role'] === 'recruiter') {
         this.userRole = 'recruiter';
+      }
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
       }
     });
 
@@ -98,10 +102,12 @@ export class SigninComponent implements OnInit {
         localStorage.setItem('USER', JSON.stringify(res.user));
         this.isLoading = false;
 
-        if (this.userRole === 'candidate') {
+        if (this.returnUrl) {
+          this.router.navigateByUrl(this.returnUrl);
+        } else if (this.userRole === 'candidate') {
           this.router.navigate(['/candidate-portal']);
         } else {
-          this.router.navigate(['/jobposts/' + res.user.id]);
+          this.router.navigate(['/dashboard']);
         }
       },
       error: (err) => {

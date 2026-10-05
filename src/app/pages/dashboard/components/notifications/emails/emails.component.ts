@@ -102,52 +102,87 @@ export class EmailsComponent implements OnInit {
     private formatService: FormattingService,
     private alertService: AlertService
   ) {
-    this.applicationStage = this.route.snapshot.paramMap.get('stageId') || '';
+    this.resolveCurrentStage();
+  }
+
+  private resolveCurrentStage(): void {
+    const routeStage = this.route.snapshot.paramMap.get('stageId') || this.route.snapshot.queryParams['stage'] || this.route.snapshot.queryParams['stageId'];
+    if (routeStage) {
+      this.applicationStage = routeStage;
+    } else if ((this.dataService.candidate as any)?.stage) {
+      this.applicationStage = (this.dataService.candidate as any).stage;
+    } else {
+      this.applicationStage = 'stage_application_review';
+    }
   }
 
   ngOnInit(): void {
     this.formattingGuide.variables = [];
-
-    if (this.applicationData?.emailTemplates) {
-      const emailTemps = this.applicationData.emailTemplates.filter(
-        (f) => f.stageId === this.applicationStage
-      );
-
-      if (emailTemps.length > 0) {
-        this.emailTemplates = emailTemps;
-        this.emailTemplate = emailTemps[0];
-        const f = this.emailTemplate.for;
-        this.activeTab =
-          f === 'shortlisted' || f === 'unshortlisted' || f === 'other'
-            ? f
-            : 'shortlisted';
-
-        if (this.emailTemplate.placeholders) {
-          this.emailTemplate.placeholders.forEach((variable) => {
-            this.formattingGuide.variables.push({
-              syntax: `{{${variable}}}`,
-              description: `Inserts ${variable.replace("_", " ")}`,
-            });
-          });
-        }
-      }
-    }
-
-
-    // Set All Templates
-    if (this.applicationData?.emailTemplates) {
-      const emailTemps = this.applicationData.emailTemplates.filter(
-        (f) => f.stageId !== this.applicationStage
-      );
-
-      if (emailTemps.length > 0) {
-        this.otherEmailTemplates = emailTemps;
-      }
-    }
+    this.loadStageTemplates();
 
     this.alertService.alert$.subscribe((alert) => {
       this.alert = alert;
     });
+  }
+
+  loadStageTemplates(): void {
+    this.resolveCurrentStage();
+    const appData = this.applicationData || this.jobPostService.getApplicationData();
+    let currentTemps: EmailTemplate[] = [];
+
+    if (appData?.emailTemplates) {
+      currentTemps = appData.emailTemplates.filter(
+        (f) => f.stageId === this.applicationStage || f.stageId?.toLowerCase() === this.applicationStage.toLowerCase()
+      );
+    }
+
+    if (!currentTemps || currentTemps.length === 0) {
+      const stageNameFormatted = this.applicationStage.replace('stage_', '').replaceAll('_', ' ');
+      currentTemps = [
+        {
+          id: `temp_${this.applicationStage}_shortlisted`,
+          name: `Shortlisted Invitation Template`,
+          subject: `Congratulations! Next Steps for your Application`,
+          body: `Dear {{candidateName}},\n\nWe are pleased to inform you that your application for {{position}} at {{company}} has been shortlisted for the ${stageNameFormatted} stage.\n\nWe will contact you shortly with further instructions.\n\nBest regards,\nRecruitment Team`,
+          type: 'auto',
+          placeholders: ['candidateName', 'position', 'company'],
+          stageId: this.applicationStage,
+          for: 'shortlisted'
+        },
+        {
+          id: `temp_${this.applicationStage}_unshortlisted`,
+          name: `Unshortlisted Update Template`,
+          subject: `Application Update regarding your submission`,
+          body: `Dear {{candidateName}},\n\nThank you for applying for {{position}} at {{company}}.\n\nAfter careful review during the ${stageNameFormatted} stage, we have decided to move forward with other candidates.\n\nWe wish you all the best in your career search.\n\nBest regards,\nRecruitment Team`,
+          type: 'auto',
+          placeholders: ['candidateName', 'position', 'company'],
+          stageId: this.applicationStage,
+          for: 'unshortlisted'
+        },
+        {
+          id: `temp_${this.applicationStage}_other`,
+          name: `General Stage Notification`,
+          subject: `Update on your application status`,
+          body: `Dear {{candidateName}},\n\nThis is an update regarding your application for {{position}} at {{company}} in the ${stageNameFormatted} stage.\n\nBest regards,\nRecruitment Team`,
+          type: 'auto',
+          placeholders: ['candidateName', 'position', 'company'],
+          stageId: this.applicationStage,
+          for: 'other'
+        }
+      ];
+    }
+
+    this.emailTemplates = currentTemps;
+    
+    const matchTabTemp = this.emailTemplates.find(t => t.for === this.activeTab) || this.emailTemplates[0];
+    this.emailTemplate = matchTabTemp;
+    this.emailTemplate.for = this.activeTab;
+
+    if (appData?.emailTemplates) {
+      this.otherEmailTemplates = appData.emailTemplates.filter(
+        (f) => f.stageId !== this.applicationStage
+      );
+    }
   }
 
   switchView(view: 'general' | 'personalized') {
@@ -155,32 +190,39 @@ export class EmailsComponent implements OnInit {
   }
 
   setTemplate(template: EmailTemplate) {
-    this.emailTemplate = template;
+    this.emailTemplate = { ...template };
     const f = template.for;
     this.activeTab =
       f === 'shortlisted' || f === 'unshortlisted' || f === 'other'
         ? f
         : 'other';
+    this.emailTemplate.for = this.activeTab;
   }
 
   switchTemplate(activeTab: 'shortlisted' | 'unshortlisted' | 'other') {
     this.activeTab = activeTab;
+    let found = false;
     for (let i = 0; i < this.emailTemplates.length; i++) {
       const eTemp = this.emailTemplates[i];
-      if (eTemp.for === activeTab && eTemp.stageId === this.applicationStage) {
+      if (eTemp.for === activeTab) {
         this.emailTemplate = eTemp;
-
-        if (this.emailTemplate.placeholders) {
-          this.emailTemplate.placeholders.forEach((variable) => {
-            this.formattingGuide.variables.push({
-              syntax: `{{${variable}}}`,
-              description: `Inserts ${variable.replace("_", " ")}`,
-            });
-          });
-        }
+        found = true;
         break;
       }
     }
+    if (!found) {
+      this.emailTemplate = {
+        id: `temp_${this.applicationStage}_${activeTab}`,
+        name: `${activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Communication Template`,
+        subject: activeTab === 'shortlisted' ? 'Next Steps for your Application' : activeTab === 'unshortlisted' ? 'Application Status Update' : 'Candidate Notice',
+        body: `Dear {{candidateName}},\n\nUpdate regarding your application for {{position}} at {{company}}.\n\nBest regards,\nRecruitment Team`,
+        type: 'auto',
+        placeholders: ['candidateName', 'position', 'company'],
+        stageId: this.applicationStage,
+        for: activeTab
+      };
+    }
+    this.emailTemplate.for = activeTab;
   }
 
   saveTemplate(type: 'shortlisted' | 'unshortlisted' | 'other') {

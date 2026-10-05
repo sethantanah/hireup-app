@@ -96,6 +96,59 @@ export class JobtestApiService {
     return this.http.delete(apiUrl, { headers });
   }
 
+  notifyCandidates(payload: {
+    test_id?: string;
+    jobpost_id?: string;
+    stage_name?: string;
+    candidate_emails: string[] | string;
+    custom_message?: string;
+  }): Observable<any> {
+    const apiUrl = environment.apiUrl + '/jobtests/notify-candidates';
+    let headers = new HttpHeaders({
+      accept: 'application/json',
+    });
+    const token = localStorage.getItem('token');
+    if (token && token !== 'null' && token !== 'undefined') {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+
+    const cleanPayload = {
+      test_id: payload.test_id || null,
+      jobpost_id: payload.jobpost_id || null,
+      stage_name: payload.stage_name || 'Shortlisted Candidates',
+      candidate_emails: Array.isArray(payload.candidate_emails) ? payload.candidate_emails : (payload.candidate_emails || '').split(/[\n,;]+/).map(e => e.trim()).filter(e => e.length > 0),
+      custom_message: payload.custom_message || null
+    };
+
+    return this.http.post(apiUrl, cleanPayload, { headers });
+  }
+
+  syncScoreAndStage(payload: {
+    applicant_id: string;
+    applicant_email: string;
+    test_score: number;
+    target_stage?: string;
+    jobpost_id?: string;
+  }): Observable<any> {
+    const apiUrl = environment.apiUrl + '/jobtests/sync-score-and-stage';
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.post(apiUrl, payload, { headers });
+  }
+
+  resetTestStatus(emails: string[], reset_reason?: string): Observable<any> {
+    const apiUrl = environment.apiUrl + '/jobtests/reset-status';
+    const headers = new HttpHeaders({
+      accept: 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
+    });
+
+    return this.http.post(apiUrl, { emails, reset_reason }, { headers });
+  }
+
   getTest(): TestData | null {
     return this.test;
   }

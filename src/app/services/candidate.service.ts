@@ -19,6 +19,7 @@ export interface CandidateProfile {
   resume_data?: any;
   raw_text?: string;
   resume_url?: string;
+  avatar_url?: string;
   email_notifications_enabled?: boolean;
   notification_match_threshold?: number;
   preferred_job_types?: string[];
@@ -155,13 +156,20 @@ export class CandidateService {
     });
   }
 
-  browseTalentPool(filters?: { query?: string; skill?: string; jobpost_id?: string; jobpost_ids?: string; source?: string }): Observable<any> {
+  getCandidateById(candidateId: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/candidates/detail/${candidateId}`, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  browseTalentPool(filters?: { query?: string; skill?: string; jobpost_id?: string; jobpost_ids?: string; source?: string; min_match_score?: number }): Observable<any> {
     let params = new HttpParams();
     if (filters?.query) params = params.set('query', filters.query);
     if (filters?.skill) params = params.set('skill', filters.skill);
     if (filters?.jobpost_id) params = params.set('jobpost_id', filters.jobpost_id);
     if (filters?.jobpost_ids) params = params.set('jobpost_ids', filters.jobpost_ids);
     if (filters?.source) params = params.set('source', filters.source);
+    if (filters?.min_match_score !== undefined && filters?.min_match_score !== null) params = params.set('min_match_score', filters.min_match_score.toString());
 
     return this.http.get(`${environment.apiUrl}/candidates/talent-pool`, {
       headers: this.getAuthHeaders(),
@@ -175,6 +183,63 @@ export class CandidateService {
       jobpost_id: jobpostId,
       stage
     }, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getMyOffers(email?: string, candidateId?: string): Observable<any> {
+    let params = new HttpParams();
+    if (email) params = params.set('candidate_email', email);
+    if (candidateId) params = params.set('candidate_id', candidateId);
+
+    return this.http.get(`${environment.apiUrl}/talent/offers`, {
+      headers: this.getAuthHeaders(),
+      params
+    });
+  }
+
+  respondToOffer(offerId: string, payload: { status: string; candidate_email: string; notes?: string; signature_data?: string }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/talent/offers/${offerId}/respond`, payload, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  contactCompany(payload: { offer_id: string; candidate_email: string; candidate_name: string; subject: string; message: string }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/talent/offers/contact-company`, payload, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
+  getOfferByToken(token: string): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/talent/offers/view/${token}`);
+  }
+
+  signOffer(payload: { offer_id: string; signature_data: string; ip_address?: string }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/talent/offers/sign`, payload);
+  }
+
+  uploadCandidateAvatar(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.http.post(`${environment.apiUrl}/candidates/upload-avatar`, formData, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+      })
+    });
+  }
+
+  uploadUserAvatar(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.http.post(`${environment.apiUrl}/auth/upload-avatar`, formData, {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`
+      })
+    });
+  }
+
+  updateUserProfile(payload: { full_name?: string; company_name?: string; position_in_company?: string; avatar_url?: string; logo_url?: string }): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/auth/user/profile`, payload, {
       headers: this.getAuthHeaders()
     });
   }

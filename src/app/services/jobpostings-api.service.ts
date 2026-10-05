@@ -17,6 +17,7 @@ export interface JobPosting {
 export interface JobPostingCreateUpdateRequest {
   id?: string;
   title: string;
+  organization_id?: string;
 }
 
 export interface JobPostingCreateUpdateResponse {
@@ -68,12 +69,29 @@ export class JobpostingsApiService {
    * @param userId - The user ID to fetch job postings for
    * @returns Observable array of job postings
    */
-  getJobPostings(userId: string): Observable<JobPosting[]> {
+  getJobPostings(userId: string, organizationId?: string): Observable<JobPosting[]> {
     if (!userId) {
       return throwError(() => new Error('User ID is required'));
     }
 
-    const params = new HttpParams().set('user_id', userId);
+    if (!organizationId) {
+      try {
+        const activeOrgStr = localStorage.getItem('current_organization') || localStorage.getItem('ACTIVE_ORG');
+        if (activeOrgStr) {
+          const activeOrg = JSON.parse(activeOrgStr);
+          if (activeOrg && activeOrg.id) {
+            organizationId = activeOrg.id;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse active org', e);
+      }
+    }
+
+    let params = new HttpParams().set('user_id', userId);
+    if (organizationId) {
+      params = params.set('organization_id', organizationId);
+    }
     const headers = this.createHeaders();
 
     return this.http.get<JobPosting[]>(`${this.baseUrl}/`, { headers, params })
@@ -90,7 +108,7 @@ export class JobpostingsApiService {
    */
   createUpdateJobPost(
     userId: string, 
-    jobPostData: Partial<JobPost>
+    jobPostData: any
   ): Observable<JobPostingCreateUpdateResponse> {
     if (!userId) {
       return throwError(() => new Error('User ID is required'));
@@ -98,6 +116,18 @@ export class JobpostingsApiService {
 
     if (!jobPostData?.title?.trim()) {
       return throwError(() => new Error('Job post title is required'));
+    }
+
+    if (!jobPostData.organization_id) {
+      try {
+        const activeOrgStr = localStorage.getItem('current_organization') || localStorage.getItem('ACTIVE_ORG');
+        if (activeOrgStr) {
+          const activeOrg = JSON.parse(activeOrgStr);
+          if (activeOrg && activeOrg.id) {
+            jobPostData.organization_id = activeOrg.id;
+          }
+        }
+      } catch (e) {}
     }
 
     const params = new HttpParams().set('user_id', userId);
@@ -128,6 +158,46 @@ export class JobpostingsApiService {
       `${this.baseUrl}/${jobPostId}`, 
       { headers }
     ).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Get deletion impact analysis (resume count, file count, vector chunk count)
+   */
+  getDeletionImpact(jobPostId: string): Observable<any> {
+    const headers = this.createHeaders();
+    return this.http.get<any>(`${this.baseUrl}/${jobPostId}/deletion-impact`, { headers }).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Archive / Soft Delete a job posting
+   */
+  archiveJobPosting(jobPostId: string): Observable<any> {
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${this.baseUrl}/${jobPostId}/archive`, {}, { headers }).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Restore an archived job posting
+   */
+  restoreJobPosting(jobPostId: string): Observable<any> {
+    const headers = this.createHeaders();
+    return this.http.post<any>(`${this.baseUrl}/${jobPostId}/restore`, {}, { headers }).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * GDPR Right to be Forgotten: Scrub candidate profile, resumes, files & vector DB
+   */
+  scrubCandidate(candidateId: string): Observable<any> {
+    const headers = this.createHeaders();
+    return this.http.delete<any>(`${environment.apiUrl}/applicants/scrub/${candidateId}`, { headers }).pipe(
       catchError(this.handleError.bind(this))
     );
   }
@@ -166,6 +236,91 @@ export class JobpostingsApiService {
 
     return this.http.get<any>(
       `${this.baseUrl}/${jobPostId}/data`, 
+      { headers }
+    ).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Schedule an interview with a candidate
+   */
+  scheduleInterview(interviewData: {
+    jobpost_id: string;
+    job_title?: string;
+    candidate_id?: string;
+    candidate_email: string;
+    candidate_name: string;
+    interview_type: string;
+    interview_date: string;
+    interview_time: string;
+    duration_minutes?: number;
+    meeting_link?: string;
+    location?: string;
+    interviewers?: string[];
+    notes?: string;
+  }): Observable<any> {
+    const headers = this.createHeaders();
+    return this.http.post<any>(
+      `${environment.apiUrl}/scorecards/interviews/schedule`,
+      interviewData,
+      { headers }
+    ).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Get scheduled interviews for a job post
+   */
+  getInterviewsByJob(jobpostId: string): Observable<any> {
+    const headers = this.createHeaders();
+    const params = new HttpParams().set('jobpost_id', jobpostId);
+    return this.http.get<any>(
+      `${environment.apiUrl}/scorecards/interviews/by-job`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Get scheduled interviews for candidate email
+   */
+  getMyInterviews(email?: string): Observable<any> {
+    const headers = this.createHeaders();
+    let params = new HttpParams();
+    if (email) {
+      params = params.set('email', email);
+    }
+    return this.http.get<any>(
+      `${environment.apiUrl}/scorecards/interviews/my-interviews`,
+      { headers, params }
+    ).pipe(
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+  /**
+   * Upload or update job post requirements text or document file (PDF, DOCX, TXT)
+   */
+  updateJobRequirements(jobPostId: string, requirementsText?: string, file?: File): Observable<any> {
+    const formData = new FormData();
+    if (requirementsText) {
+      formData.append('requirements_text', requirementsText);
+    }
+    if (file) {
+      formData.append('file', file, file.name);
+    }
+
+    const token = this.getToken();
+    const headers = new HttpHeaders({
+      ...(token && { 'Authorization': `Bearer ${token}` })
+    });
+
+    return this.http.post<any>(
+      `${this.baseUrl}/${jobPostId}/requirements`,
+      formData,
       { headers }
     ).pipe(
       catchError(this.handleError.bind(this))
@@ -220,7 +375,9 @@ export class JobpostingsApiService {
    */
   private getToken(): string | null {
     try {
-      return localStorage.getItem('token');
+      return localStorage.getItem('token') || 
+             localStorage.getItem('access_token') || 
+             localStorage.getItem('auth_token');
     } catch (error) {
       console.error('Error accessing localStorage:', error);
       return null;
@@ -308,9 +465,10 @@ export class JobPostingService {
    * @param title - Job post title
    * @returns Observable with created job post
    */
-  createJobPosting(userId: string, title: string): Observable<JobPostingCreateUpdateResponse> {
+  createJobPosting(userId: string, title: string, organizationId?: string): Observable<JobPostingCreateUpdateResponse> {
     const jobPostData: JobPostingCreateUpdateRequest = {
-      title: title.trim()
+      title: title.trim(),
+      organization_id: organizationId
     };
 
     return this.apiService.createUpdateJobPost(userId, jobPostData);
@@ -326,11 +484,13 @@ export class JobPostingService {
   updateJobPosting(
     userId: string, 
     jobPostId: string, 
-    title: string
+    title: string,
+    organizationId?: string
   ): Observable<JobPostingCreateUpdateResponse> {
     const jobPostData: JobPostingCreateUpdateRequest = {
       id: jobPostId,
-      title: title.trim()
+      title: title.trim(),
+      organization_id: organizationId
     };
 
     return this.apiService.createUpdateJobPost(userId, jobPostData);
@@ -341,8 +501,8 @@ export class JobPostingService {
    * @param userId - User ID
    * @returns Observable with processed job postings
    */
-  getUserJobPostings(userId: string): Observable<JobPosting[]> {
-    return this.apiService.getJobPostings(userId).pipe(
+  getUserJobPostings(userId: string, organizationId?: string): Observable<JobPosting[]> {
+    return this.apiService.getJobPostings(userId, organizationId).pipe(
       map(jobPostings => jobPostings.map(jp => ({
         ...jp,
         // Add any additional processing here

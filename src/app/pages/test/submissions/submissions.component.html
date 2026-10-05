@@ -38,7 +38,27 @@
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+          <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200/80 min-w-[240px]">
+            <span class="text-[11px] font-bold text-slate-500 pl-2 whitespace-nowrap">Target Stage:</span>
+            <app-custom-dropdown
+              class="flex-1 min-w-[160px]"
+              [options]="stageOptions"
+              [labelKey]="'label'"
+              [valueKey]="'value'"
+              [(value)]="targetStage"
+              [placeholder]="'Select Stage'"
+              [icon]="'fas fa-layer-group'"
+            ></app-custom-dropdown>
+          </div>
+
+          <button (click)="advancePassedCandidates()"
+                  [disabled]="isAdvancing || passedCount === 0"
+                  class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-emerald-500/20 transition-all flex items-center gap-2">
+            <i class="fas" [ngClass]="isAdvancing ? 'fa-spinner fa-spin' : 'fa-arrow-right-to-bracket'"></i>
+            <span>Advance Passed ({{ passedCount }})</span>
+          </button>
+
           <button (click)="openPassMarkModal()"
                   class="px-4 py-2.5 bg-amber-50 hover:bg-amber-100/80 text-amber-800 border border-amber-200/80 rounded-2xl font-bold text-xs transition-all flex items-center gap-2 shadow-xs">
             <i class="fas fa-sliders-h text-amber-600"></i>
@@ -137,26 +157,47 @@
           </div>
 
           <div class="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
-            <span class="text-slate-500 font-medium">Evaluation Result</span>
-            <span class="font-bold" [ngClass]="app.test_score >= passMark ? 'text-emerald-600' : 'text-rose-500'">
-              {{ app.test_score >= passMark ? 'PASSED' : 'REQUIRES REVIEW' }}
-            </span>
+            <span class="text-slate-500 font-medium">Evaluation & Pipeline Status</span>
+            <div class="flex items-center gap-2">
+              <span *ngIf="isCandidateAdvanced(app)" class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase flex items-center gap-1">
+                <i class="fas fa-check"></i> Advanced
+              </span>
+              <span class="font-bold" [ngClass]="app.test_score >= passMark ? 'text-emerald-600' : 'text-rose-500'">
+                {{ app.test_score >= passMark ? 'PASSED' : 'REQUIRES REVIEW' }}
+              </span>
+            </div>
           </div>
         </div>
 
         <!-- Footer Actions -->
-        <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex items-center justify-between gap-3">
+        <div class="p-6 border-t border-slate-100 bg-slate-50/30 flex items-center justify-between gap-2">
           <button (click)="openResponsesModal(app)"
-                  class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200/80 text-slate-800 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-2 border border-slate-200">
+                  class="flex-1 py-2 bg-slate-100 hover:bg-slate-200/80 text-slate-800 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-slate-200">
             <i class="fas fa-clipboard-list text-indigo-600"></i>
-            <span>View Responses</span>
+            <span>Responses</span>
+          </button>
+
+          <button (click)="syncScoreToProfile(app)"
+                  title="Sync score to profile & advance stage"
+                  class="flex-1 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 border border-indigo-200">
+            <i class="fas fa-sync-alt text-indigo-600"></i>
+            <span>Sync Score</span>
+          </button>
+
+          <button (click)="allowRetake(app)"
+                  [title]="isRetakeGranted(app) ? 'Retake Granted' : 'Allow candidate to retake test'"
+                  [disabled]="isGrantingRetake"
+                  [ngClass]="isRetakeGranted(app) ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'"
+                  class="flex-1 py-2 rounded-2xl font-bold text-xs transition-all flex items-center justify-center gap-1.5 border">
+            <i class="fas" [ngClass]="isRetakeGranted(app) ? 'fa-check-double text-emerald-600' : 'fa-redo text-amber-600'"></i>
+            <span>{{ isRetakeGranted(app) ? 'Retake Granted' : 'Allow Retake' }}</span>
           </button>
 
           <button (click)="toggleShortlist(app)"
                   [title]="isShortlisted(app) ? 'Unselect Candidate' : 'Select Candidate'"
                   [ngClass]="isShortlisted(app) ? 'bg-amber-100 text-amber-700 border-amber-300' : 'bg-slate-100 text-slate-400 hover:text-amber-500 border-slate-200'"
-                  class="w-10 h-10 rounded-2xl border flex items-center justify-center transition-colors">
-            <i class="fas fa-star text-sm"></i>
+                  class="w-9 h-9 rounded-2xl border flex items-center justify-center transition-colors flex-shrink-0">
+            <i class="fas fa-star text-xs"></i>
           </button>
         </div>
       </div>
@@ -218,7 +259,15 @@
       </div>
     </div>
 
-    <div class="p-6 border-t border-slate-100 flex justify-end bg-slate-50/50">
+    <div class="p-6 border-t border-slate-100 flex items-center justify-between bg-slate-50/50">
+      <button *ngIf="selectedApplicant"
+              (click)="allowRetake(selectedApplicant)"
+              [disabled]="isGrantingRetake"
+              [ngClass]="isRetakeGranted(selectedApplicant) ? 'bg-emerald-50 text-emerald-700 border-emerald-300' : 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'"
+              class="px-5 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 border">
+        <i class="fas" [ngClass]="isRetakeGranted(selectedApplicant) ? 'fa-check-double text-emerald-600' : 'fa-redo text-amber-600'"></i>
+        <span>{{ isRetakeGranted(selectedApplicant) ? 'Retake Access Granted' : 'Allow Retake Test' }}</span>
+      </button>
       <button (click)="closeResponsesModal()" class="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition-all">
         Close Inspector
       </button>
@@ -317,5 +366,30 @@
   [showModal]="showEmailSender"
   [shortlistedEmails]="getShortlistedEmails()"
   [notShortlistedEmails]="getNotShortlistedEmails()"
+  [testId]="testId"
+  [stageName]="targetStage"
   (closeModal)="showEmailSender = !showEmailSender"
 ></app-sendmail>
+
+<!-- Modal: Advance Stage Success Dialog -->
+<div *ngIf="showAdvanceSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-md">
+  <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 max-w-md w-full p-6 sm:p-8 text-center space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="w-16 h-16 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl font-black mx-auto border border-emerald-100 shadow-xs">
+      <i class="fas fa-check-circle"></i>
+    </div>
+
+    <div class="space-y-2">
+      <h3 class="text-xl font-black text-slate-900">Candidates Advanced!</h3>
+      <p class="text-xs text-slate-500 font-medium leading-relaxed">
+        Updated <strong>{{ advancedCountResult }}</strong> candidate(s) score cards and successfully advanced them to the <strong>"{{ targetStage }}"</strong> stage in the recruitment cycle.
+      </p>
+    </div>
+
+    <div class="pt-2">
+      <button (click)="showAdvanceSuccessModal = false"
+              class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-emerald-500/20 transition-all">
+        Done
+      </button>
+    </div>
+  </div>
+</div>

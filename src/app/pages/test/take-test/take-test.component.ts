@@ -29,8 +29,7 @@ import { TestSyncService } from '../../../services/test-sync.service';
     FormsModule,
     PreventCopyPasteDirective,
     PreventScreenShotDirective,
-    CrosswordBuilderComponent,
-    CrosswordPuzzleComponent
+    CrosswordBuilderComponent
   ],
   templateUrl: './take-test.component.html',
   styleUrl: './take-test.component.scss',
@@ -74,6 +73,7 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   }
 
   testData: TestData | undefined;
+  isPreview: boolean = false;
   currentView: 'instructions' | 'form' | 'thankyou' = 'instructions';
   showPopup = false;
   showViolationPopup = false;
@@ -457,6 +457,11 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
   }
 
   private initializeTest(): void {
+    const isPreviewParam = this.route.snapshot.queryParamMap.get('preview');
+    if (isPreviewParam === 'true') {
+      this.isPreview = true;
+    }
+
     if (this.testId) {
       this.loading = true;
       this.testService.jobTest(this.testId).pipe(
@@ -473,7 +478,21 @@ export class TakeTestComponent implements CanComponentDeactivate, OnInit, OnDest
                 answer: '',
               }));
               this.loading = false;
-              this.checkForResumePossibility();
+
+              if (this.isPreview) {
+                this.showPopup = false;
+                this.currentView = 'form';
+                sessionStorage.setItem(this.CREDENTIALS_KEY, JSON.stringify({
+                  applicant_id: 'preview_creator_id',
+                  name: 'Test Creator (Preview Mode)',
+                  email: 'creator@preview.internal',
+                  timestamp: Date.now()
+                }));
+                // Enable section timer and proctoring tracking in preview mode
+                this.beginSection(0);
+              } else {
+                this.checkForResumePossibility();
+              }
             }
           } catch (error) {
             console.error('Error processing test data:', error);

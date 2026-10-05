@@ -1,0 +1,568 @@
+<div class="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col lg:flex-row font-sans">
+  <!-- Toast Notification -->
+  <div *ngIf="showPopup" 
+    class="fixed top-5 right-5 z-50 transition-all duration-300 transform shadow-2xl rounded-2xl p-4 min-w-[360px] max-w-lg flex items-center gap-3.5 border backdrop-blur-md"
+    [ngClass]="{
+      'bg-emerald-50/95 border-emerald-300 text-emerald-950': popupType === 'success',
+      'bg-rose-50/95 border-rose-300 text-rose-950': popupType === 'error',
+      'bg-amber-50/95 border-amber-300 text-amber-950': popupType === 'warning',
+      'bg-sky-50/95 border-sky-300 text-sky-950': popupType === 'info'
+    }">
+    <div class="flex-shrink-0 text-xl">
+      <i class="fas" [ngClass]="{
+        'fa-check-circle text-emerald-600': popupType === 'success',
+        'fa-exclamation-circle text-rose-600': popupType === 'error',
+        'fa-exclamation-triangle text-amber-600': popupType === 'warning',
+        'fa-info-circle text-sky-600': popupType === 'info'
+      }"></i>
+    </div>
+    <div class="flex-grow min-w-0">
+      <p class="text-xs font-bold leading-relaxed break-words">{{ popupMessage }}</p>
+    </div>
+    <button (click)="showPopup = false" class="text-slate-400 hover:text-slate-600 text-sm p-1 rounded-lg">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Left Sidebar (Focused strictly on Document & Email Migration Engine) -->
+  <div [ngClass]="sidebarOpen ? 'flex' : 'hidden lg:flex'"
+    class="h-screen w-full lg:w-64 bg-card text-foreground flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 border-r border-border transition-all duration-300">
+    
+    <!-- Workspace Brand Header -->
+    <div class="p-4 border-b border-border flex flex-col gap-3 flex-shrink-0 bg-muted/20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <button class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:bg-muted transition-all" (click)="toggleSidebar()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div class="w-8 h-8 bg-gradient-to-br from-indigo-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-md text-white font-black text-sm">
+            <i class="fas fa-cloud-download-alt text-xs"></i>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-foreground leading-none">HireUp</h2>
+            <span class="text-[10px] font-medium text-indigo-600 font-bold">Migration Hub</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Migration Subsystem Title -->
+    <div class="p-3 border-b border-border bg-card flex-shrink-0 space-y-1">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
+          <i class="fas fa-file-import text-xs"></i>
+        </div>
+        <div>
+          <h3 class="text-xs font-bold text-slate-800 leading-none">Document Ingestion</h3>
+          <span class="text-[9px] font-semibold text-slate-400">CV & Resume Ingestion Engine</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dedicated Ingestion Navigation -->
+    <div class="flex-1 min-h-0 overflow-y-auto p-3 space-y-1 bg-slate-50/30">
+      <div class="pb-1 pt-1">
+        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Import Channels</span>
+      </div>
+
+      <!-- Tab Buttons in Sidebar -->
+      <button 
+        (click)="setActiveTab('upload')" 
+        [ngClass]="activeTab === 'upload' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-white hover:text-indigo-700 font-semibold'"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs text-left">
+        <i class="fas fa-folder-open text-xs w-4" [ngClass]="activeTab === 'upload' ? 'text-white' : 'text-indigo-500'"></i>
+        <span>Bulk File Upload</span>
+      </button>
+
+      <button 
+        (click)="setActiveTab('gmail')" 
+        [ngClass]="activeTab === 'gmail' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-white hover:text-indigo-700 font-semibold'"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs text-left">
+        <i class="fab fa-google text-xs w-4" [ngClass]="activeTab === 'gmail' ? 'text-white' : 'text-red-500'"></i>
+        <span>Gmail Ingestion</span>
+      </button>
+
+      <button 
+        (click)="setActiveTab('outlook')" 
+        [ngClass]="activeTab === 'outlook' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-white hover:text-indigo-700 font-semibold'"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs text-left">
+        <i class="fab fa-microsoft text-xs w-4" [ngClass]="activeTab === 'outlook' ? 'text-white' : 'text-sky-500'"></i>
+        <span>Outlook Ingestion</span>
+      </button>
+
+      <button 
+        (click)="setActiveTab('scheduler')" 
+        [ngClass]="activeTab === 'scheduler' ? 'bg-indigo-600 text-white font-bold shadow-xs' : 'text-slate-700 hover:bg-white hover:text-indigo-700 font-semibold'"
+        class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl transition-all text-xs text-left">
+        <i class="fas fa-clock text-xs w-4" [ngClass]="activeTab === 'scheduler' ? 'text-white' : 'text-amber-500'"></i>
+        <span>Background Inbox Sync</span>
+      </button>
+
+      <div class="pt-4 pb-1">
+        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Integrations & Data</span>
+      </div>
+
+      <a routerLink="/organization-settings" [queryParams]="{ tab: 'api_connections' }" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-white hover:text-sky-700 transition-all text-xs font-semibold">
+        <svg class="w-4 h-4 text-sky-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span>API Connection Data Pool</span>
+      </a>
+
+      <div class="pt-4 pb-1">
+        <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Navigation</span>
+      </div>
+
+      <a routerLink="/dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+        <i class="fas fa-arrow-left text-slate-400 text-xs w-4"></i>
+        <span>Return to Dashboard</span>
+      </a>
+    </div>
+
+    <!-- Sidebar User Footer -->
+    <div class="p-3 border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="relative flex-shrink-0">
+            <ng-container *ngIf="userData.logo_url; else initTpl">
+              <img [src]="userData.logo_url" alt="Profile" class="w-8 h-8 rounded-xl object-cover border border-slate-200 shadow-2xs" />
+            </ng-container>
+            <ng-template #initTpl>
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-2xs">
+                <span class="text-[11px] font-bold text-white">{{ getInitials(userData.full_name || userData.name || '') }}</span>
+              </div>
+            </ng-template>
+            <div class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-white"></div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-slate-900 truncate">{{ userData.full_name || userData.name }}</p>
+            <p class="text-[10px] text-slate-500 font-medium truncate">{{ userData.position_in_company || userData.email }}</p>
+          </div>
+        </div>
+        <button (click)="logOut()" class="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors" title="Logout">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden" (click)="toggleSidebar()"></div>
+
+  <!-- Main View Area -->
+  <div class="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-slate-50/50">
+    <!-- Header -->
+    <header class="sticky top-0 z-30 w-full border-b border-border bg-card shadow-sm flex flex-row justify-between items-center gap-3 p-4 min-h-14">
+      <div class="flex items-center gap-3 min-w-0">
+        <button class="lg:hidden p-2 rounded-md border border-border bg-muted/50 text-foreground shrink-0" (click)="toggleSidebar()">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <div class="min-w-0">
+          <h2 class="text-sm font-bold text-foreground flex items-center gap-2">
+            <i class="fas fa-file-import text-indigo-600"></i>
+            <span>Document & Email Import Portal</span>
+          </h2>
+          <p class="text-[11px] font-medium text-muted-foreground">
+            Migrate applicant CVs from files, Gmail, Outlook, or configure automated background inbox sync.
+          </p>
+        </div>
+      </div>
+      <a routerLink="/dashboard" class="ml-auto shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-slate-700 bg-slate-100 hover:bg-white hover:text-indigo-600 hover:shadow-xs transition-all text-xs font-bold border border-slate-200">
+        <i class="fas fa-arrow-left"></i>
+        <span>Return to Dashboard</span>
+      </a>
+    </header>
+
+    <main class="flex-1 p-4 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+      <!-- Target Job Post Selection Card with Custom Dropdown -->
+      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm relative z-30 overflow-visible">
+        <div class="absolute -right-12 -top-12 w-48 h-48 bg-indigo-50/50 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div class="space-y-1 max-w-xl">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-[11px] font-bold">
+              <i class="fas fa-bullseye text-indigo-500"></i>
+              <span>Target Destination Job Post</span>
+            </div>
+            <h2 class="text-base font-bold text-slate-800">Select Job Post for Candidate Document Ingestion</h2>
+            <p class="text-xs text-slate-500">All uploaded resumes and email attachments will automatically be parsed into structured candidate profiles under this selected job post.</p>
+          </div>
+
+          <div class="w-full md:w-96 space-y-1.5 relative z-40">
+            <label class="block text-xs font-extrabold text-slate-700">Target Job Position *</label>
+            
+            <!-- CUSTOM DROPDOWN COMPONENT -->
+            <app-custom-dropdown 
+              [options]="jobPostDropdownOptions" 
+              labelKey="label" 
+              valueKey="id" 
+              [value]="selectedJobId"
+              (valueChange)="onJobSelectChange($event)" 
+              placeholder="-- Select Target Job Position --" 
+              icon="fa-briefcase">
+            </app-custom-dropdown>
+
+            <div *ngIf="selectedJobPost" class="text-[11px] font-bold text-emerald-600 flex items-center gap-1.5 pt-1">
+              <i class="fas fa-check-circle"></i>
+              <span>Linked to: <strong>{{ selectedJobPost.title || selectedJobPost.job_title }}</strong> ({{ selectedJobPost.department || 'General' }})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Section Tabs -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="border-b border-slate-200 bg-slate-50/50 p-2 sm:px-6">
+          <nav class="flex flex-wrap gap-2">
+            <button 
+              (click)="setActiveTab('upload')"
+              [class]="activeTab === 'upload' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 font-bold' : 'text-slate-600 hover:bg-slate-200/60 font-semibold'"
+              class="px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2">
+              <i class="fas fa-folder-open"></i>
+              <span>Bulk File Upload</span>
+            </button>
+
+            <button 
+              (click)="setActiveTab('gmail')"
+              [class]="activeTab === 'gmail' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 font-bold' : 'text-slate-600 hover:bg-slate-200/60 font-semibold'"
+              class="px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2">
+              <i class="fab fa-google text-red-500"></i>
+              <span>Gmail Ingestion</span>
+            </button>
+
+            <button 
+              (click)="setActiveTab('outlook')"
+              [class]="activeTab === 'outlook' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 font-bold' : 'text-slate-600 hover:bg-slate-200/60 font-semibold'"
+              class="px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2">
+              <i class="fab fa-microsoft text-sky-500"></i>
+              <span>Outlook Ingestion</span>
+            </button>
+
+            <button 
+              (click)="setActiveTab('custom')"
+              [class]="activeTab === 'custom' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 font-bold' : 'text-slate-600 hover:bg-slate-200/60 font-semibold'"
+              class="px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2">
+              <i class="fas fa-server text-emerald-500"></i>
+              <span>Custom IMAP Server</span>
+            </button>
+
+            <button 
+              (click)="setActiveTab('scheduler')"
+              [class]="activeTab === 'scheduler' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 font-bold' : 'text-slate-600 hover:bg-slate-200/60 font-semibold'"
+              class="px-4 py-2.5 rounded-xl text-xs transition-all flex items-center gap-2">
+              <i class="fas fa-clock text-amber-500"></i>
+              <span>Background Inbox Scheduler</span>
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab 1: Bulk File Upload -->
+        <div *ngIf="activeTab === 'upload'" class="p-6 space-y-6">
+          <div class="border-2 border-dashed border-slate-300 hover:border-indigo-500 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-indigo-50/30 transition-all cursor-pointer group" (click)="fileInput.click()">
+            <input #fileInput type="file" multiple (change)="onFileSelected($event)" accept=".pdf,.doc,.docx,.txt" class="hidden" />
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform shadow-sm">
+              <i class="fas fa-cloud-upload-alt text-2xl"></i>
+            </div>
+            <h3 class="text-sm font-bold text-slate-800 mt-4">Drop candidate CVs/Resumes here, or click to browse files</h3>
+            <p class="text-xs text-slate-500 mt-1">Supports PDF, DOCX, DOC, and TXT files up to 25MB each.</p>
+          </div>
+
+          <!-- Selected Queue -->
+          <div *ngIf="selectedFiles.length > 0" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Upload Queue ({{ selectedFiles.length }} File{{ selectedFiles.length > 1 ? 's' : '' }})
+              </h4>
+              <button (click)="clearFileQueue()" class="text-xs font-semibold text-rose-600 hover:text-rose-700">Clear All</button>
+            </div>
+
+            <div class="bg-slate-50 rounded-xl border border-slate-200 divide-y divide-slate-200 max-h-64 overflow-y-auto">
+              <div *ngFor="let file of selectedFiles; let i = index" class="p-3 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-3 min-w-0">
+                  <i class="fas fa-file-pdf text-rose-500 text-lg"></i>
+                  <div class="truncate">
+                    <p class="font-bold text-slate-800 truncate">{{ file.name }}</p>
+                    <p class="text-[10px] text-slate-500">{{ (file.size / 1024).toFixed(1) }} KB</p>
+                  </div>
+                </div>
+                <button (click)="removeFileFromQueue(i)" class="text-slate-400 hover:text-rose-500 p-1">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+
+            <button 
+              (click)="startBulkUpload()" 
+              [disabled]="isUploading || !selectedJobId"
+              class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2">
+              <i *ngIf="isUploading" class="fas fa-spinner fa-spin"></i>
+              <i *ngIf="!isUploading" class="fas fa-arrow-up"></i>
+              <span>{{ isUploading ? 'Uploading & Extracting Resumes...' : 'Import All Selected Documents' }}</span>
+            </button>
+          </div>
+
+          <!-- Failed Uploads Drawer with Detailed Errors -->
+          <div *ngIf="failedUploads.length > 0" class="p-4 bg-rose-50 border border-rose-200 rounded-2xl space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold text-rose-900 flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-rose-600"></i>
+                <span>Failed Document Parsing Drawer ({{ failedUploads.length }})</span>
+              </h4>
+              <button (click)="failedUploads = []" class="text-[11px] font-bold text-rose-700 hover:underline">Dismiss</button>
+            </div>
+            <div class="space-y-2">
+              <div *ngFor="let item of failedUploads" class="p-2.5 bg-white rounded-xl border border-rose-200 text-xs flex justify-between items-start gap-3">
+                <div>
+                  <p class="font-bold text-slate-800">{{ item.fileName }}</p>
+                  <p class="text-[11px] text-rose-700 mt-0.5">{{ item.error }}</p>
+                </div>
+                <span class="px-2 py-0.5 bg-rose-100 text-rose-800 text-[10px] font-bold rounded shrink-0">Failed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2, 3, 4: Gmail / Outlook / Custom IMAP -->
+        <div *ngIf="activeTab === 'gmail' || activeTab === 'outlook' || activeTab === 'custom'" class="p-6 space-y-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" [ngClass]="activeTab === 'gmail' ? 'bg-red-500' : (activeTab === 'outlook' ? 'bg-sky-500' : 'bg-emerald-600')">
+                <i [class]="activeTab === 'gmail' ? 'fab fa-google' : (activeTab === 'outlook' ? 'fab fa-microsoft' : 'fas fa-server')"></i>
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-slate-800">{{ activeTab === 'gmail' ? 'Gmail Ingestion' : (activeTab === 'outlook' ? 'Outlook Ingestion' : 'Custom IMAP Mail Server Ingestion') }}</h3>
+                <p class="text-[11px] text-slate-500">Search inbox for candidate emails containing resume attachments and migrate them with 1-click.</p>
+              </div>
+            </div>
+
+            <button 
+              *ngIf="activeTab === 'gmail'" 
+              (click)="connectGoogle()"
+              class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl text-xs shadow-sm flex items-center gap-2">
+              <i class="fab fa-google text-red-500"></i>
+              <span>{{ isGmailConnected ? 'Connected to Gmail' : 'Connect Gmail Account' }}</span>
+            </button>
+
+            <button 
+              *ngIf="activeTab === 'outlook'" 
+              (click)="connectOutlook()"
+              class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-800 font-bold border border-slate-300 rounded-xl text-xs shadow-sm flex items-center gap-2">
+              <i class="fab fa-microsoft text-sky-500"></i>
+              <span>{{ isOutlookConnected ? 'Connected to Outlook' : 'Connect Outlook Account' }}</span>
+            </button>
+          </div>
+
+          <!-- Custom IMAP Server Credentials Form -->
+          <div *ngIf="activeTab === 'custom'" class="bg-emerald-50/40 p-4 rounded-xl border border-emerald-200 space-y-3">
+            <h4 class="text-xs font-bold text-emerald-900 flex items-center gap-2">
+              <i class="fas fa-key text-emerald-600"></i>
+              <span>Custom IMAP Email Server Settings (Yahoo, Zoho, iCloud, Webmail, etc.)</span>
+            </h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">IMAP Host Server:</label>
+                <input type="text" [(ngModel)]="imapConfig.host" placeholder="e.g. imap.mail.yahoo.com" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-semibold text-slate-800" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Port:</label>
+                <input type="number" [(ngModel)]="imapConfig.port" placeholder="993" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-semibold text-slate-800" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Username / Email:</label>
+                <input type="text" [(ngModel)]="imapConfig.username" placeholder="user@company.com" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-semibold text-slate-800" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1">Password / App Password:</label>
+                <input type="password" [(ngModel)]="imapConfig.password" placeholder="••••••••" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-semibold text-slate-800" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Search & Filter Controls -->
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+            <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-3">
+              <!-- Keyword Search Input -->
+              <div class="relative flex-grow">
+                <i class="fas fa-search absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input 
+                  type="text" 
+                  [(ngModel)]="emailSearchQuery" 
+                  (keyup.enter)="searchEmails(activeTab)"
+                  placeholder="Search inbox (subject, body, fuzzy keywords e.g. CV, Resume, Application)..."
+                  class="w-full bg-white border border-slate-300 rounded-xl pl-9 pr-4 py-2.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 shadow-xs" />
+              </div>
+
+              <!-- Start Date Picker -->
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-500 shrink-0">From:</span>
+                <input 
+                  type="date" 
+                  [(ngModel)]="emailStartDate" 
+                  class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 shadow-xs" />
+              </div>
+
+              <!-- End Date Picker -->
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-bold text-slate-500 shrink-0">To:</span>
+                <input 
+                  type="date" 
+                  [(ngModel)]="emailEndDate" 
+                  class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 shadow-xs" />
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center gap-2">
+                <button 
+                  (click)="searchEmails(activeTab)" 
+                  [disabled]="isSearching"
+                  class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-200 transition-all flex items-center gap-2 shrink-0">
+                  <i *ngIf="isSearching" class="fas fa-spinner fa-spin"></i>
+                  <i *ngIf="!isSearching" class="fas fa-search"></i>
+                  <span>{{ isSearching ? 'Searching...' : 'Search Inbox' }}</span>
+                </button>
+
+                <button 
+                  *ngIf="emailStartDate || emailEndDate"
+                  (click)="emailStartDate = ''; emailEndDate = ''; searchEmails(activeTab)"
+                  title="Clear Date Filters"
+                  class="p-2.5 bg-white hover:bg-rose-50 text-slate-500 hover:text-rose-600 border border-slate-300 rounded-xl text-xs font-bold transition-all shrink-0">
+                  <i class="fas fa-times-circle"></i>
+                </button>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-[10px] font-semibold text-slate-500">
+              <i class="fas fa-info-circle text-indigo-500"></i>
+              <span>Fuzzy search enabled: searches subject, message body, and attachment metadata. Date range applies automatically.</span>
+            </div>
+          </div>
+
+          <!-- Results Table -->
+          <div *ngIf="emails.length > 0" class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="py-3 px-4">Sender Email</th>
+                  <th class="py-3 px-4">Email Subject</th>
+                  <th class="py-3 px-4">Resume Attachments</th>
+                  <th class="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 text-xs font-semibold text-slate-700">
+                <tr *ngFor="let email of emails" [class.bg-emerald-50]="email.processed">
+                  <td class="py-3 px-4 font-bold text-slate-800">{{ email.sender }}</td>
+                  <td class="py-3 px-4 text-slate-600">{{ email.subject }}</td>
+                  <td class="py-3 px-4">
+                    <div class="flex flex-wrap gap-1.5">
+                      <span *ngFor="let att of email.attachments" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-[11px]">
+                        <i class="fas fa-paperclip text-slate-400"></i>
+                        <span>{{ att.filename }}</span>
+                      </span>
+                    </div>
+                  </td>
+                  <td class="py-3 px-4 text-right">
+                    <button 
+                      (click)="importEmailAttachments(email)" 
+                      [disabled]="email.processed"
+                      class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-[11px] font-bold rounded-lg transition-all shadow-sm">
+                      {{ email.processed ? 'Imported' : 'Import Attachments' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="hasSearched && emails.length === 0 && !isSearching" class="p-8 text-center bg-slate-50 border border-slate-200 rounded-2xl space-y-2">
+            <i class="fas fa-inbox text-slate-300 text-3xl"></i>
+            <p class="text-xs font-bold text-slate-700">No emails matched query "{{ emailSearchQuery }}"</p>
+            <p class="text-[11px] text-slate-500">Ensure the email account is authorized and contains attachments.</p>
+          </div>
+        </div>
+
+        <!-- Tab 4: Background Inbox Scheduler -->
+        <div *ngIf="activeTab === 'scheduler'" class="p-6 space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-5 bg-slate-50/60 p-5 rounded-xl border border-slate-200">
+              <h3 class="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2 flex items-center gap-2">
+                <i class="fas fa-robot text-indigo-600"></i>
+                <span>Automatic Background Inbox Monitoring</span>
+              </h3>
+
+              <div class="flex items-center justify-between py-2 bg-white p-3 rounded-xl border border-slate-200">
+                <div>
+                  <p class="text-xs font-bold text-slate-800">Enable Automated Inbox Scheduler</p>
+                  <p class="text-[11px] text-slate-500">Periodically polls connected recruiter inbox for candidate resumes and creates applicant profiles.</p>
+                </div>
+                <input type="checkbox" [(ngModel)]="schedulerConfig.enabled" class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" />
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Polling Interval:</label>
+                  <select [(ngModel)]="schedulerConfig.poll_interval_minutes" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-indigo-500">
+                    <option [value]="15">Every 15 Minutes</option>
+                    <option [value]="60">Every 1 Hour</option>
+                    <option [value]="360">Every 6 Hours</option>
+                    <option [value]="1440">Daily (Every 24 Hours)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Start Time / Date Filter:</label>
+                  <input type="date" [(ngModel)]="schedulerConfig.start_time" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-indigo-500" title="Only monitor emails received after this start time" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 mb-1">Subject & Keyword Filter:</label>
+                  <input type="text" [(ngModel)]="schedulerConfig.search_query" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-indigo-500" placeholder="e.g. CV, Resume, Application" />
+                </div>
+              </div>
+
+              <div class="pt-2 flex flex-wrap items-center gap-3">
+                <button 
+                  (click)="saveSchedulerSettings()" 
+                  [disabled]="savingScheduler"
+                  class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-200 transition-all flex items-center gap-2">
+                  <i *ngIf="savingScheduler" class="fas fa-spinner fa-spin"></i>
+                  <span>{{ savingScheduler ? 'Saving Settings...' : 'Save Scheduler Settings' }}</span>
+                </button>
+
+                <button 
+                  (click)="runSchedulerNow()" 
+                  [disabled]="runningScheduler"
+                  class="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 disabled:bg-slate-300 text-white font-bold rounded-xl text-xs shadow-sm transition-all flex items-center gap-2">
+                  <i *ngIf="runningScheduler" class="fas fa-spinner fa-spin"></i>
+                  <span>{{ runningScheduler ? 'Scanning Inbox...' : 'Trigger Scan Now' }}</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Scheduler Summary Card -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">Sync Status Summary</h4>
+              <div class="space-y-3 text-xs font-semibold">
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-500">Scheduler Status:</span>
+                  <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold" [ngClass]="schedulerConfig.enabled ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'">
+                    {{ schedulerConfig.enabled ? 'Active' : 'Disabled' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-500">Last Background Run:</span>
+                  <span class="text-slate-800">{{ schedulerConfig.last_run ? (schedulerConfig.last_run | date:'short') : 'Never' }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-slate-500">Total Imported CVs:</span>
+                  <span class="text-slate-800 font-bold">{{ schedulerConfig.imported_count || 0 }} Candidates</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

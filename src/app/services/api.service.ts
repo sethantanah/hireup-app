@@ -205,22 +205,56 @@ export class ApiService {
   }
 
 
-  getEmailAttachments(source: string, query: string): Observable<any> {
-    const apiUrl = environment.apiUrl + `/connect-mail/gmail-attachments`;
-
+  getEmailAttachments(source: string, query: string, startDate?: string, endDate?: string, imapConfig?: any): Observable<any> {
     const headers = new HttpHeaders({
       accept: 'application/json',
-      Authorization: `Bearer ${localStorage.getItem('token')}`, // Optional if you're using cookies for auth
+      Authorization: `Bearer ${localStorage.getItem('token')}`,
     });
+
+    if (source === 'outlook') {
+      const apiUrl = environment.apiUrl + `/connect-outlook/outlook-attachments`;
+      const params: any = { query: query || '', subject: query || '' };
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      return this.http.get(apiUrl, { headers, params });
+    }
+
+    if (source === 'custom' || source === 'imap') {
+      const apiUrl = environment.apiUrl + `/connect-mail/imap-attachments`;
+      const body = {
+        host: imapConfig?.host || '',
+        port: imapConfig?.port || 993,
+        username: imapConfig?.username || '',
+        password: imapConfig?.password || '',
+        use_ssl: imapConfig?.use_ssl !== false,
+        query: query || '',
+        start_date: startDate || null,
+        end_date: endDate || null
+      };
+      return this.http.post(apiUrl, body, { headers });
+    }
+
+    // Default to Gmail
+    const apiUrl = environment.apiUrl + `/connect-mail/gmail-attachments`;
+    const params: any = {
+      query: query || '',
+      subject: query || ''
+    };
+    if (startDate) params.start_date = startDate;
+    if (endDate) params.end_date = endDate;
 
     return this.http.get(apiUrl, {
       headers: headers,
-      params: { subject: query }
+      params: params
     });
   }
 
-  downloadFileAttachment(attachment: EmailAttachment) {
-    const apiUrl = environment.apiUrl + `/connect-mail/download-attachment`;
+  downloadFileAttachment(attachment: EmailAttachment, provider: string = 'gmail') {
+    let apiUrl = environment.apiUrl + `/connect-mail/download-attachment`;
+    if (provider === 'outlook') {
+      apiUrl = environment.apiUrl + `/connect-outlook/download-attachment`;
+    }
+
     const headers = new HttpHeaders({
       accept: 'application/json',
       Authorization: `Bearer ${localStorage.getItem('token')}`,

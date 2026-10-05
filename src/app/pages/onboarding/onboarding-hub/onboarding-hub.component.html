@@ -1,0 +1,209 @@
+<div class="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col lg:flex-row font-sans">
+  <!-- Sidebar HireUp aligned -->
+  <div [ngClass]="sidebarOpen ? 'flex' : 'hidden lg:flex'" class="h-screen w-full lg:w-64 bg-card text-foreground flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 border-r border-border transition-all duration-300">
+    <!-- HireUp Header -->
+    <div class="p-4 border-b border-border flex flex-col gap-3 flex-shrink-0 bg-muted/20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <button class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:bg-muted transition-all" (click)="toggleSidebar()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+          <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center shadow-sm">
+            <svg class="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-foreground leading-none">HireUp</h2>
+            <span class="text-[10px] font-medium text-muted-foreground">Workspace</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Postings moved to header dropdown -->
+
+    <!-- Onboarding Controls inside sidebar -->
+    <div class="p-3 border-b border-border bg-card flex-shrink-0 space-y-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center">
+          <i class="fas fa-user-graduate text-xs"></i>
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-foreground leading-none">Onboarding Hub</h3>
+          <span class="text-[10px] text-muted-foreground">New employee journeys</span>
+        </div>
+      </div>
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-400"></i>
+        <input [(ngModel)]="searchTerm" type="text" placeholder="Search new hire or job title..." class="w-full pl-8 pr-7 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500 placeholder:text-slate-400" />
+        <button *ngIf="searchTerm" (click)="searchTerm=''" class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="flex gap-1.5">
+        <button (click)="filterStatus=''" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all" [ngClass]="filterStatus==='' ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'">All</button>
+        <button (click)="filterStatus='in_progress'" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all" [ngClass]="filterStatus==='in_progress' ? 'bg-amber-500 text-white border-amber-500 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300'">Active</button>
+        <button (click)="filterStatus='completed'" class="flex-1 py-1.5 text-xs font-bold rounded-lg border transition-all" [ngClass]="filterStatus==='completed' ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'">Done</button>
+      </div>
+    </div>
+
+    <!-- Sidebar Employee List -->
+    <div class="flex-1 min-h-0 overflow-y-auto p-3 space-y-2 bg-slate-50/30">
+      <div *ngIf="loading" class="flex justify-center py-8"><div class="animate-spin w-6 h-6 border-4 border-indigo-200 border-t-indigo-600 rounded-full"></div></div>
+      <div *ngFor="let r of filteredRecords" (click)="selectRecord(r)" class="p-3 rounded-xl border cursor-pointer transition-all" [ngClass]="selectedRecord?.id === r.id ? 'bg-indigo-50/80 border-indigo-300 ring-1 ring-indigo-300 shadow-xs' : 'bg-white border-slate-200 hover:border-indigo-200 hover:bg-slate-50'">
+        <div class="flex items-center gap-3"><div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white text-xs font-black shrink-0 shadow-2xs">{{ getInitials(r.candidate_name) }}</div><div class="min-w-0 flex-1"><p class="font-bold text-xs text-slate-900 truncate">{{ r.candidate_name }}</p><p class="text-[11px] text-slate-500 font-medium truncate">{{ r.job_title }}</p></div></div>
+        <div class="mt-2.5"><div class="flex justify-between text-[11px] mb-1"><span class="text-slate-500 font-medium">Progress</span><span class="font-bold" [ngClass]="r.progress_percent === 100 ? 'text-emerald-600' : 'text-indigo-600'">{{ r.progress_percent || 0 }}%</span></div><div class="h-1.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all duration-500" [ngClass]="r.progress_percent === 100 ? 'bg-emerald-500' : 'bg-indigo-500'" [style.width.%]="r.progress_percent || 0"></div></div></div>
+        <div class="mt-2 flex items-center justify-between gap-1 text-[10px]"><span class="font-bold px-2 py-0.5 rounded-full border" [ngClass]="getStatusClass(r.status)">{{ r.status === 'in_progress' ? 'Active Journey' : (r.status | titlecase) }}</span><span *ngIf="r.department" class="text-slate-400 font-medium truncate max-w-[100px]">{{ r.department }}</span></div>
+      </div>
+      <div *ngIf="!loading && filteredRecords.length === 0" class="text-center py-12 text-slate-400 space-y-2"><i class="fas fa-inbox text-3xl opacity-40"></i><p class="text-xs font-semibold">No employee journeys match criteria.</p></div>
+    </div>
+
+    <!-- Workspace Tools -->
+    <div class="px-3 py-2 border-t border-slate-200/80 flex-shrink-0 bg-slate-50/50">
+      <button (click)="showToolsMenu = !showToolsMenu" class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-all border border-slate-200/60 shadow-2xs">
+        <div class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg><span>Workspace Tools & Settings</span></div>
+        <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="showToolsMenu" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+      </button>
+      <div *ngIf="showToolsMenu" class="mt-2 space-y-1 max-h-44 overflow-y-auto pr-1">
+        <a routerLink="/scheduled-interviews" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold"><i class="fas fa-calendar-alt text-indigo-500 text-xs w-4"></i><span>Scheduled Interviews</span></a>
+        <a routerLink="/interview-scorecards" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold"><i class="fas fa-clipboard-check text-indigo-500 text-xs w-4"></i><span>Scorecards</span></a>
+        <a routerLink="/offer-studio" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-emerald-700 transition-all text-xs font-semibold"><svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><span>Offer Studio</span></a>
+        <a routerLink="/onboarding" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-violet-600 text-white text-xs font-semibold"><svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg><span>Onboarding Hub</span></a>
+        <a routerLink="/organization-settings" [queryParams]="{ tab: 'api_connections' }" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-sky-700 transition-all text-xs font-semibold"><svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg><span>API Connections</span></a>
+        <a routerLink="/document-import" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold"><i class="fas fa-file-import text-indigo-500 text-xs w-4"></i><span>Import Documents</span></a>
+        <a routerLink="/organization-settings" class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold"><svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg><span>Org & Email Settings</span></a>
+      </div>
+    </div>
+
+    <!-- User Footer -->
+    <div class="p-3 border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="relative flex-shrink-0">
+            <ng-container *ngIf="userData.logo_url; else initTpl"><img [src]="userData.logo_url" alt="Profile" class="w-8 h-8 rounded-xl object-cover border border-slate-200 shadow-2xs" /></ng-container>
+            <ng-template #initTpl><div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-2xs"><span class="text-[11px] font-bold text-white">{{ getInitials(userData.full_name || userData.name || '') }}</span></div></ng-template>
+            <div class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-white"></div>
+          </div>
+          <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-900 truncate">{{ userData.full_name || userData.name }}</p><p class="text-[10px] text-slate-500 font-medium truncate">{{ userData.position_in_company || userData.email }}</p></div>
+        </div>
+        <button (click)="logOut()" class="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors" title="Logout"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" /></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Overlay -->
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden" (click)="toggleSidebar()"></div>
+
+  <!-- Main Content -->
+  <div class="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-slate-50/50">
+    <!-- Header HireUp style -->
+    <header class="sticky top-0 z-30 w-full border-b border-border bg-card shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 min-h-14">
+      <div class="flex items-center gap-3 mb-4 lg:mb-0">
+        <button class="lg:hidden p-2 rounded-md border border-border bg-muted/50 text-foreground" (click)="toggleSidebar()"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button>
+        <div>
+          <h1 class="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2"><i class="fas fa-user-graduate text-violet-600"></i><span>Onboarding Hub</span></h1>
+          <p class="text-[11px] font-medium text-muted-foreground">Track new hire journeys, tasks and completion progress</p>
+        </div>
+        <div class="hidden sm:block border-l border-border pl-3 ml-2 w-64">
+          <app-custom-dropdown
+            [options]="jobDropdownOptions"
+            labelKey="label"
+            valueKey="id"
+            [value]="jobId || ''"
+            (valueChange)="onHeaderJobChange($event)"
+            placeholder="Select Job Posting">
+          </app-custom-dropdown>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <a routerLink="/dashboard" class="h-8 px-3 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium rounded-md transition-all flex items-center gap-2 text-[11px] border border-border"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg><span>Dashboard</span></a>
+
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto">
+      <div *ngIf="!selectedRecord" class="flex flex-col items-center justify-center h-full min-h-[60vh] text-center text-slate-400 px-8 py-12">
+        <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-violet-100 to-indigo-100 flex items-center justify-center mb-5 shadow-inner"><i class="fas fa-user-graduate text-4xl text-indigo-400"></i></div>
+        <h3 class="text-xl font-black text-slate-800 mb-2">Select a New Hire Journey</h3>
+        <p class="text-xs text-slate-500 max-w-xs font-medium leading-relaxed">Choose an onboarding record from the left sidebar to view tasks, progress, and manager assignments.</p>
+      </div>
+
+      <div *ngIf="selectedRecord" class="p-6 space-y-6">
+        <div *ngIf="successMsg" class="px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-2xl font-bold flex items-center gap-2"><i class="fas fa-check-circle text-emerald-600"></i> {{ successMsg }}</div>
+        <div *ngIf="errorMsg" class="px-4 py-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl font-bold">{{ errorMsg }}</div>
+
+        <div class="bg-slate-950 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden border border-slate-800">
+          <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+            <div class="flex items-center gap-4">
+              <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-black shadow-sm">{{ getInitials(selectedRecord.candidate_name) }}</div>
+              <div>
+                <div class="flex items-center gap-2"><h2 class="text-xl font-black text-white">{{ selectedRecord.candidate_name }}</h2><span class="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">{{ selectedRecord.status === 'in_progress' ? 'Active Journey' : (selectedRecord.status | titlecase) }}</span></div>
+                <p class="text-slate-300 text-sm font-medium">{{ selectedRecord.job_title }}</p>
+                <p class="text-slate-400 text-xs mt-0.5 flex items-center gap-2"><span><i class="fa-solid fa-envelope text-emerald-400"></i> {{ selectedRecord.candidate_email }}</span><span *ngIf="selectedRecord.department">• {{ selectedRecord.department }}</span></p>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button (click)="openAddTaskModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5"><i class="fa-solid fa-plus text-emerald-400"></i> Add Task</button>
+              <button (click)="openEditPeopleModal()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-xl text-xs font-bold text-white transition-all flex items-center gap-1.5"><i class="fa-solid fa-user-pen text-emerald-400"></i> Edit Details</button>
+              <button (click)="toggleJourneyStatus()" class="px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5" [ngClass]="selectedRecord.status === 'completed' ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20'"><i class="fa-solid" [ngClass]="selectedRecord.status === 'completed' ? 'fa-rotate-left' : 'fa-check-double'"></i><span>{{ selectedRecord.status === 'completed' ? 'Re-open Journey' : 'Mark as Done' }}</span></button>
+            </div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-white/15 relative z-10">
+            <div class="flex justify-between text-xs mb-2"><span class="font-bold text-violet-100">Onboarding Completion Progress</span><span class="font-black text-white text-sm">{{ progress }}%</span></div>
+            <div class="h-3 bg-black/20 rounded-full overflow-hidden p-0.5"><div class="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full transition-all duration-700 shadow-sm" [style.width.%]="progress"></div></div>
+            <p class="text-[11px] text-violet-200 mt-1.5 font-medium">{{ completedCount }} of {{ tasks.length }} tasks completed</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-1"><div class="flex items-center justify-between"><p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Direct Manager</p><i class="fa-solid fa-user-tie text-indigo-500 text-xs"></i></div><p class="font-bold text-slate-900 text-sm truncate">{{ selectedRecord.manager_name || 'Not assigned' }}</p><p class="text-xs text-slate-500 truncate">{{ selectedRecord.manager_email || '—' }}</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-1"><div class="flex items-center justify-between"><p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Onboarding Buddy</p><i class="fa-solid fa-user-group text-violet-500 text-xs"></i></div><p class="font-bold text-slate-900 text-sm truncate">{{ selectedRecord.buddy_name || 'Not assigned' }}</p><p class="text-xs text-slate-500 truncate">{{ selectedRecord.buddy_email || '—' }}</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-1"><div class="flex items-center justify-between"><p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Start Date</p><i class="fa-solid fa-calendar-day text-emerald-500 text-xs"></i></div><p class="font-bold text-slate-900 text-sm">{{ selectedRecord.start_date || 'To Be Confirmed' }}</p><p class="text-xs text-slate-400 font-medium">Official start date</p></div>
+          <div class="bg-white rounded-2xl p-4 border border-slate-200/90 shadow-2xs space-y-1"><div class="flex items-center justify-between"><p class="text-[10px] font-black uppercase tracking-wider text-slate-400">Initiated By</p><i class="fa-solid fa-bolt text-amber-500 text-xs"></i></div><p class="font-bold text-slate-900 text-sm truncate">{{ selectedRecord.initiated_by || 'System' }}</p><p class="text-xs text-slate-400 font-medium">{{ selectedRecord.created_at | date:'mediumDate' }}</p></div>
+        </div>
+
+        <div *ngIf="selectedRecord.welcome_message" class="bg-violet-50 border border-violet-200 rounded-2xl p-4 flex items-start gap-3 shadow-2xs"><div class="w-8 h-8 rounded-xl bg-violet-100 text-violet-700 flex items-center justify-center shrink-0"><i class="fas fa-hand-wave"></i></div><div class="space-y-0.5"><span class="text-[10px] font-black uppercase text-violet-700 tracking-wider">Welcome Message</span><p class="text-xs text-slate-700 font-medium leading-relaxed italic">"{{ selectedRecord.welcome_message }}"</p></div></div>
+
+        <div class="space-y-4">
+          <div class="flex items-center justify-between"><div><h3 class="text-base font-black text-slate-900">Onboarding Checklist Tasks</h3><p class="text-xs text-slate-500 font-medium">Check off tasks as employee completes milestones.</p></div><button (click)="openAddTaskModal()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1.5"><i class="fa-solid fa-plus"></i> Add Custom Task</button></div>
+          <div *ngFor="let cat of uniqueCategories" class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+            <div class="flex items-center gap-3 px-5 py-3 border-b border-slate-100 bg-slate-50/80"><div class="w-7 h-7 rounded-xl flex items-center justify-center border text-xs" [ngClass]="categoryColors[cat] || 'text-slate-600 bg-slate-50 border-slate-200'"><i [class]="'fas ' + (categoryIcons[cat] || 'fa-check')"></i></div><span class="font-bold text-xs text-slate-800">{{ cat }}</span><span class="ml-auto text-[11px] font-bold text-slate-500 px-2 py-0.5 bg-slate-200/60 rounded-md">{{ completedCountByCategory(cat) }}/{{ tasksByCategory(cat).length }} Done</span></div>
+            <div class="divide-y divide-slate-100">
+              <div *ngFor="let task of tasksByCategory(cat)" class="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50/50 transition-colors group">
+                <button (click)="completeTask(task)" [disabled]="task.status === 'completed' || savingTask" class="w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-all disabled:cursor-not-allowed cursor-pointer" [ngClass]="task.status === 'completed' ? 'bg-emerald-500 border-emerald-500 text-white shadow-2xs' : 'border-slate-300 hover:border-emerald-500'"><i *ngIf="task.status === 'completed'" class="fas fa-check text-xs"></i></button>
+                <div class="flex-1 min-w-0"><p class="text-xs font-bold text-slate-900" [ngClass]="task.status === 'completed' ? 'line-through text-slate-400 font-medium' : ''">{{ task.title }}</p><p *ngIf="task.description" class="text-xs text-slate-500 mt-0.5 truncate font-medium">{{ task.description }}</p><p *ngIf="task.completed_at" class="text-[10px] text-emerald-600 font-bold mt-0.5 flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Completed {{ task.completed_at | date:'mediumDate' }} by {{ task.completed_by }}</p></div>
+                <div class="flex items-center gap-2 shrink-0"><span *ngIf="task.required" class="text-[9px] text-rose-700 font-black px-2 py-0.5 bg-rose-50 border border-rose-200 rounded-full">Required</span><span *ngIf="task.due_day" class="text-[10px] text-slate-500 font-bold px-2 py-0.5 bg-slate-100 rounded-md">Day {{ task.due_day }}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- MODAL: Add Custom Task -->
+  <div *ngIf="showAddTaskModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-slate-100">
+      <div class="flex items-start justify-between border-b border-slate-100 pb-3"><div><h3 class="text-base font-black text-slate-900">Add Custom Onboarding Task</h3><p class="text-xs text-slate-500 font-medium">Add task to {{ selectedRecord?.candidate_name }}'s journey.</p></div><button (click)="showAddTaskModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="space-y-3.5">
+        <div><label class="block text-xs font-black text-slate-700 mb-1">Task Title *</label><input [(ngModel)]="newTask.title" type="text" placeholder="e.g. Complete Security Awareness Module" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div>
+        <div><label class="block text-xs font-black text-slate-700 mb-1">Description</label><textarea [(ngModel)]="newTask.description" rows="2" placeholder="Brief instructions for new hire..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500"></textarea></div>
+        <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-black text-slate-700 mb-1">Category</label><select [(ngModel)]="newTask.category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500"><option value="General">General</option><option value="Document Signing">Document Signing</option><option value="IT Setup">IT Setup</option><option value="Training">Training</option><option value="HR">HR</option></select></div><div><label class="block text-xs font-black text-slate-700 mb-1">Due Day Offset</label><input [(ngModel)]="newTask.due_day" type="number" min="1" placeholder="1" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div></div>
+        <label class="flex items-center gap-2 cursor-pointer pt-1"><input [(ngModel)]="newTask.required" type="checkbox" class="rounded text-indigo-600 focus:ring-indigo-500"><span class="text-xs text-slate-700 font-bold">Mandatory / Required Task</span></label>
+      </div>
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5"><button (click)="showAddTaskModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Cancel</button><button (click)="saveNewTask()" [disabled]="!newTask.title.trim()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold disabled:opacity-50 shadow-md shadow-indigo-600/20">Save Task</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Journey & Stakeholder Details -->
+  <div *ngIf="showEditPeopleModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 space-y-5 shadow-2xl border border-slate-100">
+      <div class="flex items-start justify-between border-b border-slate-100 pb-3"><div><h3 class="text-base font-black text-slate-900">Edit Journey & People Details</h3><p class="text-xs text-slate-500 font-medium">Update managers, buddy, and start dates for {{ selectedRecord?.candidate_name }}.</p></div><button (click)="showEditPeopleModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="space-y-3.5">
+        <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-black text-slate-700 mb-1">Manager Name</label><input [(ngModel)]="peopleData.manager_name" type="text" placeholder="e.g. Alex Vance" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div><div><label class="block text-xs font-black text-slate-700 mb-1">Manager Email</label><input [(ngModel)]="peopleData.manager_email" type="email" placeholder="alex@company.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div></div>
+        <div class="grid grid-cols-2 gap-3"><div><label class="block text-xs font-black text-slate-700 mb-1">Buddy / Mentor Name</label><input [(ngModel)]="peopleData.buddy_name" type="text" placeholder="e.g. Sarah Connor" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div><div><label class="block text-xs font-black text-slate-700 mb-1">Buddy Email</label><input [(ngModel)]="peopleData.buddy_email" type="email" placeholder="sarah@company.com" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div></div>
+        <div><label class="block text-xs font-black text-slate-700 mb-1">Official Start Date</label><input [(ngModel)]="peopleData.start_date" type="text" placeholder="YYYY-MM-DD or e.g. Oct 15, 2026" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:border-indigo-500" /></div>
+        <div><label class="block text-xs font-black text-slate-700 mb-1">Custom Welcome Message</label><textarea [(ngModel)]="peopleData.welcome_message" rows="2" placeholder="Welcome message displayed on employee dashboard..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 focus:outline-none focus:border-indigo-500"></textarea></div>
+      </div>
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5"><button (click)="showEditPeopleModal = false" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold">Cancel</button><button (click)="savePeopleData()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20">Save Details</button></div>
+    </div>
+  </div>
+</div>

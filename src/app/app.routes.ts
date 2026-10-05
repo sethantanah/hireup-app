@@ -18,6 +18,11 @@ import { LandingComponent } from './pages/landing/landing.component';
 import { SubmitEndorsementComponent } from './pages/job-posts/submit-endorsement/submit-endorsement.component';
 import { JobReferencesComponent } from './pages/job-posts/job-references/job-references.component';
 import { CandidatePortalComponent } from './pages/candidate/candidate-portal/candidate-portal.component';
+import { OnboardingHubComponent } from './pages/onboarding/onboarding-hub/onboarding-hub.component';
+import { OfferStudioComponent } from './pages/offer-management/offer-studio/offer-studio.component';
+import { OfferViewComponent } from './pages/offer-management/offer-view/offer-view.component';
+import { ScorecardManagerComponent } from './pages/interview-scorecards/scorecard-manager/scorecard-manager.component';
+import { ScheduledInterviewsComponent } from './pages/interview-scorecards/scheduled-interviews/scheduled-interviews.component';
 
 export const routes: Routes = [
   {
@@ -26,7 +31,6 @@ export const routes: Routes = [
         .then(m => m.LandingComponent)
   },
   { path: 'dashboard', component: JobPostDashboadComponent, canActivate: [authGuard] },
-  { path: 'jobposts/:userId', component: JobPostDashboadComponent, canActivate: [authGuard] },
   { path: 'jobposts/manager/:jobId', component: ManagerComponent, canActivate: [authGuard] },
   { path: 'jobposts/tests/:jobId', component: ListTestComponent, canActivate: [authGuard] },
   { path: 'jobposts/applicants/:jobId/:stageId', component: DashboardComponent, canActivate: [authGuard] },
@@ -60,6 +64,11 @@ export const routes: Routes = [
   },
   {
     path: 'jobposts/tests/take-test/:testId',
+    component: TakeTestComponent,
+    canDeactivate: [canRefreshGuard]
+  },
+  {
+    path: 'jobposts/tests/take/:testId',
     component: TakeTestComponent,
     canDeactivate: [canRefreshGuard]
   },
@@ -120,6 +129,74 @@ export const routes: Routes = [
     component: CandidatePortalComponent,
     canActivate: [authGuard]
   },
+  {
+    path: 'onboarding',
+    component: OnboardingHubComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'offer-studio',
+    component: OfferStudioComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'offer/view/:linkToken',
+    component: OfferViewComponent
+  },
+  {
+    path: 'interview-scorecards',
+    component: ScorecardManagerComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'scheduled-interviews',
+    component: ScheduledInterviewsComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'talent/interviews',
+    component: ScheduledInterviewsComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'organization-settings',
+    loadComponent: () => import('./pages/organization-settings/organization-settings.component').then(m => m.OrganizationSettingsComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'settings/organization',
+    loadComponent: () => import('./pages/organization-settings/organization-settings.component').then(m => m.OrganizationSettingsComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'accept-invitation',
+    loadComponent: () => import('./pages/accept-invitation/accept-invitation.component').then(m => m.AcceptInvitationComponent)
+  },
   { path: 'auth/callback', component: AuthCallbackComponent }, // New route
+  {
+    path: 'api-connections/:connId/portal',
+    loadComponent: () => import('./pages/api-connection-portal/api-connection-portal.component').then(m => m.ApiConnectionPortalComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'document-import',
+    loadComponent: () => import('./pages/document-import-portal/document-import-portal.component').then(m => m.DocumentImportPortalComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'document-migration',
+    loadComponent: () => import('./pages/document-import-portal/document-import-portal.component').then(m => m.DocumentImportPortalComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'ai-copilot',
+    loadComponent: () => import('./pages/ai-copilot/copilot-page.component').then(m => m.CopilotPageComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'api-connection-copilot',
+    loadComponent: () => import('./pages/api-connection-copilot/api-connection-copilot.component').then(m => m.ApiConnectionCopilotComponent),
+    canActivate: [authGuard]
+  },
   { path: '**', component: PageNotFoundComponent }
 ];

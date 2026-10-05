@@ -1,10 +1,23 @@
 export interface Candidate {
   id: string;
+  email?: string;
+  user_email?: string;
+  applicant_email?: string;
+  phone?: string;
+  phone_number?: string;
+  full_name?: string;
+  applicant_name?: string;
+  candidate_name?: string;
+  name?: string;
+  jobpost_id?: string;
   form_data: FormData;
   uploaded_files: any;
   resume_url?: string;
   resume_text?: string;
   application_stages?: Record<string, any>;
+  stage?: string;
+  application_stage?: string;
+  status?: string;
   resume_data: {
     personal_details: {
       full_name: string;

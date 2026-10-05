@@ -1,12 +1,41 @@
 .custom-scrollbar {
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+
+  // Webkit (Chrome, Safari, Edge)
   &::-webkit-scrollbar {
-    width: 5px;
+    width: 3.5px;
+    height: 3.5px;
   }
+
   &::-webkit-scrollbar-track {
     background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
     border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 9999px;
+    transition: background 0.2s ease-in-out;
+
+    &:hover {
+      background: rgba(16, 185, 129, 0.75); // sleek emerald accent on hover
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
   }
 }

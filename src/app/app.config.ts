@@ -6,7 +6,8 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
-import { HttpClient, provideHttpClient, withFetch } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { orgHeaderInterceptor } from './interceptors/org-header.interceptor';
 import { canDeactivateGuard } from './guards/can-deactivate.guard';
 
 export const appConfig: ApplicationConfig = {
@@ -15,7 +16,6 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch()),
-    
+    provideHttpClient(withFetch(), withInterceptors([orgHeaderInterceptor])),
   ],
 };

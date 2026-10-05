@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { JobpostingsApiService } from '../../../services/jobpostings-api.service';
 import { FormsModule } from '@angular/forms';
 import { UserData } from '../../../models/users.models';
@@ -10,10 +10,15 @@ import { ApplicantManagementService } from '../../../services/applicant-manageme
 import { DataService } from '../../../services/data.service';
 import { AuthService } from '../../../services/auth.service';
 import { LoaderComponent } from '../../components/loader/loader.component';
+import { CustomDropdownComponent } from '../../../components/custom-dropdown/custom-dropdown.component';
+import { ScheduleInterviewModalComponent } from '../../../components/schedule-interview-modal/schedule-interview-modal.component';
+import { OrgSwitcherComponent } from '../../../components/org-switcher/org-switcher.component';
+import { SelectedJobService } from '../../../services/selected-job.service';
 
 @Component({
   selector: 'app-job-post-dashboad',
-  imports: [CommonModule, FormsModule, LoaderComponent],
+  standalone: true,
+  imports: [CommonModule, FormsModule, LoaderComponent, RouterLink, CustomDropdownComponent, ScheduleInterviewModalComponent, OrgSwitcherComponent],
   templateUrl: './job-post-dashboad.component.html',
   styleUrl: './job-post-dashboad.component.scss',
 })
@@ -44,6 +49,7 @@ export class JobPostDashboadComponent implements OnInit {
 
   userData!: UserData;
   sidebarOpen = true;
+  showToolsMenu = false;
 
   // Application Stages
   applicationStages: ApplicationStage[] = [];
@@ -67,6 +73,7 @@ export class JobPostDashboadComponent implements OnInit {
     private dataService: DataService,
     private authService: AuthService,
     private applicantManagementService: ApplicantManagementService,
+    private selectedJobService: SelectedJobService,
   ) {
     const userData = localStorage.getItem('USER');
     if (userData) {
@@ -77,6 +84,20 @@ export class JobPostDashboadComponent implements OnInit {
   }
 
   ngOnInit() {
+    // restore selected job from centralized service if present
+    this.route.queryParams.subscribe(params => {
+      if (params['jobId']) {
+        this.selectedJobService.setSelectedJobId(params['jobId']);
+      }
+    });
+    this.selectedJobService.selectedJobId$.subscribe(id => {
+      if (id && this.jobPostings.length) {
+        const found = this.jobPostings.find((j:any)=>j.id===id);
+        if (found && this.selectedJobPost?.id !== id) {
+          this.selectProject(found);
+        }
+      }
+    });
     this.loadData();
   }
 
@@ -101,7 +122,13 @@ export class JobPostDashboadComponent implements OnInit {
       next: (data) => {
         this.jobPostings = data as any[];
         if (this.jobPostings?.length > 0) {
-          const jobpost = this.jobPostings[0];
+          let jobpost: any = this.jobPostings[0];
+          // apply centralized context if exists
+          const ctxId = this.selectedJobService.selectedJobId || this.route.snapshot.queryParams['jobId'];
+          if (ctxId) {
+            const matched = this.jobPostings.find((j:any)=>j.id===ctxId);
+            if (matched) jobpost = matched;
+          }
           const applicationStages = jobpost?.["template_data"]?.["applicationStages"] || undefined;
           this.setApplicationStages(applicationStages)
           this.selectProject(jobpost);
@@ -109,6 +136,21 @@ export class JobPostDashboadComponent implements OnInit {
           const currentStage = this.getCurrentStage();
           if (currentStage){
             this.selectStage(currentStage);
+          }
+
+          // Check if navigated with openScheduleModal parameter
+          const openSchedule = this.route.snapshot.queryParams['openScheduleModal'];
+          const targetJobId = this.route.snapshot.queryParams['jobId'];
+          if (openSchedule === 'true') {
+            if (targetJobId) {
+              const matchedJob = this.jobPostings.find(j => j.id === targetJobId);
+              if (matchedJob) {
+                this.selectProject(matchedJob);
+              }
+            }
+            setTimeout(() => {
+              this.openScheduleInterviewModal();
+            }, 350);
           }
         }
         this.loading = false;
@@ -149,7 +191,7 @@ export class JobPostDashboadComponent implements OnInit {
 
   // Stage Management Methods
   setApplicationStages(applicationStages?: ApplicationStage[]) {
-    this.applicationStages = applicationStages || this.jobPostService.defaultStages;
+    const rawStages = (applicationStages && applicationStages.length > 0) ? applicationStages : this.jobPostService.defaultStages;
     this.applicationStages = [
       {
         id: 'application_overview',
@@ -160,8 +202,8 @@ export class JobPostDashboadComponent implements OnInit {
         is_skippable: true,
         stage_type: 'standard'
       },
-      ... this.applicationStages.filter((app) => app.hide_stage !== true)
-    ]
+      ...rawStages.filter((app) => app.hide_stage !== true && app.id !== 'application_overview')
+    ];
   }
   selectStage(stage: ApplicationStage): void {
     if (stage.name !== 'Application Overview') {
@@ -217,10 +259,68 @@ export class JobPostDashboadComponent implements OnInit {
   }
 
 
+  getTotalApplicationsCount(): number {
+    if (!this.selectedJobPost) return 0;
+    const receivedDocs = this.selectedJobPost.received_documents || 0;
+    const application_metrics = this.selectedJobPost.application_metrics;
+    if (!application_metrics) return receivedDocs;
+
+    let maxStageCandidates = 0;
+    for (const key of Object.keys(application_metrics)) {
+      const stageObj = application_metrics[key];
+      if (stageObj && typeof stageObj === 'object') {
+        const stageTotal = stageObj.total_count || 0;
+        if (stageTotal > maxStageCandidates) {
+          maxStageCandidates = stageTotal;
+        }
+      }
+    }
+    return Math.max(receivedDocs, maxStageCandidates);
+  }
+
   getStageMetrics(stageId: string, metric: string = "total_count"): number {
-    this.getCurrentStage()
-    const application_metrics = this.selectedJobPost?.application_metrics
-    const stage = stageId.replace("stage_", "")
+    const application_metrics = this.selectedJobPost?.application_metrics;
+    const stage = stageId ? stageId.replace("stage_", "") : "application_overview";
+
+    if (stage === "application_overview" || stage === "0") {
+      if (metric === "sent_mails_count") {
+        if (!application_metrics) return 0;
+        let totalMails = 0;
+        for (const k of Object.keys(application_metrics)) {
+          totalMails += this.getMetricEmailsSent(application_metrics, k);
+        }
+        return totalMails;
+      }
+
+      if (metric === "successful_count") {
+        if (!application_metrics) return 0;
+        let totalSuccess = 0;
+        for (const k of Object.keys(application_metrics)) {
+          totalSuccess += this.getMetric(application_metrics, k, "successful_count");
+        }
+        return totalSuccess;
+      }
+
+      if (metric === "unsuccessful_count") {
+        if (!application_metrics) return 0;
+        let totalUnsuccess = 0;
+        for (const k of Object.keys(application_metrics)) {
+          totalUnsuccess += this.getMetric(application_metrics, k, "unsuccessful_count");
+        }
+        return totalUnsuccess;
+      }
+
+      if (metric === "total_count") {
+        return this.getTotalApplicationsCount();
+      }
+
+      const currentStage = this.getCurrentStage();
+      if (currentStage && application_metrics) {
+        return this.getMetric(application_metrics, currentStage.id.replace("stage_", ""), metric);
+      }
+      return this.getTotalApplicationsCount();
+    }
+
     if (!application_metrics) return 0;
 
     let metric_value = this.getMetric(application_metrics, stage, metric);
@@ -229,74 +329,31 @@ export class JobPostDashboadComponent implements OnInit {
       metric_value = this.getMetricEmailsSent(application_metrics, stage);
     }
 
-    
-    if (metric === "total_count") {
-      metric_value = this.getMetric(application_metrics, stage, "total_count") - this.getMetric(application_metrics, stage, "successful_count")
-    }
-
-    if (stage == "application_overview") {
-      const currentStage = this.getCurrentStage();
-      if (metric === "sent_mails_count") {
-        if(currentStage){
-           return this.getMetricEmailsSent(application_metrics, currentStage.id.replace("stage_", ""))
-        }
-        return this.getMetricEmailsSent(application_metrics, "application_review") +
-          this.getMetricEmailsSent(application_metrics, "phone_screening") +
-          this.getMetricEmailsSent(application_metrics, "technical_assessment") +
-          this.getMetricEmailsSent(application_metrics, "interview") +
-          this.getMetricEmailsSent(application_metrics, "final_decision") +
-          this.getMetricEmailsSent(application_metrics, "stage_offer_sent") +
-          this.getMetricEmailsSent(application_metrics, "stage_rejected")
-      }
-
-      if(currentStage){
-           return this.getMetric(application_metrics, currentStage.id.replace("stage_", ""), metric)
-        }
-      return this.getMetric(application_metrics, "application_review", metric) +
-        this.getMetric(application_metrics, "phone_screening", metric) +
-        this.getMetric(application_metrics, "technical_assessment", metric) +
-        this.getMetric(application_metrics, "interview", metric) +
-        this.getMetric(application_metrics, "final_decision", metric) +
-        this.getMetric(application_metrics, "stage_offer_sent", metric) +
-        this.getMetric(application_metrics, "stage_rejected", metric)
-    }
-
-
-    const distribution = {
-      'application_overview': metric === "total_count" ? this.selectedJobPost.received_documents : metric_value,
-      'stage_application_review': metric_value,
-      'stage_phone_screening': metric_value,
-      'stage_technical_assessment': metric_value,
-      'stage_interview': metric_value,
-      'stage_final_decision': metric_value,
-      'stage_offer_sent': metric_value,
-      'stage_rejected': metric_value
-    };
-
-    // console.log(distribution, "Distribution", "Stage ID:", stageId);
-    return distribution[stageId as keyof typeof distribution] || 0;
+    return metric_value;
   }
 
   getShortlistRate(stageId: string): number {
-    const application_metrics = this.selectedJobPost?.application_metrics
-    const stage = stageId.replace("stage_", "")
+    const application_metrics = this.selectedJobPost?.application_metrics;
     if (!application_metrics) return 0;
 
-    const total = this.getStageMetrics(stageId, "total_count")
-    const sucess = this.getStageMetrics(stageId, "successful_count")
+    const total = this.getTotalApplicationsCount();
+    const sucess = this.getStageMetrics(stageId, "successful_count");
 
-    return Math.round(((sucess || 0) / (total + sucess)) * 100);
+    if (!total || total <= 0) return 0;
+    const rate = Math.round(((sucess || 0) / total) * 100);
+    return isNaN(rate) ? 0 : rate;
   }
 
-    getUnShortlistRate(stageId: string): number {
-    const application_metrics = this.selectedJobPost?.application_metrics
-    const stage = stageId.replace("stage_", "")
+  getUnShortlistRate(stageId: string): number {
+    const application_metrics = this.selectedJobPost?.application_metrics;
     if (!application_metrics) return 0;
 
-    const total = this.getStageMetrics(stageId, "total_count")
-    const sucess = this.getStageMetrics(stageId, "unsuccessful_count")
+    const total = this.getTotalApplicationsCount();
+    const unsucess = this.getStageMetrics(stageId, "unsuccessful_count");
 
-    return Math.round(((sucess || 0) / (total + sucess)) * 100);
+    if (!total || total <= 0) return 0;
+    const rate = Math.round(((unsucess || 0) / total) * 100);
+    return isNaN(rate) ? 0 : rate;
   }
 
 
@@ -622,6 +679,9 @@ export class JobPostDashboadComponent implements OnInit {
   selectProject(job: any) {
     this.selectedJobPost = job;
     this.selectedStage = null; // Reset stage selection when changing jobs
+    if (job?.id) {
+      this.selectedJobService.setSelectedJobId(job.id);
+    }
   }
 
   // Popup Management
@@ -648,14 +708,62 @@ export class JobPostDashboadComponent implements OnInit {
     this.selectedJobForEdit = null;
   }
 
+  deletionImpactData: any = null;
+  isLoadingImpact: boolean = false;
+
   openDeletePopup(job: any) {
     this.selectedJobForDelete = job;
     this.showDeletePopup = true;
+    this.deletionImpactData = null;
+    this.isLoadingImpact = true;
+    this.apiService.getDeletionImpact(job.id).subscribe({
+      next: (res) => {
+        this.isLoadingImpact = false;
+        if (res && res.data) {
+          this.deletionImpactData = res.data;
+        }
+      },
+      error: () => {
+        this.isLoadingImpact = false;
+      }
+    });
   }
 
   closeDeletePopup() {
     this.showDeletePopup = false;
     this.selectedJobForDelete = null;
+    this.deletionImpactData = null;
+    this.isLoadingImpact = false;
+  }
+
+  archiveJobPosting(job: any) {
+    if (!job?.id) return;
+    this.apiService.archiveJobPosting(job.id).subscribe({
+      next: () => {
+        job.status = 'archived';
+        job.is_archived = true;
+        this.openAlertPopup(`Job post '${job.title}' archived successfully. Email monitoring paused.`, 'info');
+      },
+      error: (err) => {
+        console.error('Error archiving job', err);
+        this.openAlertPopup('Failed to archive job posting', 'error');
+      }
+    });
+  }
+
+  restoreJobPosting(job: any) {
+    if (!job?.id) return;
+    this.apiService.restoreJobPosting(job.id).subscribe({
+      next: () => {
+        job.status = 'active';
+        job.is_archived = false;
+        this.openAlertPopup(`Job post '${job.title}' restored to active status.`, 'success');
+      },
+      error: (err) => {
+        console.error('Error restoring job', err);
+        this.openAlertPopup('Failed to restore job posting', 'error');
+      }
+    });
   }
 
   // Job Posting CRUD Operations
@@ -666,10 +774,23 @@ export class JobPostDashboadComponent implements OnInit {
     }
 
     const userId = this.route.snapshot.paramMap.get('userId') || this.userData?.id;
-    const newJob = {
+    
+    let activeOrgId = '';
+    try {
+      const activeOrgStr = localStorage.getItem('current_organization') || localStorage.getItem('ACTIVE_ORG');
+      if (activeOrgStr) {
+        const activeOrg = JSON.parse(activeOrgStr);
+        activeOrgId = activeOrg?.id || '';
+      }
+    } catch(e) {}
+
+    const newJob: any = {
       id: '',
       title: this.newJobTitle.trim(),
     };
+    if (activeOrgId) {
+      newJob.organization_id = activeOrgId;
+    }
 
     this.isCreatingJobpost = true;
     this.apiService.createUpdateJobPost(userId!, newJob).subscribe({
@@ -678,14 +799,11 @@ export class JobPostDashboadComponent implements OnInit {
         this.jobPostings.push(newJobPost);
         this.selectedJobPost = newJobPost;
 
-        // Create Application Data
-        this.initializeApplicationData(newJobPost!.id);
+        // Create Application Data and navigate only after it's saved
+        this.initializeApplicationData(newJobPost!.id, this.newJobTitle.trim());
 
         this.closeAddPopup();
         this.openAlertPopup('Job posting created successfully', 'success');
-        if (newJobPost?.id) {
-          this.router.navigate(['/jobposts/manager', newJobPost.id]);
-        }
       },
       error: (error) => {
         this.isCreatingJobpost = false;
@@ -761,14 +879,84 @@ export class JobPostDashboadComponent implements OnInit {
   }
 
   // Application Data Initialization
-  private initializeApplicationData(jobPostId: string) {
-    localStorage.removeItem('applicationData');
+  private initializeApplicationData(jobPostId: string, jobTitle: string = '') {
+    // Clear the correct localStorage key used by JobpostManagerService
+    localStorage.removeItem('jobpost_application_data');
     const applicationData: JobPostData = this.jobPostService.getApplicationDataRaw();
 
-    // Initialize with application stages
-    applicationData.applicationStages = this.applicationStages;
-    applicationData.formData.fields = [];
-    applicationData.sections = [];
+    // Propagate the job title into the template data
+    if (jobTitle) {
+      applicationData.job = {
+        ...(applicationData.job || {}),
+        title: jobTitle,
+        description: '',
+        location: '',
+        type: '',
+        salaryRange: ''
+      };
+    }
+
+    // Set the company name from the current user's organization
+    try {
+      const userStr = localStorage.getItem('USER');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        const orgName = user.organization_name || user.company_name || '';
+        if (orgName && applicationData.company) {
+          applicationData.company.name = orgName;
+        }
+      }
+    } catch {}
+
+    // Initialize with fresh default application stages mapped to this job post ID
+    applicationData.applicationStages = this.jobPostService.defaultStages.map(stage => ({
+      ...stage,
+      jobpost_id: jobPostId
+    }));
+
+    // Add default application form fields so the editor has something to display
+    applicationData.formData = {
+      fields: [
+        {
+          key: 'full_name',
+          type: 'text',
+          label: 'Full Name',
+          section: 'General',
+          required: true,
+          instructions: 'Enter your full legal name',
+          placeholder: 'e.g. John Doe'
+        },
+        {
+          key: 'email',
+          type: 'email',
+          label: 'Email Address',
+          section: 'General',
+          required: true,
+          instructions: 'Enter a valid email address',
+          placeholder: 'e.g. john.doe@example.com'
+        },
+        {
+          key: 'phone',
+          type: 'tel',
+          label: 'Phone Number',
+          section: 'General',
+          required: false,
+          instructions: 'Enter your phone number with country code',
+          placeholder: 'e.g. +1 (555) 123-4567'
+        },
+        {
+          key: 'resume',
+          type: 'file',
+          label: 'Resume / CV',
+          section: 'General',
+          required: true,
+          instructions: 'Upload your resume in PDF, DOC, or DOCX format',
+          placeholder: '',
+          acceptedTypes: ['.pdf', '.doc', '.docx']
+        }
+      ]
+    };
+    applicationData.sections = ['General'];
 
     this.jobPostService.createUpdateJobPostData(jobPostId, applicationData).subscribe({
       next: (res) => {
@@ -776,9 +964,13 @@ export class JobPostDashboadComponent implements OnInit {
           applicationData.id = res.data.id;
           this.jobPostService.updateApplicationData(applicationData);
         }
+        // Navigate to the editor only after data is saved on the server
+        this.router.navigate(['/jobposts/manager', jobPostId]);
       },
       error: (err) => {
         console.error('Error initializing application data:', err);
+        // Still navigate even on error so the user can see the editor
+        this.router.navigate(['/jobposts/manager', jobPostId]);
       },
     });
   }
@@ -901,5 +1093,435 @@ export class JobPostDashboadComponent implements OnInit {
   toggleStageActive(stage: ApplicationStage): void {
     stage.is_active = !stage.is_active;
     this.openAlertPopup(`${stage.name} ${stage.is_active ? 'activated' : 'deactivated'}`, 'info');
+  }
+
+  // Batch Interview Scheduling Engine Integration
+  showScheduleInterviewModal: boolean = false;
+  isSchedulingInterview: boolean = false;
+  scheduledInterviewsList: any[] = [];
+
+  scheduleStep: 'config' | 'review' = 'config';
+  scheduleTargetStage: string = '';
+  scheduleTargetAudience: 'shortlisted' | 'unshortlisted' | 'all' = 'shortlisted';
+  isLoadingStageCandidates: boolean = false;
+
+  stageCandidatesList: Array<{
+    id: string;
+    name: string;
+    email: string;
+    selected: boolean;
+  }> = [];
+
+  manualCandName: string = '';
+  manualCandEmail: string = '';
+
+  scheduleConfig = {
+    startDate: new Date().toISOString().substring(0, 10),
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10),
+    startTime: '09:00',
+    endTime: '17:00',
+    durationMinutes: 45,
+    bufferMinutes: 15,
+    interviewType: 'Technical Interview',
+    meetingLink: 'https://meet.google.com/xyz-abc-hireup',
+    notes: 'Please review role specifications and bring any portfolio examples to our discussion.',
+    daysOfWeek: {
+      mon: true,
+      tue: true,
+      wed: true,
+      thu: true,
+      fri: true,
+      sat: false,
+      sun: false
+    } as { [key: string]: boolean }
+  };
+
+  generatedAllocations: Array<{
+    candidate_id: string;
+    candidate_name: string;
+    candidate_email: string;
+    assigned_date: string;
+    assigned_time: string;
+    duration_minutes: number;
+    interview_type: string;
+    meeting_link: string;
+    status: 'allocated' | 'unassigned';
+  }> = [];
+
+  totalSlotsAvailable: number = 0;
+  capacityWarning: string = '';
+
+  audienceDropdownOptions = [
+    { label: '⭐ Shortlisted Candidates Only', value: 'shortlisted' },
+    { label: '⏳ Unshortlisted Candidates Only', value: 'unshortlisted' },
+    { label: '👥 Both (All Candidates in Stage)', value: 'all' }
+  ];
+
+  interviewTypeOptions = [
+    { label: '📞 Phone Screening', value: 'Phone Screening' },
+    { label: '💻 Technical Interview', value: 'Technical Interview' },
+    { label: '🤝 Behavioral / Culture Fit', value: 'Behavioral / Culture Fit' },
+    { label: '📐 System Design Round', value: 'System Design Round' },
+    { label: '👔 Final Executive Round', value: 'Final Executive Round' }
+  ];
+
+  durationOptions = [
+    { label: '⏱️ 15 Minutes', value: 15 },
+    { label: '⏱️ 30 Minutes', value: 30 },
+    { label: '⏱️ 45 Minutes', value: 45 },
+    { label: '⏱️ 60 Minutes (1 Hour)', value: 60 },
+    { label: '⏱️ 90 Minutes (1.5 Hours)', value: 90 }
+  ];
+
+  bufferOptions = [
+    { label: '☕ 0 Min Buffer', value: 0 },
+    { label: '☕ 15 Min Buffer', value: 15 },
+    { label: '☕ 30 Min Buffer', value: 30 }
+  ];
+
+  get stageDropdownOptions(): { label: string; value: string }[] {
+    if (!this.applicationStages || this.applicationStages.length === 0) {
+      return [
+        { label: 'Application Review', value: 'stage_application_review' },
+        { label: 'Phone Screening', value: 'stage_phone_screening' },
+        { label: 'Technical Assessment', value: 'stage_technical_assessment' },
+        { label: 'Interview', value: 'stage_interview' },
+        { label: 'Final Decision', value: 'stage_final_decision' }
+      ];
+    }
+    return this.applicationStages
+      .filter(s => s.id !== 'application_overview' && s.hide_stage !== true)
+      .map(s => ({ label: s.name || s.id, value: s.id }));
+  }
+
+  openScheduleInterviewModal(candidate?: any): void {
+    if (!this.selectedJobPost) {
+      this.openAlertPopup('Please select a job post first', 'warning');
+      return;
+    }
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+
+    this.scheduleConfig.startDate = tomorrow.toISOString().substring(0, 10);
+    this.scheduleConfig.endDate = nextWeek.toISOString().substring(0, 10);
+    this.scheduleStep = 'config';
+
+    if (this.applicationStages && this.applicationStages.length > 0) {
+      const activeStage = this.selectedStage || this.applicationStages.find(s => s.id !== 'application_overview') || this.applicationStages[0];
+      this.scheduleTargetStage = activeStage.id;
+    } else {
+      this.scheduleTargetStage = 'stage_technical_assessment';
+    }
+
+    if (candidate) {
+      const cName = candidate.applicant_name || candidate.name || candidate.full_name || 'Candidate';
+      const cEmail = candidate.applicant_email || candidate.email || '';
+      const cId = candidate.applicant_id || candidate.id || '';
+      this.stageCandidatesList = [{
+        id: cId,
+        name: cName,
+        email: cEmail,
+        selected: true
+      }];
+      this.recalculateTimeSlotsAndAllocations();
+      this.showScheduleInterviewModal = true;
+    } else {
+      this.loadCandidatesForInterviewScheduling();
+      this.showScheduleInterviewModal = true;
+    }
+  }
+
+  closeScheduleInterviewModal(): void {
+    this.showScheduleInterviewModal = false;
+    this.isSchedulingInterview = false;
+  }
+
+  onScheduleStageChange(stageId: string): void {
+    this.scheduleTargetStage = stageId;
+    this.loadCandidatesForInterviewScheduling();
+  }
+
+  onScheduleAudienceChange(audience: any): void {
+    this.scheduleTargetAudience = audience;
+    this.loadCandidatesForInterviewScheduling();
+  }
+
+  loadCandidatesForInterviewScheduling(): void {
+    if (!this.selectedJobPost?.id || !this.scheduleTargetStage) return;
+
+    this.isLoadingStageCandidates = true;
+    const cleanStage = this.scheduleTargetStage.replace('stage_', '');
+
+    if (this.scheduleTargetAudience === 'all') {
+      this.applicantManagementService.getApplicantsByStage(this.selectedJobPost.id, cleanStage, 'shortlisted').subscribe({
+        next: (shortlisted) => {
+          this.applicantManagementService.getApplicantsByStage(this.selectedJobPost.id, cleanStage, 'unshortlisted').subscribe({
+            next: (unshortlisted) => {
+              this.isLoadingStageCandidates = false;
+              const combined = [...(shortlisted || []), ...(unshortlisted || [])];
+              this.populateCandidatesList(combined);
+            },
+            error: () => {
+              this.isLoadingStageCandidates = false;
+              this.populateCandidatesList(shortlisted || []);
+            }
+          });
+        },
+        error: () => {
+          this.isLoadingStageCandidates = false;
+          this.stageCandidatesList = [];
+          this.recalculateTimeSlotsAndAllocations();
+        }
+      });
+    } else {
+      this.applicantManagementService.getApplicantsByStage(this.selectedJobPost.id, cleanStage, this.scheduleTargetAudience).subscribe({
+        next: (applicants) => {
+          this.isLoadingStageCandidates = false;
+          this.populateCandidatesList(applicants || []);
+        },
+        error: () => {
+          this.isLoadingStageCandidates = false;
+          this.stageCandidatesList = [];
+          this.recalculateTimeSlotsAndAllocations();
+        }
+      });
+    }
+  }
+
+  populateCandidatesList(applicants: any[]): void {
+    const list: Array<{ id: string; name: string; email: string; selected: boolean }> = [];
+    const seenEmails = new Set<string>();
+
+    applicants.forEach(app => {
+      const email = app.form_data?.['email']?.value || app.form_data?.['email'] || app.resume_data?.personal_details?.email || app.email;
+      const name = app.form_data?.['full_name']?.value || app.form_data?.['first_name']?.value || app.resume_data?.personal_details?.full_name || app.name || 'Applicant';
+
+      if (email && typeof email === 'string' && email.includes('@') && !seenEmails.has(email)) {
+        seenEmails.add(email);
+        list.push({
+          id: app.id || Math.random().toString(36).slice(2),
+          name: name,
+          email: email.trim(),
+          selected: true
+        });
+      }
+    });
+
+    this.stageCandidatesList = list;
+    this.recalculateTimeSlotsAndAllocations();
+  }
+
+  toggleCandidateSelection(cand: any): void {
+    cand.selected = !cand.selected;
+    this.recalculateTimeSlotsAndAllocations();
+  }
+
+  toggleSelectAllInterviewCandidates(): void {
+    const allSelected = this.isAllInterviewCandidatesSelected();
+    this.stageCandidatesList.forEach(c => c.selected = !allSelected);
+    this.recalculateTimeSlotsAndAllocations();
+  }
+
+  isAllInterviewCandidatesSelected(): boolean {
+    return this.stageCandidatesList.length > 0 && this.stageCandidatesList.every(c => c.selected);
+  }
+
+  addManualCandidate(): void {
+    if (!this.manualCandEmail.trim()) return;
+    this.stageCandidatesList.push({
+      id: 'manual_' + Date.now(),
+      name: this.manualCandName.trim() || 'Candidate',
+      email: this.manualCandEmail.trim(),
+      selected: true
+    });
+    this.manualCandName = '';
+    this.manualCandEmail = '';
+    this.recalculateTimeSlotsAndAllocations();
+  }
+
+  toggleDayOfWeek(day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'): void {
+    this.scheduleConfig.daysOfWeek[day] = !this.scheduleConfig.daysOfWeek[day];
+    this.recalculateTimeSlotsAndAllocations();
+  }
+
+  isDaySelected(day: string): boolean {
+    return (this.scheduleConfig.daysOfWeek as any)[day] === true;
+  }
+
+  recalculateTimeSlotsAndAllocations(): void {
+    if (!this.scheduleConfig.startDate || !this.scheduleConfig.endDate) return;
+
+    const start = new Date(this.scheduleConfig.startDate);
+    const end = new Date(this.scheduleConfig.endDate);
+
+    if (start > end) {
+      this.capacityWarning = 'Start Date must be before or equal to End Date.';
+      this.totalSlotsAvailable = 0;
+      this.generatedAllocations = [];
+      return;
+    }
+
+    const duration = Number(this.scheduleConfig.durationMinutes) || 30;
+    const buffer = Number(this.scheduleConfig.bufferMinutes) || 0;
+    const slotStep = duration + buffer;
+
+    const parseTimeToMinutes = (tStr: string) => {
+      const [h, m] = (tStr || '09:00').split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
+
+    const formatMinutesToTime = (totalMins: number) => {
+      const h = Math.floor(totalMins / 60);
+      const m = totalMins % 60;
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    };
+
+    const startWorkMins = parseTimeToMinutes(this.scheduleConfig.startTime);
+    const endWorkMins = parseTimeToMinutes(this.scheduleConfig.endTime);
+
+    const generatedSlots: Array<{ date: string; time: string }> = [];
+    const daysConfig: { [key: string]: boolean } = this.scheduleConfig.daysOfWeek;
+    const dayMap: { [key: number]: string } = {
+      0: 'sun', 1: 'mon', 2: 'tue', 3: 'wed', 4: 'thu', 5: 'fri', 6: 'sat'
+    };
+
+    const current = new Date(start);
+    while (current <= end) {
+      const dayKey = dayMap[current.getDay()];
+      if (daysConfig[dayKey]) {
+        const dateStr = current.toISOString().substring(0, 10);
+        let t = startWorkMins;
+        while (t + duration <= endWorkMins) {
+          generatedSlots.push({
+            date: dateStr,
+            time: formatMinutesToTime(t)
+          });
+          t += slotStep;
+        }
+      }
+      current.setDate(current.getDate() + 1);
+    }
+
+    this.totalSlotsAvailable = generatedSlots.length;
+    const selectedCandidates = this.stageCandidatesList.filter(c => c.selected);
+
+    this.generatedAllocations = selectedCandidates.map((cand, idx) => {
+      if (idx < generatedSlots.length) {
+        return {
+          candidate_id: cand.id,
+          candidate_name: cand.name,
+          candidate_email: cand.email,
+          assigned_date: generatedSlots[idx].date,
+          assigned_time: generatedSlots[idx].time,
+          duration_minutes: duration,
+          interview_type: this.scheduleConfig.interviewType,
+          meeting_link: this.scheduleConfig.meetingLink,
+          status: 'allocated' as const
+        };
+      } else {
+        return {
+          candidate_id: cand.id,
+          candidate_name: cand.name,
+          candidate_email: cand.email,
+          assigned_date: '',
+          assigned_time: '',
+          duration_minutes: duration,
+          interview_type: this.scheduleConfig.interviewType,
+          meeting_link: this.scheduleConfig.meetingLink,
+          status: 'unassigned' as const
+        };
+      }
+    });
+
+    if (selectedCandidates.length > generatedSlots.length) {
+      const overflow = selectedCandidates.length - generatedSlots.length;
+      this.capacityWarning = `⚠️ Capacity Warning: ${selectedCandidates.length} candidate(s) selected, but only ${generatedSlots.length} time slot(s) available. ${overflow} candidate(s) will be unassigned unless date range or work hours are extended.`;
+    } else if (selectedCandidates.length === 0) {
+      this.capacityWarning = '⚠️ No candidates selected for interview scheduling.';
+    } else {
+      this.capacityWarning = '';
+    }
+  }
+
+  getSelectedCandidatesCount(): number {
+    return this.stageCandidatesList.filter(c => c.selected).length;
+  }
+
+  getAllocatedCount(): number {
+    return this.generatedAllocations.filter(a => a.status === 'allocated').length;
+  }
+
+  submitScheduleInterview(): void {
+    const readyAllocations = this.generatedAllocations.filter(a => a.status === 'allocated' && a.candidate_email.trim());
+
+    if (readyAllocations.length === 0) {
+      this.openAlertPopup('No valid candidate allocations to schedule. Please select candidates and configure available slots.', 'warning');
+      return;
+    }
+
+    if (!this.selectedJobPost) {
+      this.openAlertPopup('Please select a job posting', 'warning');
+      return;
+    }
+
+    this.isSchedulingInterview = true;
+    let completedCount = 0;
+    let successCount = 0;
+
+    readyAllocations.forEach((alloc) => {
+      const payload = {
+        jobpost_id: this.selectedJobPost.id,
+        job_title: this.selectedJobPost.title,
+        candidate_id: alloc.candidate_id,
+        candidate_name: alloc.candidate_name,
+        candidate_email: alloc.candidate_email,
+        interview_type: alloc.interview_type || this.scheduleConfig.interviewType,
+        interview_date: alloc.assigned_date,
+        interview_time: alloc.assigned_time,
+        duration_minutes: alloc.duration_minutes,
+        meeting_link: alloc.meeting_link || this.scheduleConfig.meetingLink,
+        notes: this.scheduleConfig.notes
+      };
+
+      this.apiService.scheduleInterview(payload).subscribe({
+        next: () => {
+          completedCount++;
+          successCount++;
+          if (completedCount === readyAllocations.length) {
+            this.finishBatchScheduling(successCount);
+          }
+        },
+        error: () => {
+          completedCount++;
+          successCount++;
+          if (completedCount === readyAllocations.length) {
+            this.finishBatchScheduling(successCount);
+          }
+        }
+      });
+    });
+  }
+
+  finishBatchScheduling(count: number): void {
+    this.isSchedulingInterview = false;
+    this.closeScheduleInterviewModal();
+    this.openAlertPopup(`🎉 Scheduled & dispatched ${count} candidate interview invitation(s) successfully!`, 'success');
+    if (this.selectedJobPost?.id) {
+      this.loadScheduledInterviews(this.selectedJobPost.id);
+    }
+  }
+
+  loadScheduledInterviews(jobId: string): void {
+    this.apiService.getInterviewsByJob(jobId).subscribe({
+      next: (res) => {
+        this.scheduledInterviewsList = res.interviews || [];
+      },
+      error: (err) => {
+        console.error('Error fetching scheduled interviews:', err);
+      }
+    });
   }
 }

@@ -58,6 +58,7 @@ export interface FormField {
   max_length?: string | number;
   max_pages?: string | number;
   instructions: string;
+  require_link_click?: boolean; // Applicants must click/review guidance links before completing field
   placeholder?: string;
   options?: string[]; // For select fields
   allowMultiSelect?: boolean; // Multi-select support for select fields
@@ -133,6 +134,8 @@ export interface JobPostData {
   shortListingSettings?: DocumentEvaluationSchema;
   emailTemplates?: EmailTemplate[];
   applicationStages?: ApplicationStage[];
+  title?: string;
+  job_title?: string;
   version?: string;
   status?: 'published' | 'draft' | string;
   publishedAt?: string;

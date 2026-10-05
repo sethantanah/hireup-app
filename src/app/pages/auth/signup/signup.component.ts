@@ -29,6 +29,7 @@ export class SignupComponent implements OnInit {
 
   userRole: 'recruiter' | 'candidate' = 'candidate';
   alert: any = null;
+  returnUrl = '';
 
   constructor(
     private fb: FormBuilder,
@@ -71,6 +72,15 @@ export class SignupComponent implements OnInit {
         this.userRole = 'recruiter';
       } else if (params['role'] === 'candidate') {
         this.userRole = 'candidate';
+      }
+      if (params['email']) {
+        this.signupForm.patchValue({ email: params['email'] });
+      }
+      if (params['fullName']) {
+        this.signupForm.patchValue({ fullName: params['fullName'] });
+      }
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
       }
       this.updateValidators();
     });
@@ -152,13 +162,14 @@ export class SignupComponent implements OnInit {
     this.isLoading = true;
 
     const emailVal = this.signupForm.get('email')?.value;
+    const formFullName = this.signupForm.get('fullName')?.value;
     const defaultName = emailVal ? emailVal.split('@')[0] : 'Candidate';
 
     const user_data: UserReq = {
       email: emailVal,
       password: this.signupForm.get('password')?.value,
       company_name: this.userRole === 'candidate' ? 'Candidate Account' : (this.signupForm.get('companyName')?.value || 'Candidate'),
-      full_name: this.userRole === 'candidate' ? defaultName : (this.signupForm.get('fullName')?.value || defaultName),
+      full_name: formFullName || defaultName,
       position_in_company: this.userRole === 'candidate' ? 'Job Seeker' : (this.signupForm.get('positionInCompany')?.value || 'Recruiter')
     };
 
@@ -196,10 +207,12 @@ export class SignupComponent implements OnInit {
         localStorage.setItem('USER', JSON.stringify(res.user));
         this.isLoading = false;
 
-        if (this.userRole === 'candidate') {
+        if (this.returnUrl) {
+          this.router.navigateByUrl(this.returnUrl);
+        } else if (this.userRole === 'candidate') {
           this.router.navigate(['/candidate-portal']);
         } else {
-          this.router.navigate(['/jobposts/' + res.user.id]);
+          this.router.navigate(['/dashboard']);
         }
       },
       error: (err) => {

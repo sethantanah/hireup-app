@@ -42,11 +42,12 @@ export class DynamicFormComponent implements OnInit, OnDestroy {
     min_length: '',
     max_length: '',
     instructions: '',
+    require_link_click: false,
     allowMultiSelect: false,
     allowOther: false,
     options: [],
   };
-  fieldTypes = ['text', 'date', 'email', 'tel', 'select', 'checkbox', 'textarea', 'file'];
+  fieldTypes = ['text', 'number', 'date', 'email', 'tel', 'select', 'checkbox', 'textarea', 'file'];
 
   constructor(
     private jobPostService: JobpostManagerService,
@@ -155,6 +156,7 @@ export class DynamicFormComponent implements OnInit, OnDestroy {
       min_length: '',
       max_length: '',
       instructions: '',
+      require_link_click: false,
       allowMultiSelect: false,
       allowOther: false,
       options: [],

@@ -22,6 +22,8 @@ export class CrosswordBuilderComponent implements OnChanges {
   @Output() puzzleSubmitted = new EventEmitter<{ score: number, total: number, percentage: number }>();
 
   gridSize = 10;
+  difficulty: 'Easy' | 'Medium' | 'Hard' = 'Medium';
+  errorMessage: string | null = null;
   baseGrid: CrosswordCell[][] = [];
   displayGrid: CrosswordCell[][] = [];
   isSelecting = false;
@@ -36,6 +38,8 @@ export class CrosswordBuilderComponent implements OnChanges {
   editingWord = '';
   editingClueText = '';
 
+  autoWordsInput = '';
+  showAutoGenerateModal = false;
 
   showPreview = false;
   nextClueNumber = 1;
@@ -43,9 +47,21 @@ export class CrosswordBuilderComponent implements OnChanges {
   // Track which cells have letters (word letters or random letters)
   letterCells: Set<string> = new Set();
 
-  instruct: string = "Hello Word"
+  instruct: string = "Find the hidden words in the crossword puzzle grid."
 
   constructor(public formattingService: FormattingService) {
+    this.initializeGrid();
+  }
+
+  setDifficulty(level: 'Easy' | 'Medium' | 'Hard') {
+    this.difficulty = level;
+    if (level === 'Easy') {
+      this.gridSize = 8;
+    } else if (level === 'Medium') {
+      this.gridSize = 10;
+    } else if (level === 'Hard') {
+      this.gridSize = 14;
+    }
     this.initializeGrid();
   }
 
@@ -180,6 +196,161 @@ export class CrosswordBuilderComponent implements OnChanges {
           cell.value = this.getRandomLetter();
           const key = `${i},${j}`;
           this.letterCells.add(key);
+        }
+      }
+    }
+    this.emitPuzzleUpdate();
+  }
+
+  shuffleGrid(): void {
+    if (this.clues && this.clues.length > 0) {
+      const currentWords = this.clues.map(c => c.answer);
+
+      let bestPlacedClues: CrosswordClue[] = [];
+      let maxPlacedCount = -1;
+
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const shuffledWords = [...currentWords];
+        for (let i = shuffledWords.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffledWords[i], shuffledWords[j]] = [shuffledWords[j], shuffledWords[i]];
+        }
+
+        const testGridMap: string[][] = Array.from({ length: this.gridSize }, () => Array(this.gridSize).fill(''));
+        const placedClues: CrosswordClue[] = [];
+        let clueNum = 1;
+
+        for (const word of shuffledWords) {
+          let placed = false;
+
+          if (placedClues.length === 0) {
+            const maxStartCol = Math.max(0, this.gridSize - word.length);
+            const row = Math.floor(Math.random() * (this.gridSize - 2)) + 1;
+            const col = Math.floor(Math.random() * (maxStartCol + 1));
+            const dir: 'across' | 'down' = Math.random() > 0.5 ? 'across' : 'down';
+
+            if (this.canPlaceWord(testGridMap, word, row, col, dir)) {
+              this.placeWordOnMap(testGridMap, word, row, col, dir);
+              placedClues.push({
+                id: `clue_${clueNum}`,
+                number: clueNum++,
+                clue: `Find the word: ${word}`,
+                answer: word,
+                direction: dir,
+                row,
+                col,
+                length: word.length,
+                solved: false
+              });
+              placed = true;
+            }
+          }
+
+          if (!placed) {
+            for (let letterIdx = 0; letterIdx < word.length && !placed; letterIdx++) {
+              const char = word[letterIdx];
+              const positions: { r: number, c: number }[] = [];
+              for (let r = 0; r < this.gridSize; r++) {
+                for (let c = 0; c < this.gridSize; c++) {
+                  if (testGridMap[r][c] === char) positions.push({ r, c });
+                }
+              }
+              positions.sort(() => Math.random() - 0.5);
+
+              for (const pos of positions) {
+                const directions: ('across' | 'down')[] = Math.random() > 0.5 ? ['down', 'across'] : ['across', 'down'];
+                for (const dir of directions) {
+                  const startRow = dir === 'down' ? pos.r - letterIdx : pos.r;
+                  const startCol = dir === 'across' ? pos.c - letterIdx : pos.c;
+                  if (this.canPlaceWord(testGridMap, word, startRow, startCol, dir)) {
+                    this.placeWordOnMap(testGridMap, word, startRow, startCol, dir);
+                    placedClues.push({
+                      id: `clue_${clueNum}`,
+                      number: clueNum++,
+                      clue: `Find the word: ${word}`,
+                      answer: word,
+                      direction: dir,
+                      row: startRow,
+                      col: startCol,
+                      length: word.length,
+                      solved: false
+                    });
+                    placed = true;
+                    break;
+                  }
+                }
+                if (placed) break;
+              }
+            }
+          }
+
+          if (!placed) {
+            const allPositions: { r: number, c: number, dir: 'across' | 'down' }[] = [];
+            for (let r = 0; r < this.gridSize; r++) {
+              for (let c = 0; c < this.gridSize; c++) {
+                allPositions.push({ r, c, dir: 'across' });
+                allPositions.push({ r, c, dir: 'down' });
+              }
+            }
+            allPositions.sort(() => Math.random() - 0.5);
+
+            for (const pos of allPositions) {
+              if (this.canPlaceWord(testGridMap, word, pos.r, pos.c, pos.dir)) {
+                this.placeWordOnMap(testGridMap, word, pos.r, pos.c, pos.dir);
+                placedClues.push({
+                  id: `clue_${clueNum}`,
+                  number: clueNum++,
+                  clue: `Find the word: ${word}`,
+                  answer: word,
+                  direction: pos.dir,
+                  row: pos.r,
+                  col: pos.c,
+                  length: word.length,
+                  solved: false
+                });
+                placed = true;
+                break;
+              }
+            }
+          }
+        }
+
+        if (placedClues.length > maxPlacedCount) {
+          maxPlacedCount = placedClues.length;
+          bestPlacedClues = placedClues;
+        }
+
+        if (maxPlacedCount === currentWords.length) break;
+      }
+
+      if (bestPlacedClues.length > 0) {
+        this.clues = bestPlacedClues;
+        this.nextClueNumber = bestPlacedClues.length + 1;
+        this.initializeLetterCells();
+        this.updateDisplayGrid();
+        this.letterCells.clear();
+        this.fillWordLetters();
+        for (let i = 0; i < this.gridSize; i++) {
+          for (let j = 0; j < this.gridSize; j++) {
+            const cell = this.displayGrid[i][j];
+            if (!cell.isBlack && !this.isWordCell(i, j)) {
+              cell.value = this.getRandomLetter();
+              this.letterCells.add(`${i},${j}`);
+            }
+          }
+        }
+        this.emitPuzzleUpdate();
+        return;
+      }
+    }
+
+    this.letterCells.clear();
+    for (let i = 0; i < this.gridSize; i++) {
+      for (let j = 0; j < this.gridSize; j++) {
+        const cell = this.displayGrid[i][j];
+        if (!cell.isBlack && !this.isWordCell(i, j)) {
+          cell.value = this.getRandomLetter();
+          this.letterCells.add(`${i},${j}`);
         }
       }
     }
@@ -577,7 +748,7 @@ export class CrosswordBuilderComponent implements OnChanges {
           this.loadPuzzle(puzzle);
         } catch (error) {
           console.error('Error parsing puzzle file:', error);
-          alert('Invalid puzzle file');
+          this.errorMessage = 'Invalid puzzle file format. Please upload a valid JSON crossword structure.';
         }
       };
 
@@ -760,6 +931,173 @@ export class CrosswordBuilderComponent implements OnChanges {
       updatedAt: new Date()
     };
     this.puzzleUpdated.emit(puzzle);
+  }
+
+  autoGenerateFromWordList(listString?: string): void {
+    const rawInput = listString !== undefined ? listString : this.autoWordsInput;
+    if (!rawInput || !rawInput.trim()) {
+      this.errorMessage = 'Please enter at least one word (e.g. JAVASCRIPT, ANGULAR, PYTHON).';
+      return;
+    }
+
+    const words = rawInput
+      .split(/[\n,;]+/)
+      .map(w => w.trim().toUpperCase().replace(/[^A-Z]/g, ''))
+      .filter(w => w.length >= 2 && w.length <= this.gridSize);
+
+    if (words.length === 0) {
+      this.errorMessage = `No valid words found. Words must be between 2 and ${this.gridSize} letters long.`;
+      return;
+    }
+
+    // Sort words by length descending
+    words.sort((a, b) => b.length - a.length);
+
+    // Reset grid
+    this.initializeGrid();
+    const placedClues: CrosswordClue[] = [];
+    const gridMap: string[][] = Array.from({ length: this.gridSize }, () => Array(this.gridSize).fill(''));
+
+    let clueNum = 1;
+
+    for (const word of words) {
+      if (placedClues.length === 0) {
+        // Place 1st word horizontally in the middle of grid
+        const row = Math.floor(this.gridSize / 2);
+        const col = Math.floor((this.gridSize - word.length) / 2);
+
+        if (this.canPlaceWord(gridMap, word, row, col, 'across')) {
+          this.placeWordOnMap(gridMap, word, row, col, 'across');
+          placedClues.push({
+            id: `clue_${clueNum}`,
+            number: clueNum++,
+            clue: `Find the word: ${word}`,
+            answer: word,
+            direction: 'across',
+            row,
+            col,
+            length: word.length,
+            solved: false
+          });
+        }
+      } else {
+        // Try placing subsequent word by intersecting with already placed words
+        let placed = false;
+
+        for (let letterIdx = 0; letterIdx < word.length && !placed; letterIdx++) {
+          const char = word[letterIdx];
+
+          for (let r = 0; r < this.gridSize && !placed; r++) {
+            for (let c = 0; c < this.gridSize && !placed; c++) {
+              if (gridMap[r][c] === char) {
+                // Try placing 'down' if intersecting horizontal word
+                const downStartRow = r - letterIdx;
+                if (this.canPlaceWord(gridMap, word, downStartRow, c, 'down')) {
+                  this.placeWordOnMap(gridMap, word, downStartRow, c, 'down');
+                  placedClues.push({
+                    id: `clue_${clueNum}`,
+                    number: clueNum++,
+                    clue: `Find the word: ${word}`,
+                    answer: word,
+                    direction: 'down',
+                    row: downStartRow,
+                    col: c,
+                    length: word.length,
+                    solved: false
+                  });
+                  placed = true;
+                }
+
+                // Try placing 'across' if intersecting vertical word
+                if (!placed) {
+                  const acrossStartCol = c - letterIdx;
+                  if (this.canPlaceWord(gridMap, word, r, acrossStartCol, 'across')) {
+                    this.placeWordOnMap(gridMap, word, r, acrossStartCol, 'across');
+                    placedClues.push({
+                      id: `clue_${clueNum}`,
+                      number: clueNum++,
+                      clue: `Find the word: ${word}`,
+                      answer: word,
+                      direction: 'across',
+                      row: r,
+                      col: acrossStartCol,
+                      length: word.length,
+                      solved: false
+                    });
+                    placed = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // If no intersection was found, try finding any open space
+        if (!placed) {
+          for (let r = 0; r < this.gridSize && !placed; r++) {
+            for (let c = 0; c <= this.gridSize - word.length && !placed; c++) {
+              if (this.canPlaceWord(gridMap, word, r, c, 'across')) {
+                this.placeWordOnMap(gridMap, word, r, c, 'across');
+                placedClues.push({
+                  id: `clue_${clueNum}`,
+                  number: clueNum++,
+                  clue: `Find the word: ${word}`,
+                  answer: word,
+                  direction: 'across',
+                  row: r,
+                  col: c,
+                  length: word.length,
+                  solved: false
+                });
+                placed = true;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    this.clues = placedClues;
+    this.nextClueNumber = clueNum;
+
+    // Apply placed word letters to baseGrid
+    this.initializeLetterCells();
+    this.updateDisplayGrid();
+    this.fillNonWordCellsManual();
+
+    this.errorMessage = null;
+    this.showAutoGenerateModal = false;
+    this.emitPuzzleUpdate();
+  }
+
+  private canPlaceWord(gridMap: string[][], word: string, startRow: number, startCol: number, direction: 'across' | 'down'): boolean {
+    if (direction === 'across') {
+      if (startRow < 0 || startRow >= this.gridSize || startCol < 0 || startCol + word.length > this.gridSize) return false;
+      for (let i = 0; i < word.length; i++) {
+        const c = startCol + i;
+        const existing = gridMap[startRow][c];
+        if (existing !== '' && existing !== word[i]) return false;
+      }
+      return true;
+    } else {
+      if (startCol < 0 || startCol >= this.gridSize || startRow < 0 || startRow + word.length > this.gridSize) return false;
+      for (let i = 0; i < word.length; i++) {
+        const r = startRow + i;
+        const existing = gridMap[r][startCol];
+        if (existing !== '' && existing !== word[i]) return false;
+      }
+      return true;
+    }
+  }
+
+  private placeWordOnMap(gridMap: string[][], word: string, startRow: number, startCol: number, direction: 'across' | 'down'): void {
+    for (let i = 0; i < word.length; i++) {
+      if (direction === 'across') {
+        gridMap[startRow][startCol + i] = word[i];
+      } else {
+        gridMap[startRow + i][startCol] = word[i];
+      }
+    }
   }
 
   private isValidCell(row: number, col: number): boolean {

@@ -1,16 +1,10 @@
 <!-- Enterprise Loading State -->
-<div *ngIf="isLoading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm">
-  <div class="text-center">
-    <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-green-600 border-t-transparent"></div>
-    <div class="mt-6 text-xl font-semibold text-gray-800">Loading Shortlisted Candidates</div>
-    <p class="text-gray-600 mt-2 max-w-md">Processing and organizing candidate data for review</p>
-  </div>
-</div>
+<app-loader *ngIf="isLoading" [loadingText]="'Loading Shortlisted Candidates'" [subText]="'Processing and organizing candidate data for review'"></app-loader>
 
 <!-- Enterprise No Data State -->
 <div 
   *ngIf="!isLoading && candidates.length === 0" 
-  class="flex flex-col items-center justify-center min-h-[75vh] px-4 py-12"
+  class="flex flex-col items-center justify-center min-h-[75vh] px-4 py-12 bg-card min-h-screen"
 >
   <div class="max-w-2xl w-full">
     <div class="bg-white/90 backdrop-blur-2xl rounded-3xl shadow-xl border border-slate-200/80 p-8 sm:p-12 text-center transition-all">
@@ -18,7 +12,7 @@
       <div class="relative mx-auto w-24 h-24 mb-6 flex items-center justify-center">
         <div class="absolute inset-0 rounded-3xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-400 blur-lg opacity-40 animate-pulse"></div>
         <div class="relative w-20 h-20 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 rounded-3xl flex items-center justify-center shadow-lg shadow-indigo-500/30 text-white">
-          <i class="fas fa-user-astronaut text-3xl"></i>
+          <i class="fas fa-user text-3xl"></i>
         </div>
       </div>
 
@@ -76,7 +70,7 @@
 </div>
 
 <!-- Enterprise Shortlist Dashboard -->
-<div *ngIf="!isLoading && candidates.length > 0" class="p-4 md:p-6 lg:p-8">
+<div *ngIf="!isLoading && candidates.length > 0" class="p-4 md:p-6 lg:p-8 bg-card min-h-screen">
   <!-- Dashboard Header -->
   <div class="mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-6">
@@ -86,18 +80,7 @@
           Shortlisted Candidates
         </h1>
         <div class="flex flex-wrap items-center gap-4 mt-3">
-          <div class="flex items-center gap-2 text-gray-600">
-            <i class="fas fa-users"></i>
-            <span class="font-medium">{{ candidates.length }} candidates</span>
-          </div>
-          <div class="flex items-center gap-2 text-gray-600">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Updated {{ getLastUpdateTime() }}</span>
-          </div>
-          <div *ngIf="getAverageScore() > 0" class="flex items-center gap-2 text-gray-600">
-            <i class="fas fa-chart-line"></i>
-            <span>{{ getAverageScore() }}% average score</span>
-          </div>
+       
         </div>
       </div>
 
@@ -119,45 +102,6 @@
           <i class="fas fa-file-export text-slate-400 group-hover:text-indigo-600"></i>
           <span>Export List (CSV)</span>
         </button>
-      </div>
-    </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white/90 backdrop-blur-xl p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Shortlisted</p>
-            <p class="text-3xl font-extrabold text-emerald-600 mt-2 tracking-tight">{{ candidates.length }}</p>
-          </div>
-          <div class="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center">
-            <i class="fas fa-star text-emerald-600 text-lg"></i>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="getAverageExperience() > 0" class="bg-white/90 backdrop-blur-xl p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Avg. Experience</p>
-            <p class="text-3xl font-extrabold text-indigo-600 mt-2 tracking-tight">{{ getAverageExperience() }} yrs</p>
-          </div>
-          <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center">
-            <i class="fas fa-briefcase text-indigo-600 text-lg"></i>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white/90 backdrop-blur-xl p-5 rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Skills Match</p>
-            <p class="text-3xl font-extrabold text-purple-600 mt-2 tracking-tight">{{ getSkillsMatchRate() }}%</p>
-          </div>
-          <div class="w-12 h-12 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center">
-            <i class="fas fa-code text-purple-600 text-lg"></i>
-          </div>
-        </div>
       </div>
     </div>
   </div>
@@ -190,7 +134,7 @@
   <!-- Candidate Grid -->
   <div class="mb-8">
     <!-- Bulk Operations & Multi-Select Bar -->
-    <div class="mb-6 p-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl text-white shadow-xl border border-indigo-800/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="mb-6 p-4 bg-white from-slate-900 via-indigo-950 to-slate-900 rounded-2xl text-white shadow-xl border border-indigo-800/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-3">
         <label class="flex items-center gap-2 cursor-pointer bg-white/10 hover:bg-white/20 px-3 py-2 rounded-xl border border-white/10 transition-all">
           <input 
@@ -199,31 +143,34 @@
             (change)="toggleSelectAll()" 
             class="w-4 h-4 rounded text-indigo-500 focus:ring-indigo-400 focus:ring-offset-slate-900 cursor-pointer"
           />
-          <span class="text-xs font-bold uppercase tracking-wider text-slate-200">Select All</span>
+          <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Select All</span>
         </label>
 
-        <div class="text-xs font-semibold text-slate-300">
-          <span class="px-2.5 py-1 bg-indigo-500/30 rounded-lg font-bold text-indigo-200 border border-indigo-400/30">
+        <div class="text-xs font-semibold text-slate-600">
+          <span class="px-2.5 py-1 bg-indigo-500/30 rounded-lg font-bold  border border-indigo-400/30 text-slate-600">
             {{ getSelectedCount() }}
           </span>
-          <span class="ml-2">Candidate(s) Selected</span>
+          <span class="ml-2">Selected</span>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
-        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:block">Move Selected To:</label>
-        <select 
-          [(ngModel)]="targetBulkStage"
-          class="px-3.5 py-2 bg-slate-800 border border-slate-700 text-slate-100 rounded-xl text-xs font-bold shadow-inner focus:ring-2 focus:ring-indigo-500 outline-none max-w-[200px]"
-        >
-          <option value="" disabled selected>Select Pipeline Stage</option>
-          <option *ngFor="let stg of pipelineStages" [value]="stg.id">{{ stg.label }}</option>
-        </select>
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:block text-slate-600">Move Selected To:</label>
+        <div class="w-56">
+          <app-custom-dropdown
+            [options]="pipelineStages"
+            labelKey="label"
+            valueKey="id"
+            [value]="targetBulkStage"
+            (valueChange)="targetBulkStage = $event"
+            placeholder="Select Pipeline Stage"
+          ></app-custom-dropdown>
+        </div>
 
         <button 
           (click)="moveSelectedCandidatesToStage()"
           [disabled]="isBulkUpdating || getSelectedCount() === 0"
-          class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         >
           <i class="fas fa-arrow-right text-xs" *ngIf="!isBulkUpdating"></i>
           <i class="fas fa-spinner fa-spin text-xs" *ngIf="isBulkUpdating"></i>
@@ -237,14 +184,17 @@
       <h2 class="text-xl font-semibold text-gray-900">
         Shortlisted Roster
       </h2>
-      <div class="flex items-center gap-2 text-sm text-gray-600">
-        <i class="fas fa-sort"></i>
-        <select class="border-0 bg-transparent focus:ring-0" (change)="onSortChange($event)">
-          <option value="score">Sort by Score</option>
-          <option value="experience">Sort by Experience</option>
-          <option value="name">Sort by Name</option>
-          <option value="date">Sort by Date</option>
-        </select>
+      <div class="flex items-center gap-2 text-sm text-gray-600 w-48">
+        <app-custom-dropdown
+          [options]="sortOptions"
+          labelKey="label"
+          valueKey="value"
+          [value]="sortBy"
+          (valueChange)="onSortChange($event)"
+          icon="fa-sort"
+          [dropUp]="false"
+          placeholder="Sort By..."
+        ></app-custom-dropdown>
       </div>
     </div>
 
@@ -252,12 +202,13 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
       <div 
         *ngFor="let candidate of filteredCandidates"
-        class="group bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 overflow-hidden"
+        class="group bg-white rounded-xl border border-gray-200 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 relative"
         [class.ring-2]="isCandidateSelected(candidate.id)"
         [class.ring-indigo-500]="isCandidateSelected(candidate.id)"
+        [class.opacity-60]="isRemovingCandidate(candidate.id) || isUpdatingStage(candidate.id)"
       >
         <!-- Card Header with Checkbox & Score -->
-        <div class="p-5 border-b border-gray-100 bg-gradient-to-r from-green-50 to-white flex items-start justify-between gap-3">
+        <div class="p-5 border-b border-gray-100 bg-gradient-to-r from-green-50 to-white flex items-start justify-between gap-3 rounded-t-xl">
           <div class="flex items-start gap-3 min-w-0 flex-1">
             <input 
               type="checkbox" 
@@ -339,22 +290,26 @@
         </div>
 
         <!-- Card Actions & Pipeline Stage Control -->
-        <div class="p-4 border-t border-gray-100 bg-gray-50/50 space-y-3">
+        <div class="p-4 border-t border-gray-100 bg-gray-50/50 space-y-3 rounded-b-xl">
           <div class="flex items-center justify-between gap-2">
-            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider">Pipeline Stage:</span>
-            <select
-              [value]="getCandidateStage(candidate)"
-              (change)="onStageChange(candidate, $event)"
-              class="px-2.5 py-1.5 bg-white border border-gray-200 text-xs font-semibold text-gray-800 rounded-lg shadow-2xs focus:ring-2 focus:ring-green-500/20 outline-none"
-            >
-              <option *ngFor="let stg of pipelineStages" [value]="stg.id">{{ stg.label }}</option>
-            </select>
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider shrink-0">Pipeline Stage:</span>
+            <div class="w-44 flex-1">
+              <app-custom-dropdown
+                [options]="pipelineStages"
+                labelKey="label"
+                valueKey="id"
+                [value]="getCandidateStage(candidate)"
+                (valueChange)="onStageChange(candidate, $event)"
+                placeholder="Select Stage..."
+                [dropUp]="true"
+              ></app-custom-dropdown>
+            </div>
           </div>
 
           <div class="flex items-center justify-between">
             <button
               (click)="viewDetails(candidate)"
-              class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"
+              class="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors cursor-pointer"
             >
               <i class="fas fa-eye"></i>
               View Details
@@ -362,14 +317,14 @@
 
             <button
               (click)="removeFromShortList(candidate)"
-              [disabled]="isUpdating"
-              class="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              [disabled]="isRemovingCandidate(candidate.id) || isUpdatingStage(candidate.id)"
+              class="inline-flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              <ng-container *ngIf="!isUpdating">
+              <ng-container *ngIf="!isRemovingCandidate(candidate.id)">
                 <i class="fas fa-trash"></i>
                 Remove
               </ng-container>
-              <ng-container *ngIf="isUpdating">
+              <ng-container *ngIf="isRemovingCandidate(candidate.id)">
                 <i class="fas fa-spinner fa-spin"></i>
                 Removing...
               </ng-container>
@@ -396,7 +351,7 @@
   </div>
 
   <!-- Candidate Details Modal -->
-  <app-candidate-details></app-candidate-details>
+  <app-candidate-details [applicationData]="applicationData"></app-candidate-details>
 
   <!-- Floating Action Button (Mobile) -->
   <div class="md:hidden fixed bottom-6 right-6 z-40">

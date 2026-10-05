@@ -1,379 +1,293 @@
- <!-- Navigation -->
+<div class="min-h-screen bg-slate-50 text-slate-900 font-sans">
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+      <div class="flex items-center gap-3">
+        <img src="assets/logo.png" alt="HireUp Logo" class="h-9 w-9 rounded-xl object-contain shadow-xs bg-white p-0.5 border border-slate-100">
+        <span class="font-display text-xl font-extrabold tracking-tight text-slate-900">
+          HireUp
+        </span>
+      </div>
+      <nav class="hidden items-center gap-8 text-sm font-semibold text-slate-600 md:flex">
+        <a href="#features" class="transition-colors hover:text-emerald-600">Features</a>
+        <a href="#ai-matching" class="transition-colors hover:text-emerald-600">AI Vector Matching</a>
+        <a href="#pricing" class="transition-colors hover:text-emerald-600">Pricing</a>
+      </nav>
+      <div class="hidden md:flex items-center gap-3">
+        <a routerLink="/candidate-portal" class="px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-50 rounded-xl transition-colors">
+          Candidate Portal
+        </a>
+        <a routerLink="/auth/recruiter/login" class="px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors">
+          Sign In
+        </a>
+        <a routerLink="/auth/recruiter/register" class="px-4 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm transition-all">
+          Get Started
+        </a>
+      </div>
+      <button class="md:hidden p-2 text-slate-700">
+        <i class="fa-solid fa-bars h-5 w-5"></i>
+      </button>
+    </div>
+  </header>
 
- <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <i class="fas fa-briefcase text-white text-lg"></i>
-                    </div>
-                    <span class="ml-3 text-xl font-bold text-gray-900">TalentFlow</span>
-                    <span class="ml-2 text-sm text-indigo-600 font-semibold bg-indigo-50 px-2 py-1 rounded-full">ATS</span>
-                </div>
-
-                <!-- Desktop Navigation -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-                        Features
-                    </a>
-                    <a href="#pricing" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-                        Pricing
-                    </a>
-                    <a href="#contact" class="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
-                        Contact
-                    </a>
-                </div>
-
-                <!-- Auth Buttons for Recruiters & Candidates -->
-                <div class="flex items-center space-x-3">
-                    <!-- Candidate Hub Link -->
-                    <a 
-                        routerLink="/candidate-portal" 
-                        class="px-4 py-2 text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-all border border-indigo-200/60 flex items-center gap-1.5 shadow-2xs"
-                    >
-                        <i class="fa-solid fa-sparkles text-indigo-500"></i>
-                        <span>Candidate Portal & AI Match</span>
-                    </a>
-
-                    <!-- Recruiter Sign In -->
-                    <a 
-                        routerLink="/auth/recruiter/login" 
-                        class="px-4 py-2 text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition-all"
-                    >
-                        Recruiter Sign In
-                    </a>
-
-                    <!-- Recruiter Get Started -->
-                    <a 
-                        routerLink="/auth/recruiter/register" 
-                        class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-500/20 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2"
-                    >
-                        <i class="fa-solid fa-building flex text-[11px]"></i>
-                        <span>Recruiter Workspace</span>
-                    </a>
-                </div>
-            </div>
+  <!-- Hero Section -->
+  <section class="bg-hero relative overflow-hidden border-b border-slate-200/80">
+    <div aria-hidden class="pointer-events-none absolute -right-40 top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-emerald-500/10 blur-[130px]"></div>
+    <div class="relative mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-16 lg:grid-cols-12 lg:items-center lg:pb-28 lg:pt-20">
+      <div class="lg:col-span-6 space-y-6">
+        <div class="inline-flex items-center gap-2 rounded-full border border-emerald-200/80 bg-emerald-50/80 px-3.5 py-1 text-xs font-bold text-emerald-700 shadow-xs">
+          <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          AI Vector Matching & Enterprise ATS Platform
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section class="pt-16 pb-24 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center space-y-6">
-                <!-- Badge -->
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-100 rounded-full text-indigo-800 font-extrabold text-xs tracking-wide uppercase border border-indigo-200/50 shadow-xs">
-                    <i class="fas fa-sparkles text-amber-500"></i>
-                    AI Vector Matching & Enterprise ATS Platform
-                </div>
-
-                <!-- Main Headline -->
-                <h1 class="text-4xl sm:text-6xl md:text-7xl font-black text-slate-900 leading-tight tracking-tight">
-                    Smart Hiring for
-                    <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 bg-clip-text text-transparent">
-                        Recruiters & Candidates
-                    </span>
-                </h1>
-
-                <!-- Subheadline -->
-                <p class="text-base sm:text-xl text-slate-600 max-w-3xl mx-auto font-medium leading-relaxed">
-                    Connecting top talent with high-performing recruitment teams through automated AI resume parsing, vector match scoring, and seamless pipeline management.
-                </p>
-
-                <!-- Dual Audience Entry Cards (Recruiter vs Candidate) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto pt-6 text-left">
-                    <!-- Recruiter Card -->
-                    <div class="bg-gradient-to-br from-slate-900 to-indigo-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl border border-slate-800 space-y-5 relative overflow-hidden group">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 text-xl font-bold">
-                            <i class="fa-solid fa-briefcase"></i>
-                        </div>
-                        <div class="space-y-2">
-                            <h3 class="text-xl font-black text-white">For Recruiters & Hiring Managers</h3>
-                            <p class="text-xs text-slate-300 font-medium leading-relaxed">
-                                Post jobs, build custom assessment tests, run AI talent pool searches, and manage candidate pipelines with real-time velocity analytics.
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-3 pt-2">
-                            <a routerLink="/auth/recruiter/login" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-indigo-600/30 flex items-center gap-2">
-                                <span>Recruiter Sign In</span>
-                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                            </a>
-                            <a routerLink="/auth/recruiter/register" class="px-4 py-2.5 bg-white/10 hover:bg-white/20 text-slate-200 rounded-xl text-xs font-bold transition-all border border-white/10">
-                                Register Org
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Candidate Card -->
-                    <div class="bg-white rounded-3xl p-6 sm:p-8 text-slate-900 shadow-xl border border-indigo-100 space-y-5 relative overflow-hidden group hover:border-indigo-300 transition-all">
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-xl font-bold">
-                            <i class="fa-solid fa-user-graduate"></i>
-                        </div>
-                        <div class="space-y-2">
-                            <h3 class="text-xl font-black text-slate-900">For Candidates & Job Seekers</h3>
-                            <p class="text-xs text-slate-500 font-medium leading-relaxed">
-                                Upload your resume for automated AI parsing & vector DB indexing. View instant job match percentages and apply with 1-click.
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-3 pt-2">
-                            <a routerLink="/candidate-portal" class="px-5 py-2.5 bg-slate-900 hover:bg-indigo-900 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-slate-900/20 flex items-center gap-2">
-                                <span>Candidate Portal & AI Match</span>
-                                <i class="fa-solid fa-sparkles text-indigo-400 text-[10px]"></i>
-                            </a>
-                            <a routerLink="/auth/candidate/login" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all border border-slate-200">
-                                Candidate Login
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto pt-10 border-t border-slate-200/60 mt-10">
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-gray-900 mb-2">10K+</div>
-                        <div class="text-gray-600 text-xs font-semibold">Candidates Sourced</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-gray-900 mb-2">500+</div>
-                        <div class="text-gray-600 text-xs font-semibold">Active Organizations</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-gray-900 mb-2">99.9%</div>
-                        <div class="text-gray-600 text-xs font-semibold">Uptime</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="text-3xl font-bold text-gray-900 mb-2">AI 1536d</div>
-                        <div class="text-gray-600 text-xs font-semibold">Vector Embedding Engine</div>
-                    </div>
-                </div>
-            </div>
+        <h1 class="text-balance font-display text-4xl font-black leading-[1.08] tracking-tight sm:text-5xl lg:text-[3.4rem] text-slate-900">
+          Smart Hiring for
+          <br />
+          <span class="bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Recruiters & Candidates.</span>
+        </h1>
+        <p class="max-w-xl text-base sm:text-lg leading-relaxed text-slate-600 font-medium">
+          Connecting top talent with high-performing recruitment teams through automated AI resume parsing, vector match scoring, deduplicated profile ingestion, and seamless pipeline management.
+        </p>
+        <div class="flex flex-wrap gap-3.5 pt-2">
+          <a routerLink="/auth/recruiter/register" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-6 py-3.5 text-sm font-bold text-white hover:bg-emerald-700 transition-all shadow-md hover:shadow-lg">
+            Recruiter Workspace
+            <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+          </a>
+          <a routerLink="/candidate-portal" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-all shadow-xs">
+            Candidate AI Match
+          </a>
         </div>
-    </section>
-
-    <!-- Features Section -->
-    <section id="features" class="py-20 bg-gray-50/50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Powerful Features for Modern Recruitment
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Everything you need to manage your hiring process efficiently
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-                    <div class="w-14 h-14 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-users text-indigo-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Candidate Management</h3>
-                    <p class="text-gray-600">
-                        Track applicants through every stage with our intuitive pipeline management.
-                    </p>
-                </div>
-
-                <!-- Feature 2 -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-                    <div class="w-14 h-14 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-envelope text-blue-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Automated Emails</h3>
-                    <p class="text-gray-600">
-                        Send personalized emails and notifications to candidates automatically.
-                    </p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100">
-                    <div class="w-14 h-14 bg-gradient-to-br from-green-100 to-emerald-100 rounded-xl flex items-center justify-center mb-6">
-                        <i class="fas fa-chart-line text-green-600 text-2xl"></i>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-900 mb-3">Analytics Dashboard</h3>
-                    <p class="text-gray-600">
-                        Get insights into your hiring process with detailed analytics and reports.
-                    </p>
-                </div>
-            </div>
+        <div class="grid max-w-lg grid-cols-3 gap-6 border-t border-slate-200/80 pt-6">
+          <div>
+            <div class="font-display text-2xl font-black tracking-tight text-slate-900">10K+</div>
+            <div class="mt-1 text-xs font-semibold text-slate-500">Candidates Sourced</div>
+          </div>
+          <div>
+            <div class="font-display text-2xl font-black tracking-tight text-slate-900">500+</div>
+            <div class="mt-1 text-xs font-semibold text-slate-500">Active Organizations</div>
+          </div>
+          <div>
+            <div class="font-display text-2xl font-black tracking-tight text-slate-900">1536d</div>
+            <div class="mt-1 text-xs font-semibold text-slate-500">Vector Embeddings</div>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="py-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Simple, Transparent Pricing
-                </h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Choose the plan that fits your hiring needs
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                <!-- Free Plan -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Starter</h3>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold text-gray-900">Free</span>
-                        <span class="text-gray-600">/ forever</span>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>Up to 50 candidates</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>Basic email templates</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>Single job posting</span>
-                        </li>
-                    </ul>
-                    <button 
-                        routerLink="/auth/register"
-                        class="w-full py-3 bg-gray-100 text-gray-800 font-semibold rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                        Get Started
-                    </button>
-                </div>
-
-                <!-- Pro Plan -->
-                <div class="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl p-8 shadow-xl relative transform scale-105">
-                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                        <span class="px-4 py-1 bg-white text-indigo-600 font-semibold rounded-full text-sm">
-                            MOST POPULAR
-                        </span>
-                    </div>
-                    <h3 class="text-2xl font-bold text-white mb-2">Professional</h3>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold text-white">$29</span>
-                        <span class="text-indigo-200">/ month</span>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-white"></i>
-                            <span class="text-white">Unlimited candidates</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-white"></i>
-                            <span class="text-white">Advanced email templates</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-white"></i>
-                            <span class="text-white">Multiple job postings</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-white"></i>
-                            <span class="text-white">Analytics dashboard</span>
-                        </li>
-                    </ul>
-                    <button 
-                        routerLink="/auth/register"
-                        class="w-full py-3 bg-white text-indigo-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                        Start Free Trial
-                    </button>
-                </div>
-
-                <!-- Enterprise Plan -->
-                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                    <div class="mb-6">
-                        <span class="text-4xl font-bold text-gray-900">Custom</span>
-                        <span class="text-gray-600">/ tailored</span>
-                    </div>
-                    <ul class="space-y-3 mb-8">
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>Everything in Pro</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>Dedicated support</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>Custom integrations</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check text-green-500"></i>
-                            <span>API access</span>
-                        </li>
-                    </ul>
-                    <button 
-                        (click)="contactSales()"
-                        class="w-full py-3 bg-gray-900 text-white font-semibold rounded-lg hover:bg-black transition-colors"
-                    >
-                        Contact Sales
-                    </button>
-                </div>
-            </div>
+      <div class="lg:col-span-6 relative">
+        <div aria-hidden class="absolute inset-4 rounded-3xl bg-emerald-500/10 blur-2xl"></div>
+        <!-- High Quality Product Mockup Image -->
+        <div class="relative w-full rounded-2xl bg-white border border-slate-200/90 shadow-2xl overflow-hidden group transition-all">
+          <img src="assets/dashboard-preview.png" alt="HireUp Dashboard Preview" class="w-full h-auto object-cover rounded-2xl group-hover:scale-[1.01] transition-transform duration-500">
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-4 gap-8">
-                <!-- Company Info -->
-                <div>
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl flex items-center justify-center">
-                            <i class="fas fa-briefcase text-white text-lg"></i>
-                        </div>
-                        <span class="ml-3 text-xl font-bold text-white">TalentFlow</span>
-                    </div>
-                    <p class="text-gray-400 text-sm">
-                        Modern Applicant Tracking System for growing businesses.
-                    </p>
-                </div>
-
-                <!-- Quick Links -->
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Product</h4>
-                    <ul class="space-y-2">
-                        <li><a href="#features" class="text-gray-400 hover:text-white transition-colors">Features</a></li>
-                        <li><a href="#pricing" class="text-gray-400 hover:text-white transition-colors">Pricing</a></li>
-                        <li><button routerLink="/auth/register" class="text-gray-400 hover:text-white transition-colors">Sign Up</button></li>
-                        <li><button routerLink="/dashboard" class="text-gray-400 hover:text-white transition-colors">Start Hiring</button></li>
-                    </ul>
-                </div>
-
-                <!-- Legal -->
-                <div>
-                    <h4 class="text-white font-semibold mb-4">Legal</h4>
-                    <ul class="space-y-2">
-                        <li><a routerLink="/privacy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                        <li><a routerLink="/terms" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-                        <li><a routerLink="/cookies" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
-                    </ul>
-                </div>
-
-                <!-- Contact -->
-                <div id="contact">
-                    <h4 class="text-white font-semibold mb-4">Contact Us</h4>
-                    <ul class="space-y-2">
-                        <li class="flex items-center gap-2">
-                            <i class="fas fa-envelope text-gray-400"></i>
-                            <a href="mailto:support&#64;talentflow.com" class="text-gray-400 hover:text-white transition-colors">
-                                support&#64;talentflow.com
-                            </a>
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <i class="fas fa-phone text-gray-400"></i>
-                            <span class="text-gray-400">+1 (555) 123-4567</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Copyright -->
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-500 text-sm">
-                <p>© 2024 TalentFlow ATS. All rights reserved.</p>
-            </div>
+  <!-- AI Vector Feature Spotlight -->
+  <section id="ai-matching" class="bg-white border-b border-slate-200/80 py-20">
+    <div class="mx-auto max-w-7xl px-6 grid gap-12 lg:grid-cols-12 lg:items-center">
+      <div class="lg:col-span-6">
+        <div class="relative rounded-2xl bg-slate-900 p-2 shadow-2xl overflow-hidden border border-slate-800">
+          <img src="assets/ai-matching-preview.png" alt="AI Resume Analysis & Vector Match Scoring" class="w-full h-auto rounded-xl object-cover">
         </div>
-    </footer>
+      </div>
+      <div class="lg:col-span-6 space-y-5">
+        <div class="text-xs font-black uppercase tracking-[0.2em] text-emerald-600">
+          Neural Matching Engine
+        </div>
+        <h2 class="font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Automated AI Resume Vector Scoring & Deduplication.
+        </h2>
+        <p class="text-base text-slate-600 leading-relaxed font-medium">
+          HireUp converts candidate resumes and application forms into 1536-dimensional vector embeddings, dynamically evaluating technical experience, soft skills, and role compatibility in real time.
+        </p>
+        <div class="space-y-3 pt-2">
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+              <i class="fa-solid fa-fingerprint"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">Single Source of Truth Deduplication</h4>
+              <p class="text-xs text-slate-500">Candidate email collisions merge application history automatically without losing status or evaluation scorecards.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5">
+              <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">Multi-Dimensional Match Scores</h4>
+              <p class="text-xs text-slate-500">Instant visual breakdown of skill alignment, work experience duration, and educational credentials.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="mx-auto max-w-7xl px-6 py-24">
+    <div class="max-w-2xl">
+      <div class="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">
+        The Platform
+      </div>
+      <h2 class="mt-3 font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        Powerful features for modern recruitment.
+      </h2>
+      <p class="mt-4 text-base text-slate-600 font-medium">
+        Everything you need to manage your hiring process efficiently in a single governed environment.
+      </p>
+    </div>
+
+    <div class="mt-14 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div class="group rounded-2xl border border-slate-200/80 bg-white p-7 transition-all hover:-translate-y-1 hover:border-emerald-500/40 shadow-xs hover:shadow-xl">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 font-bold">
+          <i class="fa-solid fa-users text-xl"></i>
+        </div>
+        <div class="mt-5 font-display text-lg font-bold tracking-tight text-slate-900">
+          Candidate Pipeline Management
+        </div>
+        <p class="mt-2 text-xs sm:text-sm leading-relaxed text-slate-500 font-medium">
+          Track applicants through custom stage workflows with scorecards, interview notes, and status pills.
+        </p>
+      </div>
+
+      <div class="group rounded-2xl border border-slate-200/80 bg-white p-7 transition-all hover:-translate-y-1 hover:border-emerald-500/40 shadow-xs hover:shadow-xl">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 font-bold">
+          <i class="fa-solid fa-plug text-xl"></i>
+        </div>
+        <div class="mt-5 font-display text-lg font-bold tracking-tight text-slate-900">
+          API Connections & Ingestion
+        </div>
+        <p class="mt-2 text-xs sm:text-sm leading-relaxed text-slate-500 font-medium">
+          Manage, search, and migrate candidates directly into the platform pipeline using secure API key pools.
+        </p>
+      </div>
+
+      <div class="group rounded-2xl border border-slate-200/80 bg-white p-7 transition-all hover:-translate-y-1 hover:border-emerald-500/40 shadow-xs hover:shadow-xl">
+        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 font-bold">
+          <i class="fa-solid fa-chart-line text-xl"></i>
+        </div>
+        <div class="mt-5 font-display text-lg font-bold tracking-tight text-slate-900">
+          Analytics & Match Scoring
+        </div>
+        <p class="mt-2 text-xs sm:text-sm leading-relaxed text-slate-500 font-medium">
+          Get real-time insights into your hiring funnel velocity, stage counts, and top candidate recommendations.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="border-y border-slate-200/80 bg-slate-100/60 py-24">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="mx-auto max-w-2xl text-center">
+        <div class="text-xs font-black uppercase tracking-[0.18em] text-emerald-600">
+          Pricing Plans
+        </div>
+        <h2 class="mt-3 font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Simple, transparent pricing.
+        </h2>
+      </div>
+      <div class="mt-14 grid gap-6 md:grid-cols-3">
+        <!-- Starter -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-xs">
+          <div class="font-display text-xl font-bold text-slate-900">Starter</div>
+          <div class="mt-4 mb-6">
+            <span class="text-4xl font-black text-slate-900">Free</span>
+            <span class="text-slate-400 font-medium"> / forever</span>
+          </div>
+          <ul class="space-y-3 mb-8 text-xs font-semibold text-slate-700">
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Up to 50 candidates</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Basic AI parsing</span>
+            </li>
+          </ul>
+          <a routerLink="/auth/recruiter/register" class="flex w-full justify-center rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors">
+            Get Started Free
+          </a>
+        </div>
+
+        <!-- Pro -->
+        <div class="rounded-2xl border-2 border-emerald-600 bg-emerald-600 p-8 shadow-xl text-white transform md:-translate-y-2 relative">
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 bg-white text-emerald-700 text-[11px] font-black rounded-full border border-emerald-200 shadow-xs uppercase tracking-wide">
+            Most Popular
+          </div>
+          <div class="font-display text-xl font-bold">Professional</div>
+          <div class="mt-4 mb-6">
+            <span class="text-4xl font-black">$29</span>
+            <span class="text-emerald-100 font-medium"> / month</span>
+          </div>
+          <ul class="space-y-3 mb-8 text-xs font-semibold">
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-200"></i> <span>Unlimited candidate applications</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-200"></i> <span>Full AI Vector match scoring</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-200"></i> <span>API Connection Portal</span>
+            </li>
+          </ul>
+          <a routerLink="/auth/recruiter/register" class="flex w-full justify-center rounded-xl bg-white px-4 py-3 text-xs font-bold text-emerald-800 hover:bg-emerald-50 transition-colors shadow-sm">
+            Start Free Trial
+          </a>
+        </div>
+
+        <!-- Enterprise -->
+        <div class="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-xs">
+          <div class="font-display text-xl font-bold text-slate-900">Enterprise</div>
+          <div class="mt-4 mb-6">
+            <span class="text-4xl font-black text-slate-900">Custom</span>
+            <span class="text-slate-400 font-medium"> / tailored</span>
+          </div>
+          <ul class="space-y-3 mb-8 text-xs font-semibold text-slate-700">
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Dedicated API data pools</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Custom job post templates</span>
+            </li>
+          </ul>
+          <button (click)="contactSales()" class="flex w-full justify-center rounded-xl bg-slate-900 px-4 py-3 text-xs font-bold text-white hover:bg-slate-800 transition-colors">
+            Contact Sales
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="border-t border-slate-200/80 bg-white py-20">
+    <div class="mx-auto flex max-w-4xl flex-col items-center px-6 text-center space-y-6">
+      <img src="assets/logo.png" alt="HireUp Logo" class="h-14 w-14 rounded-2xl shadow-md p-1 bg-white border border-slate-100">
+      <h2 class="font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+        Ready to scale your recruitment pipeline?
+      </h2>
+      <p class="max-w-xl text-sm sm:text-base text-slate-500 font-medium">
+        Set up a workspace, invite your team, and run your next hiring cycle on a platform built for modern talent acquisition.
+      </p>
+      <a routerLink="/auth/recruiter/register" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 px-7 py-3.5 text-sm font-bold text-white hover:bg-emerald-700 transition-all shadow-md">
+        Get Started Free
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200/80 bg-white py-8 text-xs text-slate-500">
+    <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
+      <div class="flex items-center gap-2.5">
+        <img src="assets/logo.png" alt="HireUp Logo" class="h-6 w-6 rounded-lg object-contain">
+        <span class="font-bold text-slate-800">HireUp ATS</span>
+        <span>· Integrity, security and AI candidate management</span>
+      </div>
+      <div class="flex items-center gap-6 font-semibold">
+        <a href="#features" class="hover:text-slate-900">Features</a>
+        <a href="#ai-matching" class="hover:text-slate-900">AI Matching</a>
+        <a href="#pricing" class="hover:text-slate-900">Pricing</a>
+      </div>
+      <div class="font-medium">© 2026 HireUp Inc. All rights reserved.</div>
+    </div>
+  </footer>
+</div>

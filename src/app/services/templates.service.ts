@@ -17,8 +17,8 @@ export class TemplatesService {
   templates: JobTemplate[] = [
     {
       id: '1',
-      title: 'Classic Corporate',
-      description: 'Clean structured layout ideal for enterprise and corporate job openings.',
+      title: 'Executive Corporate',
+      description: 'Clean structured enterprise layout with company header, navigation, and section pagination.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
       category: 'Enterprise',
@@ -26,17 +26,17 @@ export class TemplatesService {
     },
     {
       id: '2',
-      title: 'Modern Floating Card',
-      description: 'Gradient header with responsive application cards and live section indicators.',
+      title: 'Enterprise Floating Card',
+      description: 'Dual-column layout featuring sticky position overview and visual section progress.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
-      category: 'Modern',
+      category: 'Enterprise',
       badge: 'Featured'
     },
     {
       id: '3',
-      title: 'Minimalist Focus',
-      description: 'Streamlined distraction-free interface designed to maximize completion rates.',
+      title: 'Minimalist Corporate',
+      description: 'Streamlined, clutter-free form designed to maximize candidate submission completion.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
       category: 'Minimal',
@@ -44,8 +44,8 @@ export class TemplatesService {
     },
     {
       id: '4',
-      title: 'Enterprise Sidebar Progress',
-      description: 'Dual pane design featuring sticky job details and real-time step progress tracking.',
+      title: 'Sidebar & Position Brief',
+      description: 'Split layout featuring sticky job specifications and section progress tracker.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
       category: 'Enterprise',
@@ -53,17 +53,17 @@ export class TemplatesService {
     },
     {
       id: '5',
-      title: 'Creative Split Hero',
-      description: 'Bold brand hero background, interactive tab bar, and elevated input fields.',
+      title: 'Modern Executive Portal',
+      description: 'Elevated header hero card with responsive section tabs and clean input styling.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
-      category: 'Creative',
+      category: 'Modern',
       badge: 'New'
     },
     {
       id: '6',
-      title: 'Compact Embedded Portal',
-      description: 'Ultra-sleek high-density form optimized for fast mobile submissions.',
+      title: 'Compact Enterprise Form',
+      description: 'High-density professional application portal optimized for rapid mobile submission.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
       category: 'Mobile First',
@@ -72,11 +72,29 @@ export class TemplatesService {
     {
       id: '7',
       title: 'Executive Dark Mode',
-      description: 'Sleek dark mode layout tailored for senior technology and executive roles.',
+      description: 'Sleek dark-themed corporate design tailored for tech & leadership roles.',
       preview: 'assets/classic-template.jpg',
       formOnly: false,
       category: 'Executive',
       badge: 'Dark Theme'
+    },
+    {
+      id: '8',
+      title: 'Professional Corporate Sidebar',
+      description: 'Clean split layout with a highly professional sticky sidebar for the company info and job details. Excellent for standalone applications.',
+      preview: 'assets/classic-template.jpg',
+      formOnly: false,
+      category: 'Enterprise',
+      badge: 'Professional'
+    },
+    {
+      id: '9',
+      title: 'Creative Agency Split',
+      description: 'A striking two-column layout with a dynamic graphic sidebar and a structured form application area.',
+      preview: 'assets/classic-template.jpg',
+      formOnly: false,
+      category: 'Creative',
+      badge: 'Premium'
     }
   ];
 

@@ -1,0 +1,1240 @@
+Initial chunk files | Names                            |  Raw size
+main.js             | main                             |   2.75 MB | 
+chunk-EN2IVVCX.js   | -                                |   1.43 MB | 
+chunk-HLRUQJB3.js   | -                                | 258.48 kB | 
+chunk-CR5XK4NB.js   | -                                | 222.95 kB | 
+polyfills.js        | polyfills                        |  90.20 kB | 
+chunk-NBUURP7P.js   | -                                |  74.72 kB | 
+chunk-FMLJDEDN.js   | -                                |  46.10 kB | 
+chunk-UGMBACTI.js   | -                                |  19.79 kB | 
+chunk-VDWOFCZJ.js   | -                                |  19.63 kB | 
+chunk-UAWBPLAW.js   | -                                |  17.04 kB | 
+chunk-WNAHMAH6.js   | -                                |   9.95 kB | 
+chunk-6G3KLPHQ.js   | -                                |   9.30 kB | 
+chunk-AP5FGNPQ.js   | -                                |   2.42 kB | 
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/candidate/candidate-portal/candidate-portal.component.html:305:95:
+      305 │ ... === job.job_id || applyFeedback[job.job_id]?.type === 'success'"
+          ╵                                                  ~~~~
+
+  Error occurs in the template of component CandidatePortalComponent.
+
+    src/app/pages/candidate/candidate-portal/candidate-portal.component.ts:15:15:
+      15 │   templateUrl: './candidate-portal.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: RouterLink is not used within the template of CandidatePortalComponent [plugin angular-compiler]
+
+    src/app/pages/candidate/candidate-portal/candidate-portal.component.ts:14:39:
+      14 │ ... [CommonModule, FormsModule, RouterLink, CustomDropdownComponent],
+         ╵                                 ~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/candidate-list/candidate-list.component.html:100:36:
+      100 │         [popupView]="candidates[0]?.resume_data ? true : false"
+          ╵                                     ~~~~~~~~~~~
+
+  Error occurs in the template of component CandidateListComponent.
+
+    src/app/pages/dashboard/components/candidate-list/candidate-list.component.ts:80:15:
+      80 │   templateUrl: './candidate-list.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/candidate-list/candidate-list.component.html:101:44:
+      101 │ ...  [showResumeFilters]="candidates[0]?.resume_data ? true : false"
+          ╵                                          ~~~~~~~~~~~
+
+  Error occurs in the template of component CandidateListComponent.
+
+    src/app/pages/dashboard/components/candidate-list/candidate-list.component.ts:80:15:
+      80 │   templateUrl: './candidate-list.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/notifications/emails/emails.component.html:41:44:
+      41 │ ...     [ngClass]="emailTemplate?.id === temp.id ? 'bg-white borde...
+         ╵                                   ~~
+
+  Error occurs in the template of component EmailsComponent.
+
+    src/app/pages/dashboard/components/notifications/emails/emails.component.ts:28:15:
+      28 │   templateUrl: './emails.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/notifications/emails/emails.component.html:80:44:
+      80 │ ...     [ngClass]="emailTemplate?.id === temp.id ? 'bg-white borde...
+         ╵                                   ~~
+
+  Error occurs in the template of component EmailsComponent.
+
+    src/app/pages/dashboard/components/notifications/emails/emails.component.ts:28:15:
+      28 │   templateUrl: './emails.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: SendemailsPopupComponent is not used within the template of EmailsComponent [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/notifications/emails/emails.component.ts:25:4:
+      25 │     SendemailsPopupComponent,
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/shortlisted/shortlisted.component.html:117:38:
+      117 │           [popupView]="candidates[0]?.resume_data ? true : false"
+          ╵                                       ~~~~~~~~~~~
+
+  Error occurs in the template of component ShortlistedComponent.
+
+    src/app/pages/dashboard/components/shortlisted/shortlisted.component.ts:70:15:
+      70 │   templateUrl: './shortlisted.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/shortlisted/shortlisted.component.html:118:46:
+      118 │ ...  [showResumeFilters]="candidates[0]?.resume_data ? true : false"
+          ╵                                          ~~~~~~~~~~~
+
+  Error occurs in the template of component ShortlistedComponent.
+
+    src/app/pages/dashboard/components/shortlisted/shortlisted.component.ts:70:15:
+      70 │   templateUrl: './shortlisted.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/table-view/table-view.component.html:243:45:
+      243 │ ...               <h4>{{ data?.length === 0 ? 'No Data Available'...
+          ╵                                ~~~~~~
+
+  Error occurs in the template of component TableViewComponent.
+
+    src/app/pages/dashboard/components/table-view/table-view.component.ts:39:15:
+      39 │   templateUrl: './table-view.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/dashboard/components/table-view/table-view.component.html:245:45:
+      245 │                                     {{ data?.length === 0
+          ╵                                              ~~~~~~
+
+  Error occurs in the template of component TableViewComponent.
+
+    src/app/pages/dashboard/components/table-view/table-view.component.ts:39:15:
+      39 │   templateUrl: './table-view.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: RouterLink is not used within the template of DashboardComponent [plugin angular-compiler]
+
+    src/app/pages/dashboard/dashboard/dashboard.component.ts:26:4:
+      26 │     RouterLink,
+         ╵     ~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: OrgSwitcherComponent is not used within the template of DashboardComponent [plugin angular-compiler]
+
+    src/app/pages/dashboard/dashboard/dashboard.component.ts:27:4:
+      27 │     OrgSwitcherComponent,
+         ╵     ~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/interview-scorecards/scorecard-manager/scorecard-manager.component.html:145:414:
+      145 │ ...gTemplate.competencies[i]?.max_score || 5) * 0.7 ? 'text-emera...
+          ╵                               ~~~~~~~~~
+
+  Error occurs in the template of component ScorecardManagerComponent.
+
+    src/app/pages/interview-scorecards/scorecard-manager/scorecard-manager.component.ts:40:15:
+      40 │   templateUrl: './scorecard-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/interview-scorecards/scorecard-manager/scorecard-manager.component.html:145:571:
+      145 │ ...gTemplate.competencies[i]?.max_score || 5 }}</span></div></div...
+          ╵                               ~~~~~~~~~
+
+  Error occurs in the template of component ScorecardManagerComponent.
+
+    src/app/pages/interview-scorecards/scorecard-manager/scorecard-manager.component.ts:40:15:
+      40 │   templateUrl: './scorecard-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.html:29:140:
+      29 │ ...border border-indigo-200/80">{{ jobPostings?.length || 0 }}</span>
+         ╵                                                 ~~~~~~
+
+  Error occurs in the template of component JobPostDashboadComponent.
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.ts:22:15:
+      22 │   templateUrl: './job-post-dashboad.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.html:467:40:
+styles.css          | styles                           |   2.26 kB | 
+chunk-B23XDXJM.js   | -                                |   2.19 kB | 
+chunk-66S2IJTT.js   | -                                | 186 bytes | 
+
+                    | Initial total                    |   4.95 MB
+
+Lazy chunk files    | Names                            |  Raw size
+chunk-ARKZSM4U.js   | organization-settings-component  | 227.15 kB | 
+chunk-JUVAJUYJ.js   | copilot-page-component           | 120.31 kB | 
+chunk-NCZQMVE7.js   | api-connection-portal-component  | 117.57 kB | 
+chunk-YOPHLV7A.js   | -                                | 113.40 kB | 
+chunk-A7YQW23J.js   | document-import-portal-component |  88.63 kB | 
+chunk-EG5G5Q2Y.js   | landing-component                |  24.32 kB | 
+chunk-3EQR7ZO3.js   | accept-invitation-component      |  10.00 kB | 
+chunk-32MEUU4P.js   | api-connection-copilot-component | 338 bytes | 
+
+Application bundle generation complete. [186.656 seconds]
+
+      467 │ ...    [ngClass]="selectedStage?.id === stage.id ? 'border-indigo...
+          ╵                                  ~~
+
+  Error occurs in the template of component JobPostDashboadComponent.
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.ts:22:15:
+      22 │   templateUrl: './job-post-dashboad.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.html:469:42:
+      469 │ ...    [ngClass]="selectedStage?.id === stage.id ? 'bg-indigo-600...
+          ╵                                  ~~
+
+  Error occurs in the template of component JobPostDashboadComponent.
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.ts:22:15:
+      22 │   templateUrl: './job-post-dashboad.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: CustomDropdownComponent is not used within the template of JobPostDashboadComponent [plugin angular-compiler]
+
+    src/app/pages/job-posts/job-post-dashboad/job-post-dashboad.component.ts:21:68:
+      21 │ ...ponent, RouterLink, CustomDropdownComponent, ScheduleInterviewM...
+         ╵                        ~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:86:46:
+      86 │ ... [ngClass]="applicationData?.status === 'published' ? 'bg-emera...
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:88:62:
+      88 │ ... [ngClass]="applicationData?.status === 'published' ? 'fa-circl...
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:89:40:
+      89 │ ...   <span>{{ applicationData?.status === 'published' ? 'Publishe...
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:93:48:
+      93 │ ... [ngClass]="applicationData?.status === 'published' ? 'bg-amber...
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:95:62:
+      95 │ ... [ngClass]="applicationData?.status === 'published' ? 'fa-eye-s...
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:96:40:
+      96 │ ...   <span>{{ applicationData?.status === 'published' ? 'Unpublis...
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:821:75:
+      821 │ ...]="applicationData.colorScheme?.primary" class="hidden md:block">
+          ╵                                    ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:825:111:
+      825 │ ...ny?.logoUrl!.length > 0" [src]="applicationData.company?.logoUrl"
+          ╵                                                             ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:828:50:
+      828 │                       {{ applicationData.company?.name }}
+          ╵                                                   ~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:834:66:
+      834 │ ...           [style.color]="applicationData.colorScheme?.secondary"
+          ╵                                                           ~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:844:75:
+      844 │ ...-color]="applicationData.colorScheme?.primary" class="md:hidden">
+          ╵                                          ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:848:57:
+      848 │ ...]="applicationData.company?.logoUrl" class="h-8 w-auto" alt="C...
+          ╵                                ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:850:50:
+      850 │                       {{ applicationData.company?.name }}
+          ╵                                                   ~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:863:64:
+      863 │ ...           [style.color]="applicationData.colorScheme?.secondary"
+          ╵                                                           ~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:876:40:
+      876 │                 {{ applicationData.job?.title }}
+          ╵                                         ~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:881:43:
+      881 │                       applicationData.job?.description || ''
+          ╵                                            ~~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:888:47:
+      888 │                   {{ applicationData.benefits?.title }}
+          ╵                                                ~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:905:49:
+      905 │                 {{ applicationData.applySection?.title }}
+          ╵                                                  ~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:909:50:
+      909 │                     applicationData.applySection?.instructions || ''
+          ╵                                                   ~~~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:925:51:
+      925 │                   {{ applicationData.applySection?.declaration }}
+          ╵                                                    ~~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:930:49:
+      930 │                 {{ applicationData.applySection?.buttonText }}
+          ╵                                                  ~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:940:49:
+      940 │                     applicationData.colorScheme?.primary
+          ╵                                                  ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:944:49:
+      944 │                     applicationData.colorScheme?.primary
+          ╵                                                  ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:948:49:
+      948 │                     applicationData.colorScheme?.secondary
+          ╵                                                  ~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:952:49:
+      952 │                     applicationData.colorScheme?.secondary
+          ╵                                                  ~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:965:56:
+      965 │                   {{ applicationData.submissionMessage?.title }}
+          ╵                                                         ~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:968:56:
+      968 │                   {{ applicationData.submissionMessage?.message }}
+          ╵                                                         ~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:970:62:
+      970 │ ...        <a [href]="applicationData.submissionMessage?.actionLink"
+          ╵                                                          ~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:972:56:
+      972 │ ...              {{ applicationData.submissionMessage?.actionText }}
+          ╵                                                        ~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:984:45:
+      984 │                   {{ applicationData.footer?.copyrightText }}
+          ╵                                              ~~~~~~~~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.html:1039:66:
+      1039 │ ...an>Placeholders: {{ template.placeholders?.length || 0 }}</span>
+           ╵                                               ~~~~~~
+
+  Error occurs in the template of component JobFormEditorComponent.
+
+    src/app/pages/job-posts/manager/components/company-form/job-form-editor/job-form-editor.component.ts:31:15:
+      31 │   templateUrl: './job-form-editor.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/components/data-uploads/bulk-document-uploads/bulk-document-uploads.component.html:77:49:
+      77 │ ...          (jobAppData.colorScheme?.primary || 'rgb(59 130 246)') +
+         ╵                                       ~~~~~~~
+
+  Error occurs in the template of component BulkDocumentUploadsComponent.
+
+    src/app/pages/job-posts/manager/components/data-uploads/bulk-document-uploads/bulk-document-uploads.component.ts:63:15:
+      63 │   templateUrl: './bulk-document-uploads.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:4:37:
+      4 │       '--primary-color': jobAppData?.colorScheme?.primary,
+        ╵                                      ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:5:39:
+      5 │       '--secondary-color': jobAppData?.colorScheme?.secondary,
+        ╵                                        ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:6:36:
+      6 │ ...accent-color': jobAppData?.colorScheme?.accent || jobAppData?.co...
+        ╵                               ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:6:71:
+      6 │ ...jobAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
+        ╵                                                   ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:251:37:
+      251 │       '--primary-color': jobAppData?.colorScheme?.primary,
+          ╵                                      ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:252:39:
+      252 │       '--secondary-color': jobAppData?.colorScheme?.secondary,
+          ╵                                        ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:253:36:
+      253 │ ...ccent-color': jobAppData?.colorScheme?.accent || jobAppData?.c...
+          ╵                              ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:253:71:
+      253 │ ...bAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
+          ╵                                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:518:37:
+      518 │       '--primary-color': jobAppData?.colorScheme?.primary,
+          ╵                                      ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:519:39:
+      519 │       '--secondary-color': jobAppData?.colorScheme?.secondary,
+          ╵                                        ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:520:36:
+      520 │ ...ccent-color': jobAppData?.colorScheme?.accent || jobAppData?.c...
+          ╵                              ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:520:71:
+      520 │ ...bAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
+          ╵                                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:714:37:
+      714 │       '--primary-color': jobAppData?.colorScheme?.primary,
+          ╵                                      ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:715:39:
+      715 │       '--secondary-color': jobAppData?.colorScheme?.secondary,
+          ╵                                        ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:716:36:
+      716 │ ...ccent-color': jobAppData?.colorScheme?.accent || jobAppData.co...
+          ╵                              ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:716:83:
+      716 │ ...obAppData?.colorScheme?.accent || jobAppData.colorScheme?.primary
+          ╵                                                              ~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:962:37:
+      962 │       '--primary-color': jobAppData?.colorScheme?.primary,
+          ╵                                      ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:963:39:
+      963 │       '--secondary-color': jobAppData?.colorScheme?.secondary,
+          ╵                                        ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:964:36:
+      964 │ ...ccent-color': jobAppData?.colorScheme?.accent || jobAppData?.c...
+          ╵                              ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:964:71:
+      964 │ ...bAppData?.colorScheme?.accent || jobAppData?.colorScheme?.primary
+          ╵                                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1107:37:
+      1107 │ ...--primary-color': jobAppData?.colorScheme?.primary || '#4f46e5',
+           ╵                                  ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1108:39:
+      1108 │ ...econdary-color': jobAppData?.colorScheme?.secondary || '#6366f1'
+           ╵                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1112:69:
+      1112 │ ...ogoUrl" [src]="jobAppData?.company?.logoUrl" alt="Logo" class...
+           ╵                               ~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1114:66:
+      1114 │ ...d text-white">{{ jobAppData?.job?.title || 'Position Title' }...
+           ╵                                 ~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1115:63:
+      1115 │ ...-slate-400">{{ jobAppData?.company?.name || 'Company Name' }}...
+           ╵                               ~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1126:115:
+      1126 │ ...ervice.parseMarkdown(jobAppData?.job?.description || '')"></div>
+           ╵                                     ~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1232:37:
+      1232 │ ...--primary-color': jobAppData?.colorScheme?.primary || '#6366f1',
+           ╵                                  ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1233:39:
+      1233 │ ...econdary-color': jobAppData?.colorScheme?.secondary || '#8b5cf6'
+           ╵                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1239:69:
+      1239 │ ...ogoUrl" [src]="jobAppData?.company?.logoUrl" alt="Logo" class...
+           ╵                               ~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1241:82:
+      1241 │ ...king-tight">{{ jobAppData?.company?.name || 'Company Name' }}...
+           ╵                               ~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1242:74:
+      1242 │ ...ont-semibold">{{ jobAppData?.job?.title || 'Position Title' }...
+           ╵                                 ~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1253:115:
+      1253 │ ...ervice.parseMarkdown(jobAppData?.job?.description || '')"></div>
+           ╵                                     ~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1361:37:
+      1361 │ ...--primary-color': jobAppData?.colorScheme?.primary || '#1e293b',
+           ╵                                  ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1362:39:
+      1362 │ ...econdary-color': jobAppData?.colorScheme?.secondary || '#334155'
+           ╵                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1515:37:
+      1515 │ ...--primary-color': jobAppData?.colorScheme?.primary || '#14b8a6',
+           ╵                                  ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.html:1516:39:
+      1516 │ ...econdary-color': jobAppData?.colorScheme?.secondary || '#0f766e'
+           ╵                                 ~~~~~~~~~~~
+
+  Error occurs in the template of component TemplatesManagerComponent.
+
+    src/app/pages/job-posts/manager/templates-manager/templates-manager.component.ts:27:15:
+      27 │   templateUrl: './templates-manager.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/create-test/create-test.component.html:16:32:
+      16 │               {{ test.formData?.fields?.length || 0 }} Questions
+         ╵                                 ~~~~~~
+
+  Error occurs in the template of component CreateTestComponent.
+
+    src/app/pages/test/create-test/create-test.component.ts:20:15:
+      20 │   templateUrl: './create-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: CrosswordPuzzleComponent is not used within the template of CreateTestComponent [plugin angular-compiler]
+
+    src/app/pages/test/create-test/create-test.component.ts:19:66:
+      19 │ ...rdBuilderComponent, CrosswordPuzzleComponent, CustomDropdownCom...
+         ╵                        ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/list-test/list-test.component.html:144:37:
+      144 │ ...         {{ test.test_data?.testTitle || 'Untitled Assessment' }}
+          ╵                                ~~~~~~~~~
+
+  Error occurs in the template of component ListTestComponent.
+
+    src/app/pages/test/list-test/list-test.component.ts:16:15:
+      16 │   templateUrl: './list-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/list-test/list-test.component.html:151:39:
+      151 │ ...        {{ test.test_data?.formData?.fields?.length || 0 }} Qu...
+          ╵                               ~~~~~~~~
+
+  Error occurs in the template of component ListTestComponent.
+
+    src/app/pages/test/list-test/list-test.component.ts:16:15:
+      16 │   templateUrl: './list-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/list-test/list-test.component.html:179:37:
+      179 │                   {{ test.test_data?.testDuration }} mins
+          ╵                                      ~~~~~~~~~~~~
+
+  Error occurs in the template of component ListTestComponent.
+
+    src/app/pages/test/list-test/list-test.component.ts:16:15:
+      16 │   templateUrl: './list-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/list-test/list-test.component.html:186:37:
+      186 │ ...        {{ test.test_data?.sections?.[0]?.scoring?.passmark ||...
+          ╵                               ~~~~~~~~
+
+  Error occurs in the template of component ListTestComponent.
+
+    src/app/pages/test/list-test/list-test.component.ts:16:15:
+      16 │   templateUrl: './list-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/list-test/list-test.component.html:194:36:
+      194 │ ...       +{{ test.test_data?.sections?.[0]?.scoring?.correct || ...
+          ╵                               ~~~~~~~~
+
+  Error occurs in the template of component ListTestComponent.
+
+    src/app/pages/test/list-test/list-test.component.ts:16:15:
+      16 │   templateUrl: './list-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] NG8107: The left side of this optional chain operation does not include 'null' or 'undefined' in its type, therefore the '?.' operator can be replaced with the '.' operator. [plugin angular-compiler]
+
+    src/app/pages/test/list-test/list-test.component.html:195:64:
+      195 │ ...e-500">-{{ test.test_data?.sections?.[0]?.scoring?.wrong || 0 ...
+          ╵                               ~~~~~~~~
+
+  Error occurs in the template of component ListTestComponent.
+
+    src/app/pages/test/list-test/list-test.component.ts:16:15:
+      16 │   templateUrl: './list-test.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+▲ [WARNING] TS-998113: CrosswordPuzzleComponent is not used within the template of TakeTestComponent [plugin angular-compiler]
+
+    src/app/pages/test/take-test/take-test.component.ts:33:4:
+      33 │     CrosswordPuzzleComponent
+         ╵     ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Output location: C:\Users\User\Documents\Projects\hse\hireup-app\dist\hireup
+

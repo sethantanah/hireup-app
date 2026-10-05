@@ -137,6 +137,12 @@ export class UploadResumeComponent implements OnInit {
       //   }
       //   break;
 
+      case 'number':
+        if (field.required && (value === null || value === undefined || value === '')) {
+          this.errors[field.key] = `${field.label} is required.`;
+        }
+        break;
+
       case 'text-area':
         if (field.required && !value.trim()) {
           this.errors[field.key] = `${field.label} is required.`;

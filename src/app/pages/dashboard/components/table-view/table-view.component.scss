@@ -384,6 +384,10 @@
     transition: all 0.2s ease;
 }
 
+.checkbox-wrapper input[type="checkbox"]:not(:checked) + .checkmark i {
+    display: none !important;
+}
+
 .checkbox-wrapper input[type="checkbox"]:checked + .checkmark {
     background: #4f46e5;
     border-color: #4f46e5;
@@ -392,6 +396,7 @@
 .checkbox-wrapper input[type="checkbox"]:checked + .checkmark i {
     color: white;
     font-size: 11px;
+    display: block !important;
 }
 
 .column-label {

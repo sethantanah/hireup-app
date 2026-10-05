@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CandidateService, CandidateProfile, MatchedJob } from '../../../services/candidate.service';
 import { FormattingService } from '../../../services/formatting.service';
 import { CustomDropdownComponent } from '../../../components/custom-dropdown/custom-dropdown.component';
+import { JobpostingsApiService } from '../../../services/jobpostings-api.service';
+import { SelectedJobService } from '../../../services/selected-job.service';
 
 @Component({
   selector: 'app-candidate-portal',
@@ -14,12 +16,60 @@ import { CustomDropdownComponent } from '../../../components/custom-dropdown/cus
   styleUrl: './candidate-portal.component.scss'
 })
 export class CandidatePortalComponent implements OnInit {
-  activeTab: 'matches' | 'applications' | 'profile' | 'resume' = 'matches';
+  activeTab: 'matches' | 'applications' | 'offers' | 'profile' | 'resume' = 'matches';
+  appSubTab: 'my-apps' | 'track-status' | 'offers' = 'my-apps';
+
+  // Sidebar state
+  sidebarOpen = signal(true);
+
+  // Scheduled Interviews State
+  myInterviews: any[] = [];
+  isLoadingInterviews: boolean = false;
+
+  // Selected Job context integration
+  selectedJobId: string | null = null;
+
+  switchMainTab(tab: 'matches' | 'applications' | 'offers' | 'profile' | 'resume', subTab?: 'my-apps' | 'track-status' | 'offers'): void {
+    if (tab === 'offers') {
+      this.activeTab = 'applications';
+      this.appSubTab = 'offers';
+      this.loadMyOffers();
+    } else {
+      this.activeTab = tab;
+      if (subTab) this.appSubTab = subTab;
+    }
+  }
 
   isLoggedIn: boolean = false;
   userEmail: string = '';
   myApplications: any[] = [];
   appliedJobIds: Set<string> = new Set<string>();
+
+  get candidateDisplayName(): string {
+    if (this.profile?.full_name && this.profile.full_name.trim()) {
+      return this.profile.full_name.trim();
+    }
+    if (this.userEmail) {
+      const parts = this.userEmail.split('@')[0].split(/[\._-]/);
+      return parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+    }
+    return 'Candidate';
+  }
+
+  get candidateFirstName(): string {
+    const name = this.candidateDisplayName;
+    return name.split(' ')[0] || 'Candidate';
+  }
+
+  // Offers State
+  myOffers: any[] = [];
+  isLoadingOffers: boolean = false;
+  selectedOfferForView: any = null;
+  respondingOfferId: string | null = null;
+  offerResponseMessage: { [offerId: string]: { type: 'success' | 'error'; message: string } } = {};
+  showCompanyEmailModal: boolean = false;
+  emailCompanyData: { offerId: string; companyName: string; toEmail: string; subject: string; message: string } = { offerId: '', companyName: '', toEmail: '', subject: '', message: '' };
+  isSendingCompanyEmail: boolean = false;
 
   // Application Tracking State
   trackingEmail: string = '';
@@ -72,24 +122,30 @@ export class CandidatePortalComponent implements OnInit {
   jobTypes = ['All', 'Remote', 'Hybrid', 'On-site', 'Full-Time', 'Part-Time', 'Contract'];
   
   matchScoreFilterOptions = [
-    'All Matches (0%+)',
+    'All Matches (50%+)',
+    'Moderate Match (60%+)',
+    'Good Match (70%+)',
     'High Relevance (80%+)',
     'Exceptional Match (85%+)',
     'Top Tier Match (90%+)'
   ];
 
-  selectedMatchScoreFilterLabel: string = 'All Matches (0%+)';
+  selectedMatchScoreFilterLabel: string = 'All Matches (50%+)';
 
   onMatchScoreFilterChange(label: string): void {
     this.selectedMatchScoreFilterLabel = label;
-    if (label.includes('80%')) {
-      this.filterMinMatchScore = 80;
+    if (label.includes('90%')) {
+      this.filterMinMatchScore = 90;
     } else if (label.includes('85%')) {
       this.filterMinMatchScore = 85;
-    } else if (label.includes('90%')) {
-      this.filterMinMatchScore = 90;
+    } else if (label.includes('80%')) {
+      this.filterMinMatchScore = 80;
+    } else if (label.includes('70%')) {
+      this.filterMinMatchScore = 70;
+    } else if (label.includes('60%')) {
+      this.filterMinMatchScore = 60;
     } else {
-      this.filterMinMatchScore = 0;
+      this.filterMinMatchScore = 50;
     }
     this.onMatchFiltersChange();
   }
@@ -99,7 +155,7 @@ export class CandidatePortalComponent implements OnInit {
   filterJobType: string = 'All';
   filterLocation: string = '';
   filterCountry: string = 'All';
-  filterMinMatchScore: number = 0;
+  filterMinMatchScore: number = 50;
   filterSearchQuery: string = '';
 
   // Notification Settings Modal state
@@ -109,9 +165,40 @@ export class CandidatePortalComponent implements OnInit {
   newSkill: string = '';
   
   isUploading: boolean = false;
+  isUploadingAvatar: boolean = false;
   isLoading: boolean = false;
   isLoadingApplications: boolean = false;
   isSaving: boolean = false;
+
+  onAvatarSelected(event: any): void {
+    const file: File = event.target.files[0];
+    if (!file) return;
+
+    this.isUploadingAvatar = true;
+    this.feedback = null;
+
+    this.candidateService.uploadCandidateAvatar(file).subscribe({
+      next: (res: any) => {
+        this.isUploadingAvatar = false;
+        if (res.avatar_url) {
+          this.profile.avatar_url = res.avatar_url;
+          this.feedback = {
+            type: 'success',
+            message: 'Profile picture updated successfully!'
+          };
+          this.loadProfile();
+        }
+      },
+      error: (err: any) => {
+        this.isUploadingAvatar = false;
+        console.error('Candidate avatar upload error:', err);
+        this.feedback = {
+          type: 'error',
+          message: err?.error?.detail || 'Failed to upload profile picture.'
+        };
+      }
+    });
+  }
   applyingJobId: string | null = null;
 
   selectedJobDetailsModal: any = null;
@@ -166,11 +253,21 @@ export class CandidatePortalComponent implements OnInit {
   constructor(
     private candidateService: CandidateService,
     private router: Router,
-    public formattingService: FormattingService
+    public formattingService: FormattingService,
+    private jobpostingsApiService: JobpostingsApiService,
+    private selectedJobService: SelectedJobService
   ) {}
+
+  openJobSelectionDropdown(): void {
+    // Candidate job filter dropdown action
+  }
 
   ngOnInit(): void {
     this.checkAuthentication();
+    this.selectedJobId = this.selectedJobService.selectedJobId;
+    this.selectedJobService.selectedJobId$.subscribe(id => {
+      this.selectedJobId = id;
+    });
   }
 
   checkAuthentication(): void {
@@ -193,9 +290,66 @@ export class CandidatePortalComponent implements OnInit {
       this.loadProfile();
       this.loadMatchedJobs();
       this.loadMyApplications();
+      this.loadMyOffers();
+      this.loadMyInterviews();
     } else {
       this.isLoggedIn = false;
     }
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update(val => !val);
+  }
+
+  getTimeStamp(item: any): number {
+    if (!item) return 0;
+    const dateVal =
+      item.created_at ||
+      item.applied_at ||
+      item.submitted_at ||
+      item.issued_at ||
+      item.scheduled_at ||
+      item.interview_date ||
+      item.updated_at ||
+      item.date ||
+      item.timestamp;
+
+    if (dateVal) {
+      const parsed = new Date(dateVal).getTime();
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+
+    if (typeof item.id === 'number') return item.id;
+    if (typeof item.application_id === 'number') return item.application_id;
+
+    return 0;
+  }
+
+  sortItemsByNewest(items: any[]): any[] {
+    if (!Array.isArray(items)) return [];
+    return [...items].sort((a, b) => {
+      const timeA = this.getTimeStamp(a);
+      const timeB = this.getTimeStamp(b);
+      if (timeA !== timeB) return timeB - timeA;
+      const idA = String(a.id || a.application_id || a.job_id || '');
+      const idB = String(b.id || b.application_id || b.job_id || '');
+      return idB.localeCompare(idA, undefined, { numeric: true });
+    });
+  }
+
+  loadMyInterviews(): void {
+    this.isLoadingInterviews = true;
+    const targetEmail = this.userEmail || this.profile?.user_email;
+    this.jobpostingsApiService.getMyInterviews(targetEmail).subscribe({
+      next: (res) => {
+        this.isLoadingInterviews = false;
+        this.myInterviews = this.sortItemsByNewest(res.interviews || []);
+      },
+      error: (err) => {
+        this.isLoadingInterviews = false;
+        console.error('Failed to load candidate interviews:', err);
+      }
+    });
   }
 
   redirectToLogin(): void {
@@ -259,6 +413,7 @@ export class CandidatePortalComponent implements OnInit {
           if (res.profile.user_email) {
             this.userEmail = res.profile.user_email;
           }
+          this.loadMyOffers();
         }
       },
       error: (err: any) => {
@@ -275,7 +430,7 @@ export class CandidatePortalComponent implements OnInit {
       job_type: this.filterJobType,
       location: this.filterLocation,
       country: this.filterCountry,
-      min_match_score: this.filterMinMatchScore > 0 ? this.filterMinMatchScore : undefined,
+      min_match_score: this.filterMinMatchScore,
       search: this.filterSearchQuery
     };
 
@@ -295,11 +450,19 @@ export class CandidatePortalComponent implements OnInit {
   }
 
   get displayMatchedJobs(): MatchedJob[] {
-    return (this.matchedJobs || []).filter(job => {
+    const list = (this.matchedJobs || []).filter(job => {
       const jid = job.job_id || (job as any).id;
       if (jid && this.appliedJobIds.has(jid)) return false;
       if (job.has_applied) return false;
+      if (job.match_score !== undefined && job.match_score < 50) return false;
       return true;
+    });
+
+    return list.sort((a: any, b: any) => {
+      const timeA = this.getTimeStamp(a);
+      const timeB = this.getTimeStamp(b);
+      if (timeA !== timeB) return timeB - timeA;
+      return (b.match_score || 0) - (a.match_score || 0);
     });
   }
 
@@ -309,7 +472,7 @@ export class CandidatePortalComponent implements OnInit {
       next: (res: any) => {
         this.isLoadingApplications = false;
         if (res.success && res.applications) {
-          this.myApplications = res.applications;
+          this.myApplications = this.sortItemsByNewest(res.applications);
           this.appliedJobIds = new Set(
             this.myApplications.map(a => a.job_id || a.jobpost_id).filter(id => !!id)
           );
@@ -347,7 +510,7 @@ export class CandidatePortalComponent implements OnInit {
       next: (res: any) => {
         this.isTrackLoading = false;
         if (res.success && res.applications && res.applications.length > 0) {
-          this.trackedApplications = res.applications;
+          this.trackedApplications = this.sortItemsByNewest(res.applications);
         } else {
           this.trackedApplications = [];
           this.trackErrorMessage = res.message || 'No applications or submissions found for this email address.';
@@ -385,8 +548,8 @@ export class CandidatePortalComponent implements OnInit {
     this.filterJobType = 'All';
     this.filterLocation = '';
     this.filterCountry = 'All';
-    this.filterMinMatchScore = 0;
-    this.selectedMatchScoreFilterLabel = 'All Matches (0%+)';
+    this.filterMinMatchScore = 50;
+    this.selectedMatchScoreFilterLabel = 'All Matches (50%+)';
     this.filterSearchQuery = '';
     this.loadMatchedJobs();
   }
@@ -623,6 +786,139 @@ export class CandidatePortalComponent implements OnInit {
           type: 'error',
           message: err?.error?.detail || 'Failed to withdraw application.'
         };
+      }
+    });
+  }
+
+  loadMyOffers(): void {
+    this.isLoadingOffers = true;
+    const email = this.userEmail || this.profile.user_email || '';
+    const candId = this.profile.id || '';
+    this.candidateService.getMyOffers(email, candId).subscribe({
+      next: (res: any) => {
+        this.isLoadingOffers = false;
+        if (res.success && res.offers) {
+          this.myOffers = res.offers;
+        }
+      },
+      error: (err: any) => {
+        this.isLoadingOffers = false;
+        console.error('Failed to load candidate offers:', err);
+      }
+    });
+  }
+
+  openViewOfferModal(offer: any): void {
+    this.selectedOfferForView = offer;
+  }
+
+  closeViewOfferModal(): void {
+    this.selectedOfferForView = null;
+  }
+
+  acceptOffer(offer: any): void {
+    if (!offer || !offer.id) return;
+    this.respondingOfferId = offer.id;
+    const email = this.userEmail || offer.candidate_email || '';
+    const payload = {
+      status: 'accepted',
+      candidate_email: email,
+      notes: 'Accepted via Candidate Portal'
+    };
+    this.candidateService.respondToOffer(offer.id, payload).subscribe({
+      next: (res: any) => {
+        this.respondingOfferId = null;
+        offer.status = 'accepted';
+        this.offerResponseMessage[offer.id] = { type: 'success', message: 'Congratulations! Offer accepted successfully.' };
+        this.loadMyOffers();
+      },
+      error: (err: any) => {
+        this.respondingOfferId = null;
+        this.offerResponseMessage[offer.id] = { type: 'error', message: err?.error?.detail || 'Failed to accept offer.' };
+      }
+    });
+  }
+
+  // Confirmation Modal state for declining offers
+  showDeclineConfirmModal: boolean = false;
+  offerToDecline: any = null;
+  declineReasonNote: string = '';
+
+  declineOffer(offer: any): void {
+    if (!offer || !offer.id) return;
+    this.offerToDecline = offer;
+    this.declineReasonNote = '';
+    this.showDeclineConfirmModal = true;
+  }
+
+  closeDeclineModal(): void {
+    this.showDeclineConfirmModal = false;
+    this.offerToDecline = null;
+    this.declineReasonNote = '';
+  }
+
+  confirmDeclineOffer(): void {
+    if (!this.offerToDecline || !this.offerToDecline.id) return;
+    const offer = this.offerToDecline;
+    this.respondingOfferId = offer.id;
+    const email = this.userEmail || offer.candidate_email || '';
+    const payload = {
+      status: 'declined',
+      candidate_email: email,
+      notes: this.declineReasonNote.trim() || 'Declined via Candidate Portal'
+    };
+    this.candidateService.respondToOffer(offer.id, payload).subscribe({
+      next: (res: any) => {
+        this.respondingOfferId = null;
+        offer.status = 'declined';
+        this.offerResponseMessage[offer.id] = { type: 'success', message: 'Offer declined.' };
+        this.closeDeclineModal();
+        this.loadMyOffers();
+      },
+      error: (err: any) => {
+        this.respondingOfferId = null;
+        this.offerResponseMessage[offer.id] = { type: 'error', message: err?.error?.detail || 'Failed to decline offer.' };
+        this.closeDeclineModal();
+      }
+    });
+  }
+
+  openContactCompanyModal(offer: any): void {
+    this.emailCompanyData = {
+      offerId: offer.id,
+      companyName: offer.company_name || 'Company Hiring Team',
+      toEmail: offer.issued_by || 'recruitment@company.com',
+      subject: `Inquiry Regarding Offer: ${offer.job_title}`,
+      message: ''
+    };
+    this.showCompanyEmailModal = true;
+  }
+
+  closeContactCompanyModal(): void {
+    this.showCompanyEmailModal = false;
+  }
+
+  sendEmailToCompany(): void {
+    if (!this.emailCompanyData.message || !this.emailCompanyData.message.trim()) return;
+    this.isSendingCompanyEmail = true;
+    const email = this.userEmail || this.profile.user_email || '';
+    const name = this.profile.full_name || 'Candidate';
+    const payload = {
+      offer_id: this.emailCompanyData.offerId,
+      candidate_email: email,
+      candidate_name: name,
+      subject: this.emailCompanyData.subject,
+      message: this.emailCompanyData.message
+    };
+    this.candidateService.contactCompany(payload).subscribe({
+      next: (res: any) => {
+        this.isSendingCompanyEmail = false;
+        this.showCompanyEmailModal = false;
+        this.feedback = { type: 'success', message: 'Your message has been sent to the company hiring team successfully!' };
+      },
+      error: (err: any) => {
+        this.isSendingCompanyEmail = false;
+        this.feedback = { type: 'error', message: err?.error?.detail || 'Failed to send message to company.' };
       }
     });
   }

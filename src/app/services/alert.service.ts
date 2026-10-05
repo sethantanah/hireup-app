@@ -52,12 +52,30 @@ export class AlertService {
       message,
       duration,
     });
+  }
 
-    // Set up auto-close if enabled
-    setTimeout(() => {
-      // Only clear if this is still the current alert
-      this.clearAlert();
-    }, duration);
+  showError(message: string, duration = 5000): void {
+    this.showAlert({
+      type: 'error',
+      message,
+      duration,
+    });
+  }
+
+  showWarning(message: string, duration = 5000): void {
+    this.showAlert({
+      type: 'warning',
+      message,
+      duration,
+    });
+  }
+
+  showInfo(message: string, duration = 5000): void {
+    this.showAlert({
+      type: 'info',
+      message,
+      duration,
+    });
   }
 
   clearAlert(): void {

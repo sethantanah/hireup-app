@@ -1,10 +1,15 @@
-<footer class="bg-[var(--gray-900)] text-white py-6">
-    <div class="container mx-auto px-6 text-center">
-      <p>&copy; 2023 {{ companyName }}. All rights reserved.</p>
-      <div class="mt-4 space-x-4">
-        <a *ngFor="let link of footerLinks" [href]="link.url" class="text-[var(--gray-400)] hover:text-[var(--bright-blue)]">
-          {{ link.text }}
-        </a>
-      </div>
+<footer class="border-t bg-background py-8 text-sm text-muted">
+  <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 md:flex-row">
+    <div class="flex items-center gap-2.5">
+      <img src="assets/logo.png" alt="HireUp Logo" class="h-6 w-6 rounded-lg object-contain">
+      <span class="font-bold text-slate-800">HireUp ATS</span>
+      <span class="text-slate-500">· Smart Hiring & AI Pipeline Management</span>
     </div>
-  </footer>
+    <div class="flex items-center gap-6">
+      <a *ngFor="let link of footerLinks" [href]="link.url" class="text-foreground/70 hover:text-foreground transition-colors">
+        {{ link.text }}
+      </a>
+    </div>
+    <div class="text-foreground/70">© {{ companyName }} All rights reserved.</div>
+  </div>
+</footer>

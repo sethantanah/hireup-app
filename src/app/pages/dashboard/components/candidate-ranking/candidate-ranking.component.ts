@@ -15,6 +15,8 @@ import { AlertPopupComponent } from '../../../components/alert-popup/alert-popup
 import { AlertService } from '../../../../services/alert.service';
 import { COMMON_FORM_FIELDS } from '../candidate-list/candidate-list.component';
 
+import { LoaderComponent } from '../../../components/loader/loader.component';
+
 @Component({
   selector: 'app-candidate-ranking',
   imports: [
@@ -24,6 +26,7 @@ import { COMMON_FORM_FIELDS } from '../candidate-list/candidate-list.component';
     ShortlistPopupComponent,
     CandidateDetailsComponent,
     CandidateRankingSettingsComponent,
+    LoaderComponent,
   ],
   templateUrl: './candidate-ranking.component.html',
   styleUrl: './candidate-ranking.component.scss',
@@ -65,8 +68,20 @@ export class CandidateRankingComponent implements OnInit {
     this.applicationStage = stageId.replace("stage_", "");
   }
 
+  private setupEvaluationData(): void {
+    const hasShortlisting = this.applicationData?.shortListingSettings && Object.keys(this.applicationData.shortListingSettings).length > 0;
+    const hasRanking = this.applicationData?.rankingSettings && Object.keys(this.applicationData.rankingSettings).length > 0;
+
+    if (hasShortlisting && (this.isFirstStage || !hasRanking)) {
+      this.evaluationData = { ...this.applicationData?.shortListingSettings, ...(this.applicationData?.rankingSettings || {}) };
+    } else {
+      this.evaluationData = this.applicationData?.rankingSettings || this.applicationData?.shortListingSettings || {};
+    }
+    this.selectedCategories = Object.keys(this.evaluationData);
+  }
+
   loadData() {
-    this.evaluationData = this.applicationData?.rankingSettings;
+    this.setupEvaluationData();
 
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
     this.dataService.saveJobId(jobpostId || '');
@@ -96,7 +111,7 @@ export class CandidateRankingComponent implements OnInit {
   }
 
   refreshData() {
-    this.evaluationData = this.applicationData?.rankingSettings;
+    this.setupEvaluationData();
 
     const jobpostId = this.route.snapshot.paramMap.get('jobId');
     this.dataService.saveJobId(jobpostId || '');
@@ -139,6 +154,10 @@ export class CandidateRankingComponent implements OnInit {
     formData.append('jobpost_id', jobpostId || '');
     formData.append('application_stage', this.applicationStage);
 
+    if (this.applicationData?.shortListingSettings) {
+      formData.append('shortlisting_settings', JSON.stringify(this.applicationData.shortListingSettings));
+    }
+
     this.apiService.rankCandidates(formData).subscribe({
       next: (data) => {
         this.alertService.showSuccess('Resume ranking is being processed in the background. Refresh to see progress.');
@@ -180,9 +199,42 @@ export class CandidateRankingComponent implements OnInit {
 
   // Check if a candidate is shortlisted
   isShortlisted(candidate: Candidate): boolean {
-    return this.dataService.shortlistedCandidates.some(
-      (c) => c.id === candidate.id
-    );
+    if (!candidate) return false;
+    if (this.dataService.shortlistedCandidates.some((c) => c.id === candidate.id)) {
+      return true;
+    }
+    if (candidate.status === 'shortlisted') {
+      return true;
+    }
+    const appStages = candidate.application_stages;
+    if (appStages && typeof appStages === 'object') {
+      for (const k of Object.keys(appStages)) {
+        if (appStages[k]?.status === 'shortlisted') {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  get unshortlistedCandidates(): Candidate[] {
+    return this.candidates.filter((candidate) => !this.isShortlisted(candidate));
+  }
+
+  get isFirstStage(): boolean {
+    const configured = this.applicationData?.applicationStages || (this.dataService as any)?.jobPostData?.applicationStages;
+    const activeStages = configured && configured.length > 0
+      ? configured.filter((s: any) => s.is_active && !s.hide_stage)
+      : [];
+
+    if (activeStages.length > 0) {
+      const firstStageId = activeStages[0].id.replace('stage_', '').trim().toLowerCase();
+      const currentStage = (this.applicationStage || '').replace('stage_', '').trim().toLowerCase();
+      return currentStage === firstStageId || currentStage === activeStages[0].id.toLowerCase();
+    }
+
+    const currentStage = (this.applicationStage || '').replace('stage_', '').trim().toLowerCase();
+    return !currentStage || currentStage === 'application_review' || currentStage === 'applied';
   }
 
   // Toggle shortlist status for a candidate
@@ -205,6 +257,7 @@ export class CandidateRankingComponent implements OnInit {
   viewDetails(candidate: Candidate) {
     // Handle "View Details" action
     this.dataService.candidate = candidate;
+    this.dataService.isFromCandidateList = false;
     this.dataService.openCandidateDetails = true;
     // Example: Open a modal or navigate to a detailed view
   }
@@ -282,7 +335,7 @@ export class CandidateRankingComponent implements OnInit {
   }
 
   toggleAllScores(): void {
-    const scores = this.candidates.flatMap(
+    const scores = this.unshortlistedCandidates.flatMap(
       (c) => c.document_ranking?.individual_scores || []
     );
 
@@ -306,7 +359,7 @@ export class CandidateRankingComponent implements OnInit {
   }
 
   private updateAllExpandedState(): void {
-    const scores = this.candidates.flatMap(
+    const scores = this.unshortlistedCandidates.flatMap(
       (c) => c.document_ranking?.individual_scores || []
     );
     this.areAllScoresExpanded = scores.every((score) =>

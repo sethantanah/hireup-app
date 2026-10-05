@@ -1,244 +1,198 @@
 <div class="candidate-ranking-page md:p-5 pt-3 min-h-screen">
   <!-- Loading Indicator -->
-  <div *ngIf="isLoading" class="loading-indicator">
-    <i class="fas fa-spinner fa-spin"></i> Loading...
-  </div>
+  <app-loader *ngIf="isLoading" [loadingText]="'Loading Candidate Rankings'" [subText]="'Processing vector scores and evaluating candidate profiles'"></app-loader>
 
-  <!-- Gear Icon to Toggle Options -->
-  <div class="flex flex-col md:flex-row justify-start my-2 mt-0">
-    <div class="flex flex-row ml-auto gap-3">
-      <button
-        (click)="toggleOptions()"
-        class="flex items-center gap-2 px-4 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs text-xs font-bold"
-      >
-        <i class="fas fa-sliders-h text-slate-500"></i>
-        <span>Setup Ranking</span>
-      </button>
-      <button
-        (click)="viewShortlist()"
-        class="inline-flex items-center gap-2 px-4 h-10 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl font-bold text-xs transition-all duration-200 shadow-xs hover:shadow-md group"
-        *ngIf="!isLoading && candidates.length > 0"
-      >
-        <i class="fas fa-list group-hover:scale-110 transition-transform"></i>
-        <span>View Shortlist</span>
-        <span
-          class="inline-flex items-center justify-center bg-white/20 text-white rounded-full px-2 py-0.5 text-[11px] font-extrabold"
-        >
-          {{ dataService.shortlistedCandidates.length }}
-        </span>
-      </button>
-      <button
-        (click)="refreshData()"
-        [class.spinning]="isRefreshing"
-        class="refresh-btn flex items-center justify-center px-3 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-600 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs"
-        title="Refresh Candidates"
-      >
-        <i class="fas fa-sync-alt text-xs"></i>
-      </button>
+  <!-- Not First Stage Warning Block -->
+  <div *ngIf="!isFirstStage && !isLoading" class="max-w-3xl mx-auto my-12 p-8 bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm text-center">
+    <div class="w-14 h-14 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-amber-200/80 shadow-xs">
+      <i class="fas fa-layer-group text-xl"></i>
     </div>
+    <h3 class="text-base font-extrabold text-slate-800 tracking-tight">AI Ranking Restricted to Initial Pipeline Stage</h3>
+    <p class="text-xs font-medium text-slate-500 mt-2 max-w-lg mx-auto leading-relaxed">
+      AI Candidate Ranking evaluates new applicant profiles prior to shortlisting. It is only active during the initial <strong>Application Review</strong> stage of the hiring pipeline.
+    </p>
   </div>
 
-  <!-- Options Panel (Evaluation Settings Modal) -->
-  <div
-    *ngIf="showOptions"
-    class="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-50 flex items-center justify-center p-4"
-    (click)="toggleOptions()"
-  >
-    <div
-      class="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-2xl rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
-      (click)="$event.stopPropagation()"
-    >
-      <!-- Modal Header -->
-      <div
-        class="p-6 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-4 bg-slate-50/80 sticky top-0 z-10"
-      >
-        <div>
-          <h2 class="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
-            <i class="fas fa-sliders-h text-indigo-600"></i>
-            <span>Evaluation & Ranking Settings</span>
-          </h2>
-          <p class="text-xs font-medium text-slate-500 mt-1">
-            Configure evaluation categories, criteria, and scoring weights for candidate evaluation
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <button
-            (click)="onSubmit()"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl transition-all shadow-xs hover:shadow-md text-xs font-bold"
-          >
-            <i class="fas fa-play text-xs"></i>
-            <span>Start Ranking</span>
-          </button>
+  <ng-container *ngIf="isFirstStage">
+    <!-- Gear Icon to Toggle Options -->
+    <div class="flex flex-col md:flex-row justify-start my-2 mt-0">
+      <div class="flex flex-row ml-auto gap-3">
+        <button (click)="toggleOptions()"
+          class="flex items-center gap-2 px-4 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs text-xs font-bold">
+          <i class="fas fa-sliders-h text-slate-500"></i>
+          <span>Setup Ranking</span>
+        </button>
+        <button (click)="viewShortlist()"
+          class="flex items-center gap-2 px-4 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs text-xs font-bold"
+          *ngIf="!isLoading && candidates.length > 0">
+          <i class="fas fa-list group-hover:scale-110 transition-transform text-slate-500"></i>
+          <span>View Shortlist</span>
+          <span
+            class="inline-flex items-center justify-center bg-indigo-600 text-white rounded-full px-2 py-0.5 text-[11px] font-extrabold">
+            {{ dataService.shortlistedCandidates.length }}
+          </span>
+        </button>
 
-          <button
-            (click)="toggleOptions()"
-            class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg"
-          >
-            <i class="fas fa-times text-lg"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Scrollable Settings Form Content -->
-      <div class="flex-1 overflow-y-auto p-6">
-        <app-candidate-ranking-settings
-          *ngIf="applicationData"
-          [applicationData]="applicationData"
-          title="Evaluation Criteria & Scoring Weights"
-          subtitle="Define rules for parsing document types and dynamic candidate criteria"
-          evaluationType="ranking"
-          (saveChanges)="onSettingsSaved($event)"
-        ></app-candidate-ranking-settings>
+        <button (click)="refreshData()"
+          class="flex items-center gap-2 px-4 h-10 bg-white border border-slate-200/80 rounded-xl text-slate-700 hover:text-indigo-600 hover:bg-slate-50/80 transition-all duration-200 shadow-xs text-xs font-bold"
+          title="Refresh Rankings">
+          <i class="fas fa-sync-alt text-slate-500" [ngClass]="{'fa-spin': isRefreshing}"></i>
+        </button>
       </div>
     </div>
-  </div>
 
-  <app-shortlist-popup
-    (filterChange)="onFilterByIds($event)"
-  ></app-shortlist-popup>
-  <app-candidate-details></app-candidate-details>
-
-  <!-- Candidate Cards Grid (3 Columns on Large Screens) -->
-  <div
-    class="candidate-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4"
-    *ngIf="!isLoading"
-  >
-    <ng-container *ngFor="let candidate of candidates">
+    <!-- Options Panel (Evaluation Settings Modal) -->
+    <div *ngIf="showOptions"
+      class="fixed inset-0 bg-slate-950/40 backdrop-blur-md z-50 flex items-center justify-center p-4"
+      (click)="toggleOptions()">
       <div
-        class="w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-xs hover:shadow-xl border border-slate-200/80 hover:border-indigo-300 p-5 transition-all duration-300 flex flex-col justify-between"
-      >
-        <!-- Card Header -->
-        <div class="flex flex-col gap-2 mb-4">
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-bold text-slate-900 truncate">
-              {{ getDisplayName(candidate) }}
-            </h3>
-            <span
-              class="px-2.5 py-1 bg-indigo-50 border border-indigo-200/80 text-indigo-700 rounded-full text-xs font-extrabold"
-            >
-              {{ (candidate.ranking_score * 100).toFixed(0) }}%
-            </span>
+        class="bg-white/95 backdrop-blur-xl border border-slate-200/80 shadow-2xl rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden"
+        (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div
+          class="p-6 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-4 bg-slate-50/80 sticky top-0 z-10">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+              <i class="fas fa-sliders-h text-indigo-600"></i>
+              <span>Evaluation & Ranking Settings</span>
+            </h2>
+            <p class="text-xs font-medium text-slate-500 mt-1">
+              Configure evaluation categories, criteria, and scoring weights for candidate evaluation
+            </p>
           </div>
-          <p class="text-xs font-medium text-slate-500 flex items-center gap-1.5" *ngIf="getExperience(candidate)">
-            <i class="fas fa-briefcase text-slate-400"></i>
-            <span>{{ getExperience(candidate) }} yrs experience</span>
-          </p>
-        </div>
+          <div class="flex items-center gap-3">
+            <button (click)="onSubmit()"
+              class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white rounded-xl transition-all shadow-xs hover:shadow-md text-xs font-bold">
+              <i class="fas fa-play text-xs"></i>
+              <span>Start Ranking</span>
+            </button>
 
-        <!-- Scores Section -->
-        <div class="mb-5">
-          <div class="flex items-center justify-between mb-2">
-            <h4 class="text-xs font-bold text-slate-700">
-              Score Breakdown
-            </h4>
-            <button
-              (click)="toggleAllScores()"
-              class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              {{ areAllScoresExpanded ? "Collapse All" : "Expand All" }}
+            <button (click)="toggleOptions()"
+              class="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-lg">
+              <i class="fas fa-times text-lg"></i>
             </button>
           </div>
+        </div>
 
-          <div class="overflow-x-auto -mx-5 px-5">
-            <div class="flex gap-2.5 pb-2">
-              <div
-                *ngFor="
-                  let score of candidate?.document_ranking?.individual_scores
-                "
-                class="flex-none w-[190px] bg-slate-50/80 rounded-xl p-3 border border-slate-200/60"
-              >
-                <div class="flex items-center justify-between mb-1.5">
-                  <span class="text-xs font-bold text-slate-700 truncate">{{
-                    score.document_type
-                  }}</span>
-                  <div class="flex items-center gap-1.5">
-                    <span class="text-xs font-extrabold text-slate-900"
-                      >{{ (score.overall_score * 100).toFixed(0) }}%</span
-                    >
-                    <button
-                      (click)="toggleScoreDetails(score)"
-                      class="text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      <i
-                        class="fas fa-chevron-down text-[10px]"
-                        [ngClass]="{
-                          'transform rotate-180': isScoreExpanded(score)
-                        }"
-                      >
-                      </i>
-                    </button>
-                  </div>
-                </div>
+        <!-- Scrollable Settings Form Content -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <app-candidate-ranking-settings *ngIf="applicationData" [applicationData]="applicationData"
+            title="Evaluation Criteria & Scoring Weights"
+            subtitle="Define rules for parsing document types and dynamic candidate criteria" evaluationType="ranking"
+            (saveChanges)="onSettingsSaved($event)"></app-candidate-ranking-settings>
+        </div>
+      </div>
+    </div>
 
-                <div
-                  *ngIf="isScoreExpanded(score)"
-                  class="mt-2 space-y-1 border-t border-slate-200/60 pt-2"
-                >
-                  <div
-                    *ngFor="let key of getScoreKeys(score)"
-                    class="flex justify-between items-center"
-                  >
-                    <ng-container
-                      *ngIf="key !== 'document_type' && key !== 'overall_score'"
-                    >
-                      <span class="text-[11px] text-slate-500 capitalize">{{
-                        key.replace("_", " ")
+    <app-shortlist-popup (filterChange)="onFilterByIds($event)"></app-shortlist-popup>
+    <app-candidate-details></app-candidate-details>
+
+    <!-- Empty State when no unshortlisted candidates remain -->
+    <div *ngIf="!isLoading && unshortlistedCandidates.length === 0" class="max-w-xl mx-auto my-12 p-8 bg-white/80 rounded-2xl border border-slate-200/80 text-center shadow-xs">
+      <i class="fas fa-user-check text-3xl text-emerald-500 mb-3"></i>
+      <h4 class="text-sm font-bold text-slate-800">No Un-shortlisted Candidates Available</h4>
+      <p class="text-xs text-slate-500 mt-1">All candidates for this job post have either been shortlisted or no new applications require ranking.</p>
+    </div>
+
+    <!-- Candidate Cards Grid (3 Columns on Large Screens) -->
+    <div class="candidate-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-4" *ngIf="!isLoading && unshortlistedCandidates.length > 0">
+      <ng-container *ngFor="let candidate of unshortlistedCandidates">
+        <div
+          class="w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-xs hover:shadow-xl border border-slate-200/80 hover:border-indigo-300 p-5 transition-all duration-300 flex flex-col justify-between">
+          <!-- Card Header -->
+          <div class="flex flex-col gap-2 mb-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-base font-bold text-slate-900 truncate">
+                {{ getDisplayName(candidate) }}
+              </h3>
+              <span
+                class="px-2.5 py-1 bg-indigo-50 border border-indigo-200/80 text-indigo-700 rounded-full text-xs font-extrabold">
+                {{ ((candidate.ranking_score || 0) * 100).toFixed(0) }}%
+              </span>
+            </div>
+            <p class="text-xs font-medium text-slate-500 flex items-center gap-1.5" *ngIf="getExperience(candidate)">
+              <i class="fas fa-briefcase text-slate-400"></i>
+              <span>{{ getExperience(candidate) }} yrs experience</span>
+            </p>
+          </div>
+
+          <!-- Scores Section -->
+          <div class="mb-5">
+            <div class="flex items-center justify-between mb-2">
+              <h4 class="text-xs font-bold text-slate-700">
+                Score Breakdown
+              </h4>
+              <button (click)="toggleAllScores()"
+                class="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                {{ areAllScoresExpanded ? "Collapse All" : "Expand All" }}
+              </button>
+            </div>
+
+            <div class="overflow-x-auto -mx-5 px-5">
+              <div class="flex gap-2.5 pb-2">
+                <div *ngFor="
+                    let score of candidate?.document_ranking?.individual_scores
+                  " class="flex-none w-[190px] bg-slate-50/80 rounded-xl p-3 border border-slate-200/60">
+                  <div class="flex items-center justify-between mb-1.5">
+                    <span class="text-xs font-bold text-slate-700 truncate">{{
+                      score.document_type
                       }}</span>
-                      <span class="text-[11px] font-bold text-slate-800">
-                        {{ (score[key] * 100).toFixed(0) }}%
-                      </span>
-                    </ng-container>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-xs font-extrabold text-slate-900">{{ ((score.overall_score || 0) * 100).toFixed(0)
+                        }}%</span>
+                      <button (click)="toggleScoreDetails(score)"
+                        class="text-slate-400 hover:text-slate-600 transition-colors">
+                        <i class="fas fa-chevron-down text-[10px]" [ngClass]="{
+                            'transform rotate-180': isScoreExpanded(score)
+                          }">
+                        </i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div *ngIf="isScoreExpanded(score)" class="mt-2 space-y-1 border-t border-slate-200/60 pt-2">
+                    <div *ngFor="let key of getScoreKeys(score)" class="flex justify-between items-center">
+                      <ng-container *ngIf="key !== 'document_type' && key !== 'overall_score'">
+                        <span class="text-[11px] text-slate-500 capitalize">{{
+                          key.replace("_", " ")
+                          }}</span>
+                        <span class="text-[11px] font-bold text-slate-800">
+                          {{ ((score[key] || 0) * 100).toFixed(0) }}%
+                        </span>
+                      </ng-container>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Card Footer -->
-        <div
-          class="flex items-center justify-between pt-3 border-t border-slate-100"
-        >
-          <button
-            (click)="viewDetails(candidate)"
-            class="px-3 py-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/80 rounded-lg transition-colors flex items-center gap-1.5"
-          >
-            <i class="fas fa-eye text-xs"></i>
-            <span>View Details</span>
-          </button>
+          <!-- Card Footer -->
+          <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+            <button (click)="viewDetails(candidate)"
+              class="px-3 py-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50/80 rounded-lg transition-colors flex items-center gap-1.5">
+              <i class="fas fa-eye text-xs"></i>
+              <span>View Details</span>
+            </button>
 
-          <div class="relative">
-            <input
-              type="checkbox"
-              id="shortlist-{{ candidate.id }}"
-              class="peer hidden"
-              [checked]="isShortlisted(candidate)"
-              (change)="toggleShortlist(candidate)"
-            />
-            <label
-              for="shortlist-{{ candidate.id }}"
-              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-xs font-bold text-slate-600 hover:bg-slate-100/80 peer-checked:text-emerald-700 peer-checked:bg-emerald-50 transition-colors"
-            >
-              <i
-                class="fas text-xs"
-                [ngClass]="
-                  isShortlisted(candidate) ? 'fa-check-circle text-emerald-600' : 'fa-circle text-slate-300'
-                "
-              ></i>
-              Shortlist
-            </label>
+            <div class="relative">
+              <input type="checkbox" id="shortlist-{{ candidate.id }}" class="peer hidden"
+                [checked]="isShortlisted(candidate)" (change)="toggleShortlist(candidate)" />
+              <label for="shortlist-{{ candidate.id }}"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-xs font-bold text-slate-600 hover:bg-slate-100/80 peer-checked:text-emerald-700 peer-checked:bg-emerald-50 transition-colors">
+                <i class="fas text-xs" [ngClass]="
+                    isShortlisted(candidate) ? 'fa-check-circle text-emerald-600' : 'fa-circle text-slate-300'
+                  "></i>
+                Shortlist
+              </label>
+            </div>
           </div>
         </div>
-      </div>
-    </ng-container>
-  </div>
+      </ng-container>
+    </div>
+  </ng-container>
 </div>
 
-<app-alert-popup
-  [show]="!!alert"
-  [type]="alert?.type || 'success'"
-  [message]="alert?.message || ''"
-  [autoClose]="alert?.autoClose || true"
-  [duration]="alert?.duration || 5000"
-  (closed)="onAlertClosed()"
-></app-alert-popup>
+<app-alert-popup [show]="!!alert" [type]="alert?.type || 'success'" [message]="alert?.message || ''"
+  [autoClose]="alert?.autoClose || true" [duration]="alert?.duration || 5000"
+  (closed)="onAlertClosed()"></app-alert-popup>

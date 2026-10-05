@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 import {
   JobTemplate,
   TemplatesService,
@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 import { TemplatesManagerComponent } from '../../../templates-manager/templates-manager.component';
 import { JobpostManagerService } from '../../../../../../services/jobpost-manager.service';
 import { JobPostData } from '../../../../../../models/jobpost.model';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -17,6 +17,8 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './preview.component.scss',
 })
 export class PreviewComponent {
+  @Output() templateChange = new EventEmitter<JobPostData>();
+
   showPreview = false;
   applicationData: JobPostData | undefined;
   templates: JobTemplate[] = [];
@@ -25,7 +27,8 @@ export class PreviewComponent {
   constructor(
     private templateService: TemplatesService,
     private jobPostService: JobpostManagerService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.templates = templateService.templates;
     this.ensureApplicationData();
@@ -33,6 +36,11 @@ export class PreviewComponent {
 
   ensureApplicationData() {
     this.applicationData = this.jobPostService.getApplicationData();
+    const jobId = this.route.snapshot.paramMap.get('jobId') || 
+                  this.route.parent?.snapshot.paramMap.get('jobId') || 
+                  this.route.snapshot.queryParamMap.get('jobId') ||
+                  this.applicationData?.id;
+
     if (!this.applicationData) {
       this.applicationData = {
         templateId: '1',
@@ -41,9 +49,14 @@ export class PreviewComponent {
         applySection: { title: 'Application Form', instructions: 'Fill in your details below.', buttonText: 'Submit', declaration: '' },
         sections: ['General'],
         formData: { fields: [] },
-        colorScheme: { primary: '#3b82f6', secondary: '#1e40af', borderRadius: '3xl' }
+        colorScheme: { primary: '#10b981', secondary: '#047857', borderRadius: '3xl' }
       } as any;
     }
+
+    if (jobId && this.applicationData) {
+      this.applicationData.id = jobId;
+    }
+
     if (this.applicationData && !this.applicationData.job) {
       const appDataAny = this.applicationData as any;
       this.applicationData.job = {
@@ -83,7 +96,7 @@ export class PreviewComponent {
     this.ensureApplicationData();
     if (!this.applicationData) return;
     if (!this.applicationData.colorScheme) {
-      this.applicationData.colorScheme = { primary: '#3b82f6', secondary: '#1e40af' };
+      this.applicationData.colorScheme = { primary: '#10b981', secondary: '#047857' };
     }
     this.applicationData.colorScheme.borderRadius = radius;
     this.saveDataAndSync();
@@ -91,10 +104,23 @@ export class PreviewComponent {
 
   saveDataAndSync() {
     if (!this.applicationData) return;
+    
+    const jobId = this.applicationData.id || 
+                  this.route.snapshot.paramMap.get('jobId') || 
+                  this.route.parent?.snapshot.paramMap.get('jobId') || 
+                  this.route.snapshot.queryParamMap.get('jobId');
+
+    if (jobId) {
+      this.applicationData.id = jobId;
+    }
+    this.applicationData.lastUpdated = Date.now();
+
     this.jobPostService.updateApplicationData(this.applicationData);
+    this.templateChange.emit(this.applicationData);
+
     if (this.applicationData.id) {
       this.jobPostService.createUpdateJobPostData(this.applicationData.id, this.applicationData).subscribe({
-        next: () => console.log('Template settings synced with backend'),
+        next: () => console.log('Template settings synced with backend for job:', this.applicationData?.id),
         error: (err) => console.warn('Backend sync note:', err)
       });
     }

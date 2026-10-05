@@ -190,6 +190,120 @@ export class JobFormEditorComponent implements OnInit {
   ensureSectionDefaults(): void {
     if (!this.applicationData) return;
 
+    // 1. Ensure company object exists with name, logoUrl, navLinks
+    if (!this.applicationData.company) {
+      this.applicationData.company = { name: '', logoUrl: '', navLinks: [] };
+    }
+    if (!this.applicationData.company.navLinks) {
+      this.applicationData.company.navLinks = [];
+    }
+    if (!this.applicationData.company.logoUrl) {
+      this.applicationData.company.logoUrl = '';
+    }
+    if (!this.applicationData.company.name || this.applicationData.company.name === 'Acme Inc.') {
+      const savedUserStr = localStorage.getItem('USER');
+      if (savedUserStr) {
+        try {
+          const u = JSON.parse(savedUserStr);
+          if (u.organization_name || u.company_name || u.name) {
+            this.applicationData.company.name = u.organization_name || u.company_name || u.name;
+          }
+        } catch (e) {}
+      }
+      if (!this.applicationData.company.name) {
+        this.applicationData.company.name = 'HireUp Company';
+      }
+    }
+
+    // 2. Ensure job object exists with title, description, location, type, workMode, etc.
+    if (!this.applicationData.job) {
+      this.applicationData.job = { title: '', description: '', location: '', type: '', salaryRange: '' };
+    }
+    const rawAny = this.applicationData as any;
+    const fallbackTitle = rawAny.jobInfo?.title || rawAny.title || rawAny.job_title;
+    if (!this.applicationData.job.title && fallbackTitle) {
+      this.applicationData.job.title = fallbackTitle;
+    }
+    const fallbackDesc = rawAny.jobInfo?.description || rawAny.description;
+    if (!this.applicationData.job.description && fallbackDesc) {
+      this.applicationData.job.description = fallbackDesc;
+    }
+    const fallbackType = rawAny.jobInfo?.type || rawAny.type;
+    if (!this.applicationData.job.type && fallbackType) {
+      this.applicationData.job.type = fallbackType;
+    }
+    const fallbackLocation = rawAny.jobInfo?.location || rawAny.location;
+    if (!this.applicationData.job.location && fallbackLocation) {
+      this.applicationData.job.location = fallbackLocation;
+    }
+    const fallbackSalary = rawAny.jobInfo?.salaryRange || rawAny.salaryRange;
+    if (!this.applicationData.job.salaryRange && fallbackSalary) {
+      this.applicationData.job.salaryRange = fallbackSalary;
+    }
+    const fallbackWorkMode = rawAny.jobInfo?.workMode || rawAny.workMode;
+    if (!this.applicationData.job.workMode && fallbackWorkMode) {
+      this.applicationData.job.workMode = fallbackWorkMode;
+    }
+
+    // 3. Ensure applySection object exists
+    if (!this.applicationData.applySection) {
+      this.applicationData.applySection = {
+        title: 'Apply for Position',
+        instructions: 'Please fill out the form below to submit your application.',
+        buttonText: 'Submit Application',
+        declaration: 'I certify that the information provided is accurate and complete.'
+      };
+    }
+
+    // 4. Ensure benefits object exists
+    if (!this.applicationData.benefits) {
+      this.applicationData.benefits = { title: 'Role Benefits', items: [] };
+    }
+    if (!this.applicationData.benefits.items) {
+      this.applicationData.benefits.items = [];
+    }
+
+    // 5. Ensure footer object exists
+    if (!this.applicationData.footer) {
+      this.applicationData.footer = { copyrightText: `© ${new Date().getFullYear()} ${this.applicationData.company.name}`, links: [] };
+    }
+    if (!this.applicationData.footer.links) {
+      this.applicationData.footer.links = [];
+    }
+
+    // 6. Ensure formData object exists and has fields
+    if (!this.applicationData.formData) {
+      const customSchema = rawAny.customFormSchema;
+      this.applicationData.formData = {
+        fields: Array.isArray(customSchema) ? customSchema : []
+      };
+    } else if (!this.applicationData.formData.fields) {
+      const customSchema = rawAny.customFormSchema;
+      this.applicationData.formData.fields = Array.isArray(customSchema) ? customSchema : [];
+    }
+
+    // 7. Ensure submissionMessage object exists
+    if (!this.applicationData.submissionMessage) {
+      this.applicationData.submissionMessage = {
+        title: 'Application Submitted!',
+        message: 'Thank you for your application. We will review your submission and get back to you soon.',
+        actionText: 'Back to Careers',
+        actionLink: '/careers'
+      };
+    }
+
+    // 8. Ensure colorScheme object exists
+    if (!this.applicationData.colorScheme) {
+      this.applicationData.colorScheme = {
+        primary: '#10b981',
+        secondary: '#047857',
+        accent: '#f59e0b',
+        background: '#ffffff',
+        text: '#1f2937'
+      };
+    }
+
+    // 9. Ensure sectionVisibility object exists
     if (!this.applicationData.sectionVisibility) {
       this.applicationData.sectionVisibility = {
         showCompanyDetails: true,
@@ -202,18 +316,18 @@ export class JobFormEditorComponent implements OnInit {
       };
     }
 
-    if (this.applicationData.company) {
-      if (!this.applicationData.company.name || this.applicationData.company.name === 'Acme Inc.') {
-        const savedUserStr = localStorage.getItem('USER');
-        if (savedUserStr) {
-          try {
-            const u = JSON.parse(savedUserStr);
-            if (u.organization_name || u.company_name || u.name) {
-              this.applicationData.company.name = u.organization_name || u.company_name || u.name;
-            }
-          } catch (e) {}
-        }
-      }
+    // 10. Ensure applicationStages exist
+    if (!this.applicationData.applicationStages || this.applicationData.applicationStages.length === 0) {
+      const jobpostId = this.route.snapshot.paramMap.get('jobId') || '';
+      this.applicationData.applicationStages = this.jobPostService.defaultStages.map(s => ({
+        ...s,
+        jobpost_id: jobpostId
+      }));
+    }
+
+    // 11. Ensure emailTemplates array exists
+    if (!this.applicationData.emailTemplates) {
+      this.applicationData.emailTemplates = [];
     }
   }
 
@@ -238,8 +352,8 @@ export class JobFormEditorComponent implements OnInit {
       'Color Scheme': 'fa-palette',
       'Submission Message': 'fa-paper-plane',
       'Contact Section': 'fa-address-book',
-      'Application Form': 'fa-wpforms',
-      'Request For Additional Data': 'fa-wpforms',
+      'Application Form': 'fa-file-signature',
+      'Request For Additional Data': 'fa-plus',
       'Auto Screening': 'fa-search',
       'Job Templates': 'fa-copy',
       'Email Templates': 'fa-envelope-open-text',
@@ -275,6 +389,25 @@ export class JobFormEditorComponent implements OnInit {
     this.applicationData!.footer.links.splice(index, 1);
   }
 
+  onTemplateChanged(updatedData: JobPostData): void {
+    if (updatedData && this.applicationData) {
+      this.applicationData.templateId = updatedData.templateId || this.applicationData.templateId;
+      if (updatedData.colorScheme) {
+        this.applicationData.colorScheme = {
+          ...this.applicationData.colorScheme,
+          ...updatedData.colorScheme
+        };
+      }
+      const jobpostId = this.route.snapshot.paramMap.get('jobId');
+      if (jobpostId) {
+        this.applicationData.id = jobpostId;
+      }
+      this.applicationData.lastUpdated = Date.now();
+      this.jobPostService.updateApplicationData(this.applicationData);
+      this.saveChanges();
+    }
+  }
+
   private isAutoSavingToBackend = false;
 
   autoSave() {
@@ -283,7 +416,20 @@ export class JobFormEditorComponent implements OnInit {
       if (jobpostId) {
         this.applicationData.id = jobpostId;
       }
-      this.applicationData.lastUpdated = Date.now(); // Set to current timestamp
+
+      // Check if child components like PreviewComponent updated template settings in service
+      const latestServiceData = this.jobPostService.getApplicationData();
+      if (latestServiceData && latestServiceData.templateId && latestServiceData.templateId !== this.applicationData.templateId) {
+        this.applicationData.templateId = latestServiceData.templateId;
+      }
+      if (latestServiceData && latestServiceData.colorScheme?.borderRadius && latestServiceData.colorScheme.borderRadius !== this.applicationData.colorScheme?.borderRadius) {
+        if (!this.applicationData.colorScheme) {
+          this.applicationData.colorScheme = { primary: '#10b981', secondary: '#047857' };
+        }
+        this.applicationData.colorScheme.borderRadius = latestServiceData.colorScheme.borderRadius;
+      }
+
+      this.applicationData.lastUpdated = Date.now();
       this.jobPostService.updateApplicationData(this.applicationData);
 
       // Perform background save to server

@@ -27,7 +27,7 @@ export interface Requirement {
   styleUrl: './candidate-ranking-settings.component.scss',
 })
 export class CandidateRankingSettingsComponent implements OnInit {
-  @Input() applicationData!: JobPostData;
+  @Input() applicationData?: JobPostData;
   @Input() title: string = "Candidate Ranking Settings"
   @Input() subtitle: string = "Configure how candidates are ranked"
   @Input() evaluationType: string = "ranking"
@@ -44,55 +44,65 @@ export class CandidateRankingSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const result = this.parseFields(this.applicationData.formData);
-    if (result.hasNonFileFields) {
-      this.documentTypes.push('Form Data');
+    const defaultTypes = ['Form Data', 'Resume / CV', 'Cover Letter'];
+    this.documentTypes = [...defaultTypes];
+
+    if (this.applicationData?.formData) {
+      const result = this.parseFields(this.applicationData.formData);
+      if (result.fileFields) {
+        result.fileFields.forEach((field: any) => {
+          if (field.label && !this.documentTypes.includes(field.label)) {
+            this.documentTypes.push(field.label);
+          }
+        });
+      }
     }
-
-
-    if (result.fileFields) {
-      result.fileFields.forEach((field: any) => {
-        this.documentTypes.push(field.label);
-      });
-    }
-
 
     if (this.evaluationType === "ranking") {
-      if (this.applicationData.rankingSettings) {
+      if (this.applicationData?.rankingSettings && Object.keys(this.applicationData.rankingSettings).length > 0) {
         this.savedRequirements = this.applicationData.rankingSettings;
         this.populateForm(this.applicationData.rankingSettings);
       }
-    }else {
-        if (this.applicationData.shortListingSettings) {
-          this.savedRequirements = this.applicationData.shortListingSettings;
-          this.populateForm(this.applicationData.shortListingSettings);
-        }
+    } else {
+      if (this.applicationData?.shortListingSettings && Object.keys(this.applicationData.shortListingSettings).length > 0) {
+        this.savedRequirements = this.applicationData.shortListingSettings;
+        this.populateForm(this.applicationData.shortListingSettings);
       }
+    }
+
+    // Add a default requirement if empty
+    if (this.requirements.length === 0) {
+      this.addRequirement();
+    }
   }
 
-
   populateForm(data: any) {
+    this.requirements.clear();
     Object.values(data).forEach((requirement: any) => {
       const requirementGroup = this.fb.group({
-        document_type: [requirement.document_type],
-        criteria: [requirement.criteria],
+        document_type: [requirement.document_type || 'Form Data'],
+        criteria: [requirement.criteria || ''],
         evaluation_metrics: this.fb.array([])
       });
 
       const metricsArray = requirementGroup.get('evaluation_metrics') as FormArray;
-      requirement.evaluation_metrics.forEach((metric: any) => {
-        metricsArray.push(this.fb.group({
-          score: [metric.score],
-          weight: [metric.weight]
-        }));
-      });
+      if (Array.isArray(requirement.evaluation_metrics)) {
+        requirement.evaluation_metrics.forEach((metric: any) => {
+          metricsArray.push(this.fb.group({
+            score: [metric.score || ''],
+            weight: [metric.weight ?? 50]
+          }));
+        });
+      }
 
       this.requirements.push(requirementGroup);
     });
   }
 
-
   parseFields(data: any) {
+    if (!data || !Array.isArray(data.fields)) {
+      return { hasNonFileFields: true, fileFields: [] };
+    }
     const nonFileFields = data.fields.some(
       (field: any) => field.type !== 'file'
     );
@@ -123,14 +133,16 @@ export class CandidateRankingSettingsComponent implements OnInit {
       metricsArray.clear();
 
       // Add saved metrics
-      savedData.evaluation_metrics.forEach((metric) => {
-        metricsArray.push(
-          this.fb.group({
-            score: metric.score,
-            weight: metric.weight,
-          })
-        );
-      });
+      if (Array.isArray(savedData.evaluation_metrics)) {
+        savedData.evaluation_metrics.forEach((metric) => {
+          metricsArray.push(
+            this.fb.group({
+              score: metric.score,
+              weight: metric.weight,
+            })
+          );
+        });
+      }
     }
   }
 
@@ -140,10 +152,17 @@ export class CandidateRankingSettingsComponent implements OnInit {
 
   addRequirement() {
     const requirementGroup = this.fb.group({
-      document_type: [''],
+      document_type: [this.documentTypes[0] || 'Form Data'],
       criteria: [''],
       evaluation_metrics: this.fb.array([]),
     });
+    // Add default metric
+    const metricsArray = requirementGroup.get('evaluation_metrics') as FormArray;
+    metricsArray.push(this.fb.group({
+      score: ['General Qualification'],
+      weight: [100]
+    }));
+
     this.requirements.push(requirementGroup);
   }
 
@@ -171,19 +190,26 @@ export class CandidateRankingSettingsComponent implements OnInit {
 
   onSubmit() {
     const formValue = this.requirementsForm.value;
-    formValue.requirements.forEach((requirement: Requirement) => {
+    this.savedRequirements = {};
+    (formValue.requirements || []).forEach((requirement: Requirement) => {
       requirement.evaluation_type = this.evaluationType;
-      this.savedRequirements[requirement.document_type] = requirement;
+      const docType = requirement.document_type || 'Form Data';
+      requirement.document_type = docType;
+      this.savedRequirements[docType] = requirement;
     });
 
-    if (this.applicationData) {
-      if (this.evaluationType === "ranking") {
-        this.applicationData.rankingSettings = this.savedRequirements;
-      } else {
-        this.applicationData.shortListingSettings = this.savedRequirements;
-      }
+    const appData: any = this.applicationData || {
+      templateId: '1',
+      formData: { fields: [] }
+    };
 
-      this.saveChanges.emit(this.applicationData);
+    if (this.evaluationType === "ranking") {
+      appData.rankingSettings = this.savedRequirements;
+    } else {
+      appData.shortListingSettings = this.savedRequirements;
     }
+
+    this.applicationData = appData;
+    this.saveChanges.emit(this.applicationData);
   }
 }

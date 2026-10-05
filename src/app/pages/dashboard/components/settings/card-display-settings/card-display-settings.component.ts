@@ -29,7 +29,7 @@ export class FilterBySectionPipe implements PipeTransform {
   styleUrl: './card-display-settings.component.scss',
 })
 export class CardDisplaySettingsComponent implements OnInit {
-  @Input() applicationData!: JobPostData;
+  @Input() applicationData?: JobPostData;
   @Output() saveChanges = new EventEmitter<any>();
 
   formFields: FormField[] = [];
@@ -39,17 +39,19 @@ export class CardDisplaySettingsComponent implements OnInit {
   constructor(private jobPostService: JobpostManagerService) {}
 
   ngOnInit() {
+    if (!this.applicationData?.formData?.fields) return;
     this.formFields = this.applicationData.formData.fields;
     this.initializeSettings();
   }
 
   private initializeSettings() {
+    if (!this.applicationData) return;
     this.sections = [...new Set(this.formFields.map((field) => field.section))];
     this.fieldSettings = this.formFields.map((field) => ({
       key: field.key,
       label: field.label,
       visible:
-        this.applicationData.cardSettings?.includes(
+        this.applicationData?.cardSettings?.includes(
           field.label.toLowerCase().replace(/ /g, '_')
         ) ?? false,
       section: field.section,
@@ -57,6 +59,7 @@ export class CardDisplaySettingsComponent implements OnInit {
   }
 
   saveSettings() {
+    if (!this.applicationData) return;
     const selectedFields = this.fieldSettings
       .filter((field) => field.visible)
       .map((field) => field.label.toLowerCase().replace(/ /g, '_'));

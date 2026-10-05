@@ -1,0 +1,1824 @@
+<div class="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col lg:flex-row font-sans">
+  <!-- Sidebar HireUp -->
+  <div [ngClass]="sidebarOpen ? 'flex' : 'hidden lg:flex'"
+    class="h-screen w-full lg:w-64 bg-card text-foreground flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 border-r border-border transition-all duration-300">
+    <div class="p-4 border-b border-border flex flex-col gap-3 flex-shrink-0 bg-muted/20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <button class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:bg-muted transition-all"
+            (click)="toggleSidebar()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center shadow-sm">
+            <svg class="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-foreground leading-none">HireUp</h2>
+            <span class="text-[10px] font-medium text-muted-foreground">Workspace</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Job Postings moved to header dropdown -->
+    <div class="flex-1 min-h-0"></div>
+    <div class="px-3 py-2 border-t border-slate-200/80 flex-shrink-0 bg-slate-50/50">
+      <button (click)="showToolsMenu = !showToolsMenu"
+        class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-all border border-slate-200/60 shadow-2xs">
+        <div class="flex items-center gap-2"><svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg><span>Workspace Tools & Settings</span></div>
+        <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="showToolsMenu" fill="none"
+          stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      <div *ngIf="showToolsMenu" class="mt-2 space-y-1 max-h-44 overflow-y-auto pr-1">
+        <a routerLink="/scheduled-interviews"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold"><i
+            class="fas fa-calendar-alt text-indigo-500 text-xs w-4"></i><span>Scheduled Interviews</span></a>
+        <a routerLink="/interview-scorecards"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold"><i
+            class="fas fa-clipboard-check text-indigo-500 text-xs w-4"></i><span>Scorecards</span></a>
+        <a routerLink="/offer-studio"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-emerald-700 transition-all text-xs font-semibold"><svg
+            class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg><span>Offer Studio</span></a>
+        <a routerLink="/onboarding"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-violet-700 transition-all text-xs font-semibold"><svg
+            class="w-3.5 h-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+          </svg><span>Onboarding Hub</span></a>
+        <a routerLink="/organization-settings" [queryParams]="{tab: 'api_connections'}"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-sky-700 transition-all text-xs font-semibold"><svg
+            class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg><span>API Connections</span></a>
+        <a routerLink="/organization-settings"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold"><svg
+            class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg><span>Org & Email Settings</span></a>
+      </div>
+    </div>
+    <div class="p-3 border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5 min-w-0">
+          <div class="relative flex-shrink-0">
+            <ng-container *ngIf="userData.logo_url; else initTpl"><img [src]="userData.logo_url" alt="Profile"
+                class="w-8 h-8 rounded-xl object-cover border border-slate-200 shadow-2xs" /></ng-container>
+            <ng-template #initTpl>
+              <div
+                class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-2xs">
+                <span class="text-[11px] font-bold text-white">{{ getInitials(userData.full_name || userData.name || '')
+                  }}</span></div>
+            </ng-template>
+            <div class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-white"></div>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-slate-900 truncate">{{ userData.full_name || userData.name }}</p>
+            <p class="text-[10px] text-slate-500 font-medium truncate">{{ userData.position_in_company || userData.email
+              }}</p>
+          </div>
+        </div>
+        <button (click)="logOut()"
+          class="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+          title="Logout"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+            stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg></button>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="sidebarOpen" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-30 lg:hidden"
+    (click)="toggleSidebar()"></div>
+
+  <!-- Main Content -->
+  <div class="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-slate-50/50">
+    <header
+      class="sticky top-0 z-30 w-full border-b border-border bg-card shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 min-h-14">
+      <div class="flex items-center gap-3 mb-4 lg:mb-0">
+        <button class="lg:hidden p-2 rounded-md border border-border bg-muted/50 text-foreground"
+          (click)="toggleSidebar()"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg></button>
+        <div>
+          <h1 class="text-sm font-semibold text-foreground tracking-tight flex items-center gap-2"><svg
+              class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+            </svg><span>Organization Settings</span></h1>
+          <p class="text-[11px] font-medium text-muted-foreground">Configure custom mail servers, team permissions and
+            workspace governance</p>
+        </div>
+        <div class="hidden sm:block border-l border-border pl-3 ml-2">
+          <app-org-switcher></app-org-switcher>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <a routerLink="/dashboard"
+          class="h-8 px-3 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium rounded-md transition-all flex items-center gap-2 text-[11px] border border-border"><svg
+            class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg><span>Dashboard</span></a>
+        <div
+          class="px-3 h-8 bg-slate-50 rounded-md border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full"
+            [ngClass]="{'bg-emerald-500': emailSettings.provider !== 'default', 'bg-amber-500': emailSettings.provider === 'default'}"></span><span
+            class="hidden sm:inline">Mail: <strong class="text-slate-900 uppercase">{{ emailSettings.provider
+              }}</strong></span></div>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6 md:p-6 space-y-6 bg-slate-50/30">
+      <!-- Header & Workspace Banner -->
+      <div
+        class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div class="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none">
+        </div>
+        <div class="flex items-center gap-4 relative z-10">
+          <div
+            class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 flex items-center justify-center text-white font-extrabold text-xl shadow-md border border-indigo-200">
+            {{ currentOrg?.name ? currentOrg!.name.charAt(0).toUpperCase() : 'O' }}</div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">{{ currentOrg?.name || 'Organization
+                Settings' }}</h1><span
+                class="px-2.5 py-1 text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full">{{
+                currentOrg?.role || 'Member' }}</span>
+            </div>
+            <p class="text-slate-500 text-xs mt-1">Configure custom mail servers, team permissions, invitations, and
+              workspace governance.</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 relative z-10">
+          <div
+            class="px-4 py-2 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full"
+              [ngClass]="{'bg-emerald-500': emailSettings.provider !== 'default', 'bg-amber-500': emailSettings.provider === 'default'}"></span><span>Mail
+              Provider: <strong class="text-slate-900 uppercase">{{ emailSettings.provider }}</strong></span></div>
+        </div>
+      </div>
+
+      <div *ngIf="!isAdminOrOwner"
+        class="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-800 text-sm"><svg
+          class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg><span>You have read-only access to organization settings. Only <strong>Owners</strong> and
+          <strong>Admins</strong> can save email configurations or update member roles.</span></div>
+
+      <div class="flex border-b border-slate-200 gap-6 bg-white rounded-t-2xl px-6 pt-2 overflow-x-auto">
+        <button (click)="activeTab = 'team'" class="pb-3 text-sm font-bold transition-all relative min-w-max"
+          [class.text-indigo-600]="activeTab === 'team'" [class.text-slate-500]="activeTab !== 'team'"><span>Team
+            Members ({{ members.length }})</span><span *ngIf="activeTab === 'team'"
+            class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full"></span></button>
+        <button (click)="activeTab = 'profile'" class="pb-3 text-sm font-bold transition-all relative min-w-max"
+          [class.text-indigo-600]="activeTab === 'profile'"
+          [class.text-slate-500]="activeTab !== 'profile'"><span>Organization Profile</span><span
+            *ngIf="activeTab === 'profile'"
+            class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full"></span></button>
+        <button (click)="activeTab = 'email'" class="pb-3 text-sm font-bold transition-all relative min-w-max"
+          [class.text-indigo-600]="activeTab === 'email'" [class.text-slate-500]="activeTab !== 'email'"><span>Custom
+            Email Server</span><span *ngIf="activeTab === 'email'"
+            class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full"></span></button>
+        <button (click)="activeTab = 'monitoring'" class="pb-3 text-sm font-bold transition-all relative min-w-max"
+          [class.text-indigo-600]="activeTab === 'monitoring'" [class.text-slate-500]="activeTab !== 'monitoring'">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>Monitoring</span>
+            <span *ngIf="systemFailures.length > 0" class="px-1.5 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-extrabold rounded-full">{{ systemFailures.length }}</span>
+          </span>
+          <span *ngIf="activeTab === 'monitoring'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full"></span>
+        </button>
+        <button (click)="activeTab = 'api_connections'" class="pb-3 text-sm font-bold transition-all relative min-w-max"
+          [class.text-indigo-600]="activeTab === 'api_connections'"
+          [class.text-slate-500]="activeTab !== 'api_connections'"><span>API Connections</span><span
+            *ngIf="activeTab === 'api_connections'"
+            class="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-t-full"></span></button>
+      </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loading" class="bg-white rounded-3xl p-16 md:p-24 border border-slate-200 shadow-sm flex items-center justify-center animate-in fade-in duration-300">
+        <div class="w-10 h-10 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+
+      <div *ngIf="!loading && activeTab === 'team'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900">Active Organization Members</h3>
+              <p class="text-slate-500 text-xs mt-1">Manage team member roles and access privileges.</p>
+            </div><button *ngIf="isAdminOrOwner" (click)="openInviteModal()"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2"><svg
+                class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg><span>Invite Member</span></button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="pb-3">Member</th>
+                  <th class="pb-3">Email Address</th>
+                  <th class="pb-3">Role</th>
+                  <th class="pb-3">Joined Date</th>
+                  <th *ngIf="isAdminOrOwner" class="pb-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs">
+                <tr *ngFor="let member of members" class="hover:bg-slate-50 transition-colors">
+                  <td class="py-3.5 font-bold text-slate-900 flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 rounded-full bg-slate-100 text-indigo-600 flex items-center justify-center font-bold text-xs border border-slate-200">
+                      {{ member.user_name ? member.user_name.charAt(0).toUpperCase() :
+                      member.user_email.charAt(0).toUpperCase() }}</div><span>{{ member.user_name || 'Team Member'
+                      }}</span>
+                  </td>
+                  <td class="py-3.5 text-slate-600 font-medium">{{ member.user_email }}</td>
+                  <td class="py-3.5"><select *ngIf="isAdminOrOwner && member.role !== 'Owner'" [ngModel]="member.role"
+                      (ngModelChange)="changeRole(member, $event)"
+                      class="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-indigo-700 focus:ring-1 focus:ring-indigo-500">
+                      <option value="Admin">Admin</option>
+                      <option value="Recruiter">Recruiter</option>
+                      <option value="Interviewer">Interviewer</option>
+                      <option value="Viewer">Viewer</option>
+                    </select><span *ngIf="!isAdminOrOwner || member.role === 'Owner'"
+                      class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-full font-bold text-[11px]">{{ member.role
+                      }}</span></td>
+                  <td class="py-3.5 text-slate-500">{{ member.joined_at | date:'mediumDate' }}</td>
+                  <td *ngIf="isAdminOrOwner" class="py-3.5 text-right"><button *ngIf="member.role !== 'Owner'"
+                      (click)="removeMember(member)"
+                      class="text-rose-600 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50 transition-colors"
+                      title="Remove Member"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Pending Team Invitations</h3>
+            <p class="text-slate-500 text-xs mt-1">Invitations sent to email addresses that have not been accepted yet.
+            </p>
+          </div>
+          <div *ngIf="invitations.length === 0" class="text-center py-6 text-slate-400 text-xs">No pending invitations
+            found for this organization.</div>
+          <div *ngIf="invitations.length > 0" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                  <th class="pb-3">Invitee Email</th>
+                  <th class="pb-3">Role</th>
+                  <th class="pb-3">Invited By</th>
+                  <th class="pb-3">Status</th>
+                  <th *ngIf="isAdminOrOwner" class="pb-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 text-xs">
+                <tr *ngFor="let invite of invitations" class="hover:bg-slate-50 transition-colors">
+                  <td class="py-3.5 font-bold text-slate-900">{{ invite.invitee_email }}</td>
+                  <td class="py-3.5 text-indigo-700 font-semibold">{{ invite.role }}</td>
+                  <td class="py-3.5 text-slate-500">{{ invite.inviter_email }}</td>
+                  <td class="py-3.5"><span
+                      class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full font-bold text-[10px] uppercase">{{
+                      invite.status }}</span></td>
+                  <td *ngIf="isAdminOrOwner" class="py-3.5 text-right">
+                    <div class="flex items-center justify-end gap-2.5">
+                      <button (click)="resendInvitation(invite)" [disabled]="resendingInviteId === invite.id"
+                        title="Resend invitation email"
+                        class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-xs font-semibold hover:underline cursor-pointer disabled:opacity-50">
+                        <svg *ngIf="resendingInviteId === invite.id" class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <svg *ngIf="resendingInviteId !== invite.id" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        <span>Resend</span>
+                      </button>
+                      <span class="text-slate-300">|</span>
+                      <button (click)="copyInviteLink(invite)"
+                        title="Copy direct invitation signup link to clipboard"
+                        class="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 text-xs font-semibold hover:underline cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <span>Copy Link</span>
+                      </button>
+                      <span class="text-slate-300">|</span>
+                      <button (click)="revokeInvitation(invite)"
+                        class="text-rose-600 hover:text-rose-700 text-xs font-semibold hover:underline cursor-pointer">Revoke</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && activeTab === 'profile'"
+        class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
+        <div>
+          <h3 class="text-base font-extrabold text-slate-900">Organization Profile & Details</h3>
+          <p class="text-slate-500 text-xs mt-1">General information about your workspace entity.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200"><span
+              class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-1">Organization
+              Name</span><span class="text-sm font-extrabold text-slate-900">{{ currentOrg?.name }}</span></div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200"><span
+              class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-1">Workspace ID</span><span
+              class="text-xs font-mono text-indigo-600">{{ currentOrg?.id }}</span></div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200"><span
+              class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-1">Owner Email</span><span
+              class="text-xs font-semibold text-slate-700">{{ currentOrg?.owner_email }}</span></div>
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200"><span
+              class="block text-slate-500 font-bold uppercase tracking-wider text-[10px] mb-1">Total Members</span><span
+              class="text-xs font-semibold text-emerald-600">{{ members.length }} Member(s)</span></div>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && activeTab === 'email'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">Email Delivery Provider</h3>
+            <p class="text-slate-500 text-xs mt-1">Select the mail infrastructure your organization uses for dispatching
+              interview notifications, scorecard reminders, offer letters, and team invitations.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Selected
+                Provider</label><select [(ngModel)]="emailSettings.provider" [disabled]="!isAdminOrOwner"
+                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <option *ngFor="let opt of providerOptions" [value]="opt.id">{{ opt.label }}</option>
+              </select></div>
+            <div><label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">Sender Display
+                Name</label><input type="text" [(ngModel)]="emailSettings.from_name" [disabled]="!isAdminOrOwner"
+                placeholder="e.g. HireUp Recruitment"
+                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div class="md:col-span-2"><label
+                class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">From Email Address
+                *</label><input type="email" [(ngModel)]="emailSettings.from_email" [disabled]="!isAdminOrOwner"
+                placeholder="e.g. recruiting@yourcompany.com"
+                class="w-full px-4 py-3 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+          <div *ngIf="emailSettings.provider === 'smtp'"
+            class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+            <h4 class="text-sm font-bold text-indigo-600 flex items-center gap-2"><svg class="w-4 h-4" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 002-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>Custom SMTP Server Settings</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-600 mb-1">SMTP Hostname</label><input type="text"
+                  [(ngModel)]="emailSettings.smtp_host" [disabled]="!isAdminOrOwner" placeholder="smtp.mailgun.org"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800" />
+              </div>
+              <div><label class="block text-xs font-bold text-slate-600 mb-1">SMTP Port (e.g. 587, 465,
+                  25)</label><input type="number" [(ngModel)]="emailSettings.smtp_port" [disabled]="!isAdminOrOwner"
+                  placeholder="587"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800" />
+              </div>
+              <div><label class="block text-xs font-bold text-slate-600 mb-1">SMTP Username</label><input type="text"
+                  [(ngModel)]="emailSettings.smtp_user" [disabled]="!isAdminOrOwner" placeholder="username or email"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800" />
+              </div>
+              <div><label class="block text-xs font-bold text-slate-600 mb-1">SMTP Password</label><input
+                  type="password" [(ngModel)]="emailSettings.smtp_pass" [disabled]="!isAdminOrOwner"
+                  placeholder="••••••••"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800" />
+              </div>
+              <div class="md:col-span-2 flex flex-wrap items-center gap-6 pt-2">
+                <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="tlsCheck2" [(ngModel)]="emailSettings.use_tls" [disabled]="!isAdminOrOwner" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 bg-white border-slate-300" />
+                  <span>STARTTLS (Port 587 / 25)</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="sslCheck2" [(ngModel)]="emailSettings.use_ssl" [disabled]="!isAdminOrOwner" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 bg-white border-slate-300" />
+                  <span>SSL / TLS Direct (Port 465)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="emailSettings.provider === 'mailersend'"
+            class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+            <h4 class="text-sm font-bold text-indigo-600 flex items-center gap-2"><svg class="w-4 h-4" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>MailerSend API Configuration</h4>
+            <div><label class="block text-xs font-bold text-slate-600 mb-1">MailerSend API Token</label><input
+                type="password" [(ngModel)]="emailSettings.api_key" [disabled]="!isAdminOrOwner"
+                placeholder="mlsn.••••••••••••••••"
+                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800" />
+            </div>
+          </div>
+          <div *ngIf="emailSettings.provider === 'resend'"
+            class="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+            <h4 class="text-sm font-bold text-indigo-600 flex items-center gap-2"><svg class="w-4 h-4" fill="none"
+                stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>Resend API Configuration</h4>
+            <div><label class="block text-xs font-bold text-slate-600 mb-1">Resend API Token</label><input
+                type="password" [(ngModel)]="emailSettings.api_key" [disabled]="!isAdminOrOwner"
+                placeholder="re_••••••••••••••••"
+                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800" />
+            </div>
+          </div>
+          <div class="flex items-center justify-between border-t border-slate-100 pt-6"><button
+              (click)="openTestEmailModal()"
+              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 transition-all flex items-center gap-2"><svg
+                class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg><span>Test Server Connection</span></button><button *ngIf="isAdminOrOwner"
+              (click)="saveEmailSettings()" [disabled]="isSavingEmail"
+              class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2"><svg
+                *ngIf="isSavingEmail" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg><span>Save Email Server Settings</span></button></div>
+        </div>
+      </div>
+
+      <!-- Monitoring Tab View -->
+      <div *ngIf="!loading && activeTab === 'monitoring'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>Pipeline Failure & System Monitoring</span>
+              </h3>
+              <p class="text-slate-500 text-xs mt-1">Real-time status of email ingestion, background tasks, and application log exports.</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button (click)="loadSystemFailures()" [disabled]="loadingFailures"
+                class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" [class.animate-spin]="loadingFailures" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <span>Refresh Logs</span>
+              </button>
+              <button (click)="downloadLogs()" [disabled]="isDownloadingLogs"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2">
+                <svg *ngIf="isDownloadingLogs" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                <svg *ngIf="!isDownloadingLogs" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download App Logs</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Stats Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div class="p-4 bg-emerald-50/50 border border-emerald-200 rounded-2xl">
+              <span class="block text-[10px] font-bold text-emerald-700 uppercase tracking-wider mb-1">System Health Status</span>
+              <span class="text-sm font-extrabold text-emerald-900 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span> Operational
+              </span>
+            </div>
+            <div class="p-4 bg-amber-50/50 border border-amber-200 rounded-2xl">
+              <span class="block text-[10px] font-bold text-amber-700 uppercase tracking-wider mb-1">Unresolved Ingestion Failures</span>
+              <span class="text-sm font-extrabold text-amber-900">{{ systemFailures.length }} Event(s)</span>
+            </div>
+            <div class="p-4 bg-indigo-50/50 border border-indigo-200 rounded-2xl">
+              <span class="block text-[10px] font-bold text-indigo-700 uppercase tracking-wider mb-1">Log Privacy Masking</span>
+              <span class="text-sm font-extrabold text-indigo-900">Active (Emails & UUIDs Obfuscated)</span>
+            </div>
+          </div>
+
+          <!-- Failure Events List -->
+          <div class="space-y-3 pt-2">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Unsuccessful Ingestion & Pipeline Events</h4>
+
+            <div *ngIf="systemFailures.length === 0" class="text-center py-12 bg-slate-50 rounded-2xl border border-slate-100">
+              <svg class="w-10 h-10 mx-auto text-emerald-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h5 class="text-sm font-bold text-slate-800">No Failed Pipeline Events Recorded</h5>
+              <p class="text-xs text-slate-500 mt-1">All email integrations and background processes are operating without errors.</p>
+            </div>
+
+            <div *ngIf="systemFailures.length > 0" class="overflow-x-auto">
+              <table class="w-full text-left border-collapse">
+                <thead>
+                  <tr class="border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <th class="pb-3">Event Type</th>
+                    <th class="pb-3">Error Details</th>
+                    <th class="pb-3">Source & Context</th>
+                    <th class="pb-3">Status</th>
+                    <th class="pb-3">Timestamp</th>
+                    <th class="pb-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 text-xs">
+                  <tr *ngFor="let fail of systemFailures" class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 font-bold text-slate-900">
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase border"
+                        [ngClass]="{
+                          'bg-rose-50 text-rose-700 border-rose-200': fail.event_type.includes('ingestion'),
+                          'bg-amber-50 text-amber-700 border-amber-200': !fail.event_type.includes('ingestion')
+                        }">
+                        {{ fail.event_type }}
+                      </span>
+                    </td>
+                    <td class="py-3.5 text-slate-700 max-w-xs">
+                      <p class="font-semibold text-rose-700 truncate" [title]="fail.error_message">{{ fail.error_message }}</p>
+                      <p class="text-[10px] text-slate-400 font-mono truncate" *ngIf="fail.payload">
+                        Context: {{ fail.payload | json }}
+                      </p>
+                    </td>
+                    <td class="py-3.5 text-slate-600">
+                      <span class="font-medium text-slate-800">{{ fail.source || 'email_service' }}</span>
+                      <span class="block text-[10px] text-slate-400">{{ fail.user_email }}</span>
+                    </td>
+                    <td class="py-3.5">
+                      <span class="px-2 py-0.5 rounded-full font-bold text-[10px] uppercase border"
+                        [ngClass]="{
+                          'bg-rose-50 text-rose-700 border-rose-200': fail.status === 'failed',
+                          'bg-indigo-50 text-indigo-700 border-indigo-200': fail.status === 'retried',
+                          'bg-emerald-50 text-emerald-700 border-emerald-200': fail.status === 'resolved'
+                        }">
+                        {{ fail.status }} ({{ fail.retry_count || 0 }} retries)
+                      </span>
+                    </td>
+                    <td class="py-3.5 text-slate-500 text-[11px]">
+                      {{ fail.created_at | date:'medium' }}
+                    </td>
+                    <td class="py-3.5 text-right">
+                      <div class="flex items-center justify-end gap-2">
+                        <button (click)="retryFailure(fail.id)" [disabled]="retryingFailureId === fail.id"
+                          class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg font-bold text-[11px] border border-indigo-200 transition-all flex items-center gap-1">
+                          <svg *ngIf="retryingFailureId === fail.id" class="w-3 h-3 animate-spin text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          <span>Retry</span>
+                        </button>
+                        <button (click)="resolveFailure(fail.id)" [disabled]="resolvingFailureId === fail.id"
+                          class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg font-semibold text-[11px] border border-slate-200 transition-all">
+                          Dismiss
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && activeTab === 'api_connections'" class="space-y-6">
+        <div class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900">API Connections (Data Pools)</h3>
+              <p class="text-slate-500 text-xs mt-1">Manage external platform integrations and custom data schemas.</p>
+            </div>
+            <button *ngIf="isAdminOrOwner" (click)="openApiConnModal()"
+              class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>New Connection</span>
+            </button>
+          </div>
+
+          <div *ngIf="apiConnections.length === 0"
+            class="text-center py-10 bg-slate-50 rounded-2xl border border-slate-100">
+            <svg class="w-10 h-10 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+            <h4 class="text-sm font-bold text-slate-700">No API Connections</h4>
+            <p class="text-xs text-slate-500 mt-1">Create a connection to generate an API key and define a custom data
+              schema.</p>
+          </div>
+
+          <div *ngIf="apiConnections.length > 0" class="flex items-center gap-2 overflow-x-auto pb-4 border-b border-slate-100 mb-4 [&::-webkit-scrollbar]:hidden" style="scrollbar-width: none;">
+            <button *ngFor="let conn of apiConnections" 
+                    (click)="selectedApiConnId = conn.id"
+                    [class.bg-indigo-600]="selectedApiConnId === conn.id"
+                    [class.text-white]="selectedApiConnId === conn.id"
+                    [class.border-indigo-600]="selectedApiConnId === conn.id"
+                    [class.bg-white]="selectedApiConnId !== conn.id"
+                    [class.text-slate-600]="selectedApiConnId !== conn.id"
+                    [class.border-slate-200]="selectedApiConnId !== conn.id"
+                    [class.hover:border-indigo-300]="selectedApiConnId !== conn.id"
+                    class="px-4 py-2 border rounded-full text-xs font-bold transition-all whitespace-nowrap shadow-sm">
+              {{ conn.name }}
+            </button>
+          </div>
+
+          <div *ngIf="apiConnections.length > 0" class="grid grid-cols-1 md:grid-cols-1 gap-4">
+            <ng-container *ngFor="let conn of apiConnections">
+            <div *ngIf="conn.id === selectedApiConnId"
+              class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-md transition-all">
+              <div class="flex justify-between items-start mb-3">
+                <div>
+                  <h4 class="text-sm font-bold text-indigo-700">{{ conn.name }}</h4>
+                  <p class="text-[11px] text-slate-500 font-medium">{{ conn.description || 'No description provided' }}
+                  </p>
+                </div>
+                <div class="flex items-center gap-1">
+                  <button (click)="openApiConnModal(conn)"
+                    class="text-slate-400 hover:text-indigo-600 transition-colors p-1.5 rounded-md hover:bg-slate-50"
+                    title="Edit Connection">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                  <a [routerLink]="['/api-connections', conn.id, 'portal']"
+                    class="text-slate-400 hover:text-blue-600 transition-colors p-1.5 rounded-md hover:bg-blue-50"
+                    title="Open Connection Portal">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                  <button *ngIf="isAdminOrOwner" (click)="confirmRegenerateApiKey(conn.id)"
+                    class="text-slate-400 hover:text-amber-500 transition-colors p-1.5 rounded-md hover:bg-amber-50"
+                    title="Regenerate API Key">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                  <button *ngIf="isAdminOrOwner" (click)="confirmDeleteApiConnection(conn.id)"
+                    class="text-slate-400 hover:text-rose-600 transition-colors p-1.5 rounded-md hover:bg-rose-50"
+                    title="Delete Connection">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div class="space-y-3 pt-3 border-t border-slate-100">
+                <!-- Schema First -->
+                <div>
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>Schema Definition</span>
+                    <div class="flex items-center gap-1.5">
+                      <button (click)="openSchemaEditorModal(conn)" class="text-indigo-600 hover:text-indigo-700 text-[10px] font-bold flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded transition-colors border border-indigo-100" title="Edit Schema JSON">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                        Edit Schema
+                      </button>
+                      <button (click)="copySchema(conn.schema_definition, 'card-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Schema JSON">
+                        <svg *ngIf="!copiedSchemaKeys['card-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <svg *ngIf="copiedSchemaKeys['card-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span [class.text-emerald-700]="copiedSchemaKeys['card-' + conn.id]">{{ copiedSchemaKeys['card-' + conn.id] ? 'Copied!' : 'Copy Schema' }}</span>
+                      </button>
+                    </div>
+                  </span>
+                  <div class="bg-slate-900 rounded-lg p-2.5 max-h-40 overflow-y-auto">
+                    <pre class="text-[10px] text-emerald-400 font-mono m-0 leading-relaxed">{{ formatSchemaDisplay(conn.schema_definition) }}</pre>
+                  </div>
+                </div>
+
+                <!-- Endpoints Second -->
+                <div>
+                  <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Available API
+                    Endpoints</span>
+                  <div class="space-y-2">
+
+                    <div class="flex items-center gap-2 pt-1">
+                      <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Record Management</span>
+                      <span class="flex-1 h-px bg-slate-100"></span>
+                      <span class="px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded-full uppercase">Default</span>
+                    </div>
+
+                    <!-- POST Submit -->
+                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-post')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 font-bold text-[9px] rounded uppercase shrink-0">POST</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">Submit New Record (Form Data)</span>
+                          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-post']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/records', 'POST')" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/records', 'post-' + conn.id)"
+                            class="text-slate-400 hover:text-indigo-600 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['post-' + conn.id]" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['post-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['post-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 truncate">/api/connections/{{ conn.id }}/records</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-post']"
+                        class="p-4 border-t border-slate-100 text-[10px]">
+                        <p class="text-slate-500 mb-3 text-xs">Create a new entry in this data pool. Use this endpoint to send user form data, base64 encoded file attachments, and parsed resume data.</p>
+                        
+                        <!-- Required Headers Box -->
+                        <div class="mb-3 p-2.5 bg-slate-900 rounded-lg flex items-center justify-between font-mono text-[10px]">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-indigo-400 font-bold uppercase tracking-wider">Required Header:</span>
+                            <span class="text-slate-300">X-API-Key: <span class="text-emerald-400">your_api_key</span></span>
+                            <span class="text-slate-600">|</span>
+                            <span class="text-slate-400">Content-Type: application/json</span>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">Input Schema (JSON)</span>
+                          <button (click)="copySchema(getSchemaExampleInput(conn.schema_definition), 'post-in-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Input Schema JSON">
+                            <svg *ngIf="!copiedSchemaKeys['post-in-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['post-in-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['post-in-' + conn.id]">{{ copiedSchemaKeys['post-in-' + conn.id] ? 'Copied!' : 'Copy Input Schema' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-emerald-400 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">{{ getSchemaExampleInput(conn.schema_definition) }}</pre>
+                        
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">Output Schema (JSON)</span>
+                          <button (click)="copySchema(getSchemaExampleOutput(conn.schema_definition), 'post-out-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Output Schema JSON">
+                            <svg *ngIf="!copiedSchemaKeys['post-out-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['post-out-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['post-out-' + conn.id]">{{ copiedSchemaKeys['post-out-' + conn.id] ? 'Copied!' : 'Copy Output Schema' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">{{ getSchemaExampleOutput(conn.schema_definition) }}</pre>
+                      </div>
+                    </div>
+
+                    <!-- GET List -->
+                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-get')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-blue-100 text-blue-700 font-bold text-[9px] rounded uppercase shrink-0">GET</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">List All Records</span>
+                          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-get']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/records', 'GET')" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/records', 'get-' + conn.id)"
+                            class="text-slate-400 hover:text-indigo-600 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['get-' + conn.id]" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['get-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['get-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 truncate">/api/connections/{{ conn.id }}/records</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-get']"
+                        class="p-4 border-t border-slate-100 text-[10px]">
+                        <p class="text-slate-500 mb-3 text-xs">Retrieve a paginated list of all data records submitted to this connection pool.</p>
+                        
+                        <!-- Required Headers Box -->
+                        <div class="mb-3 p-2.5 bg-slate-900 rounded-lg flex items-center justify-between font-mono text-[10px]">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-indigo-400 font-bold uppercase tracking-wider">Required Header:</span>
+                            <span class="text-slate-300">X-API-Key: <span class="text-emerald-400">your_api_key</span></span>
+                          </div>
+                        </div>
+
+                        <p class="font-bold text-slate-600 mb-1">Query Parameters (Optional)</p>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">?jobpost_id=xyz&page=1&limit=20&sort_by=created_at&sort_order=desc</pre>
+                        
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">Output Schema (JSON)</span>
+                          <button (click)="copySchema(getSchemaExampleOutput(conn.schema_definition), 'get-out-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Output Schema JSON">
+                            <svg *ngIf="!copiedSchemaKeys['get-out-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['get-out-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['get-out-' + conn.id]">{{ copiedSchemaKeys['get-out-' + conn.id] ? 'Copied!' : 'Copy Output Schema' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">{{ getSchemaExampleOutput(conn.schema_definition) }}</pre>
+                      </div>
+                    </div>
+
+                    <!-- POST Search -->
+                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-search')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-fuchsia-100 text-fuchsia-700 font-bold text-[9px] rounded uppercase shrink-0">POST</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">Semantic Search</span>
+                          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-search']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/records/search', 'POST', {query: 'Find candidates with Python experience', jobpost_id: 'jobpost_123', limit: 10, min_score: 50})" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/records/search', 'search-' + conn.id)"
+                            class="text-slate-400 hover:text-indigo-600 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['search-' + conn.id]" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['search-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['search-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 truncate">/api/connections/{{ conn.id }}/records/search</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-search']"
+                        class="p-4 border-t border-slate-100 text-[10px]">
+                        <p class="text-slate-500 mb-3 text-xs">Semantically search through all candidates using natural language. Filter search results by job post ID or query parameters.</p>
+                        
+                        <!-- Required Headers Box -->
+                        <div class="mb-3 p-2.5 bg-slate-900 rounded-lg flex items-center justify-between font-mono text-[10px]">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-indigo-400 font-bold uppercase tracking-wider">Required Header:</span>
+                            <span class="text-slate-300">X-API-Key: <span class="text-emerald-400">your_api_key</span></span>
+                            <span class="text-slate-600">|</span>
+                            <span class="text-slate-400">Content-Type: application/json</span>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">Input Schema (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;query&quot;: &quot;Senior frontend developer with React experience&quot;,\n  &quot;jobpost_id&quot;: &quot;optional_jobpost_uuid&quot;,\n  &quot;min_score&quot;: 60,\n  &quot;page&quot;: 1,\n  &quot;limit&quot;: 10\n}', 'search-in-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy JSON">
+                            <svg *ngIf="!copiedSchemaKeys['search-in-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['search-in-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['search-in-' + conn.id]">{{ copiedSchemaKeys['search-in-' + conn.id] ? 'Copied!' : 'Copy Input Schema' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "query": "Senior frontend developer with React experience",
+  "jobpost_id": "optional_jobpost_uuid",
+  "min_score": 60,
+  "page": 1,
+  "limit": 10
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">Output Schema (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;records&quot;: [\n    {\n      &quot;id&quot;: &quot;uuid&quot;,\n      &quot;match_score&quot;: 85\n    }\n  ],\n  &quot;pagination&quot;: {\n    &quot;page&quot;: 1,\n    &quot;limit&quot;: 10,\n    &quot;total_records&quot;: 1,\n    &quot;total_pages&quot;: 1\n  }\n}', 'search-out-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy JSON">
+                            <svg *ngIf="!copiedSchemaKeys['search-out-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['search-out-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['search-out-' + conn.id]">{{ copiedSchemaKeys['search-out-' + conn.id] ? 'Copied!' : 'Copy Output Schema' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "records": [
+    &#123;
+      "id": "uuid",
+      "match_score": 85
+    &#125;
+  ],
+  "pagination": &#123;
+    "page": 1,
+    "limit": 10,
+    "total_records": 1,
+    "total_pages": 1
+  &#125;
+&#125;</pre>
+                      </div>
+                    </div>
+
+                    <!-- GET/PUT/DELETE Single -->
+                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-single')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-slate-200 text-slate-700 font-bold text-[9px] rounded uppercase shrink-0">G/P/D</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">Manage Single Record</span>
+                          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-single']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/records/RECORD_ID_HERE', 'GET')" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/records/:record_id', 'single-' + conn.id)"
+                            class="text-slate-400 hover:text-indigo-600 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['single-' + conn.id]" class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['single-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['single-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 truncate">/api/connections/{{ conn.id }}/records/:record_id</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-single']"
+                        class="p-4 border-t border-slate-100 text-[10px]">
+                        <p class="text-slate-500 mb-3 text-xs">Manage individual records by passing their unique <code>:record_id</code> in the URL path.</p>
+                        
+                        <!-- Required Headers Box -->
+                        <div class="mb-3 p-2.5 bg-slate-900 rounded-lg flex items-center justify-between font-mono text-[10px]">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-indigo-400 font-bold uppercase tracking-wider">Required Header:</span>
+                            <span class="text-slate-300">X-API-Key: <span class="text-emerald-400">your_api_key</span></span>
+                            <span class="text-slate-600">|</span>
+                            <span class="text-slate-400">Content-Type: application/json</span>
+                          </div>
+                        </div>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">GET Output Schema</span>
+                          <button (click)="copySchema(getSchemaExampleOutput(conn.schema_definition), 'single-get-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy GET Output Schema">
+                            <svg *ngIf="!copiedSchemaKeys['single-get-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['single-get-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['single-get-' + conn.id]">{{ copiedSchemaKeys['single-get-' + conn.id] ? 'Copied!' : 'Copy GET Output' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">{{ getSchemaExampleOutput(conn.schema_definition) }}</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">PUT Input Schema</span>
+                          <button (click)="copySchema('{\n  &quot;form_data&quot;: {\n    &quot;first_name&quot;: &quot;John&quot;\n  }\n}', 'single-put-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy PUT Input Schema">
+                            <svg *ngIf="!copiedSchemaKeys['single-put-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['single-put-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['single-put-' + conn.id]">{{ copiedSchemaKeys['single-put-' + conn.id] ? 'Copied!' : 'Copy PUT Input' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "form_data": &#123; ...partial fields... &#125;
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">DELETE Output Schema</span>
+                          <button (click)="copySchema('{\n  &quot;message&quot;: &quot;Record deleted successfully&quot;\n}', 'single-del-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy DELETE Output Schema">
+                            <svg *ngIf="!copiedSchemaKeys['single-del-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['single-del-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['single-del-' + conn.id]">{{ copiedSchemaKeys['single-del-' + conn.id] ? 'Copied!' : 'Copy DELETE Output' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "message": "Record deleted successfully"
+&#125;</pre>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2">
+                      <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">AI Copilot Data Pool Analysis</span>
+                      <span class="flex-1 h-px bg-emerald-100"></span>
+                      <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold rounded-full uppercase">Default</span>
+                    </div>
+
+                    <!-- POST AI Copilot Data Pool Analysis -->
+                    <div class="border border-emerald-200 rounded-lg bg-emerald-50/40 overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-emerald-50/80 px-3 py-2.5 cursor-pointer hover:bg-emerald-100/70 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-copilot')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-emerald-600 text-white font-bold text-[9px] rounded uppercase shrink-0">POST</span>
+                          <span class="text-xs font-bold text-emerald-900 flex-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sparkles text-emerald-600 text-[11px]"></i> AI Copilot Data Pool Analysis
+                          </span>
+                          <svg class="w-3.5 h-3.5 text-emerald-600 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-copilot']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/copilot', 'POST', {query: 'Find candidates with Python and cloud experience', limit: 10})" class="text-emerald-700 hover:text-emerald-800 bg-emerald-100 hover:bg-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0 border border-emerald-300">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/copilot', 'copilot-' + conn.id)"
+                            class="text-emerald-600 hover:text-emerald-800 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['copilot-' + conn.id]" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['copilot-' + conn.id]" class="w-3.5 h-3.5 text-emerald-700 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['copilot-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-emerald-700 truncate">/api/connections/{{ conn.id }}/copilot</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-copilot']"
+                        class="p-4 border-t border-emerald-100 text-[10px] bg-white">
+                        <p class="text-slate-600 mb-3 text-xs">Query and evaluate candidate records in this API connection data pool using HireUp AI Copilot intelligence.</p>
+
+                        <p class="font-bold text-slate-700 mb-1">Required Headers</p>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">X-API-Key: {{ conn.api_key || 'your_generated_api_key' }}
+Content-Type: application/json</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Request Body (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;query&quot;: &quot;Find senior full-stack developers with Node.js and AWS experience&quot;,\n  &quot;jobpost_id&quot;: &quot;optional_jobpost_uuid_for_requirements_context&quot;,\n  &quot;min_score&quot;: 0,\n  &quot;limit&quot;: 10\n}', 'copilot-req-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Request JSON">
+                            <svg *ngIf="!copiedSchemaKeys['copilot-req-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['copilot-req-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['copilot-req-' + conn.id]">{{ copiedSchemaKeys['copilot-req-' + conn.id] ? 'Copied!' : 'Copy Request JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "query": "Find senior full-stack developers with Node.js and AWS experience",
+  "jobpost_id": "optional_jobpost_uuid_for_requirements_context",
+  "min_score": 0,
+  "limit": 10
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Response (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;success&quot;: true,\n  &quot;query&quot;: &quot;Find senior full-stack developers with Node.js and AWS experience&quot;,\n  &quot;response&quot;: &quot;AI Copilot analysis summary text with candidate breakdown and rationale...&quot;,\n  &quot;candidates&quot;: [],\n  &quot;total_candidates_scanned&quot;: 25\n}', 'copilot-res-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Response JSON">
+                            <svg *ngIf="!copiedSchemaKeys['copilot-res-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['copilot-res-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['copilot-res-' + conn.id]">{{ copiedSchemaKeys['copilot-res-' + conn.id] ? 'Copied!' : 'Copy Response JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "success": true,
+  "query": "Find senior full-stack developers with Node.js and AWS experience",
+  "response": "AI Copilot analysis summary text with candidate breakdown and rationale...",
+  "candidates": [
+    &#123;
+      "id": "uuid",
+      "full_name": "John Doe",
+      "user_email": "john&#64;example.com",
+      "headline": "Senior Full-Stack Engineer",
+      "match_score": 88,
+      "match_reason": "Matches required job skills: Node.js, AWS, React.",
+      "skills": ["Node.js", "AWS", "TypeScript", "React"],
+      "form_data": &#123; ... &#125;,
+      "resume_data": &#123; ... &#125;
+    &#125;
+  ],
+  "total_candidates_scanned": 25
+&#125;</pre>
+                      </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2">
+                      <span class="text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">External Job Posts (Vectorized) + Candidate Fit</span>
+                      <span class="flex-1 h-px bg-sky-100"></span>
+                      <span class="px-2 py-0.5 bg-sky-50 text-sky-700 border border-sky-200 text-[9px] font-bold rounded-full uppercase">Default on every connection</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 font-medium">Push job posts created outside HireUp into this pool for  vector search, then score any candidate resume against them with AI recommendations.</p>
+
+                    <!-- POST Create External Job Post -->
+                    <div class="border border-sky-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-sky-50/70 px-3 py-2.5 cursor-pointer hover:bg-sky-100/70 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-jobpost-create')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-sky-600 text-white font-bold text-[9px] rounded uppercase shrink-0">POST</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">Create External Job Post (Vectorized)</span>
+                          <svg class="w-3.5 h-3.5 text-sky-600 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-jobpost-create']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/jobposts', 'POST', {jobpost_id: 'ext-post-001', jobpost_text: 'Senior Python Developer. Requirements: 5+ years Python, Django, REST APIs, PostgreSQL, AWS.'})" class="text-sky-700 hover:text-sky-800 bg-sky-100 hover:bg-sky-200 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0 border border-sky-300">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/jobposts', 'jp-create-' + conn.id)"
+                            class="text-sky-600 hover:text-sky-800 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['jp-create-' + conn.id]" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['jp-create-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['jp-create-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-sky-700 truncate">/api/connections/{{ conn.id }}/jobposts</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-jobpost-create']"
+                        class="p-4 border-t border-sky-100 text-[10px] bg-white">
+                        <p class="text-slate-600 mb-3 text-xs">Create a job post entry from an external ATS/HR system. Send the external post ID plus the raw job post text (requirements etc.). The text is vectorized (embedding stored) and indexed into the  vector store. Sending an existing <code>jobpost_id</code> again updates it.</p>
+                        <p class="font-bold text-slate-700 mb-1">Required Headers</p>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">X-API-Key: {{ conn.api_key || 'your_generated_api_key' }}
+Content-Type: application/json</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Request Body (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;jobpost_id&quot;: &quot;ext-post-001&quot;,\n  &quot;jobpost_text&quot;: &quot;Senior Python Developer. Requirements: 5+ years Python, Django, REST APIs, PostgreSQL, AWS.&quot;\n}', 'jp-create-req-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Request JSON">
+                            <svg *ngIf="!copiedSchemaKeys['jp-create-req-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['jp-create-req-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['jp-create-req-' + conn.id]">{{ copiedSchemaKeys['jp-create-req-' + conn.id] ? 'Copied!' : 'Copy Request JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "jobpost_id": "ext-post-001",
+  "jobpost_text": "Senior Python Developer. Requirements: 5+ years Python, Django, REST APIs, PostgreSQL, AWS."
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Response (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;message&quot;: &quot;Job post created and vectorized successfully&quot;,\n  &quot;jobpost_id&quot;: &quot;ext-post-001&quot;,\n  &quot;stored_id&quot;: &quot;uuid&quot;,\n  &quot;embedding_dim&quot;: 1536\n}', 'jp-create-res-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Response JSON">
+                            <svg *ngIf="!copiedSchemaKeys['jp-create-res-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['jp-create-res-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['jp-create-res-' + conn.id]">{{ copiedSchemaKeys['jp-create-res-' + conn.id] ? 'Copied!' : 'Copy Response JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "message": "Job post created and vectorized successfully",
+  "jobpost_id": "ext-post-001",
+  "stored_id": "uuid",
+  "embedding_dim": 1536
+&#125;</pre>
+                      </div>
+                    </div>
+
+                    <!-- PUT Update External Job Post -->
+                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-jobpost-update')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-amber-100 text-amber-700 font-bold text-[9px] rounded uppercase shrink-0">PUT</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">Update External Job Post (Re-vectorized)</span>
+                          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-jobpost-update']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/jobposts/JOBPOST_ID_HERE', 'PUT', {jobpost_text: 'Updated requirements: Python, FastAPI, vector databases, .'})" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/jobposts/:jobpost_id', 'jp-update-' + conn.id)"
+                            class="text-slate-400 hover:text-indigo-600 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['jp-update-' + conn.id]" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['jp-update-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['jp-update-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 truncate">/api/connections/{{ conn.id }}/jobposts/:jobpost_id</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-jobpost-update']"
+                        class="p-4 border-t border-slate-100 text-[10px]">
+                        <p class="text-slate-500 mb-3 text-xs">Update the stored text for an external job post. The embedding is regenerated and the  index entry is rebuilt.</p>
+                        <p class="font-bold text-slate-700 mb-1">Required Headers</p>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">X-API-Key: {{ conn.api_key || 'your_generated_api_key' }}
+Content-Type: application/json</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">PUT Request Body (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;jobpost_text&quot;: &quot;Updated requirements: Python, FastAPI, vector databases, .&quot;\n}', 'jp-update-req-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Request JSON">
+                            <svg *ngIf="!copiedSchemaKeys['jp-update-req-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['jp-update-req-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['jp-update-req-' + conn.id]">{{ copiedSchemaKeys['jp-update-req-' + conn.id] ? 'Copied!' : 'Copy Request JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "jobpost_text": "Updated requirements: Python, FastAPI, vector databases, ."
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">PUT Response (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;message&quot;: &quot;Job post updated and re-vectorized successfully&quot;,\n  &quot;jobpost_id&quot;: &quot;ext-post-001&quot;,\n  &quot;stored_id&quot;: &quot;uuid&quot;,\n  &quot;embedding_dim&quot;: 1536\n}', 'jp-update-res-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Response JSON">
+                            <svg *ngIf="!copiedSchemaKeys['jp-update-res-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['jp-update-res-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['jp-update-res-' + conn.id]">{{ copiedSchemaKeys['jp-update-res-' + conn.id] ? 'Copied!' : 'Copy Response JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "message": "Job post updated and re-vectorized successfully",
+  "jobpost_id": "ext-post-001",
+  "stored_id": "uuid",
+  "embedding_dim": 1536
+&#125;</pre>
+                      </div>
+                    </div>
+
+                    <!-- GET / DELETE Manage External Job Posts -->
+                    <div class="border border-slate-200 rounded-lg bg-white overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-slate-50 px-3 py-2.5 cursor-pointer hover:bg-slate-100 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-jobpost-manage')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-slate-200 text-slate-700 font-bold text-[9px] rounded uppercase shrink-0">G/D</span>
+                          <span class="text-xs font-bold text-slate-800 flex-1">List &amp; Delete External Job Posts</span>
+                          <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-jobpost-manage']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/jobposts', 'GET')" class="text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/jobposts', 'jp-manage-' + conn.id)"
+                            class="text-slate-400 hover:text-indigo-600 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['jp-manage-' + conn.id]" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['jp-manage-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['jp-manage-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-slate-500 truncate">/api/connections/{{ conn.id }}/jobposts</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-jobpost-manage']"
+                        class="p-4 border-t border-slate-100 text-[10px]">
+                        <p class="text-slate-500 mb-3 text-xs">List all vectorized job posts for this connection (embeddings omitted), or delete one by its external <code>:jobpost_id</code>. Deleting also removes its chunks.</p>
+                        <p class="font-bold text-slate-700 mb-1">Required Headers</p>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">X-API-Key: {{ conn.api_key || 'your_generated_api_key' }}</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">GET Output Schema</span>
+                          <button (click)="copySchema('{\n  &quot;jobposts&quot;: [\n    {\n      &quot;jobpost_id&quot;: &quot;ext-post-001&quot;,\n      &quot;jobpost_text_preview&quot;: &quot;Senior Python Developer...&quot;,\n      &quot;created_at&quot;: &quot;iso_datetime&quot;,\n      &quot;updated_at&quot;: &quot;iso_datetime&quot;\n    }\n  ],\n  &quot;total&quot;: 1\n}', 'jp-get-res-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Output Schema">
+                            <svg *ngIf="!copiedSchemaKeys['jp-get-res-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['jp-get-res-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['jp-get-res-' + conn.id]">{{ copiedSchemaKeys['jp-get-res-' + conn.id] ? 'Copied!' : 'Copy GET Output' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "jobposts": [
+    &#123;
+      "jobpost_id": "ext-post-001",
+      "jobpost_text_preview": "Senior Python Developer...",
+      "created_at": "iso_datetime",
+      "updated_at": "iso_datetime"
+    &#125;
+  ],
+  "total": 1
+&#125;</pre>
+                        <p class="font-bold text-slate-600 mb-1">DELETE Endpoint</p>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded mb-2 overflow-x-auto font-mono m-0 leading-relaxed">DELETE /api/connections/{{ conn.id }}/jobposts/:jobpost_id</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-600">DELETE Output Schema</span>
+                          <button (click)="copySchema('{\n  &quot;message&quot;: &quot;Job post deleted successfully&quot;\n}', 'jp-del-res-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Output Schema">
+                            <svg *ngIf="!copiedSchemaKeys['jp-del-res-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['jp-del-res-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['jp-del-res-' + conn.id]">{{ copiedSchemaKeys['jp-del-res-' + conn.id] ? 'Copied!' : 'Copy DELETE Output' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-300 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "message": "Job post deleted successfully"
+&#125;</pre>
+                      </div>
+                    </div>
+
+                    <!-- POST Analyze Candidate Fit -->
+                    <div class="border border-sky-200 rounded-lg bg-sky-50/40 overflow-hidden">
+                      <div
+                        class="flex flex-col gap-1.5 bg-sky-50/80 px-3 py-2.5 cursor-pointer hover:bg-sky-100/70 transition-colors"
+                        (click)="toggleEndpoint(conn.id + '-analyze')">
+                        <div class="flex items-center gap-2">
+                          <span class="px-1.5 py-0.5 bg-sky-600 text-white font-bold text-[9px] rounded uppercase shrink-0">POST</span>
+                          <span class="text-xs font-bold text-sky-900 flex-1 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sparkles text-sky-600 text-[11px]"></i> Analyze Candidate Fit (AI Recommendations)
+                          </span>
+                          <svg class="w-3.5 h-3.5 text-sky-600 transition-transform duration-200" [class.rotate-180]="expandedEndpoints[conn.id + '-analyze']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                          <button (click)="$event.stopPropagation(); openPlayground(conn, '/analyze-candidate', 'POST', {candidate_resume_text: 'John Doe, 4 years Python, Django, PostgreSQL, AWS. Built REST APIs and data pipelines.', top_k: 5})" class="text-sky-700 hover:text-sky-800 bg-sky-100 hover:bg-sky-200 px-2 py-0.5 rounded text-[10px] font-bold transition-colors ml-2 shrink-0 border border-sky-300">Test</button>
+                          <button
+                            (click)="$event.stopPropagation(); copyApiEndpoint('/api/connections/' + conn.id + '/analyze-candidate', 'analyze-' + conn.id)"
+                            class="text-sky-600 hover:text-sky-800 shrink-0 p-1 flex items-center gap-1 transition-all rounded" title="Copy Endpoint">
+                            <svg *ngIf="!copiedEndpointKeys['analyze-' + conn.id]" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            <svg *ngIf="copiedEndpointKeys['analyze-' + conn.id]" class="w-3.5 h-3.5 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span *ngIf="copiedEndpointKeys['analyze-' + conn.id]" class="text-[10px] font-bold text-emerald-700 animate-in fade-in duration-150">Copied!</span>
+                          </button>
+                        </div>
+                        <div class="text-[10px] font-mono text-sky-700 truncate">/api/connections/{{ conn.id }}/analyze-candidate</div>
+                      </div>
+                      <div *ngIf="expandedEndpoints[conn.id + '-analyze']"
+                        class="p-4 border-t border-sky-100 text-[10px] bg-white">
+                        <p class="text-slate-600 mb-3 text-xs">Send a candidate resume as raw text <strong>or</strong> as a base64 file upload. Text is used as-is (no structured parsing), matched against the -indexed job posts, then passed with the retrieved posts to the AI for fit analysis. Returns post IDs, match scores and AI recommendations to display to the candidate.</p>
+                        <p class="font-bold text-slate-700 mb-1">Required Headers</p>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">X-API-Key: {{ conn.api_key || 'your_generated_api_key' }}
+Content-Type: application/json</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Request Body — resume text (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;candidate_resume_text&quot;: &quot;John Doe, 4 years Python, Django, PostgreSQL, AWS...&quot;,\n  &quot;candidate_id&quot;: &quot;cand-123&quot;,\n  &quot;top_k&quot;: 5\n}', 'an-text-req-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Resume Text Request JSON">
+                            <svg *ngIf="!copiedSchemaKeys['an-text-req-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['an-text-req-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['an-text-req-' + conn.id]">{{ copiedSchemaKeys['an-text-req-' + conn.id] ? 'Copied!' : 'Copy Text Request' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "candidate_resume_text": "John Doe, 4 years Python, Django, PostgreSQL, AWS...",
+  "candidate_id": "cand-123",
+  "top_k": 5
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Request Body — file upload instead of text (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;resume_file_name&quot;: &quot;resume.pdf&quot;,\n  &quot;resume_file_base64&quot;: &quot;JVBERi0xLjQK...&quot;,\n  &quot;candidate_id&quot;: &quot;cand-123&quot;,\n  &quot;top_k&quot;: 5\n}', 'an-file-req-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy File Upload Request JSON">
+                            <svg *ngIf="!copiedSchemaKeys['an-file-req-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['an-file-req-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['an-file-req-' + conn.id]">{{ copiedSchemaKeys['an-file-req-' + conn.id] ? 'Copied!' : 'Copy File Request' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded mb-3 overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "resume_file_name": "resume.pdf",
+  "resume_file_base64": "JVBERi0xLjQK...",
+  "candidate_id": "cand-123",
+  "top_k": 5
+&#125;</pre>
+
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-bold text-slate-700">POST Response (JSON)</span>
+                          <button (click)="copySchema('{\n  &quot;success&quot;: true,\n  &quot;matching_jobpost_ids&quot;: [&quot;ext-post-001&quot;, &quot;ext-post-002&quot;],\n  &quot;match_scores&quot;: [87.5, 72.3],\n  &quot;ai_recommendations&quot;: &quot;{\\n    \\&quot;fit_assessment\\&quot;: \\&quot;...\\&quot;,\\n    \\&quot;key_gaps\\&quot;: \\&quot;...\\&quot;,\\n    \\&quot;recommendation\\&quot;: \\&quot;interview\\&quot;\\n  }&quot;,\n  &quot;candidate_analysis&quot;: {\n    &quot;candidate_id&quot;: &quot;cand-123&quot;,\n    &quot;resume_text_length&quot;: 512,\n    &quot;top_matching_jobposts&quot;: [\n      {\n        &quot;jobpost_id&quot;: &quot;ext-post-001&quot;,\n        &quot;match_score&quot;: 87.5,\n        &quot;jobpost_text_preview&quot;: &quot;Senior Python Developer...&quot;\n      }\n    ],\n    &quot;ai_recommendations&quot;: &quot;...&quot;\n  }\n}', 'an-res-' + conn.id)" class="text-slate-600 hover:text-slate-800 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-slate-200 px-2 py-0.5 rounded transition-all border border-slate-200 shrink-0" title="Copy Response JSON">
+                            <svg *ngIf="!copiedSchemaKeys['an-res-' + conn.id]" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <svg *ngIf="copiedSchemaKeys['an-res-' + conn.id]" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span [class.text-emerald-700]="copiedSchemaKeys['an-res-' + conn.id]">{{ copiedSchemaKeys['an-res-' + conn.id] ? 'Copied!' : 'Copy Response JSON' }}</span>
+                          </button>
+                        </div>
+                        <pre class="bg-slate-900 text-slate-200 p-2.5 rounded overflow-x-auto font-mono m-0 leading-relaxed">&#123;
+  "success": true,
+  "matching_jobpost_ids": ["ext-post-001", "ext-post-002"],
+  "match_scores": [87.5, 72.3],
+  "ai_recommendations": "&#123;\n    \"fit_assessment\": \"...\",\n    \"key_gaps\": \"...\",\n    \"recommendation\": \"interview\"\n  &#125;",
+  "candidate_analysis": &#123;
+    "candidate_id": "cand-123",
+    "resume_text_length": 512,
+    "top_matching_jobposts": [
+      &#123;
+        "jobpost_id": "ext-post-001",
+        "match_score": 87.5,
+        "jobpost_text_preview": "Senior Python Developer..."
+      &#125;
+    ],
+    "ai_recommendations": "..."
+  &#125;
+&#125;</pre>
+                      </div>
+                    </div>
+
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="showTestEmailModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div
+          class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-base font-bold text-slate-900">Test Email Server Connection</h3><button
+              (click)="showTestEmailModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg"><svg
+                class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg></button>
+          </div>
+          <div class="py-4 space-y-4">
+            <p class="text-xs text-slate-500">Send a real sample email using your current <strong>{{
+                emailSettings.provider.toUpperCase() }}</strong> configuration to verify connection credentials.</p>
+            <div><label class="block text-xs font-bold text-slate-700 mb-1">Recipient Email Address *</label><input
+                type="email" [(ngModel)]="testTargetEmail" placeholder="you@domain.com"
+                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+          </div>
+          <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4"><button
+              (click)="showTestEmailModal = false"
+              class="px-4 py-2 text-slate-500 hover:text-slate-700 text-xs font-semibold">Cancel</button><button
+              (click)="sendTestEmail()" [disabled]="isSendingTest"
+              class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"><svg
+                *ngIf="isSendingTest" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg><span>Send Test Email</span></button></div>
+        </div>
+      </div>
+      <div *ngIf="showInviteModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div
+          class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+            <h3 class="text-base font-bold text-slate-900">Invite Team Member</h3><button
+              (click)="showInviteModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg"><svg
+                class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg></button>
+          </div>
+          <div class="py-4 space-y-4">
+            <div><label class="block text-xs font-bold text-slate-700 mb-1">Invitee Email Address *</label><input
+                type="email" [(ngModel)]="inviteEmail" placeholder="colleague@company.com"
+                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-900 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+            <div><label class="block text-xs font-bold text-slate-700 mb-1">Assign Role *</label><select
+                [(ngModel)]="inviteRole"
+                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500">
+                <option value="Admin">Admin (Full Access & Settings)</option>
+                <option value="Recruiter">Recruiter (Jobs, Candidates, Scheduling)</option>
+                <option value="Interviewer">Interviewer (Evaluations & Scorecards)</option>
+                <option value="Viewer">Viewer (Read-Only)</option>
+              </select></div>
+          </div>
+          <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4"><button
+              (click)="showInviteModal = false"
+              class="px-4 py-2 text-slate-500 hover:text-slate-700 text-xs font-semibold">Cancel</button><button
+              (click)="sendInvite()" [disabled]="isSendingInvite"
+              class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5"><svg
+                *ngIf="isSendingInvite" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg><span>Send Invitation</span></button></div>
+        </div>
+      </div>
+
+      <div *ngIf="showApiConnModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+        <div
+          class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">{{ isEditingApiConn ? 'Update API Connection' : 'Create API
+                Connection' }}</h3>
+              <p class="text-[11px] text-slate-500 font-medium">Define your custom schema for external submissions.</p>
+            </div>
+            <button (click)="showApiConnModal = false" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="py-4 space-y-4 overflow-y-auto shrink">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Connection Name
+                  *</label>
+                <input type="text" [(ngModel)]="apiConnForm.name" placeholder="e.g. Sales Portal Integration"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label
+                  class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Description</label>
+                <input type="text" [(ngModel)]="apiConnForm.description" placeholder="Optional notes"
+                  class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-indigo-500" />
+              </div>
+            </div>
+            <div>
+              <label
+                class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span>Schema Definition (JSON) *</span>
+                  <button (click)="copySchema(apiConnForm.schema_definition, 'main-modal')" type="button" class="text-slate-600 hover:text-indigo-600 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-indigo-50 px-2 py-0.5 rounded transition-all border border-slate-200" title="Copy Schema JSON">
+                    <svg *ngIf="!copiedSchemaKeys['main-modal']" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    <svg *ngIf="copiedSchemaKeys['main-modal']" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span [class.text-emerald-700]="copiedSchemaKeys['main-modal']">{{ copiedSchemaKeys['main-modal'] ? 'Copied!' : 'Copy Schema' }}</span>
+                  </button>
+                </div>
+                <span class="text-[9px] text-indigo-500 font-medium normal-case tracking-normal">Define fields, types,
+                  and constraints</span>
+              </label>
+              <textarea [(ngModel)]="apiConnForm.schema_definition" (ngModelChange)="onApiConnSchemaChange()" rows="12"
+                class="w-full px-4 py-3 bg-slate-900 border rounded-xl text-[11px] font-mono text-emerald-400 focus:ring-2 focus:outline-none transition-colors"
+                [ngClass]="{'border-rose-500 focus:ring-rose-500': apiConnSchemaValidationError, 'border-slate-800 focus:ring-indigo-500': !apiConnSchemaValidationError}"></textarea>
+              
+              <div *ngIf="apiConnSchemaValidationError" class="mt-2.5 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2 animate-in fade-in duration-150">
+                <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <div>
+                  <span class="font-bold">Schema Validation Error:</span> {{ apiConnSchemaValidationError }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 shrink-0">
+            <button (click)="showApiConnModal = false"
+              class="px-5 py-2.5 text-slate-500 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all">Cancel</button>
+            <button (click)="saveApiConnection()" [disabled]="isSavingApiConn || !!apiConnSchemaValidationError"
+              class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg *ngIf="isSavingApiConn" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              <span>{{ isEditingApiConn ? 'Save Changes' : 'Create & Generate Key' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="showApiKeyModal"
+        class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-md w-full p-8 shadow-2xl text-center">
+          <div
+            class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-emerald-50">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-black text-slate-900 mb-2">Connection Created!</h3>
+          <p class="text-sm text-slate-600 font-medium mb-6">Your new API key has been generated. Please copy it now, as
+            you will not be able to see it again.</p>
+
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-center gap-3 mb-6">
+            <code
+              class="text-sm font-bold text-slate-800 break-all select-all flex-1 text-left">{{ generatedApiKey }}</code>
+            <button (click)="copyApiKey()"
+              class="px-3 py-1.5 bg-white rounded-xl border border-slate-200 text-indigo-600 hover:bg-indigo-50 shrink-0 transition-colors flex items-center gap-1.5"
+              title="Copy API Key">
+              <svg *ngIf="!copiedApiKey" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              <svg *ngIf="copiedApiKey" class="w-4 h-4 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span [class.text-emerald-700]="copiedApiKey" class="text-xs font-bold">{{ copiedApiKey ? 'Copied!' : 'Copy Key' }}</span>
+            </button>
+          </div>
+
+          <!-- API Connection Delete Confirm Modal -->
+          <div *ngIf="showDeleteConfirmModal"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+            <div
+              class="bg-white border border-slate-200 rounded-3xl max-w-sm w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+              <div class="text-center">
+                <div
+                  class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mx-auto mb-4 text-rose-600">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-900 mb-2">Delete Connection?</h3>
+                <p class="text-sm text-slate-500 mb-6">Are you sure you want to delete this API connection? Any active
+                  integrations using its API key will fail instantly. This action cannot be undone.</p>
+              </div>
+              <div class="flex items-center gap-3">
+                <button (click)="showDeleteConfirmModal = false; apiConnToDelete = null"
+                  class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors">Cancel</button>
+                <button (click)="executeDeleteApiConnection()"
+                  class="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-sm font-bold shadow-md shadow-rose-600/20 transition-all hover:-translate-y-0.5">Delete</button>
+              </div>
+            </div>
+          </div>
+
+          <button (click)="showApiKeyModal = false"
+            class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold transition-colors">
+            I've copied it securely
+          </button>
+        </div>
+      </div>
+
+      <!-- API Playground Modal -->
+      <div *ngIf="showPlaygroundModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-white border border-slate-200 rounded-3xl max-w-4xl w-full flex flex-col shadow-2xl max-h-[90vh] overflow-hidden animate-in fade-in zoom-in duration-200">
+          
+          <div class="flex items-center justify-between border-b border-slate-100 p-6 bg-slate-50">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                API Testing Playground
+              </h3>
+              <p class="text-[11px] text-slate-500 font-medium mt-1">Run live requests against your data pool.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button (click)="openSchemaEditorModal(playgroundConn)" class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition-all shadow-xs">
+                <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                <span>Edit Schema</span>
+              </button>
+              <button (click)="showPlaygroundModal = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto p-6 space-y-4">
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-1">
+                <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">Method</label>
+                <select [(ngModel)]="playgroundMethod" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div class="col-span-2">
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">Endpoint URL</label>
+                  <button (click)="copyApiEndpoint(playgroundEndpoint, 'playground-url')" type="button" class="text-indigo-600 hover:text-indigo-800 text-[10px] font-bold flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded transition-all border border-indigo-200" title="Copy Endpoint URL">
+                    <svg *ngIf="!copiedEndpointKeys['playground-url']" class="w-3 h-3 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    <svg *ngIf="copiedEndpointKeys['playground-url']" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    <span [class.text-emerald-700]="copiedEndpointKeys['playground-url']">{{ copiedEndpointKeys['playground-url'] ? 'Copied!' : 'Copy URL' }}</span>
+                  </button>
+                </div>
+                <input type="text" [(ngModel)]="playgroundEndpoint" class="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-xs font-mono text-slate-600 focus:outline-none" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1" [class.text-rose-500]="playgroundApiKeyError">X-API-Key Header (Required) *</label>
+              <input id="playgroundApiKeyInput" type="password" [(ngModel)]="playgroundApiKey" (ngModelChange)="playgroundApiKeyError = false" placeholder="Paste your generated API key here" 
+                class="w-full px-3 py-2 bg-white rounded-lg text-xs font-mono text-slate-900 focus:outline-none"
+                [ngClass]="{'border-2 border-rose-500 focus:ring-rose-500': playgroundApiKeyError, 'border border-slate-300 focus:ring-2 focus:ring-indigo-500': !playgroundApiKeyError}" />
+            </div>
+
+            <div *ngIf="['POST', 'PUT', 'PATCH'].includes(playgroundMethod)">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600">Request Body</label>
+                  <button (click)="openSchemaEditorModal(playgroundConn)" class="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 px-2 py-0.5 rounded text-[10px] font-bold transition-all border border-indigo-200" title="Edit JSON Schema Definition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    <span>Edit Schema</span>
+                  </button>
+                </div>
+                <div *ngIf="playgroundEndpoint?.endsWith('/records') && playgroundMethod === 'POST'" class="flex items-center bg-slate-100 rounded-lg p-0.5">
+                  <button (click)="setPlaygroundMode('json')" [class.bg-white]="playgroundViewMode === 'json'" [class.shadow-sm]="playgroundViewMode === 'json'" [class.text-slate-900]="playgroundViewMode === 'json'" [class.text-slate-500]="playgroundViewMode !== 'json'" class="px-3 py-1 rounded-md text-[10px] font-bold transition-all">JSON</button>
+                  <button (click)="setPlaygroundMode('form')" [class.bg-white]="playgroundViewMode === 'form'" [class.shadow-sm]="playgroundViewMode === 'form'" [class.text-slate-900]="playgroundViewMode === 'form'" [class.text-slate-500]="playgroundViewMode !== 'form'" class="px-3 py-1 rounded-md text-[10px] font-bold transition-all">Form Data</button>
+                </div>
+              </div>
+              
+              <!-- JSON Mode -->
+              <textarea *ngIf="playgroundViewMode === 'json'" [(ngModel)]="playgroundBody" rows="6" class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-lg text-xs font-mono text-emerald-400 focus:ring-2 focus:ring-indigo-500"></textarea>
+
+              <!-- Form Mode -->
+              <div *ngIf="playgroundViewMode === 'form'" class="bg-slate-50 border border-slate-200 rounded-lg p-4 max-h-[450px] overflow-y-auto">
+                <div *ngIf="playgroundFormFields.length === 0" class="text-center py-4 text-[11px] text-slate-400 font-medium">No fields found in the schema definition.</div>
+                
+                <div *ngFor="let field of playgroundFormFields; let i = index" class="mb-4 last:mb-0 border border-slate-200 rounded-lg bg-white p-3 shadow-sm flex flex-col gap-2 relative">
+                  <button (click)="removePlaygroundFormField(i)" class="absolute top-3 right-3 text-rose-500 hover:text-rose-700 transition-colors" title="Remove Field">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                  </button>
+
+                  <div class="flex items-center gap-2 pr-8">
+                    <input type="text" [(ngModel)]="field.key" (ngModelChange)="syncPlaygroundFormToJson()" placeholder="Field Key" class="w-1/3 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                    
+                    <select [(ngModel)]="field.type" (ngModelChange)="syncPlaygroundFormToJson()" class="px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                      <option value="string">Text</option>
+                      <option value="number">Number</option>
+                      <option value="date">Date</option>
+                      <option value="email">Email</option>
+                      <option value="url">URL</option>
+                      <option value="dropdown">Dropdown</option>
+                    </select>
+
+                    <span *ngIf="field.required" class="text-rose-500 text-lg leading-none">*</span>
+                  </div>
+                  
+                  <ng-container [ngSwitch]="field.type">
+                    <div *ngSwitchCase="'dropdown'" class="space-y-2">
+                      <select [(ngModel)]="field.value" (ngModelChange)="syncPlaygroundFormToJson()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Select option...</option>
+                        <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+                      </select>
+                      <input type="text" [ngModel]="field.options?.join(',')" (ngModelChange)="field.options = $event.split(','); syncPlaygroundFormToJson()" placeholder="Options (comma separated)" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[10px] text-slate-600 focus:outline-none" />
+                    </div>
+
+                    <input *ngSwitchCase="'date'" type="date" [(ngModel)]="field.value" (ngModelChange)="syncPlaygroundFormToJson()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                    
+                    <input *ngSwitchCase="'email'" type="email" [(ngModel)]="field.value" (ngModelChange)="syncPlaygroundFormToJson()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="user@example.com" />
+
+                    <input *ngSwitchCase="'url'" type="url" [(ngModel)]="field.value" (ngModelChange)="syncPlaygroundFormToJson()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="https://..." />
+                    
+                    <input *ngSwitchCase="'number'" type="number" [(ngModel)]="field.value" (ngModelChange)="syncPlaygroundFormToJson()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter number..." />
+                    
+                    <input *ngSwitchDefault type="text" [(ngModel)]="field.value" (ngModelChange)="syncPlaygroundFormToJson()" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Enter value..." />
+                  </ng-container>
+                </div>
+
+                <div *ngIf="playgroundFiles.length > 0" class="mt-6">
+                  <h4 class="text-[11px] font-bold text-slate-700 mb-2 border-b border-slate-200 pb-1">Uploaded Files</h4>
+                  <div *ngFor="let pf of playgroundFiles; let j = index" class="mb-3 border border-slate-200 rounded-lg bg-white p-3 shadow-sm flex flex-col gap-2 relative">
+                    <button (click)="removePlaygroundFileField(j)" class="absolute top-3 right-3 text-rose-500 hover:text-rose-700 transition-colors" title="Remove File">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                    
+                    <div class="flex items-center gap-2 pr-8">
+                      <input type="text" [(ngModel)]="pf.field_name" (ngModelChange)="syncPlaygroundFormToJson()" placeholder="Field Name" class="w-1/2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                      <input type="text" [(ngModel)]="pf.file_name" (ngModelChange)="syncPlaygroundFormToJson()" placeholder="File Name" class="w-1/2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                      <input type="file" (change)="onPlaygroundFileChange($event, j)" class="text-[10px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                      <span *ngIf="pf.base64_content && pf.base64_content.length > 50" class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Base64 Encoded</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3 mt-4">
+                  <button (click)="addPlaygroundFormField()" class="flex items-center gap-1 px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg text-xs font-bold transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                    Add Field
+                  </button>
+                  <button (click)="addPlaygroundFileField()" class="flex items-center gap-1 px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-lg text-xs font-bold transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    Add File
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Response Area -->
+            <div *ngIf="playgroundResponse || playgroundLoading" class="mt-6 pt-6 border-t border-slate-100">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-2">Response</label>
+              
+              <div *ngIf="playgroundLoading" class="flex items-center justify-center p-8 bg-slate-50 rounded-lg border border-slate-200">
+                <svg class="w-6 h-6 text-indigo-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              </div>
+
+              <div *ngIf="!playgroundLoading && playgroundResponse" class="bg-slate-900 rounded-lg border border-slate-800 overflow-hidden">
+                <div class="flex items-center px-4 py-2 border-b border-slate-700 bg-slate-800">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold" 
+                        [ngClass]="{'bg-emerald-500/20 text-emerald-400': playgroundResponse.status >= 200 && playgroundResponse.status < 300, 
+                                    'bg-rose-500/20 text-rose-400': playgroundResponse.status >= 400 || playgroundResponse.status === 0}">
+                    {{ playgroundResponse.status }} {{ playgroundResponse.statusText }}
+                  </span>
+                </div>
+                <div class="p-4 overflow-auto max-h-64">
+                  <pre class="text-[11px] text-slate-300 font-mono m-0">{{ playgroundResponse.data | json }}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center justify-between p-4 border-t border-slate-100 bg-slate-50 shrink-0">
+            <div class="text-[10px] text-slate-500 font-medium">
+              <span *ngIf="lastTestRecordId || lastTestJobpostId" class="text-indigo-600 bg-indigo-50 px-2 py-1 rounded">Previous test entry deleted to prevent DB bloat.</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <button (click)="showPlaygroundModal = false" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-bold transition-all">Close</button>
+              
+              <button *ngIf="['POST', 'PUT'].includes(playgroundMethod) && playgroundEndpoint.includes('/records')" (click)="savePlaygroundSchemaOnly()" [disabled]="playgroundLoading" class="px-5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center gap-2">
+                <svg *ngIf="playgroundLoading && !savingAndTesting" class="w-4 h-4 animate-spin text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <svg *ngIf="!playgroundLoading || savingAndTesting" class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                <span>Save Schema Only</span>
+              </button>
+
+              <button (click)="runPlaygroundRequest()" [disabled]="playgroundLoading" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-2">
+                <svg *ngIf="savingAndTesting" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                <svg *ngIf="!savingAndTesting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <span>{{ ['POST', 'PUT'].includes(playgroundMethod) && playgroundEndpoint.includes('/records') ? 'Save & Test' : 'Send Request' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Delete API Connection Modal -->
+<div *ngIf="showDeleteConfirmModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col">
+    <div class="p-6">
+      <div class="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center mb-4 text-rose-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-2">Delete API Connection</h3>
+      <p class="text-sm text-slate-500">Are you sure you want to delete this API connection? This action cannot be undone and will break any integrations using its API key.</p>
+    </div>
+    <div class="flex items-center justify-end gap-3 p-4 border-t border-slate-100 bg-slate-50">
+      <button (click)="showDeleteConfirmModal = false; apiConnToDelete = null" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-bold transition-all">Cancel</button>
+      <button (click)="executeDeleteApiConnection()" class="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-md transition-all">Delete Connection</button>
+    </div>
+  </div>
+</div>
+
+<!-- Regenerate API Key Modal -->
+<div *ngIf="showRegenerateConfirmModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl flex flex-col">
+    <div class="p-6">
+      <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mb-4 text-amber-600">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 mb-2">Regenerate API Key</h3>
+      <p class="text-sm text-slate-500">Are you sure you want to regenerate the API key? The old key will immediately stop working and you will need to update all your integrations.</p>
+    </div>
+    <div class="flex items-center justify-end gap-3 p-4 border-t border-slate-100 bg-slate-50">
+      <button (click)="showRegenerateConfirmModal = false; apiConnToRegenerate = null" class="px-4 py-2 text-slate-600 hover:bg-slate-200 rounded-lg text-xs font-bold transition-all">Cancel</button>
+      <button (click)="executeRegenerateApiKey()" [disabled]="isRegeneratingApiKey" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-2">
+        <svg *ngIf="isRegeneratingApiKey" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span>Regenerate Key</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Dedicated Schema Editor Modal -->
+<div *ngIf="showSchemaEditorModal" class="fixed inset-0 z-[80] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+  <div class="bg-white border border-slate-200 rounded-3xl max-w-2xl w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+    <div class="flex items-center justify-between border-b border-slate-100 pb-4 shrink-0">
+      <div>
+        <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          Edit Schema Definition ({{ schemaEditorConn?.name }})
+        </h3>
+        <p class="text-[11px] text-slate-500 font-medium mt-0.5">Update custom schema fields and constraints with real-time UI validation.</p>
+      </div>
+      <button (click)="showSchemaEditorModal = false" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="py-4 space-y-3 overflow-y-auto shrink flex-1">
+      <div>
+        <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span>Schema JSON *</span>
+            <button (click)="copySchema(schemaEditorJson, 'dedicated-editor')" type="button" class="text-slate-600 hover:text-indigo-600 text-[10px] font-bold flex items-center gap-1 bg-slate-100 hover:bg-indigo-50 px-2 py-0.5 rounded transition-all border border-slate-200" title="Copy Schema JSON">
+              <svg *ngIf="!copiedSchemaKeys['dedicated-editor']" class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <svg *ngIf="copiedSchemaKeys['dedicated-editor']" class="w-3 h-3 text-emerald-600 animate-in zoom-in duration-150" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span [class.text-emerald-700]="copiedSchemaKeys['dedicated-editor']">{{ copiedSchemaKeys['dedicated-editor'] ? 'Copied!' : 'Copy Schema' }}</span>
+            </button>
+          </div>
+          <span class="text-[9px] text-indigo-500 font-medium normal-case">Must include top-level "fields" array</span>
+        </label>
+        <textarea [(ngModel)]="schemaEditorJson" (ngModelChange)="onSchemaEditorJsonChange()" rows="14"
+          class="w-full px-4 py-3 bg-slate-900 border rounded-xl text-[11px] font-mono text-emerald-400 focus:ring-2 focus:outline-none transition-colors"
+          [ngClass]="{'border-rose-500 focus:ring-rose-500': schemaEditorValidationError, 'border-slate-800 focus:ring-indigo-500': !schemaEditorValidationError}"></textarea>
+      </div>
+
+      <div *ngIf="schemaEditorValidationError" class="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in duration-150">
+        <svg class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+        <div>
+          <span class="font-bold">Schema Validation Error:</span> {{ schemaEditorValidationError }}
+        </div>
+      </div>
+      
+      <div *ngIf="!schemaEditorValidationError" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-700 flex items-center gap-2">
+        <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        <span>Valid JSON schema standard format.</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end gap-3 border-t border-slate-100 pt-4 shrink-0">
+      <button (click)="showSchemaEditorModal = false" class="px-5 py-2.5 text-slate-500 hover:bg-slate-50 rounded-xl text-xs font-bold transition-all">Cancel</button>
+      <button (click)="saveSchemaEditor()" [disabled]="isSavingSchemaEditor || !!schemaEditorValidationError"
+        class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+        <svg *ngIf="isSavingSchemaEditor" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span>Save &amp; Sync Schema</span>
+      </button>
+    </div>
+  </div>
+</div>

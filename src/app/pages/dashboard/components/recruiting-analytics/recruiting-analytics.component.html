@@ -1,4 +1,4 @@
-<div class="p-6 space-y-8 bg-slate-50/50 min-h-screen">
+<div class="p-6 space-y-8 bg-card min-h-screen">
   <!-- Analytics Banner -->
   <div class="p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 border border-slate-800">
     <div class="space-y-2">
@@ -78,7 +78,7 @@
       </div>
       <div>
         <h3 class="text-2xl font-black text-slate-900">
-          {{ avgCandidateRating > 0 ? (avgCandidateRating + ' / 5.0') : 'No Ratings' }}
+          {{ (avgCandidateRating > 0 && totalRatedCandidatesCount > 0) ? (avgCandidateRating + ' / 5.0') : 'No Ratings' }}
         </h3>
         <p class="text-[11px] text-amber-600 font-bold mt-1">
           {{ totalRatedCandidatesCount }} candidate rating(s) saved
@@ -134,7 +134,7 @@
               <i [class]="source.icon" class="text-indigo-600"></i>
               <span>{{ source.channel }}</span>
             </span>
-            <span class="text-xs font-black text-emerald-600">{{ source.qualityScore }} / 5.0</span>
+            <span class="text-xs font-black text-emerald-600">{{ source.qualityScore > 0 ? (source.qualityScore + ' / 5.0') : 'No Ratings' }}</span>
           </div>
           <div class="flex justify-between items-center text-[11px] text-slate-500 font-medium">
             <span>{{ source.applicants }} Applicants</span>

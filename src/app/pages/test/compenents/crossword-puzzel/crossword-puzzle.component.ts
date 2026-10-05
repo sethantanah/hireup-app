@@ -16,6 +16,7 @@ export interface CrosswordCell {
 }
 
 export interface CrosswordClue {
+  id?: string;
   number: number;
   clue: string;
   answer: string;

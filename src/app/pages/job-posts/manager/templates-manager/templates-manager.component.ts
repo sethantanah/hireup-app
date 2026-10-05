@@ -14,7 +14,7 @@ import { CandidateService } from '../../../../services/candidate.service';
 import { ColorScheme, FormField, JobPostData } from '../../../../models/jobpost.model';
 import { FormattingService } from '../../../../services/formatting.service';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 interface ColorsScheme {
   primary: string;
@@ -46,6 +46,9 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
   @Input() formType: string = "Application Form";
   @Input() formOnly: boolean = false;
   form: FormGroup | undefined; // FormGroup for the user-facing form
+
+  submittedCandidateEmail: string = '';
+  submittedCandidateName: string = '';
 
   // Fallback colors
   colorScheme: ColorScheme = {
@@ -89,6 +92,7 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
+    private router: Router,
     private apiService: ApiService,
     private candidateService: CandidateService,
     public formattingService: FormattingService
@@ -116,6 +120,36 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
         if (this.jobAppData.additionalSections && this.jobAppData.additionalSections.length > 0) {
           this.jobAppData.sections = this.jobAppData.additionalSections;
         }
+      }
+    }
+
+    if (this.jobAppData) {
+      if (!this.jobAppData.company) {
+        this.jobAppData.company = { name: 'Organization', logoUrl: '', navLinks: [] };
+      }
+      if (!this.jobAppData.company.logoUrl) {
+        this.jobAppData.company.logoUrl = '';
+      }
+      if (!this.jobAppData.company.navLinks) {
+        this.jobAppData.company.navLinks = [];
+      }
+      if (!this.jobAppData.job) {
+        this.jobAppData.job = { title: 'Open Position', description: '' };
+      }
+      if (!this.jobAppData.applySection) {
+        this.jobAppData.applySection = { title: 'Apply', instructions: '', buttonText: 'Submit Application', declaration: '' };
+      }
+      if (!this.jobAppData.footer) {
+        this.jobAppData.footer = {
+          copyrightText: `© ${new Date().getFullYear()} ${this.jobAppData.company?.name || 'All rights reserved.'}`,
+          links: []
+        };
+      }
+      if (!this.jobAppData.formData) {
+        this.jobAppData.formData = { fields: [] };
+      }
+      if (!this.jobAppData.sections || this.jobAppData.sections.length === 0) {
+        this.jobAppData.sections = ['General'];
       }
     }
 
@@ -332,14 +366,76 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
     return val === option;
   }
 
+  // Guidance Link Tracking State
+  visitedGuidanceLinks: { [linkKey: string]: boolean } = {};
+
+  getFieldMarkdownLinks(instructions: string): { title: string; url: string }[] {
+    return this.formattingService.extractMarkdownLinks(instructions || '');
+  }
+
+  onGuidanceLinkClick(field: any, url: string, event?: Event): void {
+    if (!field || !url) return;
+    const key = `${field.key}_${url}`;
+    this.visitedGuidanceLinks[key] = true;
+    delete this.errors[field.key];
+  }
+
+  onInstructionsContainerClick(event: MouseEvent, field: any): void {
+    const target = event.target as HTMLElement;
+    const anchor = target.closest('a');
+    if (anchor && anchor.href) {
+      this.onGuidanceLinkClick(field, anchor.href);
+    }
+  }
+
+  isLinkVisited(fieldKey: string, url: string): boolean {
+    if (!url) return false;
+    if (this.visitedGuidanceLinks[`${fieldKey}_${url}`]) return true;
+    return Object.keys(this.visitedGuidanceLinks).some(k => {
+      if (!k.startsWith(`${fieldKey}_`)) return false;
+      const visitedUrl = k.substring(`${fieldKey}_`.length);
+      return visitedUrl === url || visitedUrl.includes(url) || url.includes(visitedUrl);
+    });
+  }
+
+  areAllFieldLinksVisited(field: any): boolean {
+    const links = this.getFieldMarkdownLinks(field.instructions || '');
+    if (!links || links.length === 0) return true;
+    return links.every(link => this.isLinkVisited(field.key, link.url));
+  }
+
+  getUnvisitedFieldLinks(field: any): { title: string; url: string }[] {
+    const links = this.getFieldMarkdownLinks(field.instructions || '');
+    return links.filter(link => !this.isLinkVisited(field.key, link.url));
+  }
+
   validateField(field: any) {
     let value = this.formValues[field.key];
     if (field.type === 'file') {
       value = this.uploadedFiles[field.key];
     }
 
+    // Sync Reactive Form control value
+    if (this.form && this.form.controls[field.key]) {
+      this.form.controls[field.key].setValue(value);
+      this.form.controls[field.key].updateValueAndValidity();
+    }
+
     // Reset error for the field
     delete this.errors[field.key];
+
+    // Check mandatory link click verification
+    if (field.require_link_click || (field.instructions && this.getFieldMarkdownLinks(field.instructions).length > 0 && field.require_link_click)) {
+      if (!this.areAllFieldLinksVisited(field)) {
+        const unvisited = this.getUnvisitedFieldLinks(field);
+        const linkTitles = unvisited.map(l => `"${l.title}"`).join(', ');
+        this.errors[field.key] = `Mandatory link review required: Please click on ${linkTitles} before completing this field.`;
+        if (field.type === 'checkbox' && value) {
+          this.formValues[field.key] = false;
+        }
+        return;
+      }
+    }
 
     // Check if the field is required and empty
     if (field.type === 'checkbox') {
@@ -432,6 +528,76 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
     return Object.keys(this.errors).length === 0;
   }
 
+  isSubmitDisabled(): boolean {
+    if (this.isSubmitting) {
+      return true;
+    }
+
+    // 1. Check declaration acceptance if declaration text exists
+    if (this.jobAppData?.applySection?.declaration && this.jobAppData.applySection.declaration.trim().length > 0) {
+      const isAgreed = !!this.formValues['agreeToDeclaration'] || this.getCheckboxValue();
+      if (!isAgreed) {
+        return true;
+      }
+    }
+
+    // 2. Check all form fields
+    const fields = this.jobAppData?.formData?.fields || [];
+    for (const field of fields) {
+      let value = this.formValues[field.key];
+      if (field.type === 'file') {
+        value = this.uploadedFiles[field.key] || this.preloadedCvAttached[field.key];
+      }
+
+      // Check mandatory guidance link review requirement
+      if (field.require_link_click || (field.instructions && this.getFieldMarkdownLinks(field.instructions).length > 0 && field.require_link_click)) {
+        if (!this.areAllFieldLinksVisited(field)) {
+          return true;
+        }
+      }
+
+      // Check required fields
+      if (field.required) {
+        if (field.type === 'checkbox') {
+          if (!value) return true;
+        } else if (field.type === 'file') {
+          if (!this.uploadedFiles[field.key] && !this.preloadedCvAttached[field.key]) return true;
+        } else if (field.type === 'select') {
+          if (field.allowMultiSelect) {
+            if (!Array.isArray(value) || value.length === 0) return true;
+            if (field.allowOther && value.includes('Other')) {
+              const otherVal = this.formValues[field.key + '_other'];
+              if (!otherVal || !otherVal.trim()) return true;
+            }
+          } else {
+            if (!value || typeof value !== 'string' || !value.trim()) return true;
+            if (field.allowOther && value === 'Other') {
+              const otherVal = this.formValues[field.key + '_other'];
+              if (!otherVal || !otherVal.trim()) return true;
+            }
+          }
+        } else {
+          // text, text-area, textarea, email, tel, number, date
+          if (value === undefined || value === null || (typeof value === 'string' && !value.trim())) {
+            return true;
+          }
+        }
+      }
+
+      // Format validation for email / tel if value present
+      if (value && typeof value === 'string' && value.trim()) {
+        if (field.type === 'email' && !this.isValidEmail(value)) {
+          return true;
+        }
+        if (field.type === 'tel' && !this.isValidPhoneNumber(value)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   // Navigate to the next section
   goToNextSection() {
     const currentIndex = this.jobAppData!.sections.indexOf(this.activeSection);
@@ -469,20 +635,50 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
     this.onError = false;
     this.showPopup = false;
 
-    if (this.form && this.form.invalid) {
-      this.markFormGroupTouched(this.form);
-      return;
-    }
+    // Validate all fields before submission
+    this.jobAppData?.formData?.fields.forEach((field: any) => {
+      this.validateField(field);
+    });
 
     if (
-      this.jobAppData!.applySection.declaration.length > 0 &&
-      this.getCheckboxValue() == false
+      this.jobAppData?.applySection?.declaration &&
+      this.jobAppData.applySection.declaration.trim().length > 0 &&
+      this.getCheckboxValue() === false &&
+      !this.formValues['agreeToDeclaration']
     ) {
       this.showPopup = true;
       this.popupType = 'error';
       this.popupMessage = 'You must accept the declaration to submit.';
       setTimeout(() => (this.showPopup = false), 3000);
       return;
+    }
+
+    if (Object.keys(this.errors).length > 0) {
+      this.showPopupMessage(
+        'There are errors in the form. Fix them and try again.',
+        'error'
+      );
+      return;
+    }
+
+    if (this.isSubmitDisabled()) {
+      return;
+    }
+
+    // Extract submitted candidate email & full name for sign up callout
+    const emailKey = Object.keys(this.formValues).find(k => k.toLowerCase().includes('email'));
+    const nameKey = Object.keys(this.formValues).find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('full_name'));
+    
+    if (emailKey && this.formValues[emailKey]) {
+      this.submittedCandidateEmail = this.formValues[emailKey];
+    } else if (this.candidateEmail) {
+      this.submittedCandidateEmail = this.candidateEmail;
+    }
+    
+    if (nameKey && this.formValues[nameKey]) {
+      this.submittedCandidateName = this.formValues[nameKey];
+    } else if (this.candidateProfile?.full_name) {
+      this.submittedCandidateName = this.candidateProfile.full_name;
     }
 
     const formattedData = this.formatData(
@@ -492,22 +688,6 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
 
     // Create a FormData object
     const formData = new FormData();
-
-    // Validate all fields before submission
-    this.jobAppData?.formData?.fields.forEach((field: any) => {
-      if (field.section === this.activeSection) {
-        this.validateField(field);
-      }
-    });
-
-
-    if (Object.keys(this.errors).length > 0) {
-      this.showPopupMessage(
-        'There are errors in the form. Fix them and try again.',
-        'error'
-      );
-      return;
-    }
 
     if (this.jobPostId) {
       formData.append('jobPostId', this.jobPostId);
@@ -746,5 +926,12 @@ export class TemplatesManagerComponent implements OnInit, OnChanges {
       case '3xl': return '!rounded-3xl';
       default: return fallback;
     }
+  }
+
+  goToSignupForProgress(): void {
+    const email = encodeURIComponent(this.submittedCandidateEmail || '');
+    const name = encodeURIComponent(this.submittedCandidateName || '');
+    const jobId = encodeURIComponent(this.jobPostId || '');
+    this.router.navigateByUrl(`/auth/signup?email=${email}&fullName=${name}&jobId=${jobId}&role=candidate`);
   }
 }

@@ -12,14 +12,56 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormattingService } from '../../../services/formatting.service';
 import { CrosswordBuilderComponent } from '../compenents/crossword-builder/crossword-builder.component';
 import { CrosswordCell, CrosswordField, CrosswordPuzzle, CrosswordPuzzleComponent } from '../compenents/crossword-puzzel/crossword-puzzle.component';
+import { CustomDropdownComponent } from '../../../components/custom-dropdown/custom-dropdown.component';
 
 @Component({
   selector: 'app-create-test',
-  imports: [CommonModule, FormsModule, CrosswordBuilderComponent, CrosswordPuzzleComponent],
+  imports: [CommonModule, FormsModule, CrosswordBuilderComponent, CrosswordPuzzleComponent, CustomDropdownComponent],
   templateUrl: './create-test.component.html',
   styleUrl: './create-test.component.scss',
 })
 export class CreateTestComponent implements OnInit {
+  get sidebarFilterOptions(): Array<{ label: string; value: any }> {
+    const opts: Array<{ label: string; value: any }> = [{ label: 'All Sections & Sub-Sections', value: 'all' }];
+    if (this.test?.sections) {
+      this.test.sections.forEach((s) => {
+        opts.push({
+          label: `Section ${s.sectionId}: ${s.title || 'Untitled'}`,
+          value: s.sectionId,
+        });
+      });
+    }
+    return opts;
+  }
+
+  get sectionOptions(): Array<{ label: string; value: any }> {
+    if (!this.test?.sections) return [];
+    return this.test.sections.map((s) => ({
+      label: `Sec ${s.sectionId}: ${s.title || 'Untitled'}`,
+      value: s.sectionId,
+    }));
+  }
+
+  getSubSectionDropdownOptions(sectionId: number): Array<{ label: string; value: any }> {
+    const opts = [{ label: 'SubSec 1', value: 1 }];
+    const subSections = this.getSubSectionsForSection(sectionId);
+    subSections.forEach((sub) => {
+      if (sub.sectionId !== 1) {
+        opts.push({
+          label: `SubSec ${sub.sectionId}: ${sub.title || 'Sub ' + sub.sectionId}`,
+          value: sub.sectionId,
+        });
+      }
+    });
+    return opts;
+  }
+
+  get questionTypeOptions(): Array<{ label: string; value: string }> {
+    return [
+      { label: 'Multiple Choice', value: 'multiple-choice' },
+      { label: 'User Input (Open Text)', value: 'user-input' },
+    ];
+  }
   test: TestData | null = null;
   showQuestionPopup = false;
   showTestMetadataPopup = false; // Popup for editing test metadata
@@ -48,6 +90,12 @@ export class CreateTestComponent implements OnInit {
   crosswordField: CrosswordField | null = null;
 
   // Add these properties to your component
+  isSaving: boolean = false;
+  showSaveStatusModal: boolean = false;
+  saveStatusType: 'success' | 'error' = 'success';
+  saveStatusTitle: string = '';
+  saveStatusMessage: string = '';
+
   rawQuestionsText: string = '';
   parsedQuestions: any[] = [];
   isParsing: boolean = false;
@@ -58,20 +106,33 @@ export class CreateTestComponent implements OnInit {
 
   // Add this method to open crossword builder
   createCrosswordBuilder(): void {
+    const defaultGrid = Array(10).fill(null).map((_, r) =>
+      Array(10).fill(null).map((_, c) => ({
+        value: '',
+        isBlack: false,
+        row: r,
+        col: c,
+        isSelected: false,
+        isHighlighted: false
+      }))
+    );
+
     this.crosswordField = {
       key: `crossword_${Date.now()}`,
       type: 'crossword',
       question: 'Find the hidden words in the crossword puzzle',
-      answer: '', // Will be computed based on completion
+      answer: 'Completed', // Will be computed based on completion
+      section: this.selectedSection,
+      subsection: this.selectedSubSection,
       puzzleData: {
         id: `puzzle_${Date.now()}`,
         title: 'Crossword Puzzle',
         description: 'Find the hidden words in the grid. Click and drag to select words.',
-        grid: [],
+        grid: defaultGrid,
         clues: [], // Start with empty clues - user will add them in builder
         size: 10, // Smaller default size for better UX
-        totalScore: 0, // Will be calculated when clues are added
-        userScore: 0, // Starts at 0
+        totalScore: 10,
+        userScore: 0,
         createdAt: new Date(),
         updatedAt: new Date()
       }
@@ -161,8 +222,13 @@ export class CreateTestComponent implements OnInit {
     this.selectedSection = sectionId;
   }
 
-  openPuzzleBuilder() {
-    this.createCrosswordBuilder();
+  openPuzzleBuilder(field?: CrosswordField) {
+    if (field) {
+      this.crosswordField = field;
+      this.showCrosswordBuilder = true;
+    } else {
+      this.createCrosswordBuilder();
+    }
   }
 
   editPuzzleBuilder(field: CrosswordField) {
@@ -170,13 +236,37 @@ export class CreateTestComponent implements OnInit {
     this.showCrosswordBuilder = true;
   }
 
+  editQuestion(field: Field): void {
+    if (field.type === 'crossword') {
+      this.editPuzzleBuilder(field as CrosswordField);
+    } else {
+      this.openQuestionPopup(field.type, field.question);
+    }
+  }
+
   openQuestionPopup(type: string, questionKey?: string): void {
+    if (type === 'crossword') {
+      const crosswordField = this.test?.formData.fields.find(
+        (f) => f.question.toLowerCase() === questionKey?.toLowerCase()
+      );
+      if (crosswordField) {
+        this.editPuzzleBuilder(crosswordField as CrosswordField);
+      } else {
+        this.openPuzzleBuilder();
+      }
+      return;
+    }
+
     if (questionKey) {
       // Editing an existing question
       const question = this.test?.formData.fields.find(
         (field) => field.question.toLowerCase() === questionKey.toLowerCase()
       );
       if (question) {
+        if (question.type === 'crossword') {
+          this.editPuzzleBuilder(question as CrosswordField);
+          return;
+        }
         this.newQuestion = { ...question };
         this.isEditingQuestion = true;
         this.editingQuestionKey = questionKey.toLowerCase();
@@ -414,19 +504,205 @@ export class CreateTestComponent implements OnInit {
   }
 
   handleSave(): void {
+    if (this.isSaving) return;
+    this.isSaving = true;
     const jobId = this.route.snapshot.paramMap.get('jobId');
     this.testService.createUpdateJobTests(jobId || '', this.test!).subscribe({
       next: (data: any) => {
+        this.isSaving = false;
         if (data.data) {
           this.test!.id = data.data.id;
           this.saveTestMetadata();
-          alert('Test saved successfully!');
         }
+        this.saveStatusType = 'success';
+        this.saveStatusTitle = 'Assessment Saved Successfully';
+        this.saveStatusMessage = 'All assessment configuration, sections, questions, and scoring details have been saved successfully.';
+        this.showSaveStatusModal = true;
       },
       error: (error) => {
+        this.isSaving = false;
         console.error('Error saving test:', error);
+        this.saveStatusType = 'error';
+        this.saveStatusTitle = 'Save Failed';
+        this.saveStatusMessage = 'An error occurred while saving the assessment. Please verify your connection and try again.';
+        this.showSaveStatusModal = true;
       },
     });
+  }
+
+  closeSaveStatusModal(): void {
+    this.showSaveStatusModal = false;
+  }
+
+  // Question reordering & Section Movement
+  moveQuestionUp(index: number): void {
+    if (!this.test?.formData?.fields || index <= 0) return;
+    const fields = this.test.formData.fields;
+    const temp = fields[index];
+    fields[index] = fields[index - 1];
+    fields[index - 1] = temp;
+    this.saveTestMetadata();
+  }
+
+  moveQuestionDown(index: number): void {
+    if (!this.test?.formData?.fields || index >= this.test.formData.fields.length - 1) return;
+    const fields = this.test.formData.fields;
+    const temp = fields[index];
+    fields[index] = fields[index + 1];
+    fields[index + 1] = temp;
+    this.saveTestMetadata();
+  }
+
+  moveQuestionToSection(field: Field, targetSectionId: number): void {
+    field.section = Number(targetSectionId);
+    // Default subsection to 1 if not set
+    if (!field.subsection) field.subsection = 1;
+    this.saveTestMetadata();
+  }
+
+  moveQuestionToSubSection(field: Field, targetSubSectionId: number): void {
+    field.subsection = Number(targetSubSectionId);
+    this.saveTestMetadata();
+  }
+
+  // Section & Sub-Section Helpers
+  sidebarSectionFilter: number | 'all' = 'all';
+
+  get filteredSidebarFields(): Field[] {
+    if (!this.test?.formData?.fields) return [];
+    if (this.sidebarSectionFilter === 'all') {
+      return this.test.formData.fields;
+    }
+    return this.test.formData.fields.filter(
+      f => (f.section || 1) === Number(this.sidebarSectionFilter)
+    );
+  }
+
+  getQuestionsForSection(sectionId: number): Field[] {
+    return (
+      this.test?.formData?.fields?.filter(
+        f => (f.section || 1) === Number(sectionId)
+      ) || []
+    );
+  }
+
+  getQuestionsForSubSection(sectionId: number, subSectionId: number): Field[] {
+    return (
+      this.test?.formData?.fields?.filter(
+        f => (f.section || 1) === Number(sectionId) && (f.subsection || 1) === Number(subSectionId)
+      ) || []
+    );
+  }
+
+  getSubSectionsForSection(sectionId: number): FormSubSection[] {
+    const sec = this.test?.sections?.find(s => s.sectionId === Number(sectionId));
+    return sec?.subsection || [];
+  }
+
+  getSectionTitle(sectionId: number): string {
+    const sec = this.test?.sections?.find(s => s.sectionId === Number(sectionId));
+    return sec?.title ? `Sec ${sectionId}: ${sec.title}` : `Section ${sectionId}`;
+  }
+
+  getSubSectionTitle(sectionId: number, subSectionId: number): string {
+    const sec = this.test?.sections?.find(s => s.sectionId === Number(sectionId));
+    const sub = sec?.subsection?.find(s => s.sectionId === Number(subSectionId));
+    return sub?.title ? `SubSec ${subSectionId}: ${sub.title}` : `Sub-Section ${subSectionId}`;
+  }
+
+  setQuestionSectionAndSubSection(sectionId: number, subSectionId: number = 1): void {
+    this.selectedSection = Number(sectionId);
+    this.selectedSubSection = Number(subSectionId);
+  }
+
+  // Sub-Section Management
+  addSubSection(section: FormSection): void {
+    if (!section.subsection) {
+      section.subsection = [];
+    }
+    const nextSubId = section.subsection.length + 1;
+    section.subsection.push({
+      title: `Sub-Section ${nextSubId}`,
+      instructions: `Special instructions for subsection ${nextSubId}...`,
+      sectionId: nextSubId,
+      imageUrl: ''
+    });
+    this.saveTestMetadata();
+  }
+
+  removeSubSection(section: FormSection, subSectionId: number): void {
+    if (!section.subsection) return;
+    section.subsection = section.subsection.filter(sub => sub.sectionId !== subSectionId);
+    this.saveTestMetadata();
+  }
+
+  // File Upload Handlers for Section, Sub-Section, & Question Images
+  isUploadingImage: boolean = false;
+
+  uploadSectionImage(event: Event, section: FormSection): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    this.isUploadingImage = true;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      section.imageUrl = e.target.result;
+      this.isUploadingImage = false;
+      this.saveTestMetadata();
+    };
+    reader.onerror = () => {
+      this.isUploadingImage = false;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  uploadSubSectionImage(event: Event, sub: FormSubSection): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    this.isUploadingImage = true;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      sub.imageUrl = e.target.result;
+      this.isUploadingImage = false;
+      this.saveTestMetadata();
+    };
+    reader.onerror = () => {
+      this.isUploadingImage = false;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  uploadQuestionImage(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    this.isUploadingImage = true;
+
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.newQuestion.imageUrl = e.target.result;
+      this.isUploadingImage = false;
+    };
+    reader.onerror = () => {
+      this.isUploadingImage = false;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Preview Test Taker Experience without applicant verification, but with proctoring on
+  previewTestTakerExperience(): void {
+    const testId = this.test?.id || this.route.snapshot.paramMap.get('testId');
+    if (!testId) {
+      alert('Please save the assessment first before previewing candidate experience.');
+      return;
+    }
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/jobposts/tests/take-test', testId], { queryParams: { preview: 'true' } })
+    );
+    window.open(url, '_blank');
   }
 
   goBack(): void {

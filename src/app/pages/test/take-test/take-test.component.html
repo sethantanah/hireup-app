@@ -1,395 +1,344 @@
-<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm">
-  <div class="text-center">
-    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-purple-500 border-t-transparent"></div>
-    <div class="mt-4 text-lg font-medium text-gray-700">Loading ...</div>
+<div *ngIf="loading" class="fixed inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-md">
+  <div class="text-center space-y-3">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-500 border-t-transparent"></div>
+    <div class="text-sm font-bold text-slate-700">Loading Assessment Environment...</div>
   </div>
 </div>
 
-<!-- 1:: Main Test Container -->
-<div appPreventScreenShot class="test-page min-h-screen bg-gray-50" *ngIf="testData">
+<!-- Main Test Container -->
+<div appPreventScreenShot class="test-page min-h-screen bg-slate-50/70" *ngIf="testData">
 
-  <!-- 1:: User Details Modal -->
-  <div *ngIf="showPopup"
-    class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex justify-center items-center z-50">
-    <div class="bg-white p-8 rounded-xl w-full max-w-[400px] md:max-w-md shadow-2xl transform transition-all">
-      <div class="flex items-center mb-6">
-        <i class="fas fa-user-circle text-indigo-600 text-3xl mr-3"></i>
-        <h2 class="text-2xl font-bold text-gray-800">Enter Your Details</h2>
+  <!-- Preview Mode Top Notification Bar -->
+  <div *ngIf="isPreview" class="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white text-xs font-bold px-4 py-2 text-center sticky top-0 z-50 flex items-center justify-center gap-2 shadow-sm">
+    <i class="fas fa-eye text-sm"></i>
+    <span>RECRUITER PREVIEW MODE ACTIVE: Candidate credentials verification bypassed. Live proctoring and timing controls are operational.</span>
+  </div>
+
+  <!-- User Details Modal (Hidden when isPreview is true) -->
+  <div *ngIf="showPopup && !isPreview"
+    class="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex justify-center items-center z-50 p-4">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl border border-slate-200 transform transition-all space-y-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+          <i class="fas fa-user-check"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-black text-slate-900">Candidate Verification</h2>
+          <p class="text-xs text-slate-500">Confirm your credentials to start assessment</p>
+        </div>
       </div>
 
-      <form [formGroup]="userForm" (ngSubmit)="submitUserDetails()" class="space-y-6">
+      <form [formGroup]="userForm" (ngSubmit)="submitUserDetails()" class="space-y-4">
         <div>
-          <label class="flex items-center text-gray-700 font-medium mb-2">
-            <i class="fas fa-user text-indigo-500 mr-2"></i>
-            Name
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Full Name
           </label>
-          <input type="text" formControlName="name"
-            class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
+          <input type="text" formControlName="name" placeholder="John Doe"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
         </div>
 
         <div>
-          <label class="flex items-center text-gray-700 font-medium mb-2">
-            <i class="fas fa-envelope text-indigo-500 mr-2"></i>
-            Email
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Email Address
           </label>
-          <input type="email" formControlName="email"
-            class="w-full p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" />
+          <input type="email" formControlName="email" placeholder="john.doe@example.com"
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all" />
         </div>
 
-        <div *ngIf="errorMessage" class="bg-red-50 text-red-600 p-4 rounded-lg flex items-center">
-          <i class="fas fa-exclamation-circle mr-2"></i>
-          {{ errorMessage }}
+        <div *ngIf="errorMessage" class="bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-2xl text-xs font-bold flex items-center gap-2">
+          <i class="fas fa-exclamation-circle text-rose-500"></i>
+          <span>{{ errorMessage }}</span>
         </div>
 
         <button type="submit"
-          class="w-full flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200"
+          class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
           [disabled]="isLoading">
-          <i class="fas fa-paper-plane mr-2"></i>
-          <span *ngIf="!isLoading">Start Test</span>
-          <span *ngIf="isLoading" class="flex items-center">
-            <i class="fas fa-spinner fa-spin mr-2"></i>
-            Processing...
-          </span>
+          <i class="fas" [ngClass]="isLoading ? 'fa-spinner animate-spin' : 'fa-play-circle'"></i>
+          <span>{{ isLoading ? 'Verifying...' : 'Begin Assessment Session' }}</span>
         </button>
       </form>
     </div>
   </div>
 
-  <!-- 1:: Instructions View -->
-  <div *ngIf="currentView === 'instructions'" class="min-h-screen flex items-center justify-center p-4">
-    <div
-      class="max-w-3xl w-full p-8 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg border border-gray-100">
-      <div class="flex items-center mb-6">
-        <i class="fas fa-clipboard-list text-indigo-600 text-3xl mr-4"></i>
-        <h1 class="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
-          {{ testData.testTitle }}
-        </h1>
+  <!-- Instructions View -->
+  <div *ngIf="currentView === 'instructions' && !isPreview" class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-3xl w-full p-8 bg-white rounded-3xl shadow-xl border border-slate-200/80 space-y-6">
+      <div class="flex items-center gap-4 border-b border-slate-100 pb-6">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl font-bold">
+          <i class="fas fa-file-signature"></i>
+        </div>
+        <div>
+          <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 uppercase tracking-wider border border-indigo-100">
+            Candidate Assessment
+          </span>
+          <h1 class="text-2xl font-black text-slate-900 tracking-tight mt-1">
+            {{ testData.testTitle }}
+          </h1>
+        </div>
       </div>
 
-      <div class="flex items-center mb-6 bg-indigo-50 p-4 rounded-lg">
-        <i class="far fa-clock text-indigo-600 mr-3"></i>
-        <p class="text-indigo-700 font-medium">
-          Duration: {{ getTotaltime() }} minutes
-        </p>
+      <div class="flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-slate-200/80 text-xs font-bold text-slate-700">
+        <div class="flex items-center gap-2">
+          <i class="far fa-clock text-indigo-600 text-base"></i>
+          <span>Total Duration: <strong>{{ getTotaltime() }} Minutes</strong></span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fas fa-layer-group text-emerald-600 text-base"></i>
+          <span>Sections: <strong>{{ testData.sections.length }}</strong></span>
+        </div>
       </div>
 
-      <div [innerHTML]="
-          formattingService.parseMarkdown(testData.description || '')
-        " class="prose prose-indigo max-w-none mb-8"></div>
+      <div [innerHTML]="formattingService.parseMarkdown(testData.description || '')"
+           class="prose prose-sm max-w-none text-slate-700 bg-slate-50/50 p-5 rounded-2xl border border-slate-200/80"></div>
 
       <button (click)="startTest()"
-        class="group w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg">
-        <i class="fas fa-play-circle mr-2"></i>
-        <span>Start Test</span>
-        <i
-          class="fas fa-arrow-right ml-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"></i>
+        class="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2">
+        <i class="fas fa-play-circle"></i>
+        <span>Start Assessment</span>
       </button>
     </div>
   </div>
 
-  <!-- 1:: Test Form View -->
-  <div *ngIf="currentView === 'form'" class="min-h-screen">
-    <!-- 1:: Fixed Header -->
-    <div class="fixed top-0 left-0 right-0 bg-white border-b z-40 shadow-sm">
-      <div class="max-w-7xl mx-auto px-4 py-3">
-        <div class="flex items-center justify-between">
-          <h1 class="text-md md:text-2xl font-bold text-gray-800 truncate">
+  <!-- Test Form View -->
+  <div *ngIf="currentView === 'form'" class="min-h-screen flex flex-col">
+    
+    <!-- Fixed Top Navigation Bar -->
+    <div class="sticky top-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 z-40 shadow-xs">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <div>
+          <span class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest block">
+            Section {{ currentSection + 1 }} of {{ testData.sections.length }}
+          </span>
+          <h1 class="text-base font-black text-slate-900 truncate max-w-md">
             {{ testData.sections[currentSection].title }}
           </h1>
+        </div>
 
-          <div class="flex items-center gap-4">
-            <!-- 1:: Timer display - only show if section has started -->
-            <div *ngIf="sectionStarted[currentSection]" [class]="getTimerColor(timer)"
-              class="flex items-center px-4 py-2 rounded-lg transition-colors duration-300">
-              <i class="far fa-clock mr-2"></i>
-              <p class="font-medium">{{ formatTimeRemaining(timer) }}</p>
-            </div>
-
-            <!-- 1:: Next button - only show if section has started -->
-            <button *ngIf="testData!.sections.length - 1 > currentSection && sectionStarted[currentSection]"
-              class="hidden md:flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 font-medium"
-              (click)="showNavigationWarning()">
-              <span>Next</span>
-              <i class="fas fa-arrow-right transform group-hover:translate-x-0.5 transition-transform"></i>
-            </button>
-
-            <button *ngIf="testData!.sections.length - 1 === currentSection && sectionStarted[currentSection]"
-              (click)="submitTest()"
-              class="w-full sm:w-auto hidden md:flex items-center justify-center px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200">
-              <i class="fas fa-check-circle mr-2"></i>
-              Submit Test
-            </button>
+        <div class="flex items-center gap-3">
+          <!-- Timer Display -->
+          <div *ngIf="sectionStarted[currentSection]"
+               [class]="getTimerColor(timer)"
+               class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl font-mono font-bold text-xs border border-slate-200/80 shadow-2xs">
+            <i class="far fa-clock text-xs"></i>
+            <span>{{ formatTimeRemaining(timer) }}</span>
           </div>
+
+          <!-- Section Action Buttons -->
+          <button *ngIf="testData.sections.length - 1 > currentSection && sectionStarted[currentSection]"
+            class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs transition-all shadow-xs flex items-center gap-1.5"
+            (click)="showNavigationWarning()">
+            <span>Next Section</span>
+            <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+
+          <button *ngIf="testData.sections.length - 1 === currentSection && sectionStarted[currentSection]"
+            (click)="submitTest()"
+            class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all shadow-xs flex items-center gap-1.5">
+            <i class="fas fa-check-circle text-xs"></i>
+            <span>Submit Test</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- 1:: Navigation Warning Modal -->
-    <div *ngIf="showWarning" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-        <h3 class="text-xl font-bold mb-4">Navigation Warning</h3>
-        <p class="text-gray-600 mb-6">
-          You cannot navigate back once you proceed to the next section.
+    <!-- Navigation Warning Modal -->
+    <div *ngIf="showWarning" class="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl space-y-4">
+        <div class="flex items-center gap-3 text-amber-600">
+          <i class="fas fa-exclamation-triangle text-2xl"></i>
+          <h3 class="text-base font-black text-slate-900">Section Navigation Warning</h3>
+        </div>
+        <p class="text-xs text-slate-600 font-medium leading-relaxed">
+          Proceeding to the next section locks answers for Section {{ currentSection + 1 }}. You will not be able to revisit previous sections.
         </p>
-        <div class="flex justify-end gap-4">
-          <button class="px-4 py-2 text-gray-600 hover:text-gray-800" (click)="closeWarning()">
-            Cancel
+        <div class="flex justify-end gap-2 pt-2">
+          <button class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all" (click)="closeWarning()">
+            Stay on Section
           </button>
-          <button class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600" (click)="confirmNavigation()">
-            Proceed
+          <button class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs" (click)="confirmNavigation()">
+            Confirm & Proceed
           </button>
         </div>
       </div>
     </div>
 
     <div *ngIf="timeUp" (click)="confirmNavigation()"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg p-6 max-w-md mx-4">
-        <h3 class="text-xl font-bold mb-4">Section Time Up</h3>
-        <p class="text-gray-600 mb-6">
-          Time up! navigating to the next section.
-        </p>
+      class="fixed inset-0 bg-slate-950/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-3xl p-6 max-w-md w-full border border-slate-200 shadow-2xl text-center space-y-3">
+        <i class="fas fa-hourglass-end text-3xl text-rose-500"></i>
+        <h3 class="text-base font-black text-slate-900">Section Time Expired</h3>
+        <p class="text-xs text-slate-600">Navigating automatically to the next section...</p>
       </div>
     </div>
 
-    <!-- 1:: Main Content Area -->
-    <div class="flex flex-col md:flex-row max-w-7xl mx-auto pt-16">
-      <!-- 1:: Instructions Panel (Left side on large screens) -->
-      <div class="md:w-1/3 lg:w-1/2 p-4 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto">
-        <div class="p-2 h-full">
-          <div class="flex flex-row bg-white p-2 mb-3 rounded-md">
-            <h2 class="text-xl font-bold text-gray-800 flex items-center">
-              <i class="fas fa-info-circle text-indigo-600 mr-2"></i>
-              Instructions
+    <!-- Main Workspace Content Area -->
+    <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 md:p-6 gap-6">
+      
+      <!-- Section Instructions Panel (Left) -->
+      <div class="md:w-1/3 lg:w-2/5 space-y-4">
+        <div class="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4 sticky top-20">
+          
+          <!-- Section Banner Image (If set) -->
+          <div *ngIf="testData.sections[currentSection].imageUrl" class="rounded-2xl overflow-hidden border border-slate-200 max-h-48 bg-slate-100">
+            <img [src]="testData.sections[currentSection].imageUrl" alt="Section Cover" class="w-full h-48 object-cover" />
+          </div>
+
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h2 class="text-sm font-black text-slate-900 flex items-center gap-2">
+              <i class="fas fa-info-circle text-indigo-600"></i>
+              <span>Section Guidelines</span>
             </h2>
-            <!-- 1:: Timer in instructions panel - only show if section has started -->
-            <div *ngIf="sectionStarted[currentSection]" class="flex items-center rounded-lg ml-auto">
-              <i class="far fa-clock text-indigo-600 mr-2"></i>
-              <span class="text-indigo-700 font-medium">Time Remaining: {{ formatTimeRemaining(timer) }}</span>
+            <span *ngIf="sectionStarted[currentSection]" class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-100">
+              Active
+            </span>
+          </div>
+
+          <!-- Section Markdown Instructions -->
+          <div [innerHTML]="formattingService.parseMarkdown(testData.sections[currentSection].instructions, sectionStarted[currentSection])"
+               class="prose prose-sm text-slate-700 text-xs leading-relaxed max-w-none"></div>
+
+          <!-- Sub-sections Render -->
+          <div *ngIf="testData.sections[currentSection].subsection" class="space-y-3 pt-2">
+            <div *ngFor="let subsection of testData.sections[currentSection].subsection"
+                 class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+              <h4 *ngIf="subsection.title" class="text-xs font-bold text-indigo-900 uppercase tracking-wider">{{ subsection.title }}</h4>
+              
+              <!-- Sub-section Cover Image -->
+              <div *ngIf="subsection.imageUrl" class="rounded-xl overflow-hidden border border-slate-200 max-h-32 bg-slate-100">
+                <img [src]="subsection.imageUrl" alt="Sub-section illustration" class="w-full h-32 object-cover" />
+              </div>
+
+              <div [innerHTML]="formattingService.parseMarkdown(subsection.instructions, sectionStarted[currentSection])"
+                   class="prose prose-xs text-slate-600 text-[11px] leading-relaxed"></div>
             </div>
           </div>
 
-          <div [innerHTML]="
-              formattingService.parseMarkdown(
-                testData.sections[currentSection].instructions, sectionStarted[currentSection]
-              )
-            " class="prose prose-sm prose-indigo max-w-none"></div>
-
-          <!-- 1:: Subsection instructions -->
-          <div *ngIf="testData.sections[currentSection].subsection">
-            <div *ngFor="let subsection of testData.sections[currentSection].subsection; let x = index" class="mt-6">
-              <div [innerHTML]="
-                  formattingService.parseMarkdown(subsection.instructions, sectionStarted[currentSection])
-                " class="prose prose-sm prose-indigo max-w-none p-4 bg-gray-50 rounded-lg bg-white pb-10 "></div>
-            </div>
-            <div class="h-10"></div>
-          </div>
-
-
-          <!-- 1:: Mobile Navigation Buttons - only show if section has started -->
-          <div *ngIf="sectionStarted[currentSection]" class="mt-8 md:hidden space-y-3">
-            <button *ngIf="testData!.sections.length - 1 > currentSection"
-              class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg font-medium"
-              (click)="showNavigationWarning()">
-              <span>Next Section</span>
-              <i class="fas fa-arrow-right"></i>
-            </button>
-
-            <button *ngIf="testData!.sections.length - 1 === currentSection" (click)="submitTest()"
-              class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md font-medium">
-              <i class="fas fa-check-circle"></i>
-              Submit Test
-            </button>
-          </div>
         </div>
       </div>
 
-      <!-- 1:: Questions Panel (Right side on large screens) -->
-      <div class="md:w-2/3 lg:w-3/4 p-4">
-        <!-- 1:: Section Not Started View -->
-        <div *ngIf="!sectionStarted[currentSection]" class="bg-white rounded-xl shadow-lg h-full justify-center">
-          <div class="flex items-center justify-center">
-            <div class="text-center p-12">
-              <div class="w-32 h-32 mx-auto mb-8 bg-indigo-50 rounded-full flex items-center justify-center">
-                <i class="fas fa-clock text-indigo-500 text-6xl"></i>
-              </div>
-              <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                Section {{ currentSection + 1 }} Ready
-              </h2>
-              <p class="text-gray-600 mb-8 max-w-md mx-auto">
-                This section contains {{ getSectionQuestionCount(currentSection) }} questions.
-                Click "Begin Section" to start the timer and reveal the questions.
-              </p>
-              <div class="flex items-center justify-center gap-4 text-gray-700">
-                <div class="flex items-center">
-                  <i class="far fa-clock text-indigo-500 mr-2"></i>
-                  <span>Duration: {{ testData.sections[currentSection].duration }} minutes</span>
-                </div>
-                <div class="flex items-center">
-                  <i class="fas fa-question-circle text-indigo-500 mr-2"></i>
-                  <span>{{ getSectionQuestionCount(currentSection) }} questions</span>
-                </div>
-              </div>
-            </div>
+      <!-- Section Questions Panel (Right) -->
+      <div class="md:w-2/3 lg:w-3/5 space-y-6">
+        
+        <!-- Section Not Started Banner -->
+        <div *ngIf="!sectionStarted[currentSection]" class="bg-white rounded-3xl p-8 sm:p-12 border border-slate-200/80 shadow-xs text-center space-y-6">
+          <div class="w-20 h-20 mx-auto rounded-3xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl font-bold shadow-xs">
+            <i class="fas fa-play"></i>
           </div>
-
-
-          <!-- 1:: Begin Section Button - Show only if section hasn't started -->
-          <div *ngIf="!sectionStarted[currentSection]" class="mt-8 mx-[100px]">
-            <button (click)="beginSection(currentSection)"
-              class="group w-full flex items-center justify-center px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-              <i class="fas fa-play-circle mr-3 text-xl"></i>
-              <span class="text-lg font-bold">Begin Section {{ currentSection + 1 }}</span>
-              <i
-                class="fas fa-arrow-right ml-3 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all"></i>
-            </button>
-            <p class="text-gray-500 text-sm mt-3 text-center">
-              Click to start the timer and reveal questions for this section
+          <div>
+            <h2 class="text-xl font-black text-slate-900">Ready for Section {{ currentSection + 1 }}</h2>
+            <p class="text-xs text-slate-500 font-medium max-w-md mx-auto mt-1">
+              Contains <strong>{{ getSectionQuestionCount(currentSection) }} questions</strong>. Click "Begin Section" to initiate section timer.
             </p>
           </div>
-
+          <div class="flex items-center justify-center gap-4 text-xs font-bold text-slate-600">
+            <span class="flex items-center gap-1.5"><i class="far fa-clock text-indigo-600"></i> {{ testData.sections[currentSection].duration }} Mins</span>
+            <span>•</span>
+            <span class="flex items-center gap-1.5"><i class="fas fa-tasks text-emerald-600"></i> {{ getSectionQuestionCount(currentSection) }} Items</span>
+          </div>
+          <button (click)="beginSection(currentSection)"
+            class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 mx-auto">
+            <i class="fas fa-play-circle text-sm"></i>
+            <span>Begin Section {{ currentSection + 1 }}</span>
+          </button>
         </div>
 
-        <!-- 1:: Section Started View -->
-        <div *ngIf="sectionStarted[currentSection]">
-          <div class="bg-white rounded-xl shadow-lg">
-            <div class="p-6 md:p-8">
-              <!-- 1:: Questions Container -->
-              <div *ngFor="let field of getCurrentSectionFields(); let i = index">
-                <!-- <div *ngFor="let field of testData.formData.fields; let i = index">
-                <div *ngIf="
-                    testData.sections[currentSection].sectionId === field.section ||
-                    (testData.sections[currentSection].sectionId === 1 &&
-                      field.section === undefined)
-                  " class="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-100">
-                  <div> -->
-                <div>
-                  <div class="flex items-center mb-4">
-                    <span
-                      class="w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-full mr-3 font-medium"
-                      style="flex-shrink: 0">
-                      {{ i + 1 }}
-                    </span>
-                    <h3 appPreventCopyPaste class="text-lg font-semibold text-gray-800">
-                      {{ field.question }}
-                    </h3>
-                  </div>
+        <!-- Section Questions List -->
+        <div *ngIf="sectionStarted[currentSection]" class="space-y-6">
+          <div *ngFor="let field of getCurrentSectionFields(); let i = index"
+               class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs space-y-4">
+            
+            <div class="flex items-start gap-3">
+              <span class="w-8 h-8 rounded-2xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center flex-shrink-0 shadow-xs mt-0.5">
+                {{ i + 1 }}
+              </span>
+              <div class="flex-1 space-y-2">
+                <h3 appPreventCopyPaste class="text-sm font-bold text-slate-900 leading-snug">
+                  {{ field.question }}
+                </h3>
 
-                  <div *ngIf="field.type !== 'user-input' && field.type !== 'crossword'" class="space-y-3 ml-11">
-                    <div *ngFor="let option of field.options; let j = index"
-                      class="flex items-center p-3 bg-white rounded-lg hover:bg-indigo-50 transition-colors">
-                      <input appPreventCopyPaste type="radio" [name]="'question_' + i" [id]="'option_' + i + '_' + j"
-                        class="w-4 h-4 text-indigo-600 focus:ring-indigo-500" [(ngModel)]="testResponses[i].answer"
-                        [value]="option" />
-                      <label appPreventCopyPaste [for]="'option_' + i + '_' + j" class="ml-3 text-gray-700">{{ option
-                        }}</label>
-                    </div>
-                  </div>
-
-                  <div *ngIf="field.type === 'user-input'" class="ml-11">
-                    <textarea appPreventCopyPaste
-                      class="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none"
-                      rows="4" placeholder="Type your answer here..." [(ngModel)]="testResponses[i].answer"></textarea>
-                  </div>
-
-                  <!-- 1:: Crossword display -->
-                  <div *ngIf="field.type === 'crossword' && field.puzzleData" class="mt-4 ml-11">
-
-                    <app-crossword-builder [grid]="field!.puzzleData!.grid" [clues]="field!.puzzleData!.clues"
-                      [previewOnly]="true" [autoSubmitTrigger]="autoSubmitPuzzles$"
-                      (puzzleSubmitted)="onCrosswordCompleted(field, $event)"></app-crossword-builder>
-                    <div [innerHTML]="formattingService.parseMarkdown(field!.puzzleData!.description)"></div>
-                  </div>
+                <!-- Question Diagram / Illustration Image (If set) -->
+                <div *ngIf="field.imageUrl" class="my-3 rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 p-2 max-h-64">
+                  <img [src]="field.imageUrl" alt="Question Diagram" class="w-full h-full object-contain max-h-60" />
                 </div>
               </div>
+            </div>
 
-              <!-- 1:: Desktop Navigation Buttons (Bottom) -->
-              <div class="mt-8 hidden md:flex justify-end gap-4">
-                <button *ngIf="testData!.sections.length - 1 > currentSection"
-                  class="flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-8 py-3 rounded-lg transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 font-medium"
-                  (click)="showNavigationWarning()">
-                  <span>Next Section</span>
-                  <i class="fas fa-arrow-right transform group-hover:translate-x-0.5 transition-transform"></i>
-                </button>
-
-                <button *ngIf="testData!.sections.length - 1 === currentSection" (click)="submitTest()"
-                  class="flex items-center justify-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                  <i class="fas fa-check-circle"></i>
-                  Submit Test
-                </button>
+            <!-- Multiple Choice Options -->
+            <div *ngIf="field.type !== 'user-input' && field.type !== 'crossword'" class="space-y-2 pl-11">
+              <div *ngFor="let option of field.options; let j = index"
+                class="flex items-center p-3.5 bg-slate-50/70 hover:bg-indigo-50/60 rounded-2xl border border-slate-200/70 hover:border-indigo-200 transition-all cursor-pointer group">
+                <input appPreventCopyPaste type="radio" [name]="'question_' + i" [id]="'option_' + i + '_' + j"
+                  class="w-4 h-4 text-indigo-600 focus:ring-indigo-500 border-slate-300" [(ngModel)]="testResponses[i].answer"
+                  [value]="option" />
+                <label appPreventCopyPaste [for]="'option_' + i + '_' + j" class="ml-3 text-xs font-semibold text-slate-800 cursor-pointer group-hover:text-indigo-950 flex-1">
+                  {{ option }}
+                </label>
               </div>
+            </div>
+
+            <!-- Open Text User Input Answer -->
+            <div *ngIf="field.type === 'user-input'" class="pl-11">
+              <textarea appPreventCopyPaste
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                rows="4" placeholder="Type your detailed answer here..." [(ngModel)]="testResponses[i].answer"></textarea>
+            </div>
+
+            <!-- Crossword Puzzle Component -->
+            <div *ngIf="field.type === 'crossword' && field.puzzleData" class="mt-3 w-full overflow-x-auto">
+              <app-crossword-builder [grid]="field!.puzzleData!.grid" [clues]="field!.puzzleData!.clues"
+                [previewOnly]="true" [autoSubmitTrigger]="autoSubmitPuzzles$"
+                (puzzleSubmitted)="onCrosswordCompleted(field, $event)"></app-crossword-builder>
+              <div [innerHTML]="formattingService.parseMarkdown(field!.puzzleData!.description)" class="mt-2 text-xs text-slate-500"></div>
             </div>
           </div>
         </div>
+
       </div>
+
     </div>
   </div>
 
-  <!-- 1:: Thank You View -->
+  <!-- Thank You / Completion View -->
   <div *ngIf="currentView === 'thankyou'" class="min-h-screen flex items-center justify-center p-4">
-    <div class="max-w-[360px] md:max-w-xl w-full p-12 bg-white rounded-xl shadow-xl text-center">
-      <div class="space-y-8">
-        <div class="w-24 h-24 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-          <i class="fas fa-check-circle text-green-500 text-6xl animate-bounce"></i>
-        </div>
-
-        <h1 class="text-3xl font-bold text-gray-800">
-          Test Submitted Successfully!
-        </h1>
-
-        <!-- <div class="bg-blue-50 p-8 rounded-xl">
-          <div class="text-md font-bold text-blue-600 mb-2">
-            You scored {{ testPercentage }}% !
-          </div>
-        </div> -->
-
-        <p class="text-gray-600 text-lg">
-          Thank you for completing the test. We'll process your responses and get
-          back to you soon.
-        </p>
-
-        <button (click)="goToHome()"
-          class="px-8 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center mx-auto gap-2 font-medium">
-          <i class="fas fa-home"></i>
-          Return to Home
-        </button>
+    <div class="max-w-md w-full p-8 bg-white rounded-3xl shadow-xl border border-slate-200 text-center space-y-6">
+      <div class="w-20 h-20 mx-auto bg-emerald-50 text-emerald-600 rounded-3xl flex items-center justify-center text-4xl font-bold shadow-xs">
+        <i class="fas fa-check-circle"></i>
       </div>
+      <div>
+        <h1 class="text-2xl font-black text-slate-900">Assessment Completed!</h1>
+        <p class="text-xs text-slate-500 font-medium mt-1">
+          Thank you for completing the evaluation. Your responses have been securely logged for recruiter review.
+        </p>
+      </div>
+      <button (click)="goToHome()"
+        class="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-xs transition-all shadow-md">
+        Return to Platform Home
+      </button>
     </div>
   </div>
+
 </div>
 
-
-
-<!-- Violation Popup -->
-<div *ngIf="showViolationPopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black bg-opacity-50">
-  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6 border-l-8 border-red-500 animate-pulse">
-    <div class="flex items-start">
-      <div class="flex-shrink-0">
-        <svg class="h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      </div>
-      <div class="ml-4 flex-1">
-        <h3 class="text-lg font-bold text-red-800">⚠️ TEST VIOLATION WARNING</h3>
-        <div class="mt-2 text-sm text-gray-700">
-          <p class="font-semibold">{{ violationMessage }}</p>
-          <ul class="list-disc ml-4 mt-2 space-y-1">
-            <li>Opening new tabs or windows during the test is strictly prohibited</li>
-            <li>Leaving the browser tab will trigger continuous alerts</li>
-            <li>Multiple violations may result in automatic test submission</li>
-            <li>All violations are being logged and will be reported</li>
-          </ul>
-          <p class="mt-3 text-xs text-gray-500">Violation count: {{ tabLostFocusCount }}/{{ MAX_TAB_SWITCH_WARNINGS }}</p>
-        </div>
-        <div class="mt-4 flex justify-end">
-          <button 
-            (click)="dismissViolationPopup()" 
-            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-          >
-            I Understand, Continue Test
-          </button>
-        </div>
-      </div>
+<!-- Violation Warning Popup -->
+<div *ngIf="showViolationPopup" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 border-2 border-rose-500 space-y-4">
+    <div class="flex items-center gap-3 text-rose-600">
+      <i class="fas fa-shield-virus text-2xl"></i>
+      <h3 class="text-base font-black text-slate-900">PROCTORING VIOLATION WARNING</h3>
+    </div>
+    <div class="text-xs text-slate-600 font-medium leading-relaxed space-y-2">
+      <p class="font-bold text-rose-700">{{ violationMessage }}</p>
+      <ul class="list-disc ml-4 space-y-1 text-slate-500">
+        <li>Leaving the test window triggers automated security alerts</li>
+        <li>Switching tabs will generate audible proctoring warnings</li>
+        <li>Repeated tab switches logged: <strong>{{ tabLostFocusCount }}/{{ MAX_TAB_SWITCH_WARNINGS }}</strong></li>
+      </ul>
+    </div>
+    <div class="pt-2 flex justify-end">
+      <button (click)="dismissViolationPopup()" 
+        class="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-2xl transition-all shadow-sm">
+        I Understand & Resume Test
+      </button>
     </div>
   </div>
 </div>

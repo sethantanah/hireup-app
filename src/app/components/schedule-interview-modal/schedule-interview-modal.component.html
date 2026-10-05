@@ -1,0 +1,368 @@
+<!-- Schedule Candidate Interview Modal (Automated Batch Scheduler Component) -->
+<div *ngIf="isOpen"
+  class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md animate-fade-in">
+  <div
+    class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full max-w-5xl overflow-hidden flex flex-col transform transition-all animate-in fade-in zoom-in-95 duration-200 max-h-[90vh]">
+
+    <!-- Header -->
+    <div
+      class="px-6 py-4 bg-white border-b border-slate-200/80 text-slate-900 flex items-center justify-between flex-shrink-0">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+          <i class="fas fa-calendar-days text-indigo-600 text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-black text-base tracking-tight text-slate-900">Automated Candidate Interview Scheduler</h3>
+          </div>
+          <p class="text-xs text-slate-500 font-medium mt-0.5">
+            Position: <span class="font-bold text-slate-800 underline">{{ activeJobPost?.title || activeJobPost?.label || 'All
+              Positions' }}</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Step Tabs & Job Selector -->
+      <div class="flex items-center gap-2">
+        <div *ngIf="availableJobPosts && availableJobPosts.length > 1" class="w-48 text-slate-900">
+          <app-custom-dropdown [options]="jobPostDropdownOptions" labelKey="label" valueKey="value"
+            [value]="activeJobPost" (valueChange)="onJobSelectChange($event)" placeholder="Switch Job Post">
+          </app-custom-dropdown>
+        </div>
+
+        <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-2xl border border-slate-200/80">
+          <button (click)="scheduleStep = 'config'"
+            [ngClass]="scheduleStep === 'config' ? 'bg-white text-indigo-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 font-medium'"
+            class="px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+            <i class="fas fa-sliders text-[11px]"></i>
+            <span>1. Setup & Candidates</span>
+          </button>
+          <button (click)="scheduleStep = 'review'"
+            [ngClass]="scheduleStep === 'review' ? 'bg-white text-indigo-700 font-bold shadow-xs' : 'text-slate-600 hover:text-slate-900 font-medium'"
+            class="px-3.5 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1.5 cursor-pointer">
+            <i class="fas fa-list-check text-[11px]"></i>
+            <span>2. Review Allocations ({{ getAllocatedCount() }}/{{ getSelectedCandidatesCount() }})</span>
+          </button>
+        </div>
+
+        <button (click)="closeModal()"
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-all cursor-pointer">
+          <i class="fas fa-times text-xs"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 1: Configuration & Candidates -->
+    <div *ngIf="scheduleStep === 'config'" class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+
+      <!-- Top Grid: Stage Selector & Audience Dropdown -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/80 p-4 rounded-2xl border border-slate-200/80">
+        <div>
+          <app-custom-dropdown [options]="stageDropdownOptions" labelKey="label" valueKey="value"
+            [value]="scheduleTargetStage" (valueChange)="onScheduleStageChange($event)" label="Target Pipeline Stage *"
+            icon="fa-layer-group" placeholder="Select target stage...">
+          </app-custom-dropdown>
+        </div>
+
+        <div>
+          <app-custom-dropdown [options]="audienceDropdownOptions" labelKey="label" valueKey="value"
+            [value]="scheduleTargetAudience" (valueChange)="onScheduleAudienceChange($event)"
+            label="Candidate Audience Filter *" icon="fa-users-line" placeholder="Select target audience...">
+          </app-custom-dropdown>
+        </div>
+      </div>
+
+      <!-- Main Config Split View -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- Left: Target Candidates List (6 Cols) -->
+        <div class="lg:col-span-6 flex flex-col space-y-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Targeted Candidates</span>
+              <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded-full text-[11px] font-extrabold">
+                {{ getSelectedCandidatesCount() }} Selected
+              </span>
+            </div>
+            <button (click)="toggleSelectAllInterviewCandidates()"
+              class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-all flex items-center gap-1">
+              <i class="fas" [ngClass]="isAllInterviewCandidatesSelected() ? 'fa-square-minus' : 'fa-square-check'"></i>
+              <span>{{ isAllInterviewCandidatesSelected() ? 'Deselect All' : 'Select All' }}</span>
+            </button>
+          </div>
+
+          <!-- Loading Indicator -->
+          <div *ngIf="isLoadingStageCandidates" class="py-8 text-center text-slate-500 space-y-2">
+            <i class="fas fa-spinner fa-spin text-2xl text-indigo-600"></i>
+            <p class="text-xs font-medium">Fetching stage candidates from pipeline...</p>
+          </div>
+
+          <!-- Candidates List -->
+          <div *ngIf="!isLoadingStageCandidates" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <div *ngFor="let cand of stageCandidatesList" (click)="toggleCandidateSelection(cand)"
+              class="p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between"
+              [ngClass]="cand.selected ? 'bg-indigo-50/60 border-indigo-200' : 'bg-slate-50/60 border-slate-200 opacity-70 hover:opacity-100'">
+              <div class="flex items-center gap-3">
+                <input type="checkbox" [checked]="cand.selected"
+                  (click)="$event.stopPropagation(); toggleCandidateSelection(cand)"
+                  class="w-4 h-4 text-indigo-600 rounded">
+                <div>
+                  <h4 class="text-xs font-bold text-slate-900">{{ cand.name }}</h4>
+                  <p class="text-[11px] font-mono text-slate-500">{{ cand.email }}</p>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold"
+                [ngClass]="cand.selected ? 'bg-indigo-100 text-indigo-800' : 'bg-slate-200 text-slate-600'">
+                {{ cand.selected ? 'Targeted' : 'Skipped' }}
+              </span>
+            </div>
+
+            <div *ngIf="stageCandidatesList.length === 0"
+              class="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 text-center font-medium">
+              <i class="fas fa-user-slash text-amber-600 mr-1"></i> No candidates found in stage. Add candidate
+              manually:
+            </div>
+          </div>
+
+          <!-- Add Manual Candidate Inline Form -->
+          <div class="pt-3 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <input type="text" [(ngModel)]="manualCandName" placeholder="Name e.g. Vanessa"
+              class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold">
+            <input type="email" [(ngModel)]="manualCandEmail" placeholder="Email e.g. vanessa@..."
+              class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold">
+            <button (click)="addManualCandidate()" type="button"
+              class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1">
+              <i class="fas fa-plus text-[10px]"></i> Add
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Recruiter Availability & Slots Engine Config (6 Cols) -->
+        <div class="lg:col-span-6 space-y-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+          <div class="pb-2 border-b border-slate-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Availability & Slot Options</span>
+            <span class="text-[11px] text-slate-500 font-medium">Generated Slots: <strong class="text-indigo-600">{{
+                totalSlotsAvailable }}</strong></span>
+          </div>
+
+          <!-- Date Range Inputs -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Start Date
+                *</label>
+              <input type="date" [(ngModel)]="scheduleConfig.startDate" (change)="recalculateTimeSlotsAndAllocations()"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">End Date *</label>
+              <input type="date" [(ngModel)]="scheduleConfig.endDate" (change)="recalculateTimeSlotsAndAllocations()"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+            </div>
+          </div>
+
+          <!-- Work Hours Window -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Start Work
+                Hour</label>
+              <input type="time" [(ngModel)]="scheduleConfig.startTime" (change)="recalculateTimeSlotsAndAllocations()"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">End Work
+                Hour</label>
+              <input type="time" [(ngModel)]="scheduleConfig.endTime" (change)="recalculateTimeSlotsAndAllocations()"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+            </div>
+          </div>
+
+          <!-- Days of Week Toggle Badges -->
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">Available Days of
+              Week</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button *ngFor="let day of ['mon','tue','wed','thu','fri','sat','sun']" type="button"
+                (click)="toggleDayOfWeek($any(day))"
+                [ngClass]="isDaySelected(day) ? 'bg-indigo-600 text-white font-bold shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
+                class="px-2.5 py-1 rounded-lg text-xs uppercase transition-all">
+                {{ day }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Duration & Buffer Options -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <app-custom-dropdown [options]="durationOptions" labelKey="label" valueKey="value"
+                [value]="scheduleConfig.durationMinutes"
+                (valueChange)="scheduleConfig.durationMinutes = $event; recalculateTimeSlotsAndAllocations()"
+                label="Interview Duration *" icon="fa-clock" placeholder="Select duration...">
+              </app-custom-dropdown>
+            </div>
+
+            <div>
+              <app-custom-dropdown [options]="bufferOptions" labelKey="label" valueKey="value"
+                [value]="scheduleConfig.bufferMinutes"
+                (valueChange)="scheduleConfig.bufferMinutes = $event; recalculateTimeSlotsAndAllocations()"
+                label="Buffer Time *" icon="fa-mug-hot" placeholder="Select buffer...">
+              </app-custom-dropdown>
+            </div>
+          </div>
+
+          <!-- Interview Type & Meeting Link -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <app-custom-dropdown [options]="interviewTypeOptions" labelKey="label" valueKey="value"
+                [value]="scheduleConfig.interviewType"
+                (valueChange)="scheduleConfig.interviewType = $event; recalculateTimeSlotsAndAllocations()"
+                label="Round / Interview Type *" icon="fa-user-tie" placeholder="Select type...">
+              </app-custom-dropdown>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">Meeting Link
+                (Location)</label>
+              <input type="text" [(ngModel)]="scheduleConfig.meetingLink" placeholder="https://meet.google.com/xyz..."
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Capacity Alert & Summary Bar -->
+      <div *ngIf="capacityWarning"
+        class="p-3.5 bg-amber-50 border border-amber-200/90 rounded-2xl text-xs font-semibold text-amber-900 flex items-center justify-between gap-3 animate-in fade-in duration-200">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-triangle-exclamation text-amber-600 text-base"></i>
+          <span>{{ capacityWarning }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="!capacityWarning && getSelectedCandidatesCount() > 0"
+        class="p-3.5 bg-emerald-50 border border-emerald-200/90 rounded-2xl text-xs font-semibold text-emerald-900 flex items-center justify-between gap-3 animate-in fade-in duration-200">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-circle-check text-emerald-600 text-base"></i>
+          <span>Capacity Confirmed: All <strong>{{ getSelectedCandidatesCount() }}</strong> candidate(s) fit into the
+            <strong>{{ totalSlotsAvailable }}</strong> generated interview time slots!</span>
+        </div>
+        <button (click)="scheduleStep = 'review'"
+          class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-sm">
+          Review Schedule →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Step 2: Review Allocations & Save/Dispatch -->
+    <div *ngIf="scheduleStep === 'review'" class="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
+
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 class="text-sm font-extrabold text-slate-900">Review Candidate Slot Allocations</h4>
+          <p class="text-xs text-slate-500 font-medium">Verify assigned date & time slots prior to sending invitations.
+          </p>
+        </div>
+        <button (click)="recalculateTimeSlotsAndAllocations()"
+          class="px-3 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
+          <i class="fas fa-sync-alt"></i> Re-Calculate Auto Schedule
+        </button>
+      </div>
+
+      <!-- Preview Table -->
+      <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-700">
+            <thead
+              class="bg-slate-50 border-b border-slate-200 font-bold uppercase text-[10px] text-slate-600 tracking-wider">
+              <tr>
+                <th class="px-4 py-3">Candidate</th>
+                <th class="px-4 py-3">Round / Type</th>
+                <th class="px-4 py-3">Assigned Date</th>
+                <th class="px-4 py-3">Time Slot</th>
+                <th class="px-4 py-3">Duration</th>
+                <th class="px-4 py-3 text-right">Slot Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-medium">
+              <tr *ngFor="let alloc of generatedAllocations"
+                [ngClass]="alloc.status === 'allocated' ? 'hover:bg-slate-50/80' : 'bg-rose-50/40'">
+                <td class="px-4 py-3">
+                  <div class="font-bold text-slate-900">{{ alloc.candidate_name }}</div>
+                  <div class="text-[11px] font-mono text-slate-500">{{ alloc.candidate_email }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <span class="px-2 py-0.5 bg-slate-100 text-slate-800 rounded-md font-bold text-[10px]">
+                    {{ alloc.interview_type }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <input type="date" [(ngModel)]="alloc.assigned_date"
+                    class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold">
+                </td>
+                <td class="px-4 py-3">
+                  <input type="time" [(ngModel)]="alloc.assigned_time"
+                    class="px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold">
+                </td>
+                <td class="px-4 py-3 font-mono font-bold">
+                  {{ alloc.duration_minutes }} mins
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase"
+                    [ngClass]="alloc.status === 'allocated' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'">
+                    {{ alloc.status === 'allocated' ? '✅ Allocated' : '⚠️ Unassigned' }}
+                  </span>
+                </td>
+              </tr>
+
+              <tr *ngIf="generatedAllocations.length === 0">
+                <td colspan="6" class="px-4 py-8 text-center text-slate-500 font-medium">
+                  No allocations generated yet. Switch to Step 1 to select candidates and setup slot windows.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Notes input -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Interviewer Notes &
+          Preparation Instructions</label>
+        <textarea [(ngModel)]="scheduleConfig.notes" rows="2"
+          placeholder="Instructions included in candidate invitation emails..."
+          class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-900"></textarea>
+      </div>
+
+    </div>
+
+    <!-- Actions Footer -->
+    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between flex-shrink-0">
+      <button (click)="closeModal()"
+        class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-2xl text-xs font-bold transition-all">
+        Cancel
+      </button>
+
+      <div class="flex items-center gap-2">
+        <button *ngIf="scheduleStep === 'review'" (click)="scheduleStep = 'config'"
+          class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl text-xs font-bold transition-all">
+          ← Back to Setup
+        </button>
+
+        <button *ngIf="scheduleStep === 'config'" (click)="scheduleStep = 'review'"
+          class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl text-xs font-bold shadow-md transition-all flex items-center gap-2">
+          <span>Review & Save Schedule</span>
+          <i class="fas fa-arrow-right text-[11px]"></i>
+        </button>
+
+        <button *ngIf="scheduleStep === 'review'" (click)="submitScheduleInterview()"
+          [disabled]="isSchedulingInterview || getAllocatedCount() === 0"
+          class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white rounded-2xl text-xs font-bold shadow-lg shadow-indigo-500/25 flex items-center gap-2 transition-all disabled:opacity-50">
+          <i class="fas" [ngClass]="isSchedulingInterview ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+          <span>{{ isSchedulingInterview ? 'Dispatching Invites...' : 'Dispatch ' + getAllocatedCount() + ' Interview
+            Invite(s)' }}</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

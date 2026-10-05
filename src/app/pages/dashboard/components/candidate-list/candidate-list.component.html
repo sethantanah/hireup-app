@@ -1,7 +1,7 @@
 <!-- Enterprise Loading Indicator -->
 <app-loader *ngIf="isLoading" [loadingText]="'Loading Candidate Data...'"></app-loader>
 
-<div class="p-4 md:p-6 lg:p-8 font-sans">
+<div class="p-4 md:p-6 lg:p-8 font-sans bg-card min-h-screen">
   <!-- Enterprise Header with Stats -->
   <div class="mb-6 md:mb-8">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
@@ -10,15 +10,44 @@
         <p class="text-slate-500 font-medium mt-1">Review, filter, and manage applicant pipeline</p>
       </div>
 
-      <!-- Quick Stats -->
-      <div class="flex flex-wrap gap-3">
-        <div class="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl px-5 py-3 shadow-xs flex items-center gap-3">
+      <!-- Quick Actions & Quick Stats in Header -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Notify Candidates Action -->
+        <div class="relative group inline-block">
+          <button (click)="toggleEmailingPopup()"
+            class="px-4 py-2.5 bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 border border-emerald-200/80 rounded-2xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs cursor-pointer"
+            *ngIf="!isLoading && candidates.length > 0">
+            <i class="fas fa-paper-plane text-emerald-600"></i>
+            <span>Notify Candidates</span>
+          </button>
+          <span
+            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap z-50">
+            Send messages to candidates
+          </span>
+        </div>
+
+        <!-- Assessment Center Quick Link -->
+        <div class="relative group inline-block">
+          <button (click)="navigateToAssessmentCenter()"
+            class="px-4 py-2.5 bg-indigo-50/80 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 rounded-2xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs cursor-pointer">
+            <i class="fas fa-tasks text-indigo-600"></i>
+            <span>Assessment Center</span>
+          </button>
+          <span
+            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap z-50">
+            Create & manage tests and quizzes
+          </span>
+        </div>
+
+        <!-- Quick Stats -->
+        <div
+          class="bg-white/90 backdrop-blur-xl border border-slate-200/80 rounded-2xl px-5 py-2.5 shadow-xs flex items-center gap-3">
           <div class="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
             <i class="fas fa-calendar-day text-xs"></i>
           </div>
           <div>
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">New Today</div>
-            <div class="text-lg font-black text-indigo-600 leading-tight">{{ getNewTodayCount() }}</div>
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">New Today</div>
+            <div class="text-base font-black text-indigo-600 leading-tight">{{ getNewTodayCount() }}</div>
           </div>
         </div>
       </div>
@@ -30,57 +59,38 @@
       <div class="flex flex-wrap items-center gap-3">
         <!-- View Toggle -->
         <div class="flex bg-slate-100/80 rounded-xl p-1 border border-slate-200/60">
-          <button (click)="toggleView()" [class.bg-white]="viewMode === 'table'"
-            [class.text-indigo-950]="viewMode === 'table'" [class.shadow-xs]="viewMode === 'table'" [class.font-bold]="viewMode === 'table'" [class.text-slate-600]="viewMode !== 'table'"
+          <button (click)="setViewMode('table')" [class.bg-white]="viewMode === 'table'"
+            [class.text-indigo-950]="viewMode === 'table'" [class.shadow-xs]="viewMode === 'table'"
+            [class.font-bold]="viewMode === 'table'" [class.text-slate-600]="viewMode !== 'table'"
             class="px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2">
             <i class="fas fa-table text-indigo-600"></i>
             Table View
           </button>
-          <button (click)="toggleView()" [class.bg-white]="viewMode === 'cards'"
-            [class.text-indigo-950]="viewMode === 'cards'" [class.shadow-xs]="viewMode === 'cards'" [class.font-bold]="viewMode === 'cards'" [class.text-slate-600]="viewMode !== 'cards'"
+          <button (click)="setViewMode('cards')" [class.bg-white]="viewMode === 'cards'"
+            [class.text-indigo-950]="viewMode === 'cards'" [class.shadow-xs]="viewMode === 'cards'"
+            [class.font-bold]="viewMode === 'cards'" [class.text-slate-600]="viewMode !== 'cards'"
             class="px-4 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2">
             <i class="fas fa-th-large text-indigo-600"></i>
             Cards View
           </button>
         </div>
 
-        <!-- Quick Actions -->
-        <div class="relative group inline-block">
-          <button (click)="toggleEmailingPopup()"
-            class="px-4 py-2.5 bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-700 border border-emerald-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs"
+        <div class="flex items-center gap-3">
+          <button (click)="saveUnShortListingDB()"
+            class="px-4 py-2.5 bg-rose-50/80 hover:bg-rose-100/80 text-rose-700 border border-rose-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs cursor-pointer"
             *ngIf="!isLoading && candidates.length > 0">
-            <i class="fas fa-paper-plane text-emerald-600"></i>
-            Notify Candidates
+            <i class="fas fa-user-xmark text-rose-600"></i>
+            <span>Reject Remaining ({{ unshotlistedCount }})</span>
           </button>
-
-          <!-- Tooltip -->
-          <span
-            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap z-50">
-            Send messages to candidates
-          </span>
+          <!-- Refresh Button -->
+          <button (click)="refreshData()"
+            class="px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs hover:border-indigo-300 cursor-pointer"
+            title="Refresh candidates list">
+            <i class="fas fa-sync-alt text-indigo-600" [ngClass]="{'fa-spin': isLoading}"></i>
+            <span>Refresh</span>
+          </button>
         </div>
 
-        <!-- Assessment Center Quick Link -->
-        <div class="relative group inline-block">
-          <button (click)="navigateToAssessmentCenter()"
-            class="px-4 py-2.5 bg-indigo-50/80 hover:bg-indigo-100/80 text-indigo-700 border border-indigo-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs">
-            <i class="fas fa-tasks text-indigo-600"></i>
-            Assessment Center
-          </button>
-
-          <!-- Tooltip -->
-          <span
-            class="absolute left-1/2 transform -translate-x-1/2 mt-2 hidden group-hover:block bg-slate-900 text-white text-xs px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap z-50">
-            Create & manage tests and quizzes
-          </span>
-        </div>
-
-        <button (click)="saveUnShortListingDB()"
-          class="px-4 py-2.5 bg-rose-50/80 hover:bg-rose-100/80 text-rose-700 border border-rose-200/80 rounded-xl transition-all flex items-center gap-2 text-xs font-bold shadow-xs"
-          *ngIf="!isLoading && candidates.length > 0">
-          <i class="fas fa-user-xmark text-rose-600"></i>
-          Reject Remaining Candidates ({{ unshotlistedCount }})
-        </button>
       </div>
 
       <app-candidate-filters (advanceFilterChange)="onAdvanceFilterChange($event)"
@@ -109,7 +119,8 @@
 
     <h3 class="text-xl font-black text-slate-900 mb-2">No Candidates Found</h3>
     <p class="text-slate-500 text-xs font-medium text-center max-w-md mb-6">
-      No candidates in this pipeline stage yet. Search and source candidates from the Talent Pool or import applicant documents.
+      No candidates in this pipeline stage yet. Search and source candidates from the Talent Pool or import applicant
+      documents.
     </p>
 
     <div class="flex flex-wrap items-center justify-center gap-3">
@@ -125,20 +136,16 @@
         <span>Refresh Data</span>
       </button>
 
-      <button (click)="openDataUpload()"
-        class="px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border border-slate-200/80">
-        <i class="fas fa-upload text-xs"></i>
-        <span>Import Documents</span>
-      </button>
     </div>
   </div>
 
   <!-- Candidates Content -->
-  <div *ngIf="!isLoading && candidatesPaginated.length > 0" class="space-y-6">
+  <div *ngIf="!isLoading && candidates.length > 0" class="space-y-6">
     <!-- Cards View -->
-    <div *ngIf="viewMode === 'cards'" class="space-y-6">
+    <div *ngIf="$any(viewMode) === 'cards'" class="space-y-6">
       <!-- Cards Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+      <div *ngIf="candidatesPaginated.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
         <div *ngFor="let candidate of candidatesPaginated"
           class="group bg-white rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-lg transition-all duration-300 overflow-hidden">
           <!-- Candidate Header -->
@@ -218,14 +225,17 @@
               </button>
 
               <div class="flex items-center gap-2">
-                <label class="relative inline-flex items-center cursor-pointer">
+                <i *ngIf="isShortlistingCandidate(candidate.id)"
+                  class="fas fa-spinner fa-spin text-green-600 text-xs"></i>
+                <label class="relative inline-flex items-center cursor-pointer"
+                  [class.opacity-60]="isShortlistingCandidate(candidate.id)">
                   <input type="checkbox" class="sr-only peer" [checked]="isShortlisted(candidate)"
-                    (change)="toggleShortlist(candidate)" />
+                    [disabled]="isShortlistingCandidate(candidate.id)" (change)="toggleShortlist(candidate)" />
                   <div
                     class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-green-600">
                   </div>
-                  <span class="ml-3 text-sm font-medium text-gray-700">
-                    Shortlist
+                  <span class="ml-2 text-xs font-semibold text-gray-700">
+                    {{ isShortlistingCandidate(candidate.id) ? 'Shortlisting...' : 'Shortlist' }}
                   </span>
                 </label>
               </div>
@@ -234,8 +244,17 @@
         </div>
       </div>
 
+      <!-- Cards View Empty State -->
+      <div *ngIf="candidatesPaginated.length === 0"
+        class="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-slate-200/80 shadow-xs">
+        <i class="fas fa-search text-4xl text-slate-300 mb-3"></i>
+        <h4 class="text-base font-bold text-slate-800">No Matching Candidates</h4>
+        <p class="text-xs text-slate-500 font-medium mt-1">Try adjusting your search query or clear active filters.</p>
+      </div>
+
       <!-- Pagination for Cards View -->
-      <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+      <div *ngIf="candidatesPaginated.length > 0"
+        class="flex items-center justify-between pt-4 border-t border-gray-200">
         <div class="text-sm text-gray-600">
           Showing {{ getDisplayRange() }} of {{ filteredCandidates.length }} candidates
         </div>
@@ -256,7 +275,7 @@
     </div>
 
     <!-- Table View -->
-    <ng-container *ngIf="viewMode === 'table'">
+    <ng-container *ngIf="$any(viewMode) === 'table'">
       <app-table-view [columns]="tableColumns" [data]="candidates" [pageSize]="pageSize" [config]="tableConfig"
         (rowClick)="onRowClick($event)" (filteredDataChange)="onFilteredDataChange($event)"
         (exportRequest)="onExportRequest($event)" class=""></app-table-view>
@@ -265,7 +284,7 @@
 
   <!-- Modals -->
   <app-shortlist-popup (filterChange)="onFilterByIds($event)"></app-shortlist-popup>
-  <app-candidate-details></app-candidate-details>
+  <app-candidate-details [applicationData]="applicationData"></app-candidate-details>
 
   <!-- Floating Action Button (Mobile) -->
   <!-- <div class="md:hidden fixed bottom-6 right-6 z-40">

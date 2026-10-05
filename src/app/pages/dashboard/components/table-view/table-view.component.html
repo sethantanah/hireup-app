@@ -90,29 +90,37 @@
         </div>
 
         <div class="filter-controls">
-            <div class="filter-row">
-                <select [(ngModel)]="newFilter.field" class="form-select">
-                    <option value="">Select field to filter</option>
-                    <option *ngFor="let col of columns" [value]="col.key" [disabled]="!col.filterable">
-                        {{ col.label }}
-                    </option>
-                </select>
+            <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 gap-3 items-center">
+                <div class="w-full">
+                    <app-custom-dropdown
+                      [options]="fieldOptions"
+                      labelKey="label"
+                      valueKey="value"
+                      [(value)]="newFilter.field"
+                      placeholder="Select field..."
+                    ></app-custom-dropdown>
+                </div>
 
-                <select [(ngModel)]="newFilter.operator" class="form-select">
-                    <option value="contains">Contains</option>
-                    <option value="equals">Equals</option>
-                    <option value="startsWith">Starts with</option>
-                    <option value="endsWith">Ends with</option>
-                    <option value="greaterThan">Greater than</option>
-                    <option value="lessThan">Less than</option>
-                </select>
+                <div class="w-full">
+                    <app-custom-dropdown
+                      [options]="operatorOptions"
+                      labelKey="label"
+                      valueKey="value"
+                      [(value)]="newFilter.operator"
+                      placeholder="Operator..."
+                    ></app-custom-dropdown>
+                </div>
 
-                <input type="text" [(ngModel)]="newFilter.value" class="form-input" placeholder="Enter filter value"
-                    (keyup.enter)="addFilter()">
+                <div class="w-full">
+                    <input type="text" [(ngModel)]="newFilter.value" class="form-input h-10 w-full px-3 py-2 bg-white border border-slate-200/80 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="Enter filter value"
+                        (keyup.enter)="addFilter()">
+                </div>
 
-                <button class="btn-primary" (click)="addFilter()">
-                    <i class="fas fa-plus"></i> Add Filter
-                </button>
+                <div class="w-full">
+                    <button class="btn-primary w-full h-10 flex items-center justify-center gap-2" (click)="addFilter()">
+                        <i class="fas fa-plus"></i> Add Filter
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -146,7 +154,7 @@
                 <label class="checkbox-wrapper">
                     <input type="checkbox" [checked]="col.visible !== false" (change)="toggleColumnVisibility(col)">
                     <span class="checkmark">
-                        <i class="fas fa-check"></i>
+                        <i *ngIf="col.visible !== false" class="fas fa-check"></i>
                     </span>
                     <span class="column-label">{{ col.label }}</span>
                 </label>
@@ -165,7 +173,7 @@
                         <label class="checkbox-wrapper compact">
                             <input type="checkbox" [checked]="allSelected" (change)="toggleSelectAll()">
                             <span class="checkmark">
-                                <i class="fas fa-check"></i>
+                                <i *ngIf="allSelected" class="fas fa-check"></i>
                             </span>
                         </label>
                     </th>
@@ -191,37 +199,35 @@
             <tbody>
                 <!-- Data Rows -->
                 <tr *ngFor="let row of paginatedData; let i = index" (click)="onRowClick(row, $event)"
-                    [class.selected]="selectedRows.has(row)" [class.even]="i % 2 === 0">
+                    [class.selected]="selectedRows.has(row)" [class.even]="i % 2 === 0" class="cursor-pointer hover:bg-indigo-50/50 transition-all duration-150">
                     <!-- Row Selection -->
-                    <td *ngIf="tableConfig.showRowNumbers" class="selection-column">
+                    <td *ngIf="tableConfig.showRowNumbers" class="selection-column" (click)="$event.stopPropagation()">
                         <label class="checkbox-wrapper compact">
                             <input type="checkbox" [checked]="selectedRows.has(row)" (change)="toggleRowSelection(row)">
                             <span class="checkmark">
-                                <i class="fas fa-check"></i>
+                                <i *ngIf="selectedRows.has(row)" class="fas fa-check"></i>
                             </span>
                         </label>
                     </td>
 
                     <td class="table-cell">
-                        <div class="status-badge" [ngClass]="{
-                          'bg-emerald-50 text-emerald-700 border border-emerald-200/80': getCandidateStatus(row) === 'shortlisted' || getCandidateStatus(row) === 'accepted',
-                          'bg-rose-50 text-rose-700 border border-rose-200/80': getCandidateStatus(row) === 'unshortlisted' || getCandidateStatus(row) === 'rejected',
-                          'bg-indigo-50 text-indigo-700 border border-indigo-200/80': getCandidateStatus(row) === 'in review' || getCandidateStatus(row) === 'new' || getCandidateStatus(row) === 'applied',
-                          'bg-slate-100 text-slate-600 border border-slate-200': !getCandidateStatus(row)
+                        <div class="status-badge inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-extrabold shadow-2xs" [ngClass]="{
+                          'bg-emerald-50 text-emerald-700 border border-emerald-200/80': getCandidateStatus(row) === 'Shortlisted' || getCandidateStatus(row) === 'shortlisted',
+                          'bg-rose-50 text-rose-700 border border-rose-200/80': getCandidateStatus(row) === 'Rejected' || getCandidateStatus(row) === 'unshortlisted',
+                          'bg-indigo-50 text-indigo-700 border border-indigo-200/80': getCandidateStatus(row) === 'New' || getCandidateStatus(row) === 'Applied'
                         }">
                             <span class="w-1.5 h-1.5 rounded-full" [ngClass]="{
-                              'bg-emerald-500': getCandidateStatus(row) === 'shortlisted' || getCandidateStatus(row) === 'accepted',
-                              'bg-rose-500': getCandidateStatus(row) === 'unshortlisted' || getCandidateStatus(row) === 'rejected',
-                              'bg-indigo-500': getCandidateStatus(row) === 'in review' || getCandidateStatus(row) === 'new' || getCandidateStatus(row) === 'applied',
-                              'bg-slate-400': !getCandidateStatus(row)
+                              'bg-emerald-500': getCandidateStatus(row) === 'Shortlisted' || getCandidateStatus(row) === 'shortlisted',
+                              'bg-rose-500': getCandidateStatus(row) === 'Rejected' || getCandidateStatus(row) === 'unshortlisted',
+                              'bg-indigo-500': getCandidateStatus(row) === 'New' || getCandidateStatus(row) === 'Applied'
                             }"></span>
-                            {{ getCandidateStatus(row) || 'Pending' }}
+                            {{ getCandidateStatus(row) }}
                         </div>
                     </td>
 
                     <!-- Data Cells -->
                     <td *ngFor="let col of visibleColumns" class="table-cell">
-                        <div class="cell-content" [title]="formatDisplayValue(getNestedValue(row, col.key))">
+                        <div class="cell-content text-xs font-medium text-slate-800" [title]="formatDisplayValue(getNestedValue(row, col.key))">
                             {{ formatDisplayValue(getNestedValue(row, col.key)) }}
                         </div>
                     </td>
@@ -250,15 +256,15 @@
     </div>
 
     <!-- Enterprise Pagination -->
-    <div class="enterprise-pagination" *ngIf="totalPages > 1">
+    <div class="enterprise-pagination flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-slate-50/80 border-t border-slate-200/80" *ngIf="totalPages > 1 || filteredData.length > 0">
         <div class="pagination-left">
-            <div class="records-info">
+            <div class="records-info text-xs font-semibold text-slate-500">
                 Showing {{ getStartRecord() }} to {{ getEndRecord() }} of {{ filteredData.length }} records
             </div>
         </div>
 
-        <div class="pagination-center">
-            <div class="pagination-controls">
+        <div class="pagination-center" *ngIf="totalPages > 1">
+            <div class="pagination-controls flex items-center gap-1.5">
                 <!-- First Page -->
                 <button [disabled]="currentPage === 1" (click)="changePage(1)" class="pagination-btn"
                     title="First Page">
@@ -272,7 +278,7 @@
                 </button>
 
                 <!-- Page Numbers -->
-                <div class="page-numbers">
+                <div class="page-numbers flex items-center gap-1">
                     <button *ngFor="let page of pageNumbers" [class.active]="page === currentPage"
                         [class.ellipsis]="page === -1" (click)="page !== -1 && changePage(page)" class="page-number">
                         {{ page === -1 ? '...' : page }}
@@ -294,15 +300,53 @@
         </div>
 
         <div class="pagination-right">
-            <div class="page-size-control">
-                <label for="page-size">Rows per page:</label>
-                <select id="page-size" [(ngModel)]="pageSize" (change)="currentPage = 1; applyFilters()"
-                    class="page-size-select">
-                    <option [value]="10">10</option>
-                    <option [value]="25">25</option>
-                    <option [value]="50">50</option>
-                    <option [value]="100">100</option>
-                </select>
+            <div class="page-size-control flex items-center gap-2">
+                <label class="text-xs font-bold text-slate-500 whitespace-nowrap">Rows per page:</label>
+                <div class="w-36">
+                  <app-custom-dropdown
+                    [options]="pageSizeOptions"
+                    labelKey="label"
+                    valueKey="value"
+                    [value]="pageSize"
+                    (valueChange)="onPageSizeChange($event)"
+                  ></app-custom-dropdown>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Confirmation Modal -->
+    <div *ngIf="showConfirmDialog" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" (click)="cancelConfirmDialog()">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 w-full max-w-md p-6 space-y-5" (click)="$event.stopPropagation()">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold" [ngClass]="confirmActionType === 'shortlist' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'">
+                    <i class="fas" [ngClass]="confirmActionType === 'shortlist' ? 'fa-user-check' : 'fa-user-xmark'"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold text-slate-800">
+                        Confirm {{ confirmActionType === 'shortlist' ? 'Shortlist' : 'Rejection' }}
+                    </h3>
+                    <p class="text-xs text-slate-500 font-medium mt-0.5">
+                        Bulk candidate action confirmation
+                    </p>
+                </div>
+            </div>
+
+            <div class="py-2 text-xs font-semibold text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-xl border border-slate-200/60">
+                Are you sure you want to {{ confirmActionType === 'shortlist' ? 'shortlist' : 'reject' }}
+                <span class="font-extrabold text-indigo-600 px-1">{{ confirmCount }}</span> selected candidate record(s)?
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-2">
+                <button (click)="cancelConfirmDialog()" class="px-4 py-2 border border-slate-200 text-slate-700 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all">
+                    Cancel
+                </button>
+                <button (click)="proceedConfirmDialog()"
+                    class="px-5 py-2 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5"
+                    [ngClass]="confirmActionType === 'shortlist' ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700' : 'bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700'">
+                    <i class="fas" [ngClass]="confirmActionType === 'shortlist' ? 'fa-check' : 'fa-times'"></i>
+                    <span>Confirm {{ confirmActionType === 'shortlist' ? 'Shortlist' : 'Reject' }}</span>
+                </button>
             </div>
         </div>
     </div>

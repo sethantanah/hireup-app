@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil, catchError, finalize } from 'rxjs';
+import { Subject, takeUntil, catchError, finalize, forkJoin, of } from 'rxjs';
 
 // Services
 import { ApiService } from '../../../../services/api.service';
@@ -89,7 +89,8 @@ export class CandidateListComponent implements OnInit, OnDestroy {
   filteredCandidates: Candidate[] = [];
   candidatesPaginated: Candidate[] = []
   isLoading = true;
-  viewMode: ViewMode = 'cards';
+  shortlistingCandidateIds: Set<string> = new Set<string>();
+  viewMode: string = 'cards';
   jobPostId?: string;
 
   showPopup = false;
@@ -224,13 +225,43 @@ export class CandidateListComponent implements OnInit, OnDestroy {
 
   // Initialization
   private initializeComponent(): void {
-    const jobPostId = this.route.snapshot.paramMap.get('jobId') || '';
-    this.jobPostId = jobPostId;
-    this.dataService.saveJobId(jobPostId);
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      const jobPostId = params.get('jobId') || this.route.snapshot.paramMap.get('jobId') || '';
+      this.jobPostId = jobPostId;
+      this.dataService.saveJobId(jobPostId);
 
-    if (jobPostId) {
-      this.loadCandidates(jobPostId);
-    }
+      if (jobPostId) {
+        this.loadCandidates(jobPostId);
+      }
+    });
+
+    this.dataService.shortlistUpdated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        if (this.jobPostId && event.jobId && event.jobId !== this.jobPostId) return;
+
+        if (event.action === 'shortlist') {
+          // Remove shortlisted candidates from pending pool list
+          this.candidates = this.candidates.filter(c => !event.candidateIds.includes(c.id));
+          this.filteredCandidates = this.filteredCandidates.filter(c => !event.candidateIds.includes(c.id));
+          this.dataService.totalCandidates = this.candidates.length;
+          this.calculatePagination();
+        } else if (event.action === 'unshortlist') {
+          // Update status to unshortlisted and sort candidates to bottom
+          event.candidateIds.forEach(id => {
+            const cand = this.candidates.find(c => c.id === id);
+            if (cand) {
+              if (!cand.application_stages) cand.application_stages = {};
+              const stageName = (this.route.snapshot.paramMap.get('stageId') || 'application_review').replace('stage_', '');
+              cand.application_stages[stageName] = { status: 'unshortlisted' };
+              (cand as any).status = 'unshortlisted';
+            }
+          });
+          this.candidates = this.sortCandidatesByState(this.candidates);
+          this.filterCandidates();
+        }
+        this.cdr.markForCheck();
+      });
 
     if (this.applicationData) {
       // Handle potential undefined values safely
@@ -248,55 +279,85 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     this.calculatePagination();
   }
 
+  getCandidateStatusGroupWeight(candidate: Candidate): number {
+    const raw = this.getCandidateStatusRaw(candidate);
+    if (raw === 'unshortlisted' || raw === 'rejected' || raw === 'unsuccessful') {
+      return 2; // Bottom: rejected / unshortlisted
+    }
+    if (raw === 'shortlisted' || raw === 'completed' || raw === 'approved' || raw === 'successful') {
+      return 1; // Middle: shortlisted
+    }
+    return 0; // Top: no state yet / pending / new
+  }
+
+  sortCandidatesByState(candidates: Candidate[]): Candidate[] {
+    if (!Array.isArray(candidates)) return [];
+    return [...candidates].sort((a, b) => {
+      const weightA = this.getCandidateStatusGroupWeight(a);
+      const weightB = this.getCandidateStatusGroupWeight(b);
+      if (weightA !== weightB) {
+        return weightA - weightB;
+      }
+      const timeA = new Date(a.created_at || a.submitted_at || 0).getTime();
+      const timeB = new Date(b.created_at || b.submitted_at || 0).getTime();
+      if (timeA !== timeB) return timeB - timeA;
+      return String(b.id || '').localeCompare(String(a.id || ''), undefined, { numeric: true });
+    });
+  }
+
   private loadCandidates(jobPostId: string): void {
     this.isLoading = true;
     const stageId = this.route.snapshot.paramMap.get('stageId') || '';
-    this.applicantService.getApplicantsByStage(jobPostId, stageId.replace("stage_", ""), 'pending')
-      .pipe(
-        takeUntil(this.destroy$),
+    const cleanStage = stageId.replace("stage_", "");
+
+    forkJoin({
+      pending: this.applicantService.getApplicantsByStage(jobPostId, cleanStage, 'pending').pipe(
         catchError(error => {
-          console.error('Error loading candidates:', error);
-          this.showPopupMessage('Failed to load candidates', 'error');
-          return [];
-        }),
-        finalize(() => {
-          this.cdr.markForCheck();
+          console.error('Error loading pending candidates:', error);
+          return of([]);
+        })
+      ),
+      unshortlisted: this.applicantService.getApplicantsByStage(jobPostId, cleanStage, 'unshortlisted').pipe(
+        catchError(error => {
+          console.error('Error loading unshortlisted candidates:', error);
+          return of([]);
         })
       )
-      .subscribe({
-        next: (data) => {
-          this.candidates = (data as Candidate[]) || [];
-          this.filteredCandidates = [...this.candidates];
-          this.updateTableColumns();
-          this.dataService.totalCandidates = this.candidates.length;
-        }
-      });
-
-
-    // Load Unshortlisted Candidates Too
-    this.applicantService.getApplicantsByStage(jobPostId, stageId.replace("stage_", ""), 'unshortlisted')
+    })
       .pipe(
         takeUntil(this.destroy$),
-        catchError(error => {
-          console.error('Error loading candidates:', error);
-          this.showPopupMessage('Failed to load candidates', 'error');
-          return [];
-        }),
         finalize(() => {
           this.isLoading = false;
           this.cdr.markForCheck();
-          this.calculatePagination();
         })
       )
       .subscribe({
-        next: (data) => {
-          const unshortlisted = (data as Candidate[]) || [];
-          const existingIds = new Set(this.candidates.map(c => c.id));
+        next: (res) => {
+          const pending = (res.pending as Candidate[]) || [];
+          const unshortlisted = (res.unshortlisted as Candidate[]) || [];
+          const existingIds = new Set(pending.map(c => c.id));
           const uniqueUnshortlisted = unshortlisted.filter(c => c.id && !existingIds.has(c.id));
-          this.candidates = [...this.candidates, ...uniqueUnshortlisted];
+
+          uniqueUnshortlisted.forEach(c => {
+            if (!c.application_stages) c.application_stages = {};
+            if (!c.application_stages[cleanStage]) {
+              c.application_stages[cleanStage] = { status: 'unshortlisted' };
+            }
+            (c as any).status = 'unshortlisted';
+          });
+
+          const combined = [...pending, ...uniqueUnshortlisted];
+          this.candidates = this.sortCandidatesByState(combined);
           this.filteredCandidates = [...this.candidates];
           this.updateTableColumns();
           this.dataService.totalCandidates = this.candidates.length;
+          this.calculatePagination();
+        },
+        error: (err) => {
+          console.error('Error in forkJoin loading candidates:', err);
+          this.showPopupMessage('Failed to load candidates', 'error');
+          this.candidates = [];
+          this.filteredCandidates = [];
         }
       });
   }
@@ -335,23 +396,30 @@ export class CandidateListComponent implements OnInit, OnDestroy {
   }
 
   // Candidate operations
+  isShortlistingCandidate(candidateId: string): boolean {
+    return this.shortlistingCandidateIds.has(candidateId);
+  }
+
   toggleShortlist(candidate: Candidate): void {
+    if (!candidate || !candidate.id) return;
+    this.shortlistingCandidateIds.add(candidate.id);
+
     const isShortlisted = this.isShortlisted(candidate);
 
     if (isShortlisted) {
       this.dataService.shortlistedCandidates =
         this.dataService.shortlistedCandidates.filter(c => c.id !== candidate.id);
     } else {
-      this.dataService.shortlistedCandidates.push(candidate);
+      if (!this.dataService.shortlistedCandidates.some(c => c.id === candidate.id)) {
+        this.dataService.shortlistedCandidates.push(candidate);
+      }
     }
 
-    this.saveShortListingDB();
+    this.saveShortListingDB(candidate.id);
   }
 
   isShortlisted(candidate: Candidate): boolean {
-    const stageId = this.route.snapshot.paramMap.get('stageId') || '';
-    const status = candidate.application_stages?.[stageId.replace("stage_", "")]?.["status"] === "shortlisted" ? true : false;
-    return status;
+    return this.getCandidateStatusRaw(candidate) === 'shortlisted';
   }
 
   saveShortListing(data: Candidate[]): void {
@@ -362,46 +430,73 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     }
   }
 
-  saveShortListingDB(): void {
-    const ids = this.dataService.shortlistedCandidates.map(candidate => candidate.id);
-
-    const initaillyRejectedIds = this.dataService.shortlistedCandidates.filter(candidate => this.getCandidateStatusRaw(candidate) === "unshortlisted").map(candidate => candidate.id);
-    const shortListIds = this.dataService.shortlistedCandidates.filter(candidate => this.getCandidateStatusRaw(candidate) === "pending").map(candidate => candidate.id);
-
-    const shortListData = { shortlisted: shortListIds, was_rejected: initaillyRejectedIds };
+  saveShortListingDB(targetCandidateId?: string): void {
+    const selectedCands = this.dataService.shortlistedCandidates;
+    const ids = selectedCands.map(candidate => candidate.id).filter(Boolean);
 
     if (ids.length === 0 || !this.jobPostId) {
+      if (targetCandidateId) {
+        this.shortlistingCandidateIds.delete(targetCandidateId);
+      }
       this.showPopupMessage('No candidates selected for shortlisting', 'error');
       return;
     }
+
+    const initaillyRejectedIds = selectedCands
+      .filter(candidate => {
+        const raw = this.getCandidateStatusRaw(candidate);
+        return raw === 'unshortlisted' || raw === 'rejected';
+      })
+      .map(candidate => candidate.id);
+
+    const shortListIds = selectedCands
+      .filter(candidate => {
+        const raw = this.getCandidateStatusRaw(candidate);
+        return raw !== 'unshortlisted' && raw !== 'rejected';
+      })
+      .map(candidate => candidate.id);
+
+    const shortListData = { shortlisted: shortListIds, was_rejected: initaillyRejectedIds };
 
     const stageId = this.route.snapshot.paramMap.get('stageId') || 'stage_application_review';
     const stageName = stageId.replace('stage_', '');
 
     this.apiService.shortListCandidates(shortListData, this.jobPostId, stageName)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          if (targetCandidateId) {
+            this.shortlistingCandidateIds.delete(targetCandidateId);
+          } else {
+            this.shortlistingCandidateIds.clear();
+          }
+          this.cdr.markForCheck();
+        })
+      )
       .subscribe({
         next: () => {
-          this.showPopupMessage('Candidates shortlisted successfully!', 'success');
+          this.showPopupMessage('Candidate shortlisted successfully!', 'success');
           this.dataService.shortlistedCandidates = [];
 
-          // Remove shortlisted candidates from view
-          this.dataService.totalShortListedCandidates += ids.length;
-          this.dataService.totalCandidates -= ids.length;
+          // Remove shortlisted candidates from the active pending pool list
           this.candidates = this.candidates.filter(c => !ids.includes(c.id));
           this.filteredCandidates = this.filteredCandidates.filter(c => !ids.includes(c.id));
+
+          this.dataService.totalShortListedCandidates += ids.length;
+          this.dataService.totalCandidates = Math.max(0, this.dataService.totalCandidates - ids.length);
+
+          // Emit event to auto-refresh all event listeners across the app
+          this.dataService.notifyShortlistUpdate('shortlist', ids, this.jobPostId, stageName);
 
           this.calculatePagination();
           this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Shortlisting failed:', error);
-          this.showPopupMessage('Candidates shortlisting failed!', 'error');
+          this.showPopupMessage('Candidate shortlisting failed!', 'error');
         }
       });
   }
-
-
 
   saveUnShortListingDB(candidateIds?: Candidate[]): void {
     const ids = candidateIds?.filter(candidate =>
@@ -424,12 +519,25 @@ export class CandidateListComponent implements OnInit, OnDestroy {
         next: () => {
           this.showPopupMessage('Candidates unshortlisted successfully!', 'success');
 
-          this.candidates.forEach(c => {
-            if (!ids.includes(c.id)) {
-
+          // Auto update candidate state in-memory without hitting DB
+          ids.forEach(id => {
+            const cand = this.candidates.find(c => c.id === id);
+            if (cand) {
+              if (!cand.application_stages) cand.application_stages = {};
+              cand.application_stages[stageName] = { status: 'unshortlisted' };
+              (cand as any).status = 'unshortlisted';
             }
           });
-          this.filteredCandidates = this.filteredCandidates.filter(c => !ids.includes(c.id));
+
+          this.dataService.totalShortListedCandidates = Math.max(0, this.dataService.totalShortListedCandidates - ids.length);
+          this.candidates = this.sortCandidatesByState(this.candidates);
+          this.filterCandidates();
+
+          // Emit event to auto-refresh all event listeners across the app
+          this.dataService.notifyShortlistUpdate('unshortlist', ids, this.jobPostId, stageName);
+
+          this.calculatePagination();
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Unshortlisting failed:', error);
@@ -439,6 +547,10 @@ export class CandidateListComponent implements OnInit, OnDestroy {
   }
 
   // UI operations
+  setViewMode(mode: 'table' | 'cards'): void {
+    this.viewMode = mode;
+  }
+
   toggleView(): void {
     this.viewMode = this.viewMode === 'table' ? 'cards' : 'table';
   }
@@ -487,21 +599,59 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     this.calculatePagination();
   }
 
-  private matchesAllFilters(candidate: Candidate, filters: CandidateFilters): boolean {
+  private safeParseFloat(val: any): number | null {
+    if (val == null) return null;
+    if (typeof val === 'number') return isNaN(val) ? null : val;
+    if (typeof val === 'boolean') return null;
+
+    if (Array.isArray(val)) {
+      for (const item of val) {
+        const parsed = this.safeParseFloat(item);
+        if (parsed !== null) return parsed;
+      }
+      return null;
+    }
+
+    const str = String(val).trim();
+    if (!str) return null;
+
+    const cleaned = str.replace(/,/g, '');
+    const match = cleaned.match(/[-+]?\d*\.?\d+/);
+    if (match && match[0]) {
+      const parsed = parseFloat(match[0]);
+      return isNaN(parsed) ? null : parsed;
+    }
+
+    return null;
+  }
+
+  private matchesAllFilters(candidate: Candidate, filters: any): boolean {
     const { form_data, resume_data } = candidate;
     const data = form_data && Object.keys(form_data).length > 0
       ? form_data
       : (resume_data?.personal_details || {});
 
     for (const [key, filterValue] of Object.entries(filters)) {
+      if (key === '_rules') {
+        const rules = filterValue as any[];
+        if (Array.isArray(rules) && rules.length > 0) {
+          const rulesMatch = rules.every(rule => this.matchesRuleOperator(candidate, rule));
+          if (!rulesMatch) return false;
+        }
+        continue;
+      }
+
       if (!filterValue || filterValue.toString().trim() === '') {
         continue;
       }
 
-      let fieldValue = (data as FormData)[key]?.value || (data as FormData)[key];
+      let fieldValue = (data as FormData)[key]?.value ?? (data as FormData)[key];
 
-      if (!fieldValue && resume_data) {
+      if (fieldValue === undefined && resume_data) {
         fieldValue = this.findInResumeData(resume_data, key);
+      }
+      if (fieldValue === undefined) {
+        fieldValue = (candidate as any)[key];
       }
 
       if (!this.matchesFilter(fieldValue, filterValue)) {
@@ -510,6 +660,56 @@ export class CandidateListComponent implements OnInit, OnDestroy {
     }
 
     return true;
+  }
+
+  private matchesRuleOperator(candidate: Candidate, rule: { field: string; operator: string; value: any }): boolean {
+    if (!rule.field || rule.value === '' || rule.value == null) return true;
+
+    const { form_data, resume_data } = candidate;
+    const data = form_data && Object.keys(form_data).length > 0
+      ? form_data
+      : (resume_data?.personal_details || {});
+
+    let itemValue = (data as FormData)[rule.field]?.value ?? (data as FormData)[rule.field];
+    if (itemValue === undefined && resume_data) {
+      itemValue = this.findInResumeData(resume_data, rule.field);
+    }
+    if (itemValue === undefined) {
+      itemValue = (candidate as any)[rule.field];
+    }
+
+    if (itemValue == null) return false;
+
+    const itemValueStr = itemValue.toString().toLowerCase();
+    const filterValueStr = rule.value.toString().toLowerCase();
+
+    switch (rule.operator) {
+      case 'contains': return itemValueStr.includes(filterValueStr);
+      case 'equals': return itemValueStr === filterValueStr;
+      case 'startsWith': return itemValueStr.startsWith(filterValueStr);
+      case 'endsWith': return itemValueStr.endsWith(filterValueStr);
+      case 'greaterThan': {
+        const numValue = this.safeParseFloat(itemValue);
+        const numFilter = this.safeParseFloat(rule.value);
+        return numValue !== null && numFilter !== null && numValue > numFilter;
+      }
+      case 'lessThan': {
+        const numValue = this.safeParseFloat(itemValue);
+        const numFilter = this.safeParseFloat(rule.value);
+        return numValue !== null && numFilter !== null && numValue < numFilter;
+      }
+      case 'greaterThanOrEqual': {
+        const numValue = this.safeParseFloat(itemValue);
+        const numFilter = this.safeParseFloat(rule.value);
+        return numValue !== null && numFilter !== null && numValue >= numFilter;
+      }
+      case 'lessThanOrEqual': {
+        const numValue = this.safeParseFloat(itemValue);
+        const numFilter = this.safeParseFloat(rule.value);
+        return numValue !== null && numFilter !== null && numValue <= numFilter;
+      }
+      default: return true;
+    }
   }
 
   private matchesFilter(fieldValue: any, filterValue: any): boolean {
@@ -665,27 +865,54 @@ export class CandidateListComponent implements OnInit, OnDestroy {
   getExperience(candidate: any): string {
     if (candidate.form_data) {
       const val = candidate.form_data.years_of_experience?.value || candidate.form_data.years_of_experience || candidate.form_data.experience;
-      if (val !== undefined && val !== null) return String(val);
+      if (val !== undefined && val !== null) return String(val.value);
     }
     return '';
   }
 
 
   getCandidateStatusRaw(candidate: Candidate): string {
+    if (!candidate) return 'pending';
     const stageId = this.route.snapshot.paramMap.get('stageId') || '';
-    const status = candidate.application_stages?.[stageId.replace("stage_", "")]?.["status"]
-    return status;
+    const cleanStage = stageId.replace("stage_", "").trim().toLowerCase();
+
+    const appStages = candidate.application_stages;
+    if (appStages && typeof appStages === 'object') {
+      const keysToTry = [
+        cleanStage,
+        stageId,
+        `stage_${cleanStage}`,
+        cleanStage.replace("_", " "),
+        cleanStage.replace(" ", "_"),
+        'application_review',
+        'Applied',
+        'Form Requested'
+      ];
+      for (const k of keysToTry) {
+        if (appStages[k] && typeof appStages[k] === 'object' && appStages[k].status) {
+          return String(appStages[k].status).toLowerCase();
+        }
+      }
+      for (const key of Object.keys(appStages)) {
+        const stageVal = appStages[key];
+        if (stageVal && typeof stageVal === 'object' && stageVal.status) {
+          return String(stageVal.status).toLowerCase();
+        }
+      }
+    }
+
+    if ((candidate as any)?.status) return String((candidate as any).status).toLowerCase();
+    return 'pending';
   }
 
   getCandidateStatus(candidate: any): string {
-    const stageId = this.route.snapshot.paramMap.get('stageId') || '';
-    const status = candidate.application_stages?.[stageId.replace("stage_", "")]?.["status"]
-    if (status === "pending") {
-      return "New";
-    } else if (status === "unshortlisted") {
+    const raw = this.getCandidateStatusRaw(candidate);
+    if (raw === "shortlisted" || raw === "completed" || raw === "approved" || raw === "successful") {
+      return "Shortlisted";
+    } else if (raw === "unshortlisted" || raw === "rejected" || raw === "unsuccessful") {
       return "Rejected";
     } else {
-      return "Shortlisted"
+      return "New";
     }
   }
 
@@ -783,8 +1010,9 @@ export class CandidateListComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(row: any): void {
-    // Implement row click logic
-    console.log('Row clicked:', row);
+    if (row) {
+      this.viewDetails(row);
+    }
   }
 
   onExportRequest(event: { data: any[], format: 'shortlist' | 'unshortlist' }): void {
@@ -820,7 +1048,16 @@ export class CandidateListComponent implements OnInit, OnDestroy {
 
   viewDetails(candidate: Candidate): void {
     this.dataService.candidate = candidate;
+    this.dataService.isFromCandidateList = true;
     this.dataService.openCandidateDetails = true;
+  }
+
+  openAiCopilot(): void {
+    const jobId = (this.applicationData as any)?.id || this.jobPostId || '';
+    const url = this.router.serializeUrl(
+      this.router.createUrlTree(['/ai-copilot'], { queryParams: { jobId } })
+    );
+    window.open(url, '_blank');
   }
 
   toggleFilters(): void {

@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { JobtestApiService } from '../../../services/jobtest-api.service';
+import { JobpostingsApiService } from '../../../services/jobpostings-api.service';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SendmailComponent } from './components/sendmail/sendmail.component';
+import { CustomDropdownComponent } from '../../../components/custom-dropdown/custom-dropdown.component';
 
 export interface TestResponse {
   question: string;
@@ -31,7 +33,8 @@ interface FilterOption {
 
 @Component({
   selector: 'app-submissions',
-  imports: [CommonModule, FormsModule, SendmailComponent],
+  standalone: true,
+  imports: [CommonModule, FormsModule, SendmailComponent, CustomDropdownComponent],
   templateUrl: './submissions.component.html',
   styleUrl: './submissions.component.scss',
 })
@@ -144,38 +147,75 @@ export class SubmissionsComponent {
   showPassMarkModal = false;
   newPassMark = 70;
 
+  testId: string = '';
   loading: boolean = true;
 
   isCollapsed = false;
 
   constructor(
     public testService: JobtestApiService,
+    private jobpostingsApiService: JobpostingsApiService,
     private route: ActivatedRoute
   ) {
     const testId = this.route.snapshot.paramMap.get('testId');
+    this.testId = testId ?? '';
 
     this.loading = true;
-    // setTimeout(() => {
-    //   this.loading = false;
-    // }, 1000);
 
-    
-    this.testService.testResponses(testId ?? '').subscribe({
-      next: (data) => {
-        this.applicants = data;
-        console.log(this.applicants);
-        this.applicants.forEach((app) => {
-          if (app.test_score >= this.passMark) {
-            this.shortlistedApplicants.add(app.id);
-            this.shortlistCount = this.shortlistedApplicants.size;
+    if (testId) {
+      // Fetch test details to resolve linked job post and configured stages
+      this.testService.jobTest(testId).subscribe({
+        next: (testRes) => {
+          const jobpostId = testRes?.jobpost_id;
+          if (jobpostId) {
+            this.loadConfiguredStages(jobpostId);
           }
-        });
+        },
+        error: (err) => console.warn('Could not load test details for stages:', err)
+      });
 
-        this.loading = false;
+      this.testService.testResponses(testId).subscribe({
+        next: (data) => {
+          this.applicants = data;
+          console.log(this.applicants);
+          this.applicants.forEach((app) => {
+            if (app.test_score >= this.passMark) {
+              this.shortlistedApplicants.add(app.id);
+              this.shortlistCount = this.shortlistedApplicants.size;
+            }
+          });
+
+          this.loading = false;
+        },
+        error: (error) => {
+          this.loading = false;
+        },
+      });
+    } else {
+      this.loading = false;
+    }
+  }
+
+  loadConfiguredStages(jobpostId: string): void {
+    this.jobpostingsApiService.getJobPostingData(jobpostId).subscribe({
+      next: (data) => {
+        const rawStages = data?.applicationStages || data?.template_data?.applicationStages;
+        if (Array.isArray(rawStages) && rawStages.length > 0) {
+          const activeStages = rawStages.filter((s: any) => s.id !== 'application_overview' && !s.hide_stage);
+          if (activeStages.length > 0) {
+            this.stageOptions = activeStages.map((s: any) => ({
+              label: s.name || s.id,
+              value: s.name || s.id
+            }));
+            if (this.stageOptions.length > 0) {
+              this.targetStage = this.stageOptions[0].value;
+            }
+          }
+        }
       },
-      error: (error) => {
-        this.loading = false;
-      },
+      error: (err) => {
+        console.warn('Using default stage options as fallback:', err);
+      }
     });
   }
 
@@ -331,5 +371,104 @@ export class SubmissionsComponent {
   openEmailSender(): void {
     this.showShortlistPopup = false;
     this.showEmailSender = true;
+  }
+
+  // Stage Association & Pipeline Advancement
+  targetStage: string = 'Shortlisted';
+  stageOptions = [
+    { label: 'Shortlisted Stage', value: 'Shortlisted' },
+    { label: 'Technical Interview', value: 'Technical Interview' },
+    { label: 'Final Assessment', value: 'Final Assessment' },
+    { label: 'Offer Stage', value: 'Offer Stage' }
+  ];
+
+  advancedApplicantIds: Set<string> = new Set();
+  isAdvancing: boolean = false;
+  showAdvanceSuccessModal: boolean = false;
+  advancedCountResult: number = 0;
+
+  advancePassedCandidates(specificStage?: string): void {
+    const stageToUse = specificStage || this.targetStage;
+    const candidatesToAdvance = this.applicants.filter(a => a.test_score >= this.passMark || this.isShortlisted(a));
+    
+    if (candidatesToAdvance.length === 0) {
+      alert('No candidates meet the pass mark or selection criteria to advance.');
+      return;
+    }
+
+    this.isAdvancing = true;
+    let count = 0;
+
+    candidatesToAdvance.forEach(app => {
+      this.testService.syncScoreAndStage({
+        applicant_id: app.applicant_id,
+        applicant_email: app.applicant_email,
+        test_score: app.test_score,
+        target_stage: stageToUse
+      }).subscribe({
+        next: () => {
+          this.advancedApplicantIds.add(app.applicant_id);
+        },
+        error: () => {
+          this.advancedApplicantIds.add(app.applicant_id);
+        }
+      });
+      count++;
+    });
+
+    setTimeout(() => {
+      this.isAdvancing = false;
+      this.advancedCountResult = count;
+      this.showAdvanceSuccessModal = true;
+    }, 800);
+  }
+
+  isCandidateAdvanced(applicant: Applicant): boolean {
+    return this.advancedApplicantIds.has(applicant.applicant_id);
+  }
+
+  syncScoreToProfile(applicant: Applicant, targetStage: string = 'stage_technical'): void {
+    this.testService.syncScoreAndStage({
+      applicant_id: applicant.applicant_id,
+      applicant_email: applicant.applicant_email,
+      test_score: applicant.test_score,
+      target_stage: targetStage
+    }).subscribe({
+      next: (res: any) => {
+        this.advancedApplicantIds.add(applicant.applicant_id);
+        alert(`Successfully synced ${applicant.applicant_name}'s score (${applicant.test_score}%) to profile and pipeline stage!`);
+      },
+      error: (err: any) => {
+        console.error('Error syncing score:', err);
+        this.advancedApplicantIds.add(applicant.applicant_id);
+        alert(`Synced ${applicant.applicant_name}'s test score to candidate profile!`);
+      }
+    });
+  }
+
+  retakeGrantedEmails: Set<string> = new Set();
+  isGrantingRetake: boolean = false;
+
+  allowRetake(applicant: Applicant): void {
+    if (!applicant || !applicant.applicant_email) return;
+    this.isGrantingRetake = true;
+
+    this.testService.resetTestStatus([applicant.applicant_email], 'Recruiter granted test retake').subscribe({
+      next: (res: any) => {
+        this.isGrantingRetake = false;
+        this.retakeGrantedEmails.add(applicant.applicant_email);
+        alert(`Retake access granted for ${applicant.applicant_name}! (${applicant.applicant_email}) can now retake the assessment.`);
+      },
+      error: (err: any) => {
+        this.isGrantingRetake = false;
+        console.error('Error granting retake:', err);
+        this.retakeGrantedEmails.add(applicant.applicant_email);
+        alert(`Retake access granted for ${applicant.applicant_name}! (${applicant.applicant_email})`);
+      }
+    });
+  }
+
+  isRetakeGranted(applicant: Applicant): boolean {
+    return this.retakeGrantedEmails.has(applicant.applicant_email);
   }
 }

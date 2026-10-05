@@ -14,6 +14,7 @@ import { ApiService } from '../../../../services/api.service';
 import { DataService } from '../../../../services/data.service';
 import { ApplicantManagementService } from '../../../../services/applicant-management.service';
 import { AlertService } from '../../../../services/alert.service';
+import { JobpostManagerService } from '../../../../services/jobpost-manager.service';
 
 // Models
 import { Candidate, FormData } from '../../models/candidate.model';
@@ -23,6 +24,7 @@ import { JobPostData } from '../../../../models/jobpost.model';
 import { CandidateDetailsComponent } from '../candidate-details/candidate-details.component';
 import { CandidateFiltersComponent } from '../candidate-filters/candidate-filters.component';
 import { EmailsComponent } from '../notifications/emails/emails.component';
+import { CustomDropdownComponent } from '../../../../components/custom-dropdown/custom-dropdown.component';
 
 // Constants
 export const COMMON_FORM_FIELDS: readonly string[] = ['full_name', 'first_name', 'last_name'] as const;
@@ -51,6 +53,7 @@ interface AdvanceFilters {
   skills: string;
 }
 
+import { LoaderComponent } from '../../../components/loader/loader.component';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -61,6 +64,8 @@ import { FormsModule } from '@angular/forms';
     CandidateDetailsComponent,
     CandidateFiltersComponent,
     EmailsComponent,
+    CustomDropdownComponent,
+    LoaderComponent,
   ],
   templateUrl: './shortlisted.component.html',
   styleUrl: './shortlisted.component.scss',
@@ -73,6 +78,8 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
   filteredCandidates: Candidate[] = [];
   isLoading = true;
   isUpdating = false;
+  removingCandidateIds: Set<string> = new Set<string>();
+  updatingStageCandidateIds: Set<string> = new Set<string>();
   viewMode: ViewMode = 'cards';
   openEmailingPopup = false;
 
@@ -106,6 +113,13 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
   showMobileActions = false;
   searchTerm = '';
   sortBy: SortOption = 'score';
+  
+  sortOptions = [
+    { value: 'score', label: 'Sort by Score' },
+    { value: 'experience', label: 'Sort by Experience' },
+    { value: 'name', label: 'Sort by Name' },
+    { value: 'date', label: 'Sort by Date' }
+  ];
 
   // Private members
   private destroy$ = new Subject<void>();
@@ -117,7 +131,8 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     private router: Router,
     private applicantService: ApplicantManagementService,
     private cdr: ChangeDetectorRef,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private jobPostService: JobpostManagerService
   ) { }
 
   // Lifecycle hooks
@@ -137,6 +152,23 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     if (jobPostId) {
       this.loadShortlistedCandidates(jobPostId);
     }
+
+    this.dataService.shortlistUpdated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(event => {
+        const currentJobId = this.route.snapshot.paramMap.get('jobId');
+        if (currentJobId && (!event.jobId || event.jobId === currentJobId)) {
+          if (event.action === 'shortlist') {
+            this.loadShortlistedCandidates(currentJobId);
+          } else if (event.action === 'unshortlist') {
+            this.candidates = this.candidates.filter(c => !event.candidateIds.includes(c.id));
+            this.filteredCandidates = this.filteredCandidates.filter(c => !event.candidateIds.includes(c.id));
+            this.dataService.totalShortListedCandidates = Math.max(0, this.candidates.length);
+            this.extractEmailsList();
+            this.cdr.markForCheck();
+          }
+        }
+      });
 
     if (this.applicationData) {
       this.relevantFields = Array.isArray(this.applicationData.cardSettings)
@@ -198,6 +230,10 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     }
   }
 
+  isRemovingCandidate(candidateId: string): boolean {
+    return this.removingCandidateIds.has(candidateId);
+  }
+
   removeFromShortList(candidate: Candidate): void {
     const jobPostId = this.route.snapshot.paramMap.get('jobId');
 
@@ -206,13 +242,15 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.isUpdating = true;
+    if (!candidate || !candidate.id) return;
+
+    this.removingCandidateIds.add(candidate.id);
 
     this.apiService.removeListCandidates([candidate.id], jobPostId)
       .pipe(
         takeUntil(this.destroy$),
         finalize(() => {
-          this.isUpdating = false;
+          this.removingCandidateIds.delete(candidate.id);
           this.cdr.markForCheck();
         })
       )
@@ -221,14 +259,16 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
           // Remove candidate from local arrays
           this.candidates = this.candidates.filter(c => c.id !== candidate.id);
           this.filteredCandidates = this.filteredCandidates.filter(c => c.id !== candidate.id);
-          this.dataService.totalShortListedCandidates -= 1;
+          this.dataService.totalShortListedCandidates = Math.max(0, this.dataService.totalShortListedCandidates - 1);
           this.dataService.totalCandidates += 1;
           this.extractEmailsList();
+          this.alertService.showSuccess(`${this.getDisplayName(candidate)} removed from shortlist.`);
+          this.dataService.notifyShortlistUpdate('unshortlist', [candidate.id], jobPostId);
+          this.cdr.markForCheck();
         },
         error: (error) => {
           console.error('Error removing candidate from shortlist:', error);
-          // Show user-friendly error message
-          alert('An error occurred while updating!');
+          this.alertService.showDanger(`Failed to remove ${this.getDisplayName(candidate)} from shortlist.`);
         }
       });
   }
@@ -252,6 +292,7 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
 
   viewDetails(candidate: Candidate): void {
     this.dataService.candidate = candidate;
+    this.dataService.isFromCandidateList = false;
     this.dataService.openCandidateDetails = true;
   }
 
@@ -262,9 +303,8 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     this.filterCandidates();
   }
 
-  onSortChange(event: Event): void {
-    const select = event.target as HTMLSelectElement;
-    this.sortBy = select.value as SortOption;
+  onSortChange(value: string): void {
+    this.sortBy = value as SortOption;
     this.sortCandidates();
   }
 
@@ -490,15 +530,9 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
         .filter((s: any) => s.is_active && !s.hide_stage)
         .map((s: any) => ({ id: s.id, label: s.name }));
     }
-    return [
-      { id: 'stage_application_review', label: 'Application Review' },
-      { id: 'stage_phone_screening', label: 'Phone Screening' },
-      { id: 'stage_technical_assessment', label: 'Technical Assessment' },
-      { id: 'stage_interview', label: 'Interview' },
-      { id: 'stage_final_decision', label: 'Final Decision' },
-      { id: 'stage_offer_sent', label: 'Offer Sent' },
-      { id: 'stage_rejected', label: 'Rejected' }
-    ];
+    return this.jobPostService.defaultStages
+      .filter(s => s.is_active && !s.hide_stage)
+      .map(s => ({ id: s.id, label: s.name }));
   }
 
   getCandidateStage(candidate: Candidate): string {
@@ -519,11 +553,14 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     this.alertService.showSuccess(`${this.getDisplayName(candidate)} rated ${stars} star${stars > 1 ? 's' : ''}`);
   }
 
-  onStageChange(candidate: Candidate, event: Event): void {
-    const selectElem = event.target as HTMLSelectElement;
-    if (selectElem && selectElem.value) {
-      this.moveCandidateStage(candidate, selectElem.value);
+  onStageChange(candidate: Candidate, targetStageId: string): void {
+    if (targetStageId) {
+      this.moveCandidateStage(candidate, targetStageId);
     }
+  }
+
+  isUpdatingStage(candidateId: string): boolean {
+    return this.updatingStageCandidateIds.has(candidateId);
   }
 
   moveCandidateStage(candidate: Candidate, targetStageId: string): void {
@@ -531,24 +568,36 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
     const stageObj = this.pipelineStages.find(s => s.id === targetStageId);
     const stageName = stageObj?.label || targetStageId;
 
-    this.isUpdating = true;
+    this.updatingStageCandidateIds.add(candidate.id);
     this.applicantService.updateCandidateStage(
       candidate.id,
       targetStageId,
       stageName,
-      `Moved to ${stageName} from Shortlisted workspace`
-    ).subscribe({
+      `Moved to ${stageName} from Shortlisted workspace`,
+      (candidate as any).stage_id || this.route.snapshot.paramMap.get('stageId') || undefined
+    )
+    .pipe(
+      takeUntil(this.destroy$),
+      finalize(() => {
+        this.updatingStageCandidateIds.delete(candidate.id);
+        this.cdr.markForCheck();
+      })
+    )
+    .subscribe({
       next: (res: any) => {
-        this.isUpdating = false;
-        (candidate as any).stage_id = targetStageId;
-        (candidate as any).stage_name = stageName;
+        const currentStageId = this.route.snapshot.paramMap.get('stageId');
+        if (currentStageId && targetStageId !== currentStageId) {
+          this.candidates = this.candidates.filter(c => c.id !== candidate.id);
+          this.filteredCandidates = this.filteredCandidates.filter(c => c.id !== candidate.id);
+          this.dataService.totalShortListedCandidates = this.candidates.length;
+        } else {
+          (candidate as any).stage_id = targetStageId;
+          (candidate as any).stage_name = stageName;
+        }
         this.alertService.showSuccess(`${this.getDisplayName(candidate)} moved to stage: ${stageName}`);
       },
       error: (err: any) => {
-        this.isUpdating = false;
-        (candidate as any).stage_id = targetStageId;
-        (candidate as any).stage_name = stageName;
-        this.alertService.showSuccess(`${this.getDisplayName(candidate)} moved to stage: ${stageName}`);
+        this.alertService.showDanger(`Failed to move ${this.getDisplayName(candidate)} to stage: ${stageName}`);
       }
     });
   }
@@ -608,32 +657,37 @@ export class ShortlistedComponent implements OnInit, OnDestroy {
         id,
         this.targetBulkStage,
         stageName,
-        `Bulk moved to ${stageName} stage`
+        `Bulk moved to ${stageName} stage`,
+        (this.candidates.find(c => c.id === id) as any)?.stage_id || this.route.snapshot.paramMap.get('stageId') || undefined
       ).subscribe({
         next: () => {
           completedCount++;
-          const cand = this.candidates.find(c => c.id === id);
-          if (cand) {
-            (cand as any).stage_id = this.targetBulkStage;
-            (cand as any).stage_name = stageName;
+          const currentStageId = this.route.snapshot.paramMap.get('stageId');
+          if (currentStageId && this.targetBulkStage !== currentStageId) {
+             this.candidates = this.candidates.filter(c => c.id !== id);
+             this.filteredCandidates = this.filteredCandidates.filter(c => c.id !== id);
+             this.dataService.totalShortListedCandidates = this.candidates.length;
+          } else {
+            const cand = this.candidates.find(c => c.id === id);
+            if (cand) {
+              (cand as any).stage_id = this.targetBulkStage;
+              (cand as any).stage_name = stageName;
+            }
           }
           if (completedCount === selectedIds.length) {
             this.isBulkUpdating = false;
             this.selectedCandidateIds.clear();
+            this.cdr.markForCheck();
             this.alertService.showSuccess(`Moved ${selectedIds.length} candidate(s) to stage: ${stageName}`);
           }
         },
         error: () => {
           completedCount++;
-          const cand = this.candidates.find(c => c.id === id);
-          if (cand) {
-            (cand as any).stage_id = this.targetBulkStage;
-            (cand as any).stage_name = stageName;
-          }
           if (completedCount === selectedIds.length) {
             this.isBulkUpdating = false;
             this.selectedCandidateIds.clear();
-            this.alertService.showSuccess(`Moved ${selectedIds.length} candidate(s) to stage: ${stageName}`);
+            this.cdr.markForCheck();
+            this.alertService.showDanger(`Failed to move some candidate(s) to stage: ${stageName}`);
           }
         }
       });

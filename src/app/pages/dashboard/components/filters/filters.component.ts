@@ -1,11 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DataService } from '../../../../services/data.service';
+import { CustomDropdownComponent } from '../../../../components/custom-dropdown/custom-dropdown.component';
+
+export interface FilterRule {
+  field: string;
+  operator: 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan' | 'greaterThanOrEqual' | 'lessThanOrEqual';
+  value: any;
+}
 
 @Component({
   selector: 'app-filters',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomDropdownComponent],
   templateUrl: './filters.component.html',
   styleUrl: './filters.component.scss',
 })
@@ -17,6 +24,27 @@ export class FiltersComponent {
 
   showPopup = false;
   readonly initialVisibleCount = 3;
+
+  ruleFilters: FilterRule[] = [];
+  newRule: FilterRule = { field: '', operator: 'contains', value: '' };
+
+  get fieldOptions(): Array<{ label: string; value: string }> {
+    return (this.filterFields || []).map(field => ({
+      label: this.formatName(field),
+      value: field
+    }));
+  }
+
+  operatorOptions: Array<{ label: string; value: string }> = [
+    { label: 'Contains', value: 'contains' },
+    { label: 'Equals', value: 'equals' },
+    { label: 'Starts with', value: 'startsWith' },
+    { label: 'Ends with', value: 'endsWith' },
+    { label: 'Greater than', value: 'greaterThan' },
+    { label: 'Less than', value: 'lessThan' },
+    { label: 'Greater than or equal', value: 'greaterThanOrEqual' },
+    { label: 'Less than or equal', value: 'lessThanOrEqual' }
+  ];
 
   constructor(public dataService: DataService) {}
 
@@ -33,6 +61,8 @@ export class FiltersComponent {
 
   resetFilters() {
     this.initializeFilters();
+    this.ruleFilters = [];
+    this.onFilterChange();
   }
 
   updateFilter(field: string, value: string) {
@@ -41,17 +71,32 @@ export class FiltersComponent {
     }
   }
 
+  addRule(): void {
+    if (this.newRule.field && this.newRule.value !== '' && this.newRule.value != null) {
+      this.ruleFilters.push({ ...this.newRule });
+      this.newRule = { field: '', operator: 'contains', value: '' };
+      this.onFilterChange();
+    }
+  }
+
+  removeRule(index: number): void {
+    this.ruleFilters.splice(index, 1);
+    this.onFilterChange();
+  }
+
+  clearAllRules(): void {
+    this.ruleFilters = [];
+    this.onFilterChange();
+  }
+
   toggleAdvancedFilters() {
     this.dataService.showFilters = !this.dataService.showFilters;
   }
 
   formatName(input: string): string {
-    if (!input) return input; // Handle empty or null input
+    if (!input) return input;
 
-    // Replace underscores with spaces and split into words
     const words = input.replace(/_/g, ' ').split(' ');
-
-    // Capitalize the first letter of each word
     const formattedName = words
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
       .join(' ');
@@ -71,7 +116,10 @@ export class FiltersComponent {
   }
 
   onFilterChange() {
-    this.filterChange.emit(this.filters);
+    this.filterChange.emit({
+      ...this.filters,
+      _rules: this.ruleFilters
+    });
   }
 
   get visibleFields() {
@@ -87,6 +135,7 @@ export class FiltersComponent {
   }
 
   getActiveFilterCount(): number {
-    return Object.values(this.filters).filter(val => val && val.trim() !== '').length;
+    const textFiltersCount = Object.values(this.filters).filter(val => val && val.trim() !== '').length;
+    return textFiltersCount + this.ruleFilters.length;
   }
 }

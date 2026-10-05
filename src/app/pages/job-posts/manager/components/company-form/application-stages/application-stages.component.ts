@@ -59,6 +59,27 @@ export class ApplicationStagesComponent implements OnInit {
     this.defaultStages = jobPostService.defaultStages;
   }
 
+  expandedStages: { [stageId: string]: boolean } = {};
+
+  toggleExpandStage(stageId: string): void {
+    this.expandedStages[stageId] = !this.expandedStages[stageId];
+  }
+
+  isStageExpanded(stageId: string): boolean {
+    return !!this.expandedStages[stageId];
+  }
+
+  toggleAllStages(expand: boolean): void {
+    this.applicationStages.forEach(s => {
+      if (s.id) this.expandedStages[s.id] = expand;
+    });
+  }
+
+  areAllExpanded(): boolean {
+    if (!this.applicationStages || this.applicationStages.length === 0) return false;
+    return this.applicationStages.every(s => s.id && this.expandedStages[s.id]);
+  }
+
   navigateToStage(stage: ApplicationStage): void {
     if (this.jobpostId && stage?.id) {
       this.router.navigate([`/jobposts/applicants/${this.jobpostId}/${stage.id}`]);

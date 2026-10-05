@@ -44,6 +44,13 @@ export class FormattingService {
     },
     { pattern: /(<li.*?\d+\..*?<\/li>[\n]*)+/g, replacement: '<ol class="space-y-1.5 my-4 list-none">$&</ol>' },
 
+    // Candidate Links: [Candidate Name](candidate:candidate_id) or [Candidate Name](candidate-id:candidate_id)
+    {
+      pattern: /\[(.*?)\]\((candidate(?:-id|:|\/\/|#)(.*?))\)/gi,
+      replacement:
+        '<a href="$2" data-candidate-id="$3" class="text-indigo-600 font-bold hover:underline cursor-pointer candidate-details-trigger inline-flex items-center gap-1.5 px-1.5 py-0.5 bg-indigo-50/80 hover:bg-indigo-100 rounded-md border border-indigo-200/60 transition-all"><i class="fas fa-user-circle text-xs text-indigo-600"></i><span>$1</span></a>',
+    },
+
     // Links
     {
       pattern: /\[(.*?)\]\((.*?)\)/g,
@@ -154,5 +161,18 @@ export class FormattingService {
       .replace(/\[(.*?)\]\((.*?)\)/g, '$1 ($2)');
 
     return text.trim();
+  }
+
+  extractMarkdownLinks(markdown: string): { title: string; url: string }[] {
+    if (!markdown) return [];
+    const links: { title: string; url: string }[] = [];
+    const regex = /\[(.*?)\]\((.*?)\)/g;
+    let match;
+    while ((match = regex.exec(markdown)) !== null) {
+      if (match[1] && match[2]) {
+        links.push({ title: match[1].trim(), url: match[2].trim() });
+      }
+    }
+    return links;
   }
 }

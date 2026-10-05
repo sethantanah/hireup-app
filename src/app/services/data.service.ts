@@ -1,5 +1,13 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 import { Candidate } from '../pages/dashboard/models/candidate.model';
+
+export interface ShortlistEvent {
+  action: 'shortlist' | 'unshortlist';
+  candidateIds: string[];
+  jobId?: string;
+  stageName?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +22,19 @@ export class DataService {
 
   applicationId: string = '';
   openCandidateDetails: boolean = false;
+  isFromCandidateList: boolean = false;
+  isFromOffers: boolean = false;
   openShortList: boolean = false;
   showFilters: boolean = false;
   openEmailPopUp: boolean = false;
   openDocumentsUpload: boolean = false;
+
+  // RxJS Event Stream for auto-refreshing shortlisted / unshortlisted sections across pipeline
+  shortlistUpdated$ = new Subject<ShortlistEvent>();
+
+  notifyShortlistUpdate(action: 'shortlist' | 'unshortlist', candidateIds: string[], jobId?: string, stageName?: string): void {
+    this.shortlistUpdated$.next({ action, candidateIds, jobId, stageName });
+  }
 
   constructor() {
   }

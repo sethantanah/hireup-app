@@ -110,11 +110,26 @@ export class JobpostManagerService {
        metrics: this.createDefaultMetrics('stage_offer_sent')
      },
      {
+       id: 'stage_hired',
+       jobpost_id: '',
+       name: 'Hired',
+       description: 'Candidate selected, accepted offer and successfully onboarded',
+       order: 7,
+       is_active: true,
+       hide_stage: false,
+       is_skippable: false,
+       stage_type: 'approval',
+       required_approvals: 1,
+       auto_advance_days: 1,
+       email_template_id: undefined,
+       metrics: this.createDefaultMetrics('stage_hired')
+     },
+     {
        id: 'stage_rejected',
        jobpost_id: '',
        name: 'Rejected',
        description: 'Application not successful at this time',
-       order: 7,
+       order: 8,
        is_active: true,
        hide_stage: false,
        is_skippable: true,
@@ -193,6 +208,7 @@ createDefaultMetrics(stageId: string, jobId?: string): StageMetrics {
         title: '',
         items: []
       },
+      applicationStages: this.defaultStages,
       footer: {
         copyrightText: '',
         links: []
@@ -212,8 +228,8 @@ createDefaultMetrics(stageId: string, jobId?: string): StageMetrics {
         actionLink: '/careers'
       },
       colorScheme: {
-        primary: '#3b82f6',
-        secondary: '#1e40af',
+        primary: '#10b981',
+        secondary: '#047857',
         accent: '#f59e0b',
         background: '#ffffff',
         text: '#1f2937'
@@ -573,11 +589,19 @@ createDefaultMetrics(stageId: string, jobId?: string): StageMetrics {
       );
   }
 
-  /**
-   * Get all job posts for a user
-   */
   getJobPosts(userId: string): Observable<any> {
-    const apiUrl = `${environment.apiUrl}/jobposts?user_id=${userId}`;
+    let apiUrl = `${environment.apiUrl}/jobposts?user_id=${userId}`;
+    try {
+      const activeOrgStr = localStorage.getItem('current_organization') || localStorage.getItem('ACTIVE_ORG');
+      if (activeOrgStr) {
+        const activeOrg = JSON.parse(activeOrgStr);
+        if (activeOrg && activeOrg.id) {
+          apiUrl += `&organization_id=${activeOrg.id}`;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse active org', e);
+    }
     const headers = this.createHeaders();
     return this.http.get<any>(apiUrl, { headers }).pipe(
       catchError(this.handleApiError.bind(this))
@@ -636,7 +660,9 @@ createDefaultMetrics(stageId: string, jobId?: string): StageMetrics {
    */
   private getToken(): string | null {
     try {
-      return localStorage.getItem('token');
+      return localStorage.getItem('token') || 
+             localStorage.getItem('access_token') || 
+             localStorage.getItem('auth_token');
     } catch (error) {
       console.error('Error accessing token from localStorage:', error);
       return null;

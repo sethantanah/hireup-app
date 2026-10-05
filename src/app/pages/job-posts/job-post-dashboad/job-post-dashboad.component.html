@@ -3,65 +3,60 @@
 <div class="h-screen w-screen overflow-hidden bg-slate-50 flex flex-col lg:flex-row font-sans">
   <!-- Enhanced Modern Sidebar -->
   <div [ngClass]="sidebarOpen ? 'flex' : 'hidden lg:flex'"
-    class="h-screen w-full lg:w-80 bg-white text-slate-800 flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 shadow-xl lg:shadow-none border-r border-slate-200/80 transition-all duration-300">
+    class="h-screen w-full lg:w-64 bg-card text-foreground flex flex-col justify-between flex-shrink-0 lg:flex fixed lg:static inset-y-0 left-0 z-40 border-r border-border transition-all duration-300">
     <!-- Sidebar Header -->
-    <div class="p-6 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/50 backdrop-blur-md flex-shrink-0">
-      <div class="flex items-center space-x-3">
-        <button class="lg:hidden mr-2 p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-all"
-          (click)="toggleSidebar()">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
-
-        <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-600 rounded-2xl flex items-center justify-center shadow-md shadow-indigo-500/20 border border-indigo-400/30">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
-        <div>
-          <h2 class="text-lg font-bold text-slate-900 tracking-tight">Hantors</h2>
-          <span class="text-[10px] font-semibold text-indigo-700 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">Enterprise ATS</span>
+    <div class="p-4 border-b border-border flex flex-col gap-3 flex-shrink-0 bg-muted/20">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <button class="lg:hidden p-1.5 rounded-md text-muted-foreground hover:bg-muted transition-all" (click)="toggleSidebar()">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+          </button>
+          <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center shadow-sm">
+            <svg class="w-4 h-4 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold text-foreground leading-none">HireUp</h2>
+            <span class="text-[10px] font-medium text-muted-foreground">Workspace</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Job Listings Sidebar List (Independent Scrolling) -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
-      <div class="flex items-center justify-between px-2 pt-2">
-        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Job Postings</h3>
+    <!-- Job Listings Sidebar List (Primary Flexible Scrollable Area) -->
+    <div class="flex-1 min-h-0 overflow-y-auto p-3 space-y-3">
+      <div class="flex items-center justify-between px-2 pt-1">
+        <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider">Job Postings</h3>
         <span class="text-xs font-bold px-2.5 py-0.5 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200/80">{{ jobPostings?.length || 0 }}</span>
       </div>
 
-      <ul class="space-y-2">
+      <ul class="space-y-1.5">
         <li *ngFor="let job of jobPostings"
-          class="group flex items-center justify-between p-3.5 rounded-2xl cursor-pointer transition-all duration-200 border"
+          class="group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all duration-200 border"
           [ngClass]="selectedJobPost?.id === job.id ? 'bg-gradient-to-r from-indigo-50 to-indigo-100/70 border-indigo-200/80 text-indigo-950 font-bold shadow-xs' : 'bg-slate-50/60 border-slate-200/60 text-slate-700 hover:bg-slate-100 hover:text-slate-900'"
           (click)="selectProject(job)">
 
-          <div class="flex items-center space-x-3 flex-1 min-w-0">
-            <div class="flex flex-col items-center">
+          <div class="flex items-center space-x-2.5 flex-1 min-w-0">
+            <div class="flex flex-col items-center flex-shrink-0">
               <div class="w-2.5 h-2.5 rounded-full" [ngClass]="job.status === 'active' ? 'bg-emerald-500 shadow-xs' : 'bg-slate-400'"></div>
-              <span class="text-[10px] text-slate-400 mt-1 font-semibold">{{ job.recieved_documents || 0 }}</span>
+
             </div>
             <div class="min-w-0 flex-1">
-              <span class="text-sm font-semibold truncate block group-hover:text-indigo-600 transition-colors">{{ job.title }}</span>
-              <span class="text-xs text-slate-500 truncate block font-normal">{{ job.department || 'General' }}</span>
+              <span class="text-xs font-bold truncate block group-hover:text-indigo-600 transition-colors">{{ job.title }}</span>
+              <span class="text-[11px] text-slate-500 truncate block font-normal">{{ job.department || 'General' }}</span>
             </div>
           </div>
 
-          <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-1 transition-opacity">
-            <button class="p-1.5 hover:bg-indigo-100 rounded-lg text-indigo-600 transition-colors"
+          <div class="opacity-0 group-hover:opacity-100 flex items-center space-x-0.5 transition-opacity flex-shrink-0">
+            <button class="p-1 hover:bg-indigo-100 rounded-md text-indigo-600 transition-colors"
               (click)="openEditPopup(job.title, job.id); $event.stopPropagation()" title="Edit Job">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </button>
-            <button class="p-1.5 hover:bg-rose-100 rounded-lg text-rose-600 transition-colors"
+            <button class="p-1 hover:bg-rose-100 rounded-md text-rose-600 transition-colors"
               (click)="openDeletePopup(job); $event.stopPropagation()" title="Delete Job">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
@@ -71,31 +66,103 @@
       </ul>
     </div>
 
+    <!-- Collapsible Talent Management & Operations Nav -->
+    <div class="px-3 py-2 border-t border-slate-200/80 flex-shrink-0 bg-slate-50/50">
+      <button (click)="showToolsMenu = !showToolsMenu" 
+        class="w-full flex items-center justify-between px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:text-indigo-600 hover:bg-white rounded-xl transition-all border border-slate-200/60 shadow-2xs">
+        <div class="flex items-center gap-2">
+          <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          <span>Workspace Tools & Settings</span>
+        </div>
+        <svg class="w-3.5 h-3.5 transition-transform duration-200" [class.rotate-180]="showToolsMenu" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+        </svg>
+      </button>
+
+      <!-- Expandable Operations Body -->
+      <div *ngIf="showToolsMenu" class="mt-2 space-y-2 max-h-48 overflow-y-auto pr-1 transition-all">
+        <!-- Interviews -->
+        <div class="space-y-0.5">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Interviews</span>
+          <a [routerLink]="['/scheduled-interviews']" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+            <i class="fas fa-calendar-alt text-indigo-500 text-xs w-4"></i>
+            <span>Scheduled Interviews</span>
+          </a>
+          <a [routerLink]="['/interview-scorecards']" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+            <i class="fas fa-clipboard-check text-indigo-500 text-xs w-4"></i>
+            <span>Scorecards & Evaluation</span>
+          </a>
+        </div>
+
+        <!-- Talent Operations -->
+        <div class="space-y-0.5 pt-1 border-t border-slate-200/50">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Talent Ops</span>
+          <a [routerLink]="['/offer-studio']" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-emerald-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span>Offer Studio</span>
+          </a>
+          <a [routerLink]="['/onboarding']" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-violet-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            <span>Onboarding Hub</span>
+          </a>
+        </div>
+
+        <!-- Integrations & Data Ingestion -->
+        <div class="space-y-0.5 pt-1 border-t border-slate-200/50">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Integrations & Data</span>
+          <a [routerLink]="['/organization-settings']" [queryParams]="{ tab: 'api_connections' }"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-sky-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            <span>API Connections</span>
+          </a>
+          <a [routerLink]="['/document-import']" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+            <i class="fas fa-file-import text-indigo-500 text-xs w-4"></i>
+            <span>Import Documents (CV/Resume)</span>
+          </a>
+        </div>
+
+        <!-- Governance -->
+        <div class="space-y-0.5 pt-1 border-t border-slate-200/50">
+          <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest px-1">Governance</span>
+          <a [routerLink]="['/organization-settings']"
+            class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-white hover:text-indigo-700 transition-all text-xs font-semibold">
+            <svg class="w-3.5 h-3.5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+            <span>Org & Email Settings</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
     <!-- User Profile Footer -->
-    <div class="p-4 mt-auto border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
+    <div class="p-3 border-t border-slate-200/80 bg-slate-50/80 backdrop-blur-md flex-shrink-0" *ngIf="userData">
       <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3 min-w-0">
+        <div class="flex items-center space-x-2.5 min-w-0">
           <div class="relative flex-shrink-0">
             <ng-container *ngIf="userData.logo_url; else initialsTemplate">
-              <img [src]="userData.logo_url" alt="Profile" class="w-10 h-10 rounded-2xl object-cover border border-slate-200 shadow-xs" />
+              <img [src]="userData.logo_url" alt="Profile" class="w-8 h-8 rounded-xl object-cover border border-slate-200 shadow-2xs" />
             </ng-container>
             <ng-template #initialsTemplate>
-              <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-xs">
-                <span class="text-xs font-bold text-white">{{ getInitials(userData.full_name) }}</span>
+              <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-600 to-slate-800 flex items-center justify-center shadow-2xs">
+                <span class="text-[11px] font-bold text-white">{{ getInitials(userData.full_name) }}</span>
               </div>
             </ng-template>
-            <div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+            <div class="absolute bottom-0 right-0 w-2 h-2 bg-emerald-500 rounded-full border border-white"></div>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold text-slate-900 truncate">{{ userData.full_name }}</p>
-            <p class="text-xs text-slate-500 font-medium truncate">{{ userData.position_in_company }}</p>
+            <p class="text-xs font-bold text-slate-900 truncate">{{ userData.full_name }}</p>
+            <p class="text-[10px] text-slate-500 font-medium truncate">{{ userData.position_in_company }}</p>
           </div>
         </div>
 
         <button (click)="logOut()"
-          class="p-2.5 rounded-xl hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+          class="p-2 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
           title="Logout">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6A2.25 2.25 0 005.25 5.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
           </svg>
         </button>
@@ -109,46 +176,57 @@
   <!-- Main Content Area (Independent Scrolling) -->
   <div class="flex-1 h-screen overflow-y-auto flex flex-col min-w-0 bg-slate-50/50">
     <!-- Enhanced Header Bar -->
-    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center p-6 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 sticky top-0 z-20 shadow-xs">
+    <header class="sticky top-0 z-50 w-full border-b border-border bg-card shadow-sm flex flex-col lg:flex-row justify-between items-start lg:items-center p-4 min-h-14">
       <div class="flex items-center gap-3 mb-4 lg:mb-0">
-        <button class="p-2.5 rounded-2xl text-slate-600 hover:bg-slate-100 transition-colors border border-slate-200"
-          (click)="toggleSidebar()" title="Toggle Sidebar">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
         <div>
-          <h1 class="text-2xl font-black text-slate-900 tracking-tight" *ngIf="selectedJobPost">
+          <h1 class="text-sm font-semibold text-foreground tracking-tight" *ngIf="selectedJobPost">
             {{ selectedJobPost.title }}
           </h1>
-          <p class="text-sm font-medium text-slate-500 mt-1" *ngIf="selectedJobPost">
+          <p class="text-[11px] font-medium text-muted-foreground" *ngIf="selectedJobPost">
             Manage job details, application pipelines, and candidates
           </p>
-          <h1 class="text-2xl font-bold text-slate-400" *ngIf="!selectedJobPost">
+          <h1 class="text-sm font-medium text-muted-foreground" *ngIf="!selectedJobPost">
             Select a Job Posting
           </h1>
         </div>
+        <div class="hidden sm:block border-l border-border pl-3 ml-2">
+          <app-org-switcher></app-org-switcher>
+        </div>
       </div>
 
-      <div class="flex flex-wrap gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- AI Copilot Button -->
+        <a [routerLink]="['/ai-copilot']" [queryParams]="selectedJobPost?.id ? { jobId: selectedJobPost.id } : null"
+          class="hidden h-8 px-3.5 bg-emerald-50 hover:bg-emerald-100/90 text-emerald-800 font-bold rounded-md transition-all flex items-center gap-1.5 text-[11px] border border-emerald-500 shadow-2xs hover:scale-[1.02] cursor-pointer"
+          title="Launch AI Copilot Workspace">
+          <i class="fas fa-sparkles text-emerald-600 animate-pulse"></i>
+          <span>AI Copilot</span>
+        </a>
+
         <button *ngIf="selectedJobPost" (click)="openSharePopover()"
-          class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-2xl hover:bg-slate-50 hover:border-slate-300 transition-all duration-200 flex items-center gap-2.5 shadow-xs text-sm">
-          <i class="fas fa-share text-slate-500"></i>
+          class="h-8 px-3 bg-muted/50 border border-border text-foreground font-medium rounded-md hover:bg-muted transition-all flex items-center gap-2 text-[11px]">
+          <i class="fas fa-share text-muted-foreground"></i>
           <span>Share Job</span>
         </button>
 
         <button (click)="openAddPopup()"
-          class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 via-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-semibold rounded-2xl transition-all duration-300 flex items-center gap-2.5 shadow-lg shadow-indigo-500/20 text-sm transform hover:-translate-y-0.5 border border-indigo-400/20">
+          class="h-8 px-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md transition-all flex items-center gap-2 text-[11px]">
           <i class="fas fa-plus text-xs"></i>
-          <span>New Job Posting</span>
+          <span>New Job</span>
         </button>
 
-        <button class="p-2.5 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 text-slate-600 transition-all duration-200 shadow-xs"
-          (click)="refresh()" [class.animate-spin]="isRefreshing" title="Refresh Dashboard">
-          <i class="fas fa-sync-alt"></i>
+        <a [routerLink]="['/organization-settings']"
+          class="hidden h-8 px-3 bg-secondary hover:bg-secondary/80 text-secondary-foreground font-medium rounded-md transition-all flex items-center gap-2 text-[11px] border border-border">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          <span>Settings</span>
+        </a>
+
+        <button class="h-8 w-8 flex items-center justify-center bg-muted/50 border border-border rounded-md hover:bg-muted text-foreground transition-all"
+          (click)="refresh()" [class.animate-spin]="isRefreshing" title="Refresh">
+          <i class="fas fa-sync-alt text-[11px]"></i>
         </button>
       </div>
-    </div>
+    </header>
 
     <!-- Application Stages Navigation Bar -->
     <div class="bg-white/80 backdrop-blur-md border-b border-slate-200/80" *ngIf="selectedJobPost">
@@ -188,7 +266,7 @@
           <div>
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Applications</p>
             <p class="text-3xl font-black text-slate-900 mt-1">
-              {{ selectedJobPost?.received_documents || 0 }}
+              {{ getTotalApplicationsCount() }}
             </p>
             <p class="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
               <i class="fas fa-arrow-up text-[9px]"></i> Active Submissions
@@ -323,7 +401,7 @@
         <!-- Stage Actions -->
         <div class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 shadow-xs border border-slate-200/80">
           <h3 class="text-lg font-bold text-slate-900 mb-4 tracking-tight">Stage Actions</h3>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <button (click)="navigateTo('/applicants/', selectedJobPost.id)"
               class="p-4 text-left border border-slate-200/80 rounded-2xl hover:border-indigo-300 hover:bg-indigo-50/50 transition-all duration-200 group">
               <div class="flex items-center space-x-3">
@@ -333,6 +411,19 @@
                 <div>
                   <div class="font-bold text-slate-900 text-sm">Manage Applicants</div>
                   <div class="text-xs text-slate-500 mt-0.5">Shortlist & evaluate</div>
+                </div>
+              </div>
+            </button>
+
+            <button (click)="openScheduleInterviewModal()"
+              class="p-4 text-left border border-slate-200/80 rounded-2xl hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 group">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-100/80 rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <i class="fas fa-calendar-check text-blue-600"></i>
+                </div>
+                <div>
+                  <div class="font-bold text-slate-900 text-sm">Schedule Interview</div>
+                  <div class="text-xs text-slate-500 mt-0.5">Book candidate slot</div>
                 </div>
               </div>
             </button>
@@ -529,32 +620,60 @@
   </div>
 </div>
 
-<!-- Modern Delete Modal -->
+<!-- Modern Delete / Archive Modal with Impact Assessment -->
 <div *ngIf="showDeletePopup"
   class="fixed inset-0 bg-slate-950/70 backdrop-blur-md overflow-y-auto h-full w-full flex items-center justify-center z-50 p-4">
   <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-7 border border-white/20 animate-modal-appear text-center">
-    <div class="w-16 h-16 bg-rose-100 rounded-3xl flex items-center justify-center mx-auto mb-5 border border-rose-200">
+    <div class="w-16 h-16 bg-rose-100 rounded-3xl flex items-center justify-center mx-auto mb-4 border border-rose-200">
       <i class="fas fa-trash-alt text-2xl text-rose-600"></i>
     </div>
 
-    <h3 class="text-xl font-bold text-slate-900 mb-2 tracking-tight">Delete Job Posting</h3>
-    <p class="text-slate-600 text-sm leading-relaxed mb-6">
-      Are you sure you want to delete <strong class="text-slate-900">{{ selectedJobPost?.title }}</strong>? All candidate applications and associated data will be removed.
+    <h3 class="text-xl font-bold text-slate-900 mb-1 tracking-tight">Delete or Archive Job</h3>
+    <p class="text-slate-600 text-xs leading-relaxed mb-4">
+      Are you sure you want to delete <strong class="text-slate-900">{{ selectedJobForDelete?.title }}</strong>?
     </p>
 
-    <div class="flex gap-3 justify-center">
+    <!-- Deletion Impact Assessment Box -->
+    <div class="bg-slate-50 rounded-2xl p-4 mb-5 border border-slate-200 text-left space-y-2">
+      <div class="flex items-center justify-between text-xs font-bold text-slate-800 uppercase tracking-wider">
+        <span>Deletion Impact Assessment</span>
+        <i *ngIf="isLoadingImpact" class="fas fa-spinner fa-spin text-indigo-600"></i>
+      </div>
+      <div class="grid grid-cols-3 gap-2 text-center pt-1" *ngIf="!isLoadingImpact && deletionImpactData">
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+          <div class="text-lg font-black text-slate-900">{{ deletionImpactData.resume_count || 0 }}</div>
+          <div class="text-[10px] font-semibold text-slate-500">Resumes</div>
+        </div>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+          <div class="text-lg font-black text-slate-900">{{ deletionImpactData.file_count || 0 }}</div>
+          <div class="text-[10px] font-semibold text-slate-500">Files</div>
+        </div>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+          <div class="text-lg font-black text-slate-900">{{ deletionImpactData.vector_chunk_count || 0 }}</div>
+          <div class="text-[10px] font-semibold text-slate-500">Vectors</div>
+        </div>
+      </div>
+      <p class="text-[11px] text-amber-700 font-medium">
+        <i class="fas fa-triangle-exclamation mr-1"></i>
+        Archiving pauses inbox polling while keeping candidate files safe.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-2.5 justify-center">
       <button (click)="closeDeletePopup()"
-        class="px-6 py-2.5 border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-colors text-sm font-semibold min-w-[120px]">
+        class="px-4 py-2.5 border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-colors text-xs font-bold">
         Cancel
       </button>
+      <button (click)="archiveJobPosting(selectedJobForDelete); closeDeletePopup()"
+        class="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-2xl transition-colors text-xs font-bold shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5">
+        <i class="fas fa-box-archive text-xs"></i>
+        <span>Archive Job</span>
+      </button>
       <button (click)="deleteJobPosting()" [disabled]="isDeleting"
-        class="px-6 py-2.5 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-colors text-sm font-semibold shadow-md shadow-rose-500/25 disabled:opacity-50 flex items-center justify-center gap-2 min-w-[120px]">
-        <span *ngIf="!isDeleting">Delete</span>
-        <div *ngIf="isDeleting" class="flex items-center gap-2">
-          <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+        class="px-4 py-2.5 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 transition-colors text-xs font-bold shadow-md shadow-rose-500/25 disabled:opacity-50 flex items-center justify-center gap-1.5">
+        <span *ngIf="!isDeleting">Permanently Delete</span>
+        <div *ngIf="isDeleting" class="flex items-center gap-1.5">
+          <i class="fas fa-spinner fa-spin"></i>
           <span>Deleting...</span>
         </div>
       </button>
@@ -858,6 +977,16 @@
     </div>
   </div>
 </div>
+
+<!-- Schedule Candidate Interview Modal (Automated Batch Scheduler Component) -->
+<app-schedule-interview-modal
+  [isOpen]="showScheduleInterviewModal"
+  [selectedJobPost]="selectedJobPost"
+  [availableJobPosts]="jobPostings"
+  [applicationStages]="applicationStages"
+  (close)="closeScheduleInterviewModal()"
+  (scheduled)="refresh()">
+</app-schedule-interview-modal>
 
 <!-- Alert Popup -->
 <div *ngIf="showAlertPopup" class="fixed top-5 right-5 z-50 animate-slide-in">

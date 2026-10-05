@@ -3,7 +3,7 @@
   <i class="fas fa-spinner fa-spin"></i> {{ loadingText }}
 </div>
 
-<div class=" h-screen">
+<div class="bg-card min-h-screen">
   <div class="mx-auto px-4 py-6 pt-4">
     <!-- Header -->
     <!-- <div class="mb-8">
@@ -14,7 +14,7 @@
     </div> -->
 
     <!-- Settings Layout -->
-    <div class="grid grid-cols-12 gap-6" *ngIf="applicationData">
+    <div class="grid grid-cols-12 gap-6">
       <!-- Sidebar -->
       <div class="col-span-12 md:col-span-3">
         <div class="bg-white/90 backdrop-blur-xl rounded-2xl border border-slate-200/80 shadow-xs p-3">
@@ -37,8 +37,12 @@
       </div>
 
       <!-- Content Area -->
-      <div class="col-span-12 md:col-span-9" *ngIf="applicationData">
+      <div class="col-span-12 md:col-span-9">
         <div [ngSwitch]="currentSetting">
+          <div *ngSwitchCase="'user-profile'">
+            <app-user-profile-settings></app-user-profile-settings>
+          </div>
+
           <app-card-display-settings
             *ngSwitchCase="'card-display'"
             [applicationData]="applicationData"
@@ -96,6 +100,14 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
 </div>
+
+<app-alert-popup
+  [show]="!!alert"
+  [type]="alert?.type || 'success'"
+  [message]="alert?.message || ''"
+  [autoClose]="alert?.autoClose || true"
+  [duration]="alert?.duration || 5000"
+  (closed)="onAlertClosed()"
+></app-alert-popup>

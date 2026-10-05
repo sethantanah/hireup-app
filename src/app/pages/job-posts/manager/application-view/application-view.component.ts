@@ -40,15 +40,22 @@ export class ApplicationViewComponent implements OnInit {
     if (applicationId) {
       this.loading = true;
       this.jobPostService.getJobPostData(applicationId).subscribe({
-        next: (data) => {
+        next: (res: any) => {
           this.loading = false;
           this.mode = 'submission';
-          this.applicationData = data?.data![0].template_data;
-          this.templateId = this.applicationData!.templateId || '1';
-
+          const item = Array.isArray(res?.data) ? res.data[0] : (res?.data || res);
+          const tData = item?.template_data || item;
+          
+          if (tData && (tData.formData || tData.job || tData.company)) {
+            this.applicationData = tData;
+          } else {
+            this.applicationData = this.jobPostService.getApplicationData();
+          }
+          
+          this.templateId = this.applicationData?.templateId || '1';
 
           const formType = this.route.snapshot.paramMap.get('applicationType') || this.route.snapshot.paramMap.get('formOnly') || "Application";
-          if (formType == "Additional Data") {
+          if (formType === "Additional Data" || formType === "Request For Additional Data") {
             if (this.applicationData && this.applicationData.additionalSections && this.applicationData.requestForDataForm) {
               this.applicationData.sections = this.applicationData.additionalSections;
               this.applicationData.formData = this.applicationData.requestForDataForm;
@@ -59,7 +66,10 @@ export class ApplicationViewComponent implements OnInit {
         },
         error: (error) => {
           this.loading = false;
-          console.error(error);
+          console.error('Failed to load job post data from server:', error);
+          this.applicationData = this.jobPostService.getApplicationData();
+          this.templateId = this.applicationData?.templateId || '1';
+          this.formType = this.route.snapshot.paramMap.get('applicationType') || "Application";
         },
       });
     } else {
@@ -67,8 +77,7 @@ export class ApplicationViewComponent implements OnInit {
       this.applicationData = this.jobPostService.getApplicationData();
 
       const formType = this.route.snapshot.paramMap.get('applicationType') || this.route.snapshot.paramMap.get('formOnly') || "Application";
-      if (formType == "Additional Data") {
-        console.log("hello", this.applicationData, this.applicationData && this.applicationData.additionalSections && this.applicationData.requestForDataForm)
+      if (formType === "Additional Data" || formType === "Request For Additional Data") {
         if (this.applicationData && this.applicationData.additionalSections && this.applicationData.requestForDataForm) {
           this.applicationData.sections = this.applicationData.additionalSections;
           this.applicationData.formData = this.applicationData.requestForDataForm;

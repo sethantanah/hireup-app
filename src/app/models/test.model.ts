@@ -14,6 +14,7 @@ export interface Field {
   puzzleData?: any;
   section?: number;
   subsection?: number;
+  imageUrl?: string;
 }
 
 export interface FormData {
@@ -30,22 +31,27 @@ export interface TestData {
 }
 
 export interface FormSection {
-  title: string
+  title: string;
   scoring: Scoring;
   duration: number;
   instructions: string;
   sectionId: number;
+  imageUrl?: string;
   subsection?: FormSubSection[];
 }
 
 export interface FormSubSection {
+  title?: string;
   instructions: string;
   sectionId: number;
+  imageUrl?: string;
 }
 
 export interface JobTest {
   id: string;
+  jobpost_id?: string;
   test_data: TestData;
+  [key: string]: any;
 }
 
 export interface TestResponse {

@@ -4,6 +4,8 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges } from '@angu
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { CustomDropdownComponent } from '../../../../components/custom-dropdown/custom-dropdown.component';
+
 export interface TableColumn {
   key: string;
   label: string;
@@ -16,7 +18,7 @@ export interface TableColumn {
 
 export interface FilterConfig {
   field: string;
-  operator: 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan';
+  operator: 'contains' | 'equals' | 'startsWith' | 'endsWith' | 'greaterThan' | 'lessThan' | 'greaterThanOrEqual' | 'lessThanOrEqual';
   value: any;
 }
 
@@ -33,7 +35,7 @@ export interface TableConfig {
 
 @Component({
   selector: 'app-table-view',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CustomDropdownComponent],
   templateUrl: './table-view.component.html',
   styleUrl: './table-view.component.scss'
 })
@@ -48,6 +50,39 @@ export class TableViewComponent implements OnInit, OnChanges {
 
   Math = Math; // Expose Math to template
   filteredData: any[] = [];
+
+  get fieldOptions(): Array<{ label: string; value: string }> {
+    return (this.columns || [])
+      .filter(col => col.filterable !== false)
+      .map(col => ({ label: col.label, value: col.key }));
+  }
+
+  operatorOptions: Array<{ label: string; value: string }> = [
+    { label: 'Contains', value: 'contains' },
+    { label: 'Equals', value: 'equals' },
+    { label: 'Starts with', value: 'startsWith' },
+    { label: 'Ends with', value: 'endsWith' },
+    { label: 'Greater than', value: 'greaterThan' },
+    { label: 'Less than', value: 'lessThan' },
+    { label: 'Greater than or equal', value: 'greaterThanOrEqual' },
+    { label: 'Less than or equal', value: 'lessThanOrEqual' }
+  ];
+
+  pageSizeOptions: Array<{ label: string; value: number }> = [
+    { label: '10 per page', value: 10 },
+    { label: '25 per page', value: 25 },
+    { label: '50 per page', value: 50 },
+    { label: '100 per page', value: 100 }
+  ];
+
+  onPageSizeChange(size: any): void {
+    const numSize = Number(size);
+    if (!isNaN(numSize) && numSize > 0) {
+      this.pageSize = numSize;
+      this.currentPage = 1;
+      this.applyFilters();
+    }
+  }
   currentPage: number = 1;
   sortField: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
@@ -136,6 +171,32 @@ export class TableViewComponent implements OnInit, OnChanges {
     this.applyFilters();
   }
 
+  private safeParseFloat(val: any): number | null {
+    if (val == null) return null;
+    if (typeof val === 'number') return isNaN(val) ? null : val;
+    if (typeof val === 'boolean') return null;
+
+    if (Array.isArray(val)) {
+      for (const item of val) {
+        const parsed = this.safeParseFloat(item);
+        if (parsed !== null) return parsed;
+      }
+      return null;
+    }
+
+    const str = String(val).trim();
+    if (!str) return null;
+
+    const cleaned = str.replace(/,/g, '');
+    const match = cleaned.match(/[-+]?\d*\.?\d+/);
+    if (match && match[0]) {
+      const parsed = parseFloat(match[0]);
+      return isNaN(parsed) ? null : parsed;
+    }
+
+    return null;
+  }
+
   sortData(field: string) {
     if (this.sortField === field) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -150,6 +211,12 @@ export class TableViewComponent implements OnInit, OnChanges {
 
       if (aValue == null) return this.sortDirection === 'asc' ? -1 : 1;
       if (bValue == null) return this.sortDirection === 'asc' ? 1 : -1;
+
+      const numA = this.safeParseFloat(aValue);
+      const numB = this.safeParseFloat(bValue);
+      if (numA !== null && numB !== null) {
+        return this.sortDirection === 'asc' ? numA - numB : numB - numA;
+      }
 
       if (aValue < bValue) return this.sortDirection === 'asc' ? -1 : 1;
       if (aValue > bValue) return this.sortDirection === 'asc' ? 1 : -1;
@@ -194,14 +261,26 @@ export class TableViewComponent implements OnInit, OnChanges {
             case 'equals': return itemValueStr === filterValueStr;
             case 'startsWith': return itemValueStr.startsWith(filterValueStr);
             case 'endsWith': return itemValueStr.endsWith(filterValueStr);
-            case 'greaterThan':
-              const numValue = Number(itemValue);
-              const numFilter = Number(filter.value);
-              return !isNaN(numValue) && !isNaN(numFilter) && numValue > numFilter;
-            case 'lessThan':
-              const numValue2 = Number(itemValue);
-              const numFilter2 = Number(filter.value);
-              return !isNaN(numValue2) && !isNaN(numFilter2) && numValue2 < numFilter2;
+            case 'greaterThan': {
+              const numValue = this.safeParseFloat(itemValue);
+              const numFilter = this.safeParseFloat(filter.value);
+              return numValue !== null && numFilter !== null && numValue > numFilter;
+            }
+            case 'lessThan': {
+              const numValue = this.safeParseFloat(itemValue);
+              const numFilter = this.safeParseFloat(filter.value);
+              return numValue !== null && numFilter !== null && numValue < numFilter;
+            }
+            case 'greaterThanOrEqual': {
+              const numValue = this.safeParseFloat(itemValue);
+              const numFilter = this.safeParseFloat(filter.value);
+              return numValue !== null && numFilter !== null && numValue >= numFilter;
+            }
+            case 'lessThanOrEqual': {
+              const numValue = this.safeParseFloat(itemValue);
+              const numFilter = this.safeParseFloat(filter.value);
+              return numValue !== null && numFilter !== null && numValue <= numFilter;
+            }
             default: return true;
           }
         });
@@ -269,20 +348,44 @@ export class TableViewComponent implements OnInit, OnChanges {
       this.paginatedData.every(row => this.selectedRows.has(row));
   }
 
-  exportData(format: 'shortlist' | 'unshortlist') {
-    const dataToExport = this.selectedRows.size > 0 ?
-      Array.from(this.selectedRows) : [];
+  showConfirmDialog: boolean = false;
+  confirmActionType: 'shortlist' | 'unshortlist' | null = null;
+  confirmCount: number = 0;
 
+  exportData(format: 'shortlist' | 'unshortlist') {
+    const dataToExport = this.selectedRows.size > 0 ? Array.from(this.selectedRows) : [];
+
+    if (dataToExport.length === 0) {
+      alert("Please select at least one candidate record first.");
+      return;
+    }
+
+    this.confirmActionType = format;
+    this.confirmCount = dataToExport.length;
+    this.showConfirmDialog = true;
+  }
+
+  cancelConfirmDialog() {
+    this.showConfirmDialog = false;
+    this.confirmActionType = null;
+    this.confirmCount = 0;
+  }
+
+  proceedConfirmDialog() {
+    if (!this.confirmActionType) return;
+    const format = this.confirmActionType;
+    const dataToExport = Array.from(this.selectedRows);
 
     this.filteredData = this.filteredData.filter(
       (data) => !dataToExport.some(item => item.id === data.id)
     );
 
     this.exportRequest.emit({ data: dataToExport, format });
-
-    if (dataToExport.length > 0) {
-      alert("Shortlisting in Progress!");
-    }
+    this.selectedRows.clear();
+    this.allSelected = false;
+    this.showConfirmDialog = false;
+    this.confirmActionType = null;
+    this.confirmCount = 0;
   }
 
   get paginatedData() {
@@ -361,14 +464,40 @@ export class TableViewComponent implements OnInit, OnChanges {
 
 
   getCandidateStatus(candidate: any): string {
+    if (!candidate) return "New";
     const stageId = this.route.snapshot.paramMap.get('stageId') || '';
-    const status = candidate.application_stages?.[stageId.replace("stage_", "")]?.["status"]
-    if (status === "pending") {
-      return "New";
-    } else if (status === "unshortlisted") {
+    const cleanStage = stageId.replace("stage_", "").trim().toLowerCase();
+
+    let status: string | undefined;
+    const appStages = candidate.application_stages;
+    if (appStages && typeof appStages === 'object') {
+      const keysToTry = [cleanStage, stageId, `stage_${cleanStage}`, 'application_review', 'Applied'];
+      for (const k of keysToTry) {
+        if (appStages[k]?.status) {
+          status = String(appStages[k].status).toLowerCase();
+          break;
+        }
+      }
+      if (!status) {
+        for (const k of Object.keys(appStages)) {
+          if (appStages[k]?.status) {
+            status = String(appStages[k].status).toLowerCase();
+            break;
+          }
+        }
+      }
+    }
+
+    if (!status && candidate.status) {
+      status = String(candidate.status).toLowerCase();
+    }
+
+    if (status === "shortlisted" || status === "completed" || status === "approved") {
+      return "Shortlisted";
+    } else if (status === "unshortlisted" || status === "rejected") {
       return "Rejected";
     } else {
-      return "Shortlisted"
+      return "New";
     }
   }
 }
