@@ -277,12 +277,10 @@
         </div>
         <div class="bg-white rounded-3xl p-6 md:p-6 border border-slate-200 shadow-sm space-y-6">
           <div>
-            <h3 class="text-base font-extrabold text-slate-900">Pending Team Invitations</h3>
-            <p class="text-slate-500 text-xs mt-1">Invitations sent to email addresses that have not been accepted yet.
-            </p>
+            <h3 class="text-base font-extrabold text-slate-900">Organization Invitations</h3>
+            <p class="text-slate-500 text-xs mt-1">Track pending and accepted invitations for team members.</p>
           </div>
-          <div *ngIf="invitations.length === 0" class="text-center py-6 text-slate-400 text-xs">No pending invitations
-            found for this organization.</div>
+          <div *ngIf="invitations.length === 0" class="text-center py-6 text-slate-400 text-xs">No invitations found for this organization.</div>
           <div *ngIf="invitations.length > 0" class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
               <thead>
@@ -299,11 +297,18 @@
                   <td class="py-3.5 font-bold text-slate-900">{{ invite.invitee_email }}</td>
                   <td class="py-3.5 text-indigo-700 font-semibold">{{ invite.role }}</td>
                   <td class="py-3.5 text-slate-500">{{ invite.inviter_email }}</td>
-                  <td class="py-3.5"><span
-                      class="px-2.5 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full font-bold text-[10px] uppercase">{{
-                      invite.status }}</span></td>
+                  <td class="py-3.5">
+                    <span class="px-2.5 py-1 rounded-full font-bold text-[10px] uppercase border"
+                      [ngClass]="{
+                        'bg-amber-50 text-amber-700 border-amber-200': invite.status === 'pending',
+                        'bg-emerald-50 text-emerald-700 border-emerald-200': invite.status === 'accepted',
+                        'bg-rose-50 text-rose-700 border-rose-200': invite.status === 'revoked'
+                      }">
+                      {{ invite.status }}
+                    </span>
+                  </td>
                   <td *ngIf="isAdminOrOwner" class="py-3.5 text-right">
-                    <div class="flex items-center justify-end gap-2.5">
+                    <div class="flex items-center justify-end gap-2.5" *ngIf="invite.status === 'pending'">
                       <button (click)="resendInvitation(invite)" [disabled]="resendingInviteId === invite.id"
                         title="Resend invitation email"
                         class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-xs font-semibold hover:underline cursor-pointer disabled:opacity-50">
@@ -321,6 +326,10 @@
                       <span class="text-slate-300">|</span>
                       <button (click)="revokeInvitation(invite)"
                         class="text-rose-600 hover:text-rose-700 text-xs font-semibold hover:underline cursor-pointer">Revoke</button>
+                    </div>
+                    <div *ngIf="invite.status === 'accepted'" class="text-emerald-600 font-semibold text-xs flex items-center justify-end gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                      <span>Joined Workspace</span>
                     </div>
                   </td>
                 </tr>
